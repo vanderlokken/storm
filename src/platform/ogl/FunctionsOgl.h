@@ -26,6 +26,8 @@
 
 #include "CoreTypesOgl.h"
 
+#define __gl_h_
+
 #ifndef GL_VERSION_1_0
 #define GL_VERSION_1_0 1
 void glCullFace( GLenum mode );

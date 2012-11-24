@@ -1,5 +1,10 @@
 #include "RenderingSystemOgl.h"
 
+#include "ConstantsOgl.h"
+#include "FunctionsOgl.h"
+
+#include <Cg/cgGL.h>
+
 #include "BlendingTechniqueOgl.h"
 #include "CheckResultOgl.h"
 #include "ElementBufferOgl.h"
@@ -50,9 +55,9 @@ void RenderingSystemOgl::setShader( std::shared_ptr<Shader> shader ) {
     
     auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
     
-    ::glUseProgram( nativeShader->getProgram() );
-    checkResult( "::glUseProgram" );
-    
+    ::cgGLBindProgram( nativeShader->getProgram() );
+    ::cgGLEnableProfile( ::cgGetProgramProfile(nativeShader->getProgram()) );
+
     _shader = shader;
     return;
 }

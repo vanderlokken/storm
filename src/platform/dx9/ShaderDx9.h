@@ -1,9 +1,6 @@
 #ifndef storm_ShaderDx9_h
 #define storm_ShaderDx9_h
 
-#include <map>
-#include <vector>
-
 #include <Cg/cg.h>
 
 #include "Noncopyable.h"

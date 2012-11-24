@@ -1,9 +1,8 @@
 #ifndef storm_ShaderOgl_h
 #define storm_ShaderOgl_h
 
-#include <map>
+#include <Cg/cg.h>
 
-#include "CoreTypesOgl.h"
 #include "Noncopyable.h"
 #include "Shader.h"
 
@@ -12,29 +11,18 @@ namespace storm {
 class ShaderOgl : public Shader {
     NONCOPYABLE( ShaderOgl );
 public:
-    ShaderOgl( const std::string &sourceCode );
+    ShaderOgl( const std::string &sourceCode, Type type );
     
     virtual ~ShaderOgl() noexcept;
     
-    virtual void setUniformValue( UniformIdentifier identifier, float value );
+    virtual Uniform getUniform( const std::string &identifier ) const;
     
-    virtual void setUniformValue( UniformIdentifier identifier, const Color &value );
-    virtual void setUniformValue( UniformIdentifier identifier, const Vector &value );
-    virtual void setUniformValue( UniformIdentifier identifier, const Matrix &value );
-    
-    virtual void setUniformValue( UniformIdentifier identifier, std::shared_ptr<Sampler> value );
-    virtual void setUniformValue( UniformIdentifier identifier, std::shared_ptr<Texture> value );
-    
-    GLuint getProgram() const noexcept;
-    
+    CGprogram getProgram() const noexcept;
+
 private:
-    GLint getUniformLocation( UniformIdentifier identifier );
+    static CGprofile selectProfile( Type type );
     
-    GLuint _program;
-    GLuint _vertexShader;
-    GLuint _pixelShader;
-    
-    std::map< UniformIdentifier, GLint > _locations;
+    CGprogram _program;
 };
 
 }

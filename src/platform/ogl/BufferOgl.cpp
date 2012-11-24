@@ -38,7 +38,12 @@ BufferOgl::~BufferOgl() noexcept {
 }
 
 void BufferOgl::getData( size_t offset, size_t size, void *data ) const {
-    throwRuntimeError( "Not implemented" );
+    ::glBindBuffer( GL_COPY_READ_BUFFER, _handle );
+    checkResult( "::glBindBuffer" );
+    
+    ::glGetBufferSubData( GL_COPY_READ_BUFFER, offset, size, data );
+    checkResult( "::glGetBufferSubData" );
+    return;
 }
 
 void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
