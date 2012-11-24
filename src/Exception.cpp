@@ -1,6 +1,6 @@
 #include "Exception.h"
 
-#if defined( _MSC_VER ) && ( _MSC_VER <= 1600 )
+#if defined( _MSC_VER ) && ( _MSC_VER <= 1700 )
 #   define snprintf sprintf_s
 #endif
 
