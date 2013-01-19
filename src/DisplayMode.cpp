@@ -7,7 +7,7 @@ Display::Mode::Mode(
     unsigned int height,
     unsigned int refreshRate,
     unsigned int colorDepth ) noexcept
-    
+
   : _width( width ),
     _height( height ),
     _refreshRate( refreshRate ),

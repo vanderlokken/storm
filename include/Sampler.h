@@ -16,19 +16,19 @@ public:
         MinifyingFilterBilinear,
         MinifyingFilterTrilinear
     };
-    
+
     enum MagnifyingFilter {
         MagnifyingFilterNearest,
         MagnifyingFilterLinear
     };
-    
+
     enum WrapMode {
         WrapClamped,
         WrapRepeated,
         WrapMirrored,
         WrapWithBorderColor
     };
-    
+
     struct Description {
         MinifyingFilter minifyingFilter;
         MagnifyingFilter magnifyingFilter;
@@ -36,11 +36,11 @@ public:
         std::array<WrapMode, 3> wrapModes;
         Color borderColor;
     };
-    
+
     static std::shared_ptr<Sampler> create( const Description& );
-    
+
     virtual ~Sampler() noexcept { }
-    
+
     virtual const Description& getDescription() const noexcept = 0;
 };
 

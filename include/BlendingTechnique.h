@@ -16,7 +16,7 @@ public:
         OperationMinimum,
         OperationMaximum
     };
-    
+
     enum Factor {
         FactorZero,
         FactorOne,
@@ -30,16 +30,16 @@ public:
         FactorInvertedDestinationAlpha,
         FactorSourceAlphaSaturate
     };
-    
+
     struct Description {
         Operation operation;
         Factor sourceFactor;
         Factor destinationFactor;
     };
-    
+
     static std::shared_ptr<BlendingTechnique> create( const Description& );
     static std::shared_ptr<BlendingTechnique> getDefault();
-    
+
     virtual ~BlendingTechnique() noexcept { }
 
     virtual const Description& getDescription() const noexcept = 0;

@@ -23,24 +23,24 @@ const Sampler::Description& SamplerOgl::getDescription() const noexcept {
 
 GLenum SamplerOgl::convertMinifyingFilter( MinifyingFilter minifyingFilter ) {
     GLenum result;
-    
+
     switch( minifyingFilter ) {
     case MinifyingFilterNearest:
         result = GL_NEAREST;
         break;
-        
+
     case MinifyingFilterLinear:
         result = GL_LINEAR;
         break;
-        
+
     case MinifyingFilterBilinear:
         result = GL_LINEAR_MIPMAP_NEAREST;
         break;
-        
+
     case MinifyingFilterTrilinear:
         result = GL_LINEAR_MIPMAP_LINEAR;
         break;
-        
+
     default:
         throwInvalidArgument( "'minifyingFilter' is invalid" );
     }
@@ -49,16 +49,16 @@ GLenum SamplerOgl::convertMinifyingFilter( MinifyingFilter minifyingFilter ) {
 
 GLenum SamplerOgl::convertMagnifyingFilter( MagnifyingFilter magnifyingFilter ) {
     GLenum result;
-    
+
     switch( magnifyingFilter ) {
     case MagnifyingFilterNearest:
         result = GL_NEAREST;
         break;
-        
+
     case MagnifyingFilterLinear:
         result = GL_LINEAR;
         break;
-        
+
     default:
         throwInvalidArgument( "'magnifyingFilter' is invalid" );
     }
@@ -67,24 +67,24 @@ GLenum SamplerOgl::convertMagnifyingFilter( MagnifyingFilter magnifyingFilter ) 
 
 GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
     GLenum result;
-    
+
     switch( wrapMode ) {
     case WrapClamped:
         result = GL_CLAMP_TO_EDGE;
         break;
-        
+
     case WrapRepeated:
         result = GL_REPEAT;
         break;
-        
+
     case WrapMirrored:
         result = GL_MIRRORED_REPEAT;
         break;
-        
+
     case WrapWithBorderColor:
         result = GL_CLAMP_TO_BORDER;
         break;
-        
+
     default:
         throwInvalidArgument( "'wrapMode' is invalid" );
     }

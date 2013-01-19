@@ -5,13 +5,13 @@
 #include "Clock.h"
 
 namespace storm {
-    
+
 class HighPrecisionClock : public Clock {
 public:
     HighPrecisionClock();
 
     virtual void update() noexcept;
-    
+
     virtual Time getTime() const noexcept;
     virtual Time getTimeChange() const noexcept;
 

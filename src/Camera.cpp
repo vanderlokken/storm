@@ -37,7 +37,7 @@ float Camera::getMaximalDepth() const noexcept {
 
 void Camera::setMinimalDepth( float depth ) noexcept {
     _minimalDepth = depth;
-    
+
     if( _maximalDepth < _minimalDepth )
         _maximalDepth = _minimalDepth;
     return;
@@ -45,7 +45,7 @@ void Camera::setMinimalDepth( float depth ) noexcept {
 
 void Camera::setMaximalDepth( float depth ) noexcept {
     _maximalDepth = depth;
-    
+
     if( _minimalDepth > _maximalDepth )
         _minimalDepth = _maximalDepth;
     return;
@@ -62,15 +62,15 @@ void Camera::setFrameDimensions( const Dimensions &frameDimensions ) noexcept {
 
 Matrix Camera::getViewTransformation() const noexcept {
     const Vector directionUp( 0, 1, 0 );
-    
+
     Vector zAxis = _target - _position;
     zAxis.normalize();
-    
+
     Vector xAxis = Vector::getCrossProduct( directionUp, zAxis );
     xAxis.normalize();
-    
+
     Vector yAxis = Vector::getCrossProduct( zAxis, xAxis );
-    
+
     return Matrix(
         xAxis.getX(), yAxis.getX(), zAxis.getX(), 0,
         xAxis.getY(), yAxis.getY(), zAxis.getY(), 0,
@@ -96,7 +96,7 @@ Matrix PerspectiveCamera::getProjectionTransformation() const noexcept {
     const float frameHeight = static_cast< float >( _frameDimensions.getHeight() );
     const float aspectRatio = frameWidth / frameHeight;
     const float depthRange = _maximalDepth - _minimalDepth;
-    
+
     Matrix result;
 
     result[0][0] = tan( Pi / 2 - _fieldOfView / 2 );
@@ -114,7 +114,7 @@ Matrix OrthographicCamera::getProjectionTransformation() const noexcept {
     const float frameWidth = static_cast< float >( _frameDimensions.getWidth() );
     const float frameHeight = static_cast< float >( _frameDimensions.getHeight() );
     const float depthRange = _maximalDepth - _minimalDepth;
-    
+
     Matrix result;
 
     result[0][0] =  2 / frameWidth;

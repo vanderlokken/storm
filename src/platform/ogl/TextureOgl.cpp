@@ -9,11 +9,11 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
 {
     ::glGenTextures( 1, &_texture );
     checkResult( "::glGenTextures" );
-    
+
     try {
         ::glBindTexture( GL_TEXTURE_2D, _texture );
         checkResult( "::glBindTexture" );
-        
+
         const GLenum target = GL_TEXTURE_2D;
         const GLint level = 0;
         const GLint internalFormat = ...;
@@ -22,10 +22,10 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
         const GLint border = 0;
         const GLenum format = ...;
         const GLenum type = ...;
-        
+
         ::glTexImage2D( target, level, internalFormat, width, height, border, format, type, texels );
         checkResult( "::glTexImage2D" );
-        
+
     } catch( ... ) {
         ::glDeleteTextures( 1, &_texture );
         throw;

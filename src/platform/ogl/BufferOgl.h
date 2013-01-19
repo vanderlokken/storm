@@ -13,12 +13,12 @@ class BufferOgl {
 public:
     BufferOgl( size_t size, const void *data, ResourceType resourceType );
     ~BufferOgl() noexcept;
-    
+
     void getData( size_t offset, size_t size, void *data ) const;
     void setData( size_t offset, size_t size, const void *data );
-    
+
     GLuint getHandle() const noexcept;
-    
+
 private:
     GLuint _handle;
     size_t _size;

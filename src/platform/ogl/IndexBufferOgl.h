@@ -10,17 +10,17 @@ class IndexBufferOgl : public IndexBuffer {
     NONCOPYABLE( IndexBufferOgl );
 public:
     IndexBufferOgl( const Description&, const void *indices = nullptr );
-    
+
     virtual ~IndexBufferOgl() noexcept { }
-    
+
     virtual void getIndices( size_t offset, size_t size, void *indices ) const;
     virtual void setIndices( size_t offset, size_t size, const void *indices );
-    
+
     virtual const Description& getDescription() const noexcept;
-    
+
     GLuint getHandle() const noexcept;
     GLenum getIndexFormat() const noexcept;
-    
+
 private:
     static GLenum selectIndexFormat( size_t indexSize );
 

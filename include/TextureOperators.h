@@ -10,7 +10,7 @@ class Texture;
 
 std::istream& operator >> (
     std::istream &stream, std::shared_ptr<Texture> &result );
-    
+
 }
 
 #endif

@@ -12,7 +12,7 @@ std::istream& operator >> (
 {
     if( !stream )
         throwInvalidArgument( "'stream' is invalid" );
-    
+
     return stream;
 }
 

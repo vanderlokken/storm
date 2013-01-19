@@ -16,13 +16,13 @@ public:
 
         unsigned int getWidth() const noexcept;
         void setWidth( unsigned int ) noexcept;
-        
+
         unsigned int getHeight() const noexcept;
         void setHeight( unsigned int ) noexcept;
-        
+
         unsigned int getRefreshRate() const noexcept;
         void setRefreshRate( unsigned int ) noexcept;
-        
+
         unsigned int getColorDepth() const noexcept;
         void setColorDepth( unsigned int ) noexcept;
 
@@ -35,13 +35,13 @@ public:
         int _refreshRate;
         int _colorDepth;
     };
-    
+
     static std::shared_ptr<Display> getInstance();
-    
+
     virtual ~Display() noexcept { }
 
     virtual std::vector<Mode> getSupportedModes() const noexcept = 0;
-    
+
     virtual const Mode& getCurrentMode() const noexcept = 0;
     virtual void setCurrentMode( const Mode& ) = 0;
 };

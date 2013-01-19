@@ -17,7 +17,7 @@ public:
     virtual void setTexels( unsigned int lodIndex, const void *texels );
 
     virtual const Description& getDescription() const noexcept;
-    
+
 private:
     Description _description;
     GLuint _texture;

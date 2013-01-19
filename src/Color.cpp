@@ -96,10 +96,10 @@ void Color::setNormalizedA( float normalizedA ) noexcept {
 }
 
 unsigned char Color::convertNormalizedValue( float normalizedValue ) noexcept {
-    
+
     normalizedValue = normalizedValue < 0 ? 0 : normalizedValue;
     normalizedValue = normalizedValue > 1 ? 1 : normalizedValue;
-    
+
     return static_cast< unsigned char >( normalizedValue * 255 );
 }
 

@@ -14,12 +14,12 @@ public:
         CullFrontFaces,
         CullBackFaces
     };
-    
+
     enum FillMode {
         FillSolid,
         FillWireframe
     };
-    
+
     struct Description {
         CullMode cullMode;
         FillMode fillMode;
@@ -27,12 +27,12 @@ public:
         int depthBias;
         float slopeScaleDepthBias;
     };
-    
+
     static std::shared_ptr<RasterizationTechnique> create( const Description& );
     static std::shared_ptr<RasterizationTechnique> getDefault();
-    
+
     virtual ~RasterizationTechnique() noexcept { }
-    
+
     virtual const Description& getDescription() const noexcept = 0;
 };
 

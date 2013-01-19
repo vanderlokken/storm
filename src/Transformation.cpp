@@ -21,7 +21,7 @@ Matrix createScalingTransformation( float x, float y, float z ) noexcept {
 Matrix createXRotationTransformation( float angle ) noexcept {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
-    
+
     return Matrix( 1,      0,      0,      0,
                    0, cosine,  -sine,      0,
                    0,   sine, cosine,      0,
@@ -31,7 +31,7 @@ Matrix createXRotationTransformation( float angle ) noexcept {
 Matrix createYRotationTransformation( float angle ) noexcept {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
-    
+
     return Matrix( cosine,      0,   sine,      0,
                         0,      1,      0,      0,
                     -sine,      0, cosine,      0,
@@ -41,7 +41,7 @@ Matrix createYRotationTransformation( float angle ) noexcept {
 Matrix createZRotationTransformation( float angle ) noexcept {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
-    
+
     return Matrix( cosine,  -sine,      0,      0,
                      sine, cosine,      0,      0,
                         0,      0,      1,      0,

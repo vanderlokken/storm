@@ -11,22 +11,22 @@ RenderingSystemGlx::RenderingSystemGlx()
       _window( RenderingWindowX11::getInstance()->getHandle() )
 {
     int visualAttributes[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    
+
     XVisualInfo *visualInformation = ::glXChooseVisual(
         _display, DefaultScreen(_display), visualAttributes );
-    
+
     if( !visualInformation ) {
         throwRuntimeError( "::glXChooseVisual has failed" );
     }
-    
+
     const GLXContext shareListContext = 0;
     const bool useDirectRendering = true;
-    
+
     _context = ::glXCreateContext(
         _display, visualInformation, shareListContext, useDirectRendering );
-    
+
     ::glXMakeCurrent( _display, _window, _context );
-    
+
     initialize();
     return;
 }

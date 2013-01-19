@@ -19,14 +19,14 @@ public:
     virtual void setTexels( unsigned int lodIndex, const void *texels );
 
     virtual const Description& getDescription() const noexcept;
-    
+
     ComPointer< IDirect3DTexture9 > getTexture() const noexcept;
-    
+
 private:
     size_t getTexelSize() const;
-    
+
     static D3DFORMAT convertFormat( Format );
-    
+
     Description _description;
     ComPointer< IDirect3DTexture9 > _texture;
 };

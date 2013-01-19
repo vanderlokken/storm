@@ -9,7 +9,7 @@ class Dimensions {
 public:
     Dimensions() noexcept;
     Dimensions( unsigned int width, unsigned int height ) noexcept;
-    
+
     Dimensions& operator -= ( const Dimensions& ) noexcept;
 
     unsigned int getWidth() const noexcept;

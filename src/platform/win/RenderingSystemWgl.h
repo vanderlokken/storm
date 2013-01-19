@@ -23,7 +23,7 @@ public:
 
 private:
     RenderingSystemWgl();
-    
+
     HWND _renderingWindowHandle;
     HDC _deviceContextHandle;
     HGLRC _renderingContextHandle;

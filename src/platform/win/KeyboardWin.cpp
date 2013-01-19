@@ -25,7 +25,7 @@ KeyboardWin::KeyboardWin()
       _originalWindowProcedure( nullptr )
 {
     registerInputDevice( HID_USAGE_PAGE_GENERIC, HID_USAGE_GENERIC_KEYBOARD );
-    
+
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
     _originalWindowProcedure = replaceWindowProcedure( windowHandle, &KeyboardWin::handleMessage );
     return;
@@ -61,7 +61,7 @@ bool KeyboardWin::isKeyPressed( Key key ) const noexcept {
 
 void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
     Key key;
-    
+
     try {
         key = convertKey( keyboard.VKey );
 
@@ -69,22 +69,22 @@ void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
         // Unknown keys are silently ignored
         return;
     }
-    
+
     if( keyboard.Message == WM_KEYDOWN && _keyPressed[key] == false )
         processKeyPress( key );
-    
+
     if( keyboard.Message == WM_KEYDOWN && _keyPressed[key] == true )
         processKeyRepeat( key );
-    
+
     if( keyboard.Message == WM_KEYUP )
         processKeyRelease( key );
-    
+
     return;
 }
 
 void KeyboardWin::processKeyPress( Key key ) {
     _keyPressed[key] = true;
-    
+
     KeyPressEvent event; event.key = key;
     _keyPressEventHandlers( event );
     return;
@@ -97,17 +97,17 @@ void KeyboardWin::processKeyRepeat( Key key ) {
 }
 
 void KeyboardWin::processKeyRelease( Key key ) {
-    
+
     // There might be some situations when key release events shouldn't be received
-    
+
     // For example a user can press some key while the rendering window is not
     // active and then activate the rendering window and release the pressed key
-    
+
     if( !_keyPressed[key] )
         return;
-    
+
     _keyPressed[key] = false;
-    
+
     KeyReleaseEvent event; event.key = key;
     _keyReleaseEventHandlers( event );
     return;
@@ -165,12 +165,12 @@ Keyboard::Key KeyboardWin::convertKey( USHORT code ) {
         'Y',        // KeyY
         'Z',        // KeyZ
     };
-    
+
     auto searchResult = std::find( codes.cbegin(), codes.cend(), code );
-    
+
     if( searchResult == codes.cend() )
         throwInvalidArgument( "'code' is invalid" );
-    
+
     return static_cast< Keyboard::Key >( searchResult - codes.cbegin() );
 }
 
@@ -180,45 +180,45 @@ LRESULT CALLBACK KeyboardWin::handleMessage(
     HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter )
 {
     auto keyboard = KeyboardWin::getInstance();
-    
+
     LRESULT result = USE_DEFAULT_PROCESSING;
-    
+
     switch( message ) {
     case WM_INPUT:
         result = keyboard->handleInputMessage( firstParameter, secondParameter );
         break;
-        
+
     case WM_ACTIVATEAPP:
         result = keyboard->handleActivationMessage( firstParameter, secondParameter );
         break;
     }
-    
+
     if( result != USE_DEFAULT_PROCESSING )
         return result;
-    
+
     return ::CallWindowProc( keyboard->_originalWindowProcedure,
         windowHandle, message, firstParameter, secondParameter );
 }
 
 LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
-    
+
     const HRAWINPUT inputHandle = reinterpret_cast< HRAWINPUT >( secondParameter );
     const RAWINPUT inputData = receiveInputData( inputHandle );
-    
+
     if( inputData.header.dwType == RIM_TYPEKEYBOARD )
         processKeyboardInputEvent( inputData.data.keyboard );
-    
+
     return USE_DEFAULT_PROCESSING;
 }
 
 LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) noexcept {
-    
+
     const BOOL activated = firstParameter;
-    
+
     if( !activated )
         for( size_t keyIndex = 0; keyIndex < KeyCount; ++keyIndex )
             if( _keyPressed[keyIndex] ) processKeyRelease( static_cast<Key>(keyIndex) );
-    
+
     return USE_DEFAULT_PROCESSING;
 }
 

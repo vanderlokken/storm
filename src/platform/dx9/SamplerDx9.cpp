@@ -23,7 +23,7 @@ const Sampler::Description& SamplerDx9::getDescription() const noexcept {
 
 D3DTEXTUREFILTERTYPE SamplerDx9::selectMinifyingFilter( const Description &description ) {
     D3DTEXTUREFILTERTYPE result;
-    
+
     if( description.maximalAnisotropyDegree > 1 ) {
         result = D3DTEXF_ANISOTROPIC;
     } else {
@@ -31,13 +31,13 @@ D3DTEXTUREFILTERTYPE SamplerDx9::selectMinifyingFilter( const Description &descr
         case MinifyingFilterNearest:
             result = D3DTEXF_POINT;
             break;
-            
+
         case MinifyingFilterLinear:
         case MinifyingFilterBilinear:
         case MinifyingFilterTrilinear:
             result = D3DTEXF_LINEAR;
             break;
-            
+
         default:
             throwInvalidArgument( "'description.minifyingFilter' is invalid" );
         }
@@ -47,7 +47,7 @@ D3DTEXTUREFILTERTYPE SamplerDx9::selectMinifyingFilter( const Description &descr
 
 D3DTEXTUREFILTERTYPE SamplerDx9::selectMagnifyingFilter( const Description &description ) {
     D3DTEXTUREFILTERTYPE result;
-    
+
     if( description.maximalAnisotropyDegree > 1 ) {
         result = D3DTEXF_ANISOTROPIC;
     } else {
@@ -55,11 +55,11 @@ D3DTEXTUREFILTERTYPE SamplerDx9::selectMagnifyingFilter( const Description &desc
         case MagnifyingFilterNearest:
             result = D3DTEXF_POINT;
             break;
-            
+
         case MagnifyingFilterLinear:
             result = D3DTEXF_LINEAR;
             break;
-            
+
         default:
             throwInvalidArgument( "'description.magnifyingFilter' is invalid" );
         }
@@ -69,21 +69,21 @@ D3DTEXTUREFILTERTYPE SamplerDx9::selectMagnifyingFilter( const Description &desc
 
 D3DTEXTUREFILTERTYPE SamplerDx9::selectMipmappingFilter( const Description &description ) {
     D3DTEXTUREFILTERTYPE result;
-    
+
     switch( description.minifyingFilter ) {
     case MinifyingFilterNearest:
     case MinifyingFilterLinear:
         result = D3DTEXF_NONE;
         break;
-        
+
     case MinifyingFilterBilinear:
         result = D3DTEXF_POINT;
         break;
-        
+
     case MinifyingFilterTrilinear:
         result = D3DTEXF_LINEAR;
         break;
-        
+
     default:
         throwInvalidArgument( "'description.minifyingFilter' is invalid" );
     }
@@ -92,24 +92,24 @@ D3DTEXTUREFILTERTYPE SamplerDx9::selectMipmappingFilter( const Description &desc
 
 D3DTEXTUREADDRESS SamplerDx9::convertWrapMode( WrapMode wrapMode ) {
     D3DTEXTUREADDRESS result;
-    
+
     switch( wrapMode ) {
     case WrapClamped:
         result = D3DTADDRESS_CLAMP;
         break;
-        
+
     case WrapRepeated:
         result = D3DTADDRESS_WRAP;
         break;
-        
+
     case WrapMirrored:
         result = D3DTADDRESS_MIRROR;
         break;
-        
+
     case WrapWithBorderColor:
         result = D3DTADDRESS_BORDER;
         break;
-        
+
     default:
         throwInvalidArgument( "'wrapMode' is invalid" );
     }

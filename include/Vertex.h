@@ -16,7 +16,7 @@ struct Vertex {
             SemanticsBlendingWeights,
             SemanticsBlendingIndices
         };
-        
+
         enum Format {
             FormatFloat,
             Format2Float,
@@ -31,13 +31,13 @@ struct Vertex {
             Format2Uint16Normalized,
             Format4Uint16Normalized
         };
-        
+
         unsigned short getSize() const;
-        
+
         Semantics semantics;
         Format format;
     };
-    
+
 };
 
 }

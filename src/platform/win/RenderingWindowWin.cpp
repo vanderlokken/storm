@@ -9,7 +9,7 @@ RenderingWindowWin::RenderingWindowWin()
       _fullscreen( false )
 {
     const HINSTANCE instance = ::GetModuleHandle( 0 );
-    
+
     WNDCLASS windowClass;
     windowClass.style = 0;
     windowClass.lpfnWndProc = &RenderingWindowWin::windowProcedure;
@@ -21,12 +21,12 @@ RenderingWindowWin::RenderingWindowWin()
     windowClass.hbrBackground = reinterpret_cast< HBRUSH >( COLOR_3DFACE + 1 );
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = L"Storm Rendering Window";
-    
+
     const ATOM classId = ::RegisterClass( &windowClass );
-    
+
     if( !classId )
         throwRuntimeError( "::RegisterClass has failed" );
-    
+
     const wchar_t *className = windowClass.lpszClassName;
     const wchar_t *windowName = L"";
     const DWORD style = WS_CAPTION | WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
@@ -37,7 +37,7 @@ RenderingWindowWin::RenderingWindowWin()
     const HWND parentWindowHandle = 0;
     const HMENU menuHandle = 0;
     void *parameter = nullptr;
-    
+
     _handle = ::CreateWindow(
         className,
         windowName,
@@ -77,29 +77,29 @@ bool RenderingWindowWin::isFullscreen() const noexcept {
 void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
     const unsigned int width = windowDimensions.getWidth();
     const unsigned int height = windowDimensions.getHeight();
-    
+
     RECT desktopRectangle = { 0, 0, 0, 0 };
-    
+
     ::GetWindowRect( ::GetDesktopWindow(), &desktopRectangle );
-    
+
     const unsigned int x = ( desktopRectangle.right - width ) / 2;
     const unsigned int y = ( desktopRectangle.bottom - height ) / 2;
-    
+
     RECT windowRectangle = { x, y, x + width, y + height };
-    
+
     const DWORD windowStyle = ::GetWindowLongPtr( _handle, GWL_STYLE );
     const BOOL  hasMenu     = ::GetMenu( _handle ) != 0;
-    
+
     ::AdjustWindowRect( &windowRectangle, windowStyle, hasMenu );
-    
+
     const int resultX = windowRectangle.left;
     const int resultY = windowRectangle.top;
     const int resultWidth = windowRectangle.right - windowRectangle.left;
     const int resultHeight = windowRectangle.bottom - windowRectangle.top;
     const BOOL repaint = FALSE;
-    
+
     ::MoveWindow( _handle, resultX, resultY, resultWidth, resultHeight, repaint );
-    
+
     _fullscreen = false;
     _dimensions = windowDimensions;
     return;

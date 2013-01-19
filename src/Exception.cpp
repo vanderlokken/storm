@@ -11,9 +11,9 @@ template< class ExceptionType > void throwException(
 {
     const size_t size = 1024;
     char information[ size ];
-    
+
     ::snprintf( information, size, "%s(%ld): %s\n%s", fileName, line, functionName, description );
-    
+
     throw ExceptionType( information );
 }
 

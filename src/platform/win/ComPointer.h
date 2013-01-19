@@ -10,19 +10,19 @@ public:
     ComPointer() noexcept : _pointer( nullptr ) { }
     ComPointer( const ComPointer& ) noexcept;
     ~ComPointer() noexcept { if( _pointer ) _pointer->Release(); }
-    
+
     ComPointer& operator = ( const ComPointer& ) noexcept;
 
     bool operator ! () noexcept { return !_pointer; }
 
     bool operator == ( const ComPointer& ) noexcept;
     bool operator != ( const ComPointer& ) noexcept;
-    
+
     T* get() const noexcept { return _pointer; }
     T* operator -> () const noexcept { return _pointer; }
-    
+
     T** getAddress() noexcept { return &_pointer; }
-    
+
 private:
     T *_pointer;
 };
@@ -38,7 +38,7 @@ template< class T > ComPointer< T >::ComPointer( const ComPointer< T > &comPoint
 
 template< class T > ComPointer< T >& ComPointer< T >::operator = ( const ComPointer< T > &comPointer ) noexcept {
     T *pointer = comPointer._pointer;
-    
+
     if( pointer ) {
         pointer->AddRef();
     }

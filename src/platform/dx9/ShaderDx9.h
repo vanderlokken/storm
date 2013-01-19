@@ -14,14 +14,14 @@ class ShaderDx9 : public Shader {
 public:
     ShaderDx9( const std::string &sourceCode, Type type );
     virtual ~ShaderDx9() noexcept;
-    
+
     virtual Uniform getUniform( const std::string &identifier ) const;
-    
+
     CGprogram getProgram() const noexcept;
-    
+
 private:
     static CGprofile selectProfile( Type type );
-    
+
     CGprogram _program;
 };
 

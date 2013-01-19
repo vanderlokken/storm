@@ -10,14 +10,14 @@ namespace storm {
 struct ColoredVertex {
     Vector position;
     Color color;
-    
+
     static const Vertex::Attribute attributes[2];
 };
 
 struct OrientedVertex {
     Vector position;
     Vector normal;
-    
+
     static const Vertex::Attribute attributes[2];
 };
 

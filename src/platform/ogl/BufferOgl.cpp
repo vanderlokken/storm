@@ -16,15 +16,15 @@ BufferOgl::BufferOgl( size_t size, const void *data, ResourceType resourceType )
     try {
         ::glGenBuffers( 1, &_handle );
         checkResult( "::glGenBuffers" );
-        
+
         ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
         checkResult( "::glBindBuffer" );
-        
+
         const GLenum usage = getResourceUsage( resourceType );
-        
+
         ::glBufferData( GL_COPY_WRITE_BUFFER, size, data, usage );
         checkResult( "::glBufferData" );
-        
+
     } catch( ... ) {
         ::glDeleteBuffers( 1, &_handle );
         throw;
@@ -40,7 +40,7 @@ BufferOgl::~BufferOgl() noexcept {
 void BufferOgl::getData( size_t offset, size_t size, void *data ) const {
     ::glBindBuffer( GL_COPY_READ_BUFFER, _handle );
     checkResult( "::glBindBuffer" );
-    
+
     ::glGetBufferSubData( GL_COPY_READ_BUFFER, offset, size, data );
     checkResult( "::glGetBufferSubData" );
     return;
@@ -50,18 +50,18 @@ void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     if( offset + size > _size ) {
         throwInvalidArgument( "The specified offset and size are not correct" );
     }
-    
+
     ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
     checkResult( "::glBindBuffer" );
-    
+
     void *destination = ::glMapBufferRange( GL_COPY_WRITE_BUFFER, offset, size, GL_MAP_WRITE_BIT );
     checkResult( "::glMapBufferRange" );
-    
+
     ::memcpy( destination, data, size );
-    
+
     ::glUnmapBuffer( GL_COPY_WRITE_BUFFER );
     checkResult( "::glUnmapBuffer" );
-    
+
     // glUnmapBuffer can return 'false' indicating the data corruption.
     // Now the return value is simply ignored.
     return;

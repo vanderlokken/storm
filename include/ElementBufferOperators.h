@@ -10,7 +10,7 @@ class ElementBuffer;
 
 std::istream& operator >> (
     std::istream &stream, std::shared_ptr<ElementBuffer> &result );
-    
+
 }
 
 #endif

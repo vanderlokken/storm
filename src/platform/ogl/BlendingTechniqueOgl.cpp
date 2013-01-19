@@ -37,23 +37,23 @@ GLenum BlendingTechniqueOgl::convertOperation( Operation operation ) {
     case OperationAddition:
         result = GL_FUNC_ADD;
         break;
-    
+
     case OperationSubtraction:
         result = GL_FUNC_SUBTRACT;
         break;
-    
+
     case OperationNegativeSubtraction:
         result = GL_FUNC_REVERSE_SUBTRACT;
         break;
-    
+
     case OperationMinimum:
         result = GL_MIN;
         break;
-    
+
     case OperationMaximum:
         result = GL_MAX;
         break;
-    
+
     default:
         throwInvalidArgument( "'operation' is invalid" );
     }
@@ -67,47 +67,47 @@ GLenum BlendingTechniqueOgl::convertFactor( Factor factor ) {
     case FactorZero:
         result = GL_ZERO;
         break;
-        
+
     case FactorOne:
         result = GL_ONE;
         break;
-        
+
     case FactorSourceColor:
         result = GL_SRC_COLOR;
         break;
-        
+
     case FactorInvertedSourceColor:
         result = GL_ONE_MINUS_SRC_COLOR;
         break;
-        
+
     case FactorDestinationColor:
         result = GL_DST_COLOR;
         break;
-        
+
     case FactorInvertedDestinationColor:
         result = GL_ONE_MINUS_DST_COLOR;
         break;
-        
+
     case FactorSourceAlpha:
         result = GL_SRC_ALPHA;
         break;
-        
+
     case FactorInvertedSourceAlpha:
         result = GL_ONE_MINUS_SRC_ALPHA;
         break;
-        
+
     case FactorDestinationAlpha:
         result = GL_DST_ALPHA;
         break;
-        
+
     case FactorInvertedDestinationAlpha:
         result = GL_ONE_MINUS_DST_ALPHA;
         break;
-        
+
     case FactorSourceAlphaSaturate:
         result = GL_SRC_ALPHA_SATURATE;
         break;
-    
+
     default:
         throwInvalidArgument( "'factor' is invalid" );
     }

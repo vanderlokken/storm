@@ -15,13 +15,13 @@ FrameworkWin::FrameworkWin() noexcept {
 void FrameworkWin::run( const Callback &callback ) {
     if( !callback )
         throwInvalidArgument( "'callback' is invalid" );
-    
+
     bool processing = true;
-    
+
     while( processing ) {
-        
+
         MSG message;
-        
+
         while( ::PeekMessage(&message, 0, 0, 0, PM_REMOVE) ) {
             if( message.message == WM_QUIT ) {
                 processing = false;
@@ -29,13 +29,13 @@ void FrameworkWin::run( const Callback &callback ) {
             ::TranslateMessage( &message );
             ::DispatchMessage( &message );
         }
-        
+
         if( !processing )
             break;
-        
+
         callback();
     }
-    
+
     return;
 }
 

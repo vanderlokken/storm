@@ -12,16 +12,16 @@ DisplayWin::DisplayWin()
     : _currentMode( 0, 0, 0, 0 )
 {
     const wchar_t *deviceName = nullptr;
-    
+
     DEVMODE mode;
     mode.dmSize = sizeof( mode );
     mode.dmDriverExtra = 0;
-    
+
     const BOOL result = ::EnumDisplaySettings( deviceName, ENUM_CURRENT_SETTINGS, &mode );
     if( !result ) {
         throwRuntimeError( "::EnumDisplaySettings has failed" );
     }
-    
+
     _currentMode = Mode(
         mode.dmPelsWidth,
         mode.dmPelsHeight,
@@ -32,15 +32,15 @@ DisplayWin::DisplayWin()
 
 std::vector<Display::Mode> DisplayWin::getSupportedModes() const noexcept {
     std::vector< Mode > supportedModes;
-    
+
     const wchar_t *deviceName = nullptr;
-    
+
     DWORD modeIndex = 0;
-    
+
     DEVMODE mode;
     mode.dmSize = sizeof( mode );
     mode.dmDriverExtra = 0;
-    
+
     while( ::EnumDisplaySettings(deviceName, modeIndex, &mode) ) {
         Mode supportedMode(
             mode.dmPelsWidth,

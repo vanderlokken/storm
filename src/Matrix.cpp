@@ -19,7 +19,7 @@ Matrix::Matrix(
       _21( element21 ), _22( element22 ), _23( element23 ), _24( element24 ),
       _31( element31 ), _32( element32 ), _33( element33 ), _34( element34 ),
       _41( element41 ), _42( element42 ), _43( element43 ), _44( element44 )
-{ 
+{
 }
 
 float* Matrix::operator [] ( size_t index ) {
@@ -160,23 +160,23 @@ Vector& operator *= ( Vector &vector, const Matrix &matrix ) noexcept {
     const float x = vector.getX();
     const float y = vector.getY();
     const float z = vector.getZ();
-    
+
     float newX = x * matrix[0][0] + y * matrix[1][0] + z * matrix[2][0] + matrix[3][0];
     float newY = x * matrix[0][1] + y * matrix[1][1] + z * matrix[2][1] + matrix[3][1];
     float newZ = x * matrix[0][2] + y * matrix[1][2] + z * matrix[2][2] + matrix[3][2];
-    
+
     const float newW = x * matrix[0][3] + y * matrix[1][3] + z * matrix[2][3] + matrix[3][3];
-    
+
     if( newW != 1 ) {
         newX /= newW;
         newY /= newW;
         newZ /= newW;
     }
-    
+
     vector.setX( newX );
     vector.setY( newY );
     vector.setZ( newZ );
-    
+
     return vector;
 }
 

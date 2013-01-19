@@ -9,10 +9,10 @@ std::shared_ptr< Shader > readShader( std::istream &stream, Shader::Type shaderT
 
     if( !stream )
         throwInvalidArgument( "'stream' is invalid" );
-    
+
     std::istreambuf_iterator< char > begin( stream );
     std::istreambuf_iterator< char > end;
-    
+
     return Shader::create( std::string(begin, end), shaderType );
 }
 

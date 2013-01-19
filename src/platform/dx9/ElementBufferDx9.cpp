@@ -22,15 +22,15 @@ D3DPRIMITIVETYPE ElementBufferDx9::getElementTopology() const noexcept {
 
 UINT ElementBufferDx9::getElementCount() const noexcept {
     UINT result = 0;
-    
+
     const auto &indexBufferDescription = _description.indexBuffer->getDescription();
     const size_t indexCount = indexBufferDescription.bufferSize / indexBufferDescription.indexSize;
-    
+
     switch( _elementTopology ) {
     case D3DPT_TRIANGLELIST:
         result = indexCount / 3;
         break;
-        
+
     case D3DPT_TRIANGLESTRIP:
         result = indexCount - 2;
         break;
@@ -40,16 +40,16 @@ UINT ElementBufferDx9::getElementCount() const noexcept {
 
 D3DPRIMITIVETYPE ElementBufferDx9::convertElementTopology( ElementTopology elementTopology ) {
     D3DPRIMITIVETYPE result;
-    
+
     switch( elementTopology ) {
     case ElementTopologyList:
         result = D3DPT_TRIANGLELIST;
         break;
-        
+
     case ElementTopologyStrip:
         result = D3DPT_TRIANGLESTRIP;
         break;
-        
+
     default:
         throwInvalidArgument( "'elementTopology' is invalid" );
     }

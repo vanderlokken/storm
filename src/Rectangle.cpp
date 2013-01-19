@@ -6,7 +6,7 @@ Rectangle::Rectangle() noexcept : _x( 0 ), _y( 0 ), _width( 0 ), _height( 0 ) { 
 
 Rectangle::Rectangle( int x, int y, unsigned int width, unsigned int height ) noexcept
     : _x( x ), _y( y ), _width( width ), _height( height ) { }
-    
+
 int Rectangle::getX() const noexcept {
     return _x;
 }

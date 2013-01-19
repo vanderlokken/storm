@@ -27,25 +27,25 @@ GLenum RasterizationTechniqueOgl::getFillMode() const noexcept {
 
 GLenum RasterizationTechniqueOgl::convertCullMode( CullMode cullMode ) {
     GLenum result;
-    
+
     switch( cullMode ) {
     case CullNothing:
-        
+
         // GL_NONE is not a valid argument for ::glCullFace. This value just
         // indicates that ::glDisable( GL_CULL_FACE ) should be called instead
         // of ::glCullFace.
-        
+
         result = GL_NONE;
         break;
-        
+
     case CullFrontFaces:
         result = GL_FRONT;
         break;
-        
+
     case CullBackFaces:
         result = GL_BACK;
         break;
-        
+
     default:
         throwInvalidArgument( "'cullMode' is invalid" );
     }
@@ -54,16 +54,16 @@ GLenum RasterizationTechniqueOgl::convertCullMode( CullMode cullMode ) {
 
 GLenum RasterizationTechniqueOgl::convertFillMode( FillMode fillMode ) {
     GLenum result;
-    
+
     switch( fillMode ) {
     case FillSolid:
         result = GL_FILL;
         break;
-        
+
     case FillWireframe:
         result = GL_LINE;
         break;
-        
+
     default:
         throwInvalidArgument( "'fillMode' is invalid" );
     }
