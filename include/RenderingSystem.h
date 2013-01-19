@@ -6,6 +6,7 @@
 #include "Color.h"
 #include "Noexcept.h"
 #include "Rectangle.h"
+#include "Shader.h"
 
 namespace storm {
 
@@ -13,7 +14,6 @@ class BlendingTechnique;
 class ElementBuffer;
 class OutputTechnique;
 class RasterizationTechnique;
-class Shader;
 
 class RenderingSystem {
 public:
@@ -36,7 +36,7 @@ public:
 
     virtual void renderElementBuffer( std::shared_ptr<ElementBuffer> ) = 0;
 
-    virtual std::shared_ptr<Shader> getShader() const noexcept = 0;
+    virtual std::shared_ptr<Shader> getShader( Shader::Type ) const noexcept = 0;
     virtual void setShader( std::shared_ptr<Shader> ) = 0;
 
     virtual std::shared_ptr<RasterizationTechnique> getRasterizationTechnique() const noexcept = 0;

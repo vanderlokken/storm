@@ -1,50 +1,18 @@
 #include "ShaderOgl.h"
 
-#include "Exception.h"
-#include "FunctionsOgl.h"
-
 #include <Cg/cgGL.h>
+
+#include "Exception.h"
 
 namespace storm {
 
 ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
-    : _program( nullptr )
+    : ShaderCg( type, selectProfile(type), sourceCode, selectCompilerOptions(type) )
 {
-    static CGcontext context = ::cgCreateContext();
-
-    const CGprofile profile = selectProfile( type );
-    ::cgGLSetContextOptimalOptions( context, profile );
-
-    _program = cgCreateProgram(
-        context, CG_SOURCE, sourceCode.c_str(), profile, nullptr, nullptr );
-
-    const CGerror error = ::cgGetError();
-    if( error )
-        throwRuntimeError( ::cgGetErrorString(error) );
-
     ::cgGLLoadProgram( _program );
+    checkCgError( "::cgGLLoadProgram" );
 
     return;
-}
-
-ShaderOgl::~ShaderOgl() noexcept {
-    ::cgDestroyProgram( _program );
-    return;
-}
-
-Shader::Uniform ShaderOgl::getUniform( const std::string &identifier ) const {
-
-    CGparameter uniform = ::cgGetNamedParameter( _program, identifier.c_str() );
-
-    if( !uniform )
-        throwInvalidArgument( "'identifier' is invalid" );
-
-    return Uniform( uniform );
-
-}
-
-CGprogram ShaderOgl::getProgram() const noexcept {
-    return _program;
 }
 
 CGprofile ShaderOgl::selectProfile( Type type ) {
@@ -66,6 +34,9 @@ CGprofile ShaderOgl::selectProfile( Type type ) {
     return result;
 }
 
+const char** ShaderOgl::selectCompilerOptions( Type type ) {
+    return ::cgGLGetContextOptimalOptions( getCgContext(), selectProfile(type) );
+}
 
 std::shared_ptr< Shader > Shader::create( const std::string &sourceCode, Type type ) {
     return std::make_shared< ShaderOgl >( sourceCode, type );

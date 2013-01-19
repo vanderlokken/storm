@@ -111,6 +111,8 @@ void RenderingSystemDx9::endFrameRendering() {
 void RenderingSystemDx9::renderElementBuffer(
     std::shared_ptr<ElementBuffer> elementBuffer )
 {
+    setShaderUniformValues();
+
     const auto &description = elementBuffer->getDescription();
 
     auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferDx9 >( description.indexBuffer );
@@ -165,16 +167,16 @@ void RenderingSystemDx9::renderElementBuffer(
     return;
 }
 
-std::shared_ptr<Shader> RenderingSystemDx9::getShader() const noexcept {
-    return _shader;
-}
-
 void RenderingSystemDx9::setShader( std::shared_ptr<Shader> shader ) {
+    if( getShader(shader->getType()) == shader )
+        return;
+
+    RenderingSystemCommon::setShader( shader );
 
     auto nativeShader = std::static_pointer_cast< ShaderDx9 >( shader );
 
-    const HRESULT result = ::cgD3D9BindProgram( nativeShader->getProgram() );
-    checkResult( result, "::cgD3D9BindProgram" );
+    ::cgD3D9BindProgram( nativeShader->getProgram() );
+    checkCgError( "::cgD3D9BindProgram" );
 
     return;
 }

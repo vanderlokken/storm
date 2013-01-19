@@ -2,47 +2,20 @@
 
 #include <Cg/cgD3D9.h>
 
-#include "platform/win/CheckResult.h"
+#include "Exception.h"
 
 namespace storm {
 
 ShaderDx9::ShaderDx9( const std::string &sourceCode, Type type )
-    : _program( nullptr )
+    : ShaderCg( type, selectProfile(type), sourceCode, selectCompilerOptions(type) )
 {
-    static CGcontext context = ::cgCreateContext();
+    const CGbool parameterShadowing = CG_FALSE;
+    const DWORD assemblerFlags = 0;
 
-    _program = cgCreateProgram(
-        context, CG_SOURCE, sourceCode.c_str(), selectProfile(type), nullptr, nullptr );
-
-    const CGerror error = ::cgGetError();
-    if( error )
-        throwRuntimeError( ::cgGetErrorString(error) );
-
-    const HRESULT loaded = ::cgD3D9LoadProgram( _program, CG_TRUE, 0 );
-    checkResult( loaded, "::cgD3D9LoadProgram" );
+    ::cgD3D9LoadProgram( _program, parameterShadowing, assemblerFlags );
+    checkCgError( "::cgD3D9LoadProgram" );
 
     return;
-}
-
-ShaderDx9::~ShaderDx9() noexcept {
-    ::cgD3D9UnloadProgram( _program );
-    ::cgDestroyProgram( _program );
-    return;
-}
-
-Shader::Uniform ShaderDx9::getUniform( const std::string &identifier ) const {
-
-    CGparameter uniform = ::cgGetNamedParameter( _program, identifier.c_str() );
-
-    if( !uniform )
-        throwInvalidArgument( "'identifier' is invalid" );
-
-    return Uniform( uniform );
-
-}
-
-CGprogram ShaderDx9::getProgram() const noexcept {
-    return _program;
 }
 
 CGprofile ShaderDx9::selectProfile( Type type ) {
@@ -62,6 +35,10 @@ CGprofile ShaderDx9::selectProfile( Type type ) {
     }
 
     return result;
+}
+
+const char** ShaderDx9::selectCompilerOptions( Type type ) {
+    return ::cgD3D9GetOptimalOptions( selectProfile(type) );
 }
 
 std::shared_ptr< Shader > Shader::create( const std::string &sourceCode, Type type ) {

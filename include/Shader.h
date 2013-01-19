@@ -40,6 +40,7 @@ public:
 
     virtual ~Shader() noexcept { }
 
+    virtual Type getType() const noexcept = 0;
     virtual Uniform getUniform( const std::string &identifier ) const = 0;
 };
 

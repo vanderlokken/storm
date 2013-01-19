@@ -26,6 +26,8 @@ void RenderingSystemOgl::initialize() {
 void RenderingSystemOgl::renderElementBuffer(
     std::shared_ptr<ElementBuffer> elementBuffer )
 {
+    setShaderUniformValues();
+
     const auto &description = elementBuffer->getDescription();
 
     auto nativeElementBuffer = std::static_pointer_cast< ElementBufferOgl >( elementBuffer );
@@ -46,19 +48,22 @@ void RenderingSystemOgl::renderElementBuffer(
     return;
 }
 
-std::shared_ptr<Shader> RenderingSystemOgl::getShader() const noexcept {
-    return _shader;
-}
-
 void RenderingSystemOgl::setShader( std::shared_ptr<Shader> shader ) {
-    if( _shader == shader ) return;
+    if( getShader(shader->getType()) == shader )
+        return;
+
+    RenderingSystemCommon::setShader( shader );
 
     auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
 
-    ::cgGLBindProgram( nativeShader->getProgram() );
-    ::cgGLEnableProfile( ::cgGetProgramProfile(nativeShader->getProgram()) );
+    const CGprogram program = nativeShader->getProgram();
 
-    _shader = shader;
+    ::cgGLBindProgram( program );
+    checkCgError( "::cgGLBindProgram" );
+
+    ::cgGLEnableProfile( ::cgGetProgramProfile(program) );
+    checkCgError( "::cgGLEnableProfile" );
+
     return;
 }
 

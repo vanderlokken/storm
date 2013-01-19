@@ -1,11 +1,11 @@
 #ifndef storm_RenderingSystemOgl_h
 #define storm_RenderingSystemOgl_h
 
-#include "RenderingSystem.h"
+#include "RenderingSystemCommon.h"
 
 namespace storm {
 
-class RenderingSystemOgl : public RenderingSystem {
+class RenderingSystemOgl : public RenderingSystemCommon {
 public:
     virtual ~RenderingSystemOgl() noexcept { }
 
@@ -14,7 +14,6 @@ public:
 
     virtual void renderElementBuffer( std::shared_ptr<ElementBuffer> );
 
-    virtual std::shared_ptr<Shader> getShader() const noexcept;
     virtual void setShader( std::shared_ptr<Shader> );
 
     virtual std::shared_ptr<RasterizationTechnique> getRasterizationTechnique() const noexcept;
@@ -44,8 +43,6 @@ protected:
     void initialize();
 
 private:
-    std::shared_ptr<Shader> _shader;
-
     std::shared_ptr<RasterizationTechnique> _rasterizationTechnique;
     std::shared_ptr<OutputTechnique> _outputTechnique;
     std::shared_ptr<BlendingTechnique> _blendingTechnique;

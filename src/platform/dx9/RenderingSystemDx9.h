@@ -6,7 +6,7 @@
 #include "CoreTypesDx9.h"
 #include "Noncopyable.h"
 #include "platform/win/ComPointer.h"
-#include "RenderingSystem.h"
+#include "RenderingSystemCommon.h"
 
 struct IDirect3D9;
 struct IDirect3DDevice9;
@@ -18,7 +18,7 @@ struct IDirect3DVertexShader9;
 
 namespace storm {
 
-class RenderingSystemDx9 : public RenderingSystem {
+class RenderingSystemDx9 : public RenderingSystemCommon {
     NONCOPYABLE( RenderingSystemDx9 );
 public:
     static std::shared_ptr<RenderingSystemDx9> getInstance();
@@ -30,7 +30,6 @@ public:
 
     virtual void renderElementBuffer( std::shared_ptr<ElementBuffer> );
 
-    virtual std::shared_ptr<Shader> getShader() const noexcept;
     virtual void setShader( std::shared_ptr<Shader> );
 
     virtual std::shared_ptr<RasterizationTechnique> getRasterizationTechnique() const noexcept;
@@ -63,8 +62,6 @@ private:
 
     void setRenderingState( D3DRENDERSTATETYPE state, unsigned int value );
 
-    void setShaderUniformValues();
-
     static D3DFORMAT convertColorBufferFormat( ColorBufferFormat );
     static D3DFORMAT convertDepthBufferFormat( DepthBufferFormat );
 
@@ -75,17 +72,12 @@ private:
     ComPointer< IDirect3DVertexBuffer9 > _cachedVertexBuffer;
     ComPointer< IDirect3DVertexDeclaration9 > _cachedVertexDeclaration;
 
-    ComPointer< IDirect3DVertexShader9 > _cachedVertexShader;
-    ComPointer< IDirect3DPixelShader9 > _cachedPixelShader;
-
     static const size_t RenderingStateCount = 256;
     std::array< unsigned int, RenderingStateCount > _cachedRenderingStates;
 
     std::shared_ptr< RasterizationTechnique > _rasterizationTechnique;
     std::shared_ptr< OutputTechnique > _outputTechnique;
     std::shared_ptr< BlendingTechnique > _blendingTechnique;
-
-    std::shared_ptr< Shader > _shader;
 };
 
 }
