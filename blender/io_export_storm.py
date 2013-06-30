@@ -8,8 +8,9 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "Import-Export" }
+    "category": "Import-Export"}
 
+from contextlib import contextmanager
 import struct
 
 import bpy
@@ -32,7 +33,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         name="Export Blending Weights")
 
     @classmethod
-    def poll(self, context):
+    def poll(cls, context):
         return context.object and context.object.type == "MESH"
 
     def execute(self, context):
@@ -46,22 +47,23 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
     def _export(self):
-        self._duplicate_object()
-        self._apply_transformations()
-        self._convert_quadrangles_to_triangles()
-        self._export_attributes()
-        self._export_mesh()
-        self._delete_duplicate()
+        with self._duplicated_object():
+            self._apply_transformations()
+            self._convert_quadrangles_to_triangles()
+            self._export_attributes()
+            self._export_mesh()
 
-    def _duplicate_object(self):
+    @contextmanager
+    def _duplicated_object(self):
         bpy.ops.object.mode_set(mode="OBJECT")
         bpy.ops.object.select_all(action="DESELECT")
 
         self._context.object.select = True
         bpy.ops.object.duplicate_move()
-
-    def _delete_duplicate(self):
-        bpy.ops.object.delete()
+        try:
+            yield
+        finally:
+            bpy.ops.object.delete()
 
     def _apply_transformations(self):
         bpy.ops.object.transform_apply(
@@ -129,6 +131,14 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
         index_count = 0
 
+        armature = self._context.object.find_armature()
+        bones_names = [
+            bone.name for bone in armature.pose.bones] if armature else []
+
+        def bone_index_by_vertex_group_index(index):
+            name = self._context.object.vertex_groups[index].name
+            return bones_names.index(name) if name in bones_names else None
+
         for polygon in mesh.polygons:
 
             if polygon.hide:
@@ -149,7 +159,9 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
                 if self.export_blending_indices:
                     indices = [
-                        group_element.group for group_element in vertex.groups]
+                        bone_index_by_vertex_group_index(group.group) for
+                        group in vertex.groups]
+                    indices = [index for index in indices if index is not None]
 
                     while len(indices) < 4:
                         indices.append(0)
@@ -159,10 +171,15 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
                 if self.export_blending_weights:
                     weights = [
-                        group_element.weight for group_element in vertex.groups]
+                        group.weight for group in vertex.groups if
+                            bone_index_by_vertex_group_index(group.group) is not
+                            None]
 
                     while len(weights) < 3:
-                        weights.append( 0 )
+                        weights.append(0)
+
+                    weights = [
+                        weight / (sum(weights) or 1) for weight in weights]
 
                     vertex_data += struct.pack(
                         "<fff", weights[0], weights[1], weights[2])
