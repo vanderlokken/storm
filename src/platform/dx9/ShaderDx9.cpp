@@ -7,15 +7,24 @@
 namespace storm {
 
 ShaderDx9::ShaderDx9( const std::string &sourceCode, Type type )
-    : ShaderCg( type, selectProfile(type), sourceCode, selectCompilerOptions(type) )
+    : ShaderCg( selectCompilerArguments(sourceCode, type), type )
 {
     const CGbool parameterShadowing = CG_FALSE;
     const DWORD assemblerFlags = 0;
 
     ::cgD3D9LoadProgram( _program, parameterShadowing, assemblerFlags );
     checkCgError( "::cgD3D9LoadProgram" );
+}
 
-    return;
+ShaderCg::CompilerArguments ShaderDx9::selectCompilerArguments(
+    const std::string &sourceCode, Type type )
+{
+    CompilerArguments compilerArguments;
+    compilerArguments.sourceCode = sourceCode.c_str();
+    compilerArguments.profile = selectProfile( type );
+    compilerArguments.compilerOptions =
+        ::cgD3D9GetOptimalOptions( compilerArguments.profile );
+    return compilerArguments;
 }
 
 CGprofile ShaderDx9::selectProfile( Type type ) {
@@ -35,10 +44,6 @@ CGprofile ShaderDx9::selectProfile( Type type ) {
     }
 
     return result;
-}
-
-const char** ShaderDx9::selectCompilerOptions( Type type ) {
-    return ::cgD3D9GetOptimalOptions( selectProfile(type) );
 }
 
 std::shared_ptr< Shader > Shader::create( const std::string &sourceCode, Type type ) {

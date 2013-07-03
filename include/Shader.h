@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Color.h"
 #include "Matrix.h"
@@ -26,11 +27,13 @@ public:
     public:
         Uniform( void* );
 
+        void setValue( int value );
         void setValue( float value );
 
         void setValue( const Color &value );
         void setValue( const Vector &value );
         void setValue( const Matrix &value );
+        void setValue( const std::vector<Matrix> &matrices );
 
     private:
         void *_identifier;

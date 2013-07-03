@@ -12,8 +12,9 @@ public:
     ShaderOgl( const std::string &sourceCode, Type type );
 
 private:
+    static CompilerArguments selectCompilerArguments(
+        const std::string &sourceCode, Type type );
     static CGprofile selectProfile( Type type );
-    static const char** selectCompilerOptions( Type type );
 };
 
 }

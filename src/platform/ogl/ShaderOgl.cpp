@@ -7,12 +7,21 @@
 namespace storm {
 
 ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
-    : ShaderCg( type, selectProfile(type), sourceCode, selectCompilerOptions(type) )
+    : ShaderCg( selectCompilerArguments(sourceCode, type), type )
 {
     ::cgGLLoadProgram( _program );
     checkCgError( "::cgGLLoadProgram" );
+}
 
-    return;
+ShaderCg::CompilerArguments ShaderOgl::selectCompilerArguments(
+    const std::string &sourceCode, Type type )
+{
+    CompilerArguments compilerArguments;
+    compilerArguments.sourceCode = sourceCode.c_str();
+    compilerArguments.profile = selectProfile( type );
+    compilerArguments.compilerOptions =
+        ::cgGLGetOptimalOptions( compilerArguments.profile );
+    return compilerArguments;
 }
 
 CGprofile ShaderOgl::selectProfile( Type type ) {
@@ -32,10 +41,6 @@ CGprofile ShaderOgl::selectProfile( Type type ) {
     }
 
     return result;
-}
-
-const char** ShaderOgl::selectCompilerOptions( Type type ) {
-    return ::cgGLGetContextOptimalOptions( getCgContext(), selectProfile(type) );
 }
 
 std::shared_ptr< Shader > Shader::create( const std::string &sourceCode, Type type ) {

@@ -7,6 +7,15 @@
 
 namespace storm {
 
+class CGContextInstance {
+public:
+    static CGContextInstance getInstance();
+    operator CGcontext () const;
+private:
+    CGContextInstance();
+    std::shared_ptr<_CGcontext> _handle;
+};
+
 class ShaderCg : public Shader {
     NONCOPYABLE( ShaderCg );
 public:
@@ -20,14 +29,18 @@ public:
     void updateUniformValues();
 
 protected:
-    ShaderCg( Type type, CGprofile cgProfile,
-        const std::string &sourceCode, const char **compilerOptions );
+    struct CompilerArguments {
+        const char *sourceCode;
+        const char **compilerOptions;
+        CGprofile profile;
+    };
+
+    ShaderCg( CompilerArguments compilerArguments, Type type );
 
     Type _type;
     CGprogram _program;
+    CGContextInstance _context;
 };
-
-CGcontext getCgContext();
 
 void checkCgError( const std::string &call );
 

@@ -5,17 +5,44 @@
 namespace storm {
 
 // ----------------------------------------------------------------------------
+//  CGContextInstance
+// ----------------------------------------------------------------------------
+
+CGContextInstance::CGContextInstance()
+    : _handle( ::cgCreateContext(), [](CGcontext context) {
+        ::cgDestroyContext( context );
+    })
+{
+    checkCgError( "::cgCreateContext" );
+    ::cgSetParameterSettingMode( *this, CG_DEFERRED_PARAMETER_SETTING );
+    checkCgError( "::cgSetParameterSettingMode" );
+}
+
+CGContextInstance::operator CGcontext () const {
+    return _handle.get();
+}
+
+CGContextInstance CGContextInstance::getInstance() {
+    static const CGContextInstance instance;
+    return instance;
+}
+
+// ----------------------------------------------------------------------------
 //  ShaderCg
 // ----------------------------------------------------------------------------
 
-ShaderCg::ShaderCg( Type type, CGprofile cgProfile,
-    const std::string &sourceCode, const char **compilerOptions )
-        : _type( type ), _program( nullptr )
+ShaderCg::ShaderCg( CompilerArguments compilerArguments, Type type )
+    : _type( type ),
+      _program( nullptr ),
+      _context( CGContextInstance::getInstance() )
 {
-    _program = ::cgCreateProgram( getCgContext(), CG_SOURCE, sourceCode.c_str(),
-        cgProfile, nullptr, compilerOptions );
+    _program = ::cgCreateProgram(
+        _context, CG_SOURCE,
+        compilerArguments.sourceCode,
+        compilerArguments.profile,
+        nullptr,
+        compilerArguments.compilerOptions );
     checkCgError( "::cgCreateProgram" );
-    return;
 }
 
 ShaderCg::~ShaderCg() noexcept {
@@ -53,6 +80,11 @@ void ShaderCg::updateUniformValues() {
 
 Shader::Uniform::Uniform( void *identifier ) : _identifier(identifier) {}
 
+void Shader::Uniform::setValue( int value ) {
+    ::cgSetParameter1i( static_cast<CGparameter>(_identifier), value );
+    return;
+}
+
 void Shader::Uniform::setValue( float value ) {
     ::cgSetParameter1f( static_cast<CGparameter>(_identifier), value );
     return;
@@ -80,6 +112,13 @@ void Shader::Uniform::setValue( const Matrix &matrix ) {
     return;
 }
 
+void Shader::Uniform::setValue( const std::vector<Matrix> &matrices ) {
+    ::cgSetParameterValuefr(
+        static_cast<CGparameter>(_identifier), matrices.size() * 4 * 4,
+        reinterpret_cast<const float*>(matrices.data()) );
+    return;
+}
+
 // ----------------------------------------------------------------------------
 //  Utilities
 // ----------------------------------------------------------------------------
@@ -95,37 +134,9 @@ void checkCgError( const std::string &call ) {
     std::string description = call + " has failed.\n" + errorString;
     if( error == CG_COMPILER_ERROR ) {
         description += "\n";
-        description += ::cgGetLastListing( getCgContext() );
+        description += ::cgGetLastListing( CGContextInstance::getInstance() );
     }
     throwRuntimeError( description.c_str() );
-}
-
-CGcontext getCgContext() {
-
-    class ContextHandle {
-        NONCOPYABLE( ContextHandle );
-    public:
-        ContextHandle() : value( ::cgCreateContext() ) {
-            checkCgError( "::cgContext" );
-        }
-        ~ContextHandle() {
-            ::cgDestroyContext( value );
-        }
-        CGcontext value;
-    };
-
-    class ContextInstance {
-    public:
-        ContextInstance() {
-            ::cgSetParameterSettingMode(
-                contextHandle.value, CG_DEFERRED_PARAMETER_SETTING );
-            checkCgError( "::cgSetParameterSettingMode" );
-        }
-        ContextHandle contextHandle;
-    };
-
-    static const ContextInstance contextInstance;
-    return contextInstance.contextHandle.value;
 }
 
 }
