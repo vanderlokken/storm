@@ -70,6 +70,10 @@ Vector Vector::operator / ( float divisor ) const noexcept {
         _z / divisor );
 }
 
+Vector Vector::operator - () const noexcept {
+    return Vector( -_x, -_y, -_z );
+}
+
 float Vector::getX() const noexcept {
     return _x;
 }
@@ -124,6 +128,10 @@ Vector Vector::getCrossProduct( const Vector &first, const Vector &second ) noex
         first._y * second._z - first._z * second._y,
         first._z * second._x - first._x * second._z,
         first._x * second._y - first._y * second._x );
+}
+
+Vector operator * ( float multiplier, const Vector &vector ) noexcept {
+    return vector * multiplier;
 }
 
 }

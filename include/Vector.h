@@ -20,6 +20,8 @@ public:
     Vector operator * ( float ) const noexcept;
     Vector operator / ( float ) const noexcept;
 
+    Vector operator - () const noexcept;
+
     float getX() const noexcept;
     float getY() const noexcept;
     float getZ() const noexcept;
@@ -41,6 +43,8 @@ private:
     float _y;
     float _z;
 };
+
+Vector operator * ( float, const Vector& ) noexcept;
 
 }
 
