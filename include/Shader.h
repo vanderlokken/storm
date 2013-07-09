@@ -40,6 +40,7 @@ public:
     };
 
     static std::shared_ptr<Shader> create( const std::string &sourceCode, Type type );
+    static std::shared_ptr<Shader> load( const std::string &filename, Type type );
 
     virtual ~Shader() noexcept { }
 

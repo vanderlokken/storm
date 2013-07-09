@@ -7,7 +7,6 @@
 #include "CommonVertexTypes.h"
 #include "IndexBuffer.h"
 #include "ElementBuffer.h"
-#include "ElementBufferOperators.h"
 #include "Framework.h"
 #include "Keyboard.h"
 #include "MathConstants.h"
@@ -15,7 +14,6 @@
 #include "RenderingSystem.h"
 #include "RenderingWindow.h"
 #include "Shader.h"
-#include "ShaderOperators.h"
 #include "Transformation.h"
 #include "VertexBuffer.h"
 

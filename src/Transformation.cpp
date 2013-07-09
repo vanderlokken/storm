@@ -11,11 +11,21 @@ Matrix createTranslationTransformation( float x, float y, float z ) noexcept {
                    x, y, z, 1 );
 }
 
+Matrix createTranslationTransformation( const Vector &vector ) noexcept {
+    return createTranslationTransformation(
+        vector.getX(), vector.getY(), vector.getZ() );
+}
+
 Matrix createScalingTransformation( float x, float y, float z ) noexcept {
     return Matrix( x, 0, 0, 0,
                    0, y, 0, 0,
                    0, 0, z, 0,
                    0, 0, 0, 1 );
+}
+
+Matrix createScalingTransformation( const Vector &vector ) noexcept {
+    return createScalingTransformation(
+        vector.getX(), vector.getY(), vector.getZ() );
 }
 
 Matrix createXRotationTransformation( float angle ) noexcept {

@@ -2,6 +2,7 @@
 #define storm_ElementBuffer_h
 
 #include <memory>
+#include <string>
 
 #include "Noexcept.h"
 
@@ -24,6 +25,7 @@ public:
     };
 
     static std::shared_ptr<ElementBuffer> create( const Description& );
+    static std::shared_ptr<ElementBuffer> load( const std::string &filename );
 
     virtual ~ElementBuffer() noexcept { }
 

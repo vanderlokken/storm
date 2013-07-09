@@ -1,6 +1,7 @@
-#include "ElementBufferOperators.h"
+#include "ElementBuffer.h"
 
 #include <cstdint>
+#include <fstream>
 #include <numeric>
 #include <vector>
 
@@ -11,9 +12,11 @@
 
 namespace storm {
 
-std::istream& operator >> (
-    std::istream &stream, std::shared_ptr<ElementBuffer> &result )
+std::shared_ptr<ElementBuffer> ElementBuffer::load(
+    const std::string &filename )
 {
+    std::ifstream stream( filename, std::ios::binary );
+
     if( !stream )
         throwInvalidArgument( "'stream' is invalid" );
 
@@ -65,9 +68,7 @@ std::istream& operator >> (
     elementBufferDescription.indexBuffer = IndexBuffer::create( indexBufferDescription, indexData.data() );
     elementBufferDescription.elementTopology = ElementBuffer::ElementTopologyList;
 
-    result = ElementBuffer::create( elementBufferDescription );
-
-    return stream;
+    return ElementBuffer::create( elementBufferDescription );
 }
 
 }
