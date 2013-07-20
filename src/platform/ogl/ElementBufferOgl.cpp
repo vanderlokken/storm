@@ -11,41 +11,34 @@
 
 namespace storm {
 
-ElementBufferOgl::ElementBufferOgl( const Description &description )
-    : _description( description ),
-      _elementTopology( convertElementTopology(description.elementTopology) ),
-      _handle( 0 )
-{
-    try {
-        ::glGenVertexArrays( 1, &_handle );
-        checkResult( "::glGenVertexArrays" );
-
-        ::glBindVertexArray( _handle );
-        checkResult( "::glBindVertexArray" );
-
-        auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferOgl >( _description.indexBuffer );
-        auto nativeVertexBuffer = std::static_pointer_cast< VertexBufferOgl >( _description.vertexBuffer );
-
-        GLuint indexBufferHandle = nativeIndexBuffer->getHandle();
-        GLuint vertexBufferHandle = nativeVertexBuffer->getHandle();
-
-        ::glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle );
-        checkResult( "::glBindBuffer" );
-
-        ::glBindBuffer( GL_ARRAY_BUFFER, vertexBufferHandle );
-        checkResult( "::glBindBuffer" );
-
-        setVertexAttributes();
-
-    } catch( ... ) {
-        ::glDeleteVertexArrays( 1, &_handle );
-        throw;
-    }
+ElementBufferHandleOgl::ElementBufferHandleOgl() {
+    ::glGenVertexArrays( 1, &_handle );
+    checkResult( "::glGenVertexArrays" );
     return;
 }
 
-ElementBufferOgl::~ElementBufferOgl() noexcept {
+ElementBufferHandleOgl::~ElementBufferHandleOgl() noexcept {
     ::glDeleteVertexArrays( 1, &_handle );
+    return;
+}
+
+ElementBufferOgl::ElementBufferOgl( const Description &description )
+    : _description( description ),
+      _elementTopology( convertElementTopology(description.elementTopology) )
+{
+    ::glBindVertexArray( _handle );
+    checkResult( "::glBindVertexArray" );
+
+    auto indexBuffer = std::static_pointer_cast< IndexBufferOgl >( _description.indexBuffer );
+    auto vertexBuffer = std::static_pointer_cast< VertexBufferOgl >( _description.vertexBuffer );
+
+    ::glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer->getHandle() );
+    checkResult( "::glBindBuffer" );
+
+    ::glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer->getHandle() );
+    checkResult( "::glBindBuffer" );
+
+    setVertexAttributes();
     return;
 }
 
@@ -57,7 +50,7 @@ GLenum ElementBufferOgl::getElementTopology() const noexcept {
     return _elementTopology;
 }
 
-GLuint ElementBufferOgl::getHandle() const noexcept {
+const ElementBufferHandleOgl& ElementBufferOgl::getHandle() const noexcept {
     return _handle;
 }
 

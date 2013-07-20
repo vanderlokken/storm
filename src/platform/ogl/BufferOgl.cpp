@@ -7,33 +7,31 @@
 
 namespace storm {
 
+BufferHandleOgl::BufferHandleOgl() {
+    ::glGenBuffers( 1, &_handle );
+    checkResult( "::glGenBuffers" );
+    return;
+}
+
+BufferHandleOgl::~BufferHandleOgl() noexcept {
+    ::glDeleteBuffers( 1, &_handle );
+    return;
+}
+
 // GL_COPY_WRITE_BUFFER and GL_COPY_READ_BUFFER are not used in the rendering process
 // so it's safe to overwrite these targets and to use them in the data transfer operations.
 
 BufferOgl::BufferOgl( size_t size, const void *data, ResourceType resourceType )
-    : _handle( 0 ), _size( size )
+    : _size( size )
 {
-    try {
-        ::glGenBuffers( 1, &_handle );
-        checkResult( "::glGenBuffers" );
+    ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
+    checkResult( "::glBindBuffer" );
 
-        ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
-        checkResult( "::glBindBuffer" );
+    const GLenum usage = getResourceUsage( resourceType );
 
-        const GLenum usage = getResourceUsage( resourceType );
+    ::glBufferData( GL_COPY_WRITE_BUFFER, size, data, usage );
+    checkResult( "::glBufferData" );
 
-        ::glBufferData( GL_COPY_WRITE_BUFFER, size, data, usage );
-        checkResult( "::glBufferData" );
-
-    } catch( ... ) {
-        ::glDeleteBuffers( 1, &_handle );
-        throw;
-    }
-    return;
-}
-
-BufferOgl::~BufferOgl() noexcept {
-    ::glDeleteBuffers( 1, &_handle );
     return;
 }
 
@@ -67,7 +65,7 @@ void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     return;
 }
 
-GLuint BufferOgl::getHandle() const noexcept {
+const BufferHandleOgl& BufferOgl::getHandle() const noexcept {
     return _handle;
 }
 

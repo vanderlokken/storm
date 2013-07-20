@@ -11,14 +11,12 @@ class IndexBufferOgl : public IndexBuffer {
 public:
     IndexBufferOgl( const Description&, const void *indices = nullptr );
 
-    virtual ~IndexBufferOgl() noexcept { }
-
     virtual void getIndices( size_t offset, size_t size, void *indices ) const;
     virtual void setIndices( size_t offset, size_t size, const void *indices );
 
     virtual const Description& getDescription() const noexcept;
 
-    GLuint getHandle() const noexcept;
+    const BufferHandleOgl& getHandle() const noexcept;
     GLenum getIndexFormat() const noexcept;
 
 private:

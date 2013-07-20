@@ -33,9 +33,7 @@ void RenderingSystemOgl::renderElementBuffer(
     auto nativeElementBuffer = std::static_pointer_cast< ElementBufferOgl >( elementBuffer );
     auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferOgl >( description.indexBuffer );
 
-    const GLuint handle = nativeElementBuffer->getHandle();
-
-    ::glBindVertexArray( handle );
+    ::glBindVertexArray( nativeElementBuffer->getHandle() );
     checkResult( "::glBindVertexArray" );
 
     const GLenum elementTopology = nativeElementBuffer->getElementTopology();

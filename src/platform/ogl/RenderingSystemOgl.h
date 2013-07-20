@@ -7,8 +7,6 @@ namespace storm {
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
-    virtual ~RenderingSystemOgl() noexcept { }
-
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
 
@@ -38,8 +36,6 @@ public:
     virtual void setDepthBufferFormat( DepthBufferFormat ) = 0;
 
 protected:
-    RenderingSystemOgl() noexcept { }
-
     void initialize();
 
 private:

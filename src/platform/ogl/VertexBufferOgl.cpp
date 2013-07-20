@@ -22,7 +22,7 @@ const VertexBuffer::Description& VertexBufferOgl::getDescription() const noexcep
     return _description;
 }
 
-GLuint VertexBufferOgl::getHandle() const noexcept {
+const BufferHandleOgl& VertexBufferOgl::getHandle() const noexcept {
     return _buffer.getHandle();
 }
 

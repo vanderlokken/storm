@@ -3,20 +3,25 @@
 
 #include "CoreTypesOgl.h"
 #include "ElementBuffer.h"
+#include "HandleOgl.h"
 #include "Vertex.h"
 
 namespace storm {
+
+class ElementBufferHandleOgl : public HandleOgl {
+public:
+    ElementBufferHandleOgl();
+    ~ElementBufferHandleOgl() noexcept;
+};
 
 class ElementBufferOgl : public ElementBuffer {
 public:
     ElementBufferOgl( const Description& );
 
-    virtual ~ElementBufferOgl() noexcept;
-
     virtual const Description& getDescription() const noexcept;
 
     GLenum getElementTopology() const noexcept;
-    GLuint getHandle() const noexcept;
+    const ElementBufferHandleOgl& getHandle() const noexcept;
 
 private:
     void setVertexAttributes();
@@ -33,7 +38,7 @@ private:
 
     Description _description;
     GLenum _elementTopology;
-    GLuint _handle;
+    ElementBufferHandleOgl _handle;
 };
 
 }

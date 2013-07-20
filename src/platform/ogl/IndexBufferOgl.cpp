@@ -27,7 +27,7 @@ const IndexBuffer::Description& IndexBufferOgl::getDescription() const noexcept 
     return _description;
 }
 
-GLuint IndexBufferOgl::getHandle() const noexcept {
+const BufferHandleOgl& IndexBufferOgl::getHandle() const noexcept {
     return _buffer.getHandle();
 }
 
