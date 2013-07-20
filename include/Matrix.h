@@ -21,13 +21,18 @@ public:
     float* operator [] ( size_t index );
     const float* operator [] ( size_t index ) const;
 
-    Matrix& operator *= ( const Matrix& ) const noexcept;
-    Matrix& operator += ( const Matrix& ) const noexcept;
+    Matrix& operator *= ( const Matrix& ) noexcept;
+    Matrix& operator += ( const Matrix& ) noexcept;
 
     Matrix operator * ( const Matrix& ) const noexcept;
     Matrix operator + ( const Matrix& ) const noexcept;
 
     Matrix operator * ( float ) const noexcept;
+
+    float getDeterminant() const noexcept;
+
+    void invert() noexcept;
+    Matrix getInverted() const noexcept;
 
     static const Matrix Identity;
 
