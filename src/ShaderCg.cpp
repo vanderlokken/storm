@@ -45,7 +45,7 @@ ShaderCg::ShaderCg( CompilerArguments compilerArguments, Type type )
     checkCgError( "::cgCreateProgram" );
 }
 
-ShaderCg::~ShaderCg() noexcept {
+ShaderCg::~ShaderCg() {
     ::cgDestroyProgram( _program );
     return;
 }

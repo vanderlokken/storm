@@ -9,7 +9,7 @@ template< class T > class ComPointer {
 public:
     ComPointer() noexcept : _pointer( nullptr ) { }
     ComPointer( const ComPointer& ) noexcept;
-    ~ComPointer() noexcept { if( _pointer ) _pointer->Release(); }
+    ~ComPointer() { if( _pointer ) _pointer->Release(); }
 
     ComPointer& operator = ( const ComPointer& ) noexcept;
 

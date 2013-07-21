@@ -62,7 +62,7 @@ public:
     static std::shared_ptr<OutputTechnique> create( const Description& );
     static std::shared_ptr<OutputTechnique> getDefault();
 
-    virtual ~OutputTechnique() noexcept { }
+    virtual ~OutputTechnique() { }
 
     virtual const Description& getDescription() const noexcept = 0;
 };

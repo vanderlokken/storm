@@ -17,7 +17,7 @@ MeshHandleOgl::MeshHandleOgl() {
     return;
 }
 
-MeshHandleOgl::~MeshHandleOgl() noexcept {
+MeshHandleOgl::~MeshHandleOgl() {
     ::glDeleteVertexArrays( 1, &_handle );
     return;
 }

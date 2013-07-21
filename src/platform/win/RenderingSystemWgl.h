@@ -13,7 +13,7 @@ class RenderingSystemWgl : public RenderingSystemOgl {
 public:
     static std::shared_ptr<RenderingSystemWgl> getInstance();
 
-    virtual ~RenderingSystemWgl() noexcept;
+    virtual ~RenderingSystemWgl();
 
     virtual void beginFrameRendering();
     virtual void endFrameRendering();

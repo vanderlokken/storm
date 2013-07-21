@@ -17,7 +17,7 @@ DisplayConnectionX11::DisplayConnectionX11()
     return;
 }
 
-DisplayConnectionX11::~DisplayConnectionX11() noexcept {
+DisplayConnectionX11::~DisplayConnectionX11() {
     ::XCloseDisplay( _handle );
     return;
 }

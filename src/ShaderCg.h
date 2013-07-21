@@ -19,7 +19,7 @@ private:
 class ShaderCg : public Shader {
     NONCOPYABLE( ShaderCg );
 public:
-    virtual ~ShaderCg() noexcept;
+    virtual ~ShaderCg();
 
     virtual Type getType() const noexcept;
     virtual Uniform getUniform( const std::string &identifier ) const;

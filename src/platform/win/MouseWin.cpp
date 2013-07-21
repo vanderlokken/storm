@@ -31,7 +31,7 @@ MouseWin::MouseWin()
     return;
 }
 
-MouseWin::~MouseWin() noexcept {
+MouseWin::~MouseWin() {
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
     replaceWindowProcedure( windowHandle, _originalWindowProcedure );
     return;

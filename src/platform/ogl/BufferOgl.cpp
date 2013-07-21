@@ -13,7 +13,7 @@ BufferHandleOgl::BufferHandleOgl() {
     return;
 }
 
-BufferHandleOgl::~BufferHandleOgl() noexcept {
+BufferHandleOgl::~BufferHandleOgl() {
     ::glDeleteBuffers( 1, &_handle );
     return;
 }

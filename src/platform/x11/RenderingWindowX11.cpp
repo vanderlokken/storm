@@ -43,7 +43,7 @@ RenderingWindowX11::RenderingWindowX11()
     return;
 }
 
-RenderingWindowX11::~RenderingWindowX11() noexcept {
+RenderingWindowX11::~RenderingWindowX11() {
     ::XDestroyWindow( _display, _handle );
     return;
 }

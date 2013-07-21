@@ -88,7 +88,7 @@ RenderingSystemDx9::RenderingSystemDx9() {
     return;
 }
 
-RenderingSystemDx9::~RenderingSystemDx9() noexcept {
+RenderingSystemDx9::~RenderingSystemDx9() {
     ::cgD3D9SetDevice( nullptr );
     return;
 }

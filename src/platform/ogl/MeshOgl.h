@@ -11,7 +11,7 @@ namespace storm {
 class MeshHandleOgl : public HandleOgl {
 public:
     MeshHandleOgl();
-    ~MeshHandleOgl() noexcept;
+    ~MeshHandleOgl();
 };
 
 class MeshOgl : public Mesh {

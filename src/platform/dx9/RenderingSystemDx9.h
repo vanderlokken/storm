@@ -23,7 +23,7 @@ class RenderingSystemDx9 : public RenderingSystemCommon {
 public:
     static std::shared_ptr<RenderingSystemDx9> getInstance();
 
-    virtual ~RenderingSystemDx9() noexcept;
+    virtual ~RenderingSystemDx9();
 
     virtual void beginFrameRendering();
     virtual void endFrameRendering();

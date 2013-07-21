@@ -39,7 +39,7 @@ public:
 
     static std::shared_ptr<Sampler> create( const Description& );
 
-    virtual ~Sampler() noexcept { }
+    virtual ~Sampler() { }
 
     virtual const Description& getDescription() const noexcept = 0;
 };

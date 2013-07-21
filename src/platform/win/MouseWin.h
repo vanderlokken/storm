@@ -16,7 +16,7 @@ class MouseWin : public Mouse {
 public:
     static std::shared_ptr<MouseWin> getInstance();
 
-    virtual ~MouseWin() noexcept;
+    virtual ~MouseWin();
 
     virtual void addEventHandler( const EventHandler<ButtonPressEvent>& );
     virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& );

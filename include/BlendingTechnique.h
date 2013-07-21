@@ -40,7 +40,7 @@ public:
     static std::shared_ptr<BlendingTechnique> create( const Description& );
     static std::shared_ptr<BlendingTechnique> getDefault();
 
-    virtual ~BlendingTechnique() noexcept { }
+    virtual ~BlendingTechnique() { }
 
     virtual const Description& getDescription() const noexcept = 0;
 };

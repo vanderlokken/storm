@@ -36,7 +36,7 @@ public:
 
     static std::shared_ptr<Mouse> getInstance();
 
-    virtual ~Mouse() noexcept { }
+    virtual ~Mouse() { }
 
     virtual void addEventHandler( const EventHandler<ButtonPressEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& ) = 0;

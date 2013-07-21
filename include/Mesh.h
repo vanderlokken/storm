@@ -27,7 +27,7 @@ public:
     static std::shared_ptr<Mesh> create( const Description& );
     static std::shared_ptr<Mesh> load( const std::string &filename );
 
-    virtual ~Mesh() noexcept { }
+    virtual ~Mesh() { }
 
     virtual const Description& getDescription() const noexcept = 0;
 };

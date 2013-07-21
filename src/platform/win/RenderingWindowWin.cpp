@@ -57,7 +57,7 @@ RenderingWindowWin::RenderingWindowWin()
     return;
 }
 
-RenderingWindowWin::~RenderingWindowWin() noexcept {
+RenderingWindowWin::~RenderingWindowWin() {
     ::DestroyWindow( _handle );
     return;
 }

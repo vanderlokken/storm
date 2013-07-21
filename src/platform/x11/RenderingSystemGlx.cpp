@@ -31,7 +31,7 @@ RenderingSystemGlx::RenderingSystemGlx()
     return;
 }
 
-RenderingSystemGlx::~RenderingSystemGlx() noexcept {
+RenderingSystemGlx::~RenderingSystemGlx() {
     ::glXMakeCurrent( _display, None, 0 );
     ::glXDestroyContext( _display, _context );
     return;

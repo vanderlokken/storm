@@ -14,7 +14,7 @@ class RenderingWindowWin : public RenderingWindow {
 public:
     static std::shared_ptr<RenderingWindowWin> getInstance();
 
-    virtual ~RenderingWindowWin() noexcept;
+    virtual ~RenderingWindowWin();
 
     virtual Dimensions getDimensions() const noexcept;
 

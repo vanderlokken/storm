@@ -12,7 +12,7 @@ public:
         return;
     }
 
-    virtual ~HandleOgl() noexcept {
+    virtual ~HandleOgl() {
         return;
     }
 

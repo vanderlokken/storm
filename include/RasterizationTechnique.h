@@ -31,7 +31,7 @@ public:
     static std::shared_ptr<RasterizationTechnique> create( const Description& );
     static std::shared_ptr<RasterizationTechnique> getDefault();
 
-    virtual ~RasterizationTechnique() noexcept { }
+    virtual ~RasterizationTechnique() { }
 
     virtual const Description& getDescription() const noexcept = 0;
 };

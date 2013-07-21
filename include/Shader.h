@@ -42,7 +42,7 @@ public:
     static std::shared_ptr<Shader> create( const std::string &sourceCode, Type type );
     static std::shared_ptr<Shader> load( const std::string &filename, Type type );
 
-    virtual ~Shader() noexcept { }
+    virtual ~Shader() { }
 
     virtual Type getType() const noexcept = 0;
     virtual Uniform getUniform( const std::string &identifier ) const = 0;

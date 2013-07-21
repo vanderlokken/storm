@@ -15,7 +15,7 @@ class RenderingSystemGlx : public RenderingSystemOgl {
 public:
     static std::shared_ptr<RenderingSystemGlx> getInstance();
 
-    virtual ~RenderingSystemGlx() noexcept;
+    virtual ~RenderingSystemGlx();
 
     virtual void beginFrameRendering();
     virtual void endFrameRendering();

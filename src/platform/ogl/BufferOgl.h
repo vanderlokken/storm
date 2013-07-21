@@ -10,7 +10,7 @@ namespace storm {
 class BufferHandleOgl : public HandleOgl {
 public:
     BufferHandleOgl();
-    ~BufferHandleOgl() noexcept;
+    ~BufferHandleOgl();
 };
 
 class BufferOgl {

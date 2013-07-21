@@ -36,7 +36,7 @@ MultimediaClockWin::MultimediaClockWin()
     return;
 }
 
-MultimediaClockWin::~MultimediaClockWin() noexcept {
+MultimediaClockWin::~MultimediaClockWin() {
     _timeEndPeriod( Period );
     return;
 }

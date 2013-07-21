@@ -21,7 +21,7 @@ public:
     template<class Container>
         static std::shared_ptr<IndexBuffer> create( const Container &indices );
 
-    virtual ~IndexBuffer() noexcept { }
+    virtual ~IndexBuffer() { }
 
     virtual void getIndices( size_t offset, size_t size, void *indices ) const = 0;
     virtual void setIndices( size_t offset, size_t size, const void *indices ) = 0;

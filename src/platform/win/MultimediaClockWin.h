@@ -14,7 +14,7 @@ class MultimediaClockWin : public Clock {
 public:
     static std::shared_ptr<MultimediaClockWin> getInstance();
 
-    virtual ~MultimediaClockWin() noexcept;
+    virtual ~MultimediaClockWin();
 
     virtual void update() noexcept;
 

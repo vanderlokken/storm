@@ -11,7 +11,7 @@ class ClockPosix : public Clock {
 public:
     static std::shared_ptr<ClockPosix> getInstance();
 
-    virtual ~ClockPosix() noexcept { }
+    virtual ~ClockPosix() { }
 
     virtual void update() noexcept;
 

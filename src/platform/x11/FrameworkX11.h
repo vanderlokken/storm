@@ -13,8 +13,6 @@ class FrameworkX11 : public Framework {
 public:
     static std::shared_ptr<FrameworkX11> getInstance();
 
-    virtual ~FrameworkX11() noexcept;
-
     virtual void run( const Callback &callback );
     virtual void stop();
 

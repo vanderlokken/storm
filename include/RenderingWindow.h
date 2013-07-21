@@ -12,7 +12,7 @@ class RenderingWindow {
 public:
     static std::shared_ptr<RenderingWindow> getInstance();
 
-    virtual ~RenderingWindow() noexcept { }
+    virtual ~RenderingWindow() { }
 
     virtual Dimensions getDimensions() const noexcept = 0;
 

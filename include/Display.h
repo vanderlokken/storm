@@ -38,7 +38,7 @@ public:
 
     static std::shared_ptr<Display> getInstance();
 
-    virtual ~Display() noexcept { }
+    virtual ~Display() { }
 
     virtual std::vector<Mode> getSupportedModes() const noexcept = 0;
 

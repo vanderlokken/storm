@@ -11,10 +11,6 @@ FrameworkX11::FrameworkX11()
     return;
 }
 
-FrameworkX11::~FrameworkX11() noexcept {
-    return;
-}
-
 void FrameworkX11::run( const Callback &callback ) {
     if( !callback )
         throwInvalidArgument( "'callback' is invalid" );

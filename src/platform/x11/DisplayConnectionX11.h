@@ -11,7 +11,7 @@ class DisplayConnectionX11 {
 public:
     static std::shared_ptr<DisplayConnectionX11> getInstance();
 
-    ~DisplayConnectionX11() noexcept;
+    ~DisplayConnectionX11();
 
     Display* getHandle() const noexcept;
 

@@ -24,7 +24,7 @@ public:
     template<class Container>
         static std::shared_ptr<VertexBuffer> create( const Container &vertices );
 
-    virtual ~VertexBuffer() noexcept { }
+    virtual ~VertexBuffer() { }
 
     virtual void getVertices( size_t offset, size_t size, void *vertices ) const = 0;
     virtual void setVertices( size_t offset, size_t size, const void *vertices ) = 0;

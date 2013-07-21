@@ -13,7 +13,7 @@ class RenderingWindowX11 : public RenderingWindow {
 public:
     static std::shared_ptr<RenderingWindowX11> getInstance();
 
-    virtual ~RenderingWindowX11() noexcept;
+    virtual ~RenderingWindowX11();
 
     virtual Dimensions getDimensions() const noexcept;
 

@@ -14,7 +14,7 @@ public:
 
     static std::shared_ptr<Clock> getInstance();
 
-    virtual ~Clock() noexcept { }
+    virtual ~Clock() { }
 
     virtual void update() noexcept = 0;
 

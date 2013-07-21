@@ -29,7 +29,7 @@ public:
 
     static std::shared_ptr<RenderingSystem> getInstance();
 
-    virtual ~RenderingSystem() noexcept { }
+    virtual ~RenderingSystem() { }
 
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
