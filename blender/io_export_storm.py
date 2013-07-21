@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Storm (.selement)",
+    "name": "Storm (.smesh)",
     "author": "vanderlokken@gmail.com",
     "version": (1, 1),
     "blender": (2, 65, 0),
-    "location": "File > Export > Storm (.selement)",
-    "description": "Export Storm (.selement)",
+    "location": "File > Export > Storm (.smesh)",
+    "description": "Export Storm (.smesh)",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
@@ -18,12 +18,12 @@ from bpy_extras.io_utils import ExportHelper
 
 
 class StormExportOperator(bpy.types.Operator, ExportHelper):
-    """Export Storm (.selement)"""
+    """Export Storm (.smesh)"""
 
     bl_idname = "export.storm"
     bl_label = "Export Storm"
 
-    filename_ext = ".selement"
+    filename_ext = ".smesh"
 
     export_normals = bpy.props.BoolProperty(
         name="Export Normals")
@@ -197,7 +197,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
 def menu_function(self, context):
     self.layout.operator(
-        StormExportOperator.bl_idname, text="Storm (.selement)")
+        StormExportOperator.bl_idname, text="Storm (.smesh)")
 
 
 def register():
