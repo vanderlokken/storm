@@ -3,11 +3,7 @@
 
 #include "Exception.h"
 
-#define checkResult( result, call )                                 \
-    if( result < 0 ) {                                              \
-        throwException< std::runtime_error >(                       \
-            __FILE__, __LINE__, __FUNCTION__, call " has failed" ); \
-    }
-
+#define checkResult( result, call ) \
+    if( result < 0 ) throwRuntimeError( call " has failed" );
 
 #endif

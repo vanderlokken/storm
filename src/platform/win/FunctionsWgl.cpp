@@ -5,7 +5,7 @@
 
 PROC getCoreFunctionAddress( const char *functionName ) {
     static const HMODULE library = ::GetModuleHandle( L"opengl32.dll" );
-    
+
     PROC address = ::GetProcAddress( library, functionName );
     return address;
 }
@@ -13,23 +13,26 @@ PROC getCoreFunctionAddress( const char *functionName ) {
 PROC getExtensionFunctionAddress( const char *functionName ) {
     // This call is required to be sure that the OpenGL rendering context is created
     storm::RenderingSystemWgl::getInstance();
-    
+
     PROC address = ::wglGetProcAddress( functionName );
     return address;
 }
 
 PROC getFunctionAddress( const char *functionName ) {
     PROC coreFunctionAddress = getCoreFunctionAddress( functionName );
-    
+
     if( coreFunctionAddress )
         return coreFunctionAddress;
-    
+
     return getExtensionFunctionAddress( functionName );
 }
 
+// This function is used in the 'throwRuntimeError' macro
+using storm::formatExceptionMessage;
+
 #define DECLARE( functionName ) \
     static const Pointer pointer = reinterpret_cast< Pointer >( getFunctionAddress(functionName) ); \
-    if( !pointer ) storm::throwRuntimeError( "Function is unavailable" );
+    if( !pointer ) throwRuntimeError( "Function is unavailable" );
 
 void glCullFace( GLenum mode ) {
     typedef void (__stdcall * Pointer)( GLenum );
@@ -2657,4 +2660,12 @@ void glGetQueryIndexediv( GLenum target, GLuint index, GLenum pname, GLint *para
     typedef void (__stdcall * Pointer)( GLenum, GLuint, GLenum, GLint* );
     DECLARE( "glGetQueryIndexediv" );
     return pointer( target, index, pname, params );
+}
+
+// WGL_ARB_create_context extension
+
+HGLRC wglCreateContextAttribsARB( HDC hDC, HGLRC hShareContext, const int *attribList ) {
+    typedef HGLRC (__stdcall * Pointer)( HDC, HGLRC, const int * );
+    DECLARE( "wglCreateContextAttribsARB" );
+    return pointer( hDC, hShareContext, attribList );
 }

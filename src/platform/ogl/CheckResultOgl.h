@@ -5,11 +5,7 @@
 #include "Exception.h"
 #include "FunctionsOgl.h"
 
-#define checkResult( call )                                         \
-    if( ::glGetError() != GL_NO_ERROR ) {                           \
-        throwException< std::runtime_error >(                       \
-            __FILE__, __LINE__, __FUNCTION__, call " has failed" ); \
-    }
-
+#define checkResult( call ) \
+    if( ::glGetError() != GL_NO_ERROR ) throwRuntimeError( call " has failed" );
 
 #endif
