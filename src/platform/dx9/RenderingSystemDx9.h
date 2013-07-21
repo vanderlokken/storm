@@ -28,7 +28,7 @@ public:
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
-    virtual void renderElementBuffer( std::shared_ptr<ElementBuffer> );
+    virtual void renderMesh( std::shared_ptr<Mesh> );
 
     virtual void setShader( std::shared_ptr<Shader> );
 

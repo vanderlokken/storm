@@ -1,4 +1,4 @@
-#include "ElementBufferOgl.h"
+#include "MeshOgl.h"
 
 #include <numeric>
 
@@ -11,20 +11,20 @@
 
 namespace storm {
 
-ElementBufferHandleOgl::ElementBufferHandleOgl() {
+MeshHandleOgl::MeshHandleOgl() {
     ::glGenVertexArrays( 1, &_handle );
     checkResult( "::glGenVertexArrays" );
     return;
 }
 
-ElementBufferHandleOgl::~ElementBufferHandleOgl() noexcept {
+MeshHandleOgl::~MeshHandleOgl() noexcept {
     ::glDeleteVertexArrays( 1, &_handle );
     return;
 }
 
-ElementBufferOgl::ElementBufferOgl( const Description &description )
+MeshOgl::MeshOgl( const Description &description )
     : _description( description ),
-      _elementTopology( convertElementTopology(description.elementTopology) )
+      _triangleTopology( convertTriangleTopology(description.triangleTopology) )
 {
     ::glBindVertexArray( _handle );
     checkResult( "::glBindVertexArray" );
@@ -42,19 +42,19 @@ ElementBufferOgl::ElementBufferOgl( const Description &description )
     return;
 }
 
-const ElementBuffer::Description& ElementBufferOgl::getDescription() const noexcept {
+const Mesh::Description& MeshOgl::getDescription() const noexcept {
     return _description;
 }
 
-GLenum ElementBufferOgl::getElementTopology() const noexcept {
-    return _elementTopology;
+GLenum MeshOgl::getTriangleTopology() const noexcept {
+    return _triangleTopology;
 }
 
-const ElementBufferHandleOgl& ElementBufferOgl::getHandle() const noexcept {
+const MeshHandleOgl& MeshOgl::getHandle() const noexcept {
     return _handle;
 }
 
-void ElementBufferOgl::setVertexAttributes() {
+void MeshOgl::setVertexAttributes() {
     const std::vector< Vertex::Attribute > &attributes = _description.vertexBuffer->getDescription().vertexAttributes;
 
     const size_t vertexSize = std::accumulate( attributes.cbegin(), attributes.cend(), 0,
@@ -83,25 +83,25 @@ void ElementBufferOgl::setVertexAttributes() {
     return;
 }
 
-GLenum ElementBufferOgl::convertElementTopology( ElementTopology elementTopology ) {
+GLenum MeshOgl::convertTriangleTopology( TriangleTopology triangleTopology ) {
     GLenum result;
 
-    switch( elementTopology ) {
-    case ElementTopologyList:
+    switch( triangleTopology ) {
+    case TriangleTopologyList:
         result = GL_TRIANGLES;
         break;
 
-    case ElementTopologyStrip:
+    case TriangleTopologyStrip:
         result = GL_TRIANGLE_STRIP;
         break;
 
     default:
-        throwInvalidArgument( "'elementTopology' is invalid" );
+        throwInvalidArgument( "'triangleTopology' is invalid" );
     }
     return result;
 }
 
-ElementBufferOgl::VertexAttributeFormat ElementBufferOgl::convertVertexAttributeFormat( Vertex::Attribute::Format format ) {
+MeshOgl::VertexAttributeFormat MeshOgl::convertVertexAttributeFormat( Vertex::Attribute::Format format ) {
     VertexAttributeFormat result;
 
     switch( format ) {
@@ -183,8 +183,8 @@ ElementBufferOgl::VertexAttributeFormat ElementBufferOgl::convertVertexAttribute
     return result;
 }
 
-std::shared_ptr<ElementBuffer> ElementBuffer::create( const Description &description ) {
-    return std::make_shared< ElementBufferOgl >( description );
+std::shared_ptr<Mesh> Mesh::create( const Description &description ) {
+    return std::make_shared< MeshOgl >( description );
 }
 
 }

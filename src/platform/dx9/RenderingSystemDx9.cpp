@@ -6,7 +6,7 @@
 
 #include "BlendingTechniqueDx9.h"
 #include "IndexBufferDx9.h"
-#include "ElementBufferDx9.h"
+#include "MeshDx9.h"
 #include "platform/win/CheckResult.h"
 #include "OutputTechnique.h"
 #include "RasterizationTechniqueDx9.h"
@@ -108,12 +108,10 @@ void RenderingSystemDx9::endFrameRendering() {
     return;
 }
 
-void RenderingSystemDx9::renderElementBuffer(
-    std::shared_ptr<ElementBuffer> elementBuffer )
-{
+void RenderingSystemDx9::renderMesh( std::shared_ptr<Mesh> mesh ) {
     setShaderUniformValues();
 
-    const auto &description = elementBuffer->getDescription();
+    const auto &description = mesh->getDescription();
 
     auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferDx9 >( description.indexBuffer );
     auto nativeVertexBuffer = std::static_pointer_cast< VertexBufferDx9 >( description.vertexBuffer );
@@ -151,17 +149,17 @@ void RenderingSystemDx9::renderElementBuffer(
         _cachedVertexDeclaration = vertexDeclaration;
     }
 
-    auto nativeElementBuffer = std::static_pointer_cast< ElementBufferDx9 >( elementBuffer );
+    auto nativeMesh = std::static_pointer_cast< MeshDx9 >( mesh );
 
-    const D3DPRIMITIVETYPE elementTopology = nativeElementBuffer->getElementTopology();
+    const D3DPRIMITIVETYPE triangleTopology = nativeMesh->getTriangleTopology();
     const INT baseIndex = 0;
     const UINT minimalIndex = 0;
     const UINT usedVertexCount = vertexCount;
     const UINT startIndex = 0;
-    const UINT elementCount = nativeElementBuffer->getElementCount();
+    const UINT triangleCount = nativeMesh->getTriangleCount();
 
     const HRESULT result = _device->DrawIndexedPrimitive(
-        elementTopology, baseIndex, minimalIndex, usedVertexCount, startIndex, elementCount );
+        triangleTopology, baseIndex, minimalIndex, usedVertexCount, startIndex, triangleCount );
     checkResult( result, "IDirect3DDevice9::DrawIndexedPrimitive" );
 
     return;

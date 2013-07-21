@@ -11,7 +11,7 @@
 namespace storm {
 
 class BlendingTechnique;
-class ElementBuffer;
+class Mesh;
 class OutputTechnique;
 class RasterizationTechnique;
 
@@ -34,7 +34,7 @@ public:
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
 
-    virtual void renderElementBuffer( std::shared_ptr<ElementBuffer> ) = 0;
+    virtual void renderMesh( std::shared_ptr<Mesh> ) = 0;
 
     virtual std::shared_ptr<Shader> getShader( Shader::Type ) const noexcept = 0;
     virtual void setShader( std::shared_ptr<Shader> ) = 0;

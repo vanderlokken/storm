@@ -7,8 +7,8 @@
 
 #include "BlendingTechniqueOgl.h"
 #include "CheckResultOgl.h"
-#include "ElementBufferOgl.h"
 #include "IndexBufferOgl.h"
+#include "MeshOgl.h"
 #include "OutputTechnique.h"
 #include "RasterizationTechniqueOgl.h"
 #include "ShaderOgl.h"
@@ -23,25 +23,23 @@ void RenderingSystemOgl::initialize() {
     return;
 }
 
-void RenderingSystemOgl::renderElementBuffer(
-    std::shared_ptr<ElementBuffer> elementBuffer )
-{
+void RenderingSystemOgl::renderMesh( std::shared_ptr<Mesh> mesh ) {
     setShaderUniformValues();
 
-    const auto &description = elementBuffer->getDescription();
+    const auto &description = mesh->getDescription();
 
-    auto nativeElementBuffer = std::static_pointer_cast< ElementBufferOgl >( elementBuffer );
+    auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
     auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferOgl >( description.indexBuffer );
 
-    ::glBindVertexArray( nativeElementBuffer->getHandle() );
+    ::glBindVertexArray( nativeMesh->getHandle() );
     checkResult( "::glBindVertexArray" );
 
-    const GLenum elementTopology = nativeElementBuffer->getElementTopology();
+    const GLenum triangleTopology = nativeMesh->getTriangleTopology();
     const GLsizei indexCount = nativeIndexBuffer->getDescription().bufferSize / nativeIndexBuffer->getDescription().indexSize;
     const GLenum indexFormat = nativeIndexBuffer->getIndexFormat();
     const GLvoid *indexOffset = nullptr;
 
-    ::glDrawElements( elementTopology, indexCount, indexFormat, indexOffset );
+    ::glDrawElements( triangleTopology, indexCount, indexFormat, indexOffset );
     checkResult( "::glDrawElements" );
     return;
 }

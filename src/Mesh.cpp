@@ -1,20 +1,17 @@
-#include "ElementBuffer.h"
+#include "Mesh.h"
 
 #include <cstdint>
 #include <fstream>
 #include <numeric>
 #include <vector>
 
-#include "ElementBuffer.h"
 #include "Exception.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 
 namespace storm {
 
-std::shared_ptr<ElementBuffer> ElementBuffer::load(
-    const std::string &filename )
-{
+std::shared_ptr<Mesh> Mesh::load( const std::string &filename ) {
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
@@ -63,12 +60,12 @@ std::shared_ptr<ElementBuffer> ElementBuffer::load(
     indexBufferDescription.bufferSize = indexDataSize;
     indexBufferDescription.resourceType = ResourceTypeStatic;
 
-    ElementBuffer::Description elementBufferDescription;
-    elementBufferDescription.vertexBuffer = VertexBuffer::create( vertexBufferDescription, vertexData.data() );
-    elementBufferDescription.indexBuffer = IndexBuffer::create( indexBufferDescription, indexData.data() );
-    elementBufferDescription.elementTopology = ElementBuffer::ElementTopologyList;
+    Mesh::Description meshDescription;
+    meshDescription.vertexBuffer = VertexBuffer::create( vertexBufferDescription, vertexData.data() );
+    meshDescription.indexBuffer = IndexBuffer::create( indexBufferDescription, indexData.data() );
+    meshDescription.triangleTopology = Mesh::TriangleTopologyList;
 
-    return ElementBuffer::create( elementBufferDescription );
+    return Mesh::create( meshDescription );
 }
 
 }
