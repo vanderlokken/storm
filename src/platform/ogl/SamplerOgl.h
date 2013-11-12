@@ -1,5 +1,4 @@
-#ifndef storm_SamplerOgl_h
-#define storm_SamplerOgl_h
+#pragma once
 
 #include "CoreTypesOgl.h"
 #include "Sampler.h"
@@ -25,5 +24,3 @@ private:
 };
 
 }
-
-#endif

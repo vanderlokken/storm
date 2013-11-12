@@ -1,5 +1,4 @@
-#ifndef storm_OutputTechnique_h
-#define storm_OutputTechnique_h
+#pragma once
 
 #include <memory>
 
@@ -68,5 +67,3 @@ public:
 };
 
 }
-
-#endif

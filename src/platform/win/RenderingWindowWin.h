@@ -1,5 +1,4 @@
-#ifndef storm_RenderingWindowWin_h
-#define storm_RenderingWindowWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -37,5 +36,3 @@ private:
 };
 
 }
-
-#endif

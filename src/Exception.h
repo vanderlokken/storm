@@ -1,5 +1,4 @@
-#ifndef storm_Exception_h
-#define storm_Exception_h
+#pragma once
 
 #include <stdexcept>
 
@@ -18,5 +17,3 @@ const char* formatExceptionMessage(
     const char *fileName, long line, const char *functionName, const char *description );
 
 }
-
-#endif

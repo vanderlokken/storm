@@ -1,5 +1,4 @@
-#ifndef storm_VertexDx9_h
-#define storm_VertexDx9_h
+#pragma once
 
 #include <vector>
 
@@ -13,5 +12,3 @@ namespace storm {
 ComPointer< IDirect3DVertexDeclaration9 > convertVertexAttributes( const std::vector<Vertex::Attribute>& );
 
 }
-
-#endif

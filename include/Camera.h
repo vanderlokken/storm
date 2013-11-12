@@ -1,5 +1,4 @@
-#ifndef storm_Camera_h
-#define storm_Camera_h
+#pragma once
 
 #include "Dimensions.h"
 #include "Noexcept.h"
@@ -63,5 +62,3 @@ public:
 };
 
 }
-
-#endif

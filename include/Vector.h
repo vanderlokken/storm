@@ -1,5 +1,4 @@
-#ifndef storm_Vector_h
-#define storm_Vector_h
+#pragma once
 
 #include "Noexcept.h"
 
@@ -47,5 +46,3 @@ private:
 Vector operator * ( float, const Vector& ) noexcept;
 
 }
-
-#endif

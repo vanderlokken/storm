@@ -1,5 +1,4 @@
-#ifndef storm_ShaderDx9_h
-#define storm_ShaderDx9_h
+#pragma once
 
 #include "Noncopyable.h"
 #include "ShaderCg.h"
@@ -18,5 +17,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_RenderingWindowX11_h
-#define storm_RenderingWindowX11_h
+#pragma once
 
 #include <X11/Xlib.h>
 
@@ -35,5 +34,3 @@ private:
 };
 
 }
-
-#endif

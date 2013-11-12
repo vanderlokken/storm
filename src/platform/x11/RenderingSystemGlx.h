@@ -1,5 +1,4 @@
-#ifndef storm_RenderingSystemGlx_h
-#define storm_RenderingSystemGlx_h
+#pragma once
 
 #include "platform/ogl/CoreTypesOgl.h"
 #define __gl_h_
@@ -33,5 +32,3 @@ private:
 };
 
 }
-
-#endif

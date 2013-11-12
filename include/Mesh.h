@@ -1,5 +1,4 @@
-#ifndef storm_Mesh_h
-#define storm_Mesh_h
+#pragma once
 
 #include <memory>
 #include <string>
@@ -33,5 +32,3 @@ public:
 };
 
 }
-
-#endif

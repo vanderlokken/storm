@@ -1,5 +1,4 @@
-#ifndef storm_VertexBufferDx9_h
-#define storm_VertexBufferDx9_h
+#pragma once
 
 #include "Noncopyable.h"
 #include "platform/win/ComPointer.h"
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_BlendingTechniqueOgl_h
-#define storm_BlendingTechniqueOgl_h
+#pragma once
 
 #include "BlendingTechnique.h"
 #include "CoreTypesOgl.h"
@@ -27,5 +26,3 @@ private:
 };
 
 }
-
-#endif

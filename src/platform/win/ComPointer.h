@@ -1,5 +1,4 @@
-#ifndef storm_ComPointer_h
-#define storm_ComPointer_h
+#pragma once
 
 #include "Noexcept.h"
 
@@ -58,5 +57,3 @@ template<class T> bool ComPointer<T>::operator != ( const ComPointer<T> &comPoin
 }
 
 }
-
-#endif

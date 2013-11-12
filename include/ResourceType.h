@@ -1,5 +1,4 @@
-#ifndef storm_ResourceType_h
-#define storm_ResourceType_h
+#pragma once
 
 namespace storm {
 
@@ -10,5 +9,3 @@ enum ResourceType {
 };
 
 }
-
-#endif

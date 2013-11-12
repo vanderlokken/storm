@@ -1,5 +1,4 @@
-#ifndef storm_RasterizationTechnique_h
-#define storm_RasterizationTechnique_h
+#pragma once
 
 #include <memory>
 
@@ -37,5 +36,3 @@ public:
 };
 
 }
-
-#endif

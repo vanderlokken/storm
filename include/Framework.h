@@ -1,5 +1,4 @@
-#ifndef storm_Framework_h
-#define storm_Framework_h
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -21,5 +20,3 @@ public:
 };
 
 }
-
-#endif

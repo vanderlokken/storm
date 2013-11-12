@@ -1,5 +1,4 @@
-#ifndef storm_EventHandler_h
-#define storm_EventHandler_h
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -50,5 +49,3 @@ template< class EventType > template< class HandlerClass > EventHandler<EventTyp
     : _handler( std::bind(handlerMethod, handlerInstance, std::placeholders::_1) ), _registration( registration ) { }
 
 }
-
-#endif

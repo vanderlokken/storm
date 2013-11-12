@@ -1,5 +1,4 @@
-#ifndef storm_CommonVertexTypes_h
-#define storm_CommonVertexTypes_h
+#pragma once
 
 #include "Vector.h"
 #include "Color.h"
@@ -22,5 +21,3 @@ struct OrientedVertex {
 };
 
 }
-
-#endif

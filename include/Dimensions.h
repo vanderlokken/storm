@@ -1,5 +1,4 @@
-#ifndef storm_Dimensions_h
-#define storm_Dimensions_h
+#pragma once
 
 #include "Noexcept.h"
 
@@ -27,5 +26,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_CheckResultOgl_h
-#define storm_CheckResultOgl_h
+#pragma once
 
 #include "ConstantsOgl.h"
 #include "Exception.h"
@@ -7,5 +6,3 @@
 
 #define checkResult( call ) \
     if( ::glGetError() != GL_NO_ERROR ) throwRuntimeError( call " has failed" );
-
-#endif

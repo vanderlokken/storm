@@ -1,5 +1,4 @@
-#ifndef storm_RasterizationTechniqueOgl_h
-#define storm_RasterizationTechniqueOgl_h
+#pragma once
 
 #include "CoreTypesOgl.h"
 #include "RasterizationTechnique.h"
@@ -25,5 +24,3 @@ private:
 };
 
 }
-
-#endif

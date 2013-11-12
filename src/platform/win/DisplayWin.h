@@ -1,5 +1,4 @@
-#ifndef storm_DisplayWin_h
-#define storm_DisplayWin_h
+#pragma once
 
 #include "Display.h"
 
@@ -21,5 +20,3 @@ private:
 };
 
 }
-
-#endif

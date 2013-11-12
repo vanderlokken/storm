@@ -1,5 +1,4 @@
-#ifndef storm_TextureDx9_h
-#define storm_TextureDx9_h
+#pragma once
 
 #include "CoreTypesDx9.h"
 #include "Noncopyable.h"
@@ -32,5 +31,3 @@ private:
 };
 
 }
-
-#endif

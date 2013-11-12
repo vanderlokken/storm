@@ -1,5 +1,4 @@
-#ifndef storm_Transformation_h
-#define storm_Transformation_h
+#pragma once
 
 #include "Matrix.h"
 
@@ -16,5 +15,3 @@ Matrix createYRotationTransformation( float angle ) noexcept;
 Matrix createZRotationTransformation( float angle ) noexcept;
 
 }
-
-#endif

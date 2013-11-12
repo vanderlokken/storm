@@ -1,5 +1,4 @@
-#ifndef storm_RenderingSystemDx9_h
-#define storm_RenderingSystemDx9_h
+#pragma once
 
 #include <array>
 
@@ -81,5 +80,3 @@ private:
 };
 
 }
-
-#endif

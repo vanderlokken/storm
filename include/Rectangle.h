@@ -1,5 +1,4 @@
-#ifndef storm_Rectangle_h
-#define storm_Rectangle_h
+#pragma once
 
 #include "Noexcept.h"
 
@@ -33,5 +32,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_Matrix_h
-#define storm_Matrix_h
+#pragma once
 
 #include <cstddef>
 
@@ -47,5 +46,3 @@ Vector& operator *= ( Vector &vector, const Matrix &matrix ) noexcept;
 Vector operator * ( const Vector &vector, const Matrix &matrix ) noexcept;
 
 }
-
-#endif

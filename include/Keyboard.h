@@ -1,5 +1,4 @@
-#ifndef storm_Keyboard_h
-#define storm_Keyboard_h
+#pragma once
 
 #include <memory>
 
@@ -83,5 +82,3 @@ public:
 };
 
 }
-
-#endif

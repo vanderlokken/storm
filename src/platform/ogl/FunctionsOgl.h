@@ -1,5 +1,4 @@
-#ifndef storm_FunctionsOgl_h
-#define storm_FunctionsOgl_h
+#pragma once
 
 /*
 ** Copyright (c) 2007-2010 The Khronos Group Inc.
@@ -678,6 +677,4 @@ void glDrawTransformFeedbackStream( GLenum mode, GLuint id, GLuint stream );
 void glBeginQueryIndexed( GLenum target, GLuint index, GLuint id );
 void glEndQueryIndexed( GLenum target, GLuint index );
 void glGetQueryIndexediv( GLenum target, GLuint index, GLenum pname, GLint *params );
-#endif
-
 #endif

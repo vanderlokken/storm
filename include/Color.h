@@ -1,5 +1,4 @@
-#ifndef storm_Color_h
-#define storm_Color_h
+#pragma once
 
 #include <cstdint>
 
@@ -47,5 +46,3 @@ private:
 };
 
 }
-
-#endif

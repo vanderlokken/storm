@@ -1,5 +1,4 @@
-#ifndef storm_VertexBuffer_h
-#define storm_VertexBuffer_h
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -46,5 +45,3 @@ template<class Container> std::shared_ptr<VertexBuffer> VertexBuffer::create( co
 }
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_BufferOgl_h
-#define storm_BufferOgl_h
+#pragma once
 
 #include "CoreTypesOgl.h"
 #include "HandleOgl.h"
@@ -29,5 +28,3 @@ private:
 };
 
 }
-
-#endif

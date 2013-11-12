@@ -1,5 +1,4 @@
-#ifndef storm_OutputTechniqueOgl_h
-#define storm_OutputTechniqueOgl_h
+#pragma once
 
 #include "OutputTechnique.h"
 
@@ -16,5 +15,3 @@ private:
 };
 
 }
-
-#endif

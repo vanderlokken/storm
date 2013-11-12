@@ -1,5 +1,4 @@
-#ifndef storm_VertexBufferOgl_h
-#define storm_VertexBufferOgl_h
+#pragma once
 
 #include "BufferOgl.h"
 #include "VertexBuffer.h"
@@ -24,5 +23,3 @@ private:
 };
 
 }
-
-#endif

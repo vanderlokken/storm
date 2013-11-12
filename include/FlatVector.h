@@ -1,5 +1,4 @@
-#ifndef storm_FlatVector_h
-#define storm_FlatVector_h
+#pragma once
 
 #include "Noexcept.h"
 
@@ -39,5 +38,3 @@ private:
 };
 
 }
-
-#endif

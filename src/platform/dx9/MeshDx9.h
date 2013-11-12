@@ -1,5 +1,4 @@
-#ifndef storm_MeshDx9_h
-#define storm_MeshDx9_h
+#pragma once
 
 #include "CoreTypesDx9.h"
 #include "Mesh.h"
@@ -23,5 +22,3 @@ private:
 };
 
 }
-
-#endif

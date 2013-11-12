@@ -1,5 +1,4 @@
-#ifndef storm_IndexBufferOgl_h
-#define storm_IndexBufferOgl_h
+#pragma once
 
 #include "BufferOgl.h"
 #include "IndexBuffer.h"
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

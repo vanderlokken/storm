@@ -1,5 +1,4 @@
-#ifndef storm_Display_h
-#define storm_Display_h
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -47,5 +46,3 @@ public:
 };
 
 }
-
-#endif

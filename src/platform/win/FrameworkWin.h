@@ -1,5 +1,4 @@
-#ifndef storm_FrameworkWin_h
-#define storm_FrameworkWin_h
+#pragma once
 
 #include "Framework.h"
 #include "Noncopyable.h"
@@ -19,5 +18,3 @@ private:
 };
 
 }
-
-#endif

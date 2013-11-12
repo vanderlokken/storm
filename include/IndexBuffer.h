@@ -1,5 +1,4 @@
-#ifndef storm_IndexBuffer_h
-#define storm_IndexBuffer_h
+#pragma once
 
 #include <memory>
 
@@ -43,5 +42,3 @@ template<class Container> std::shared_ptr<IndexBuffer> IndexBuffer::create( cons
 }
 
 }
-
-#endif

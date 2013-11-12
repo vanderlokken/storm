@@ -1,5 +1,4 @@
-#ifndef storm_Shader_h
-#define storm_Shader_h
+#pragma once
 
 #include <memory>
 #include <string>
@@ -49,5 +48,3 @@ public:
 };
 
 }
-
-#endif

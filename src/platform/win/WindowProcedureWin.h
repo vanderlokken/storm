@@ -1,5 +1,4 @@
-#ifndef storm_WindowProcedureWin_h
-#define storm_WindowProcedureWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -12,5 +11,3 @@ namespace storm {
 WNDPROC replaceWindowProcedure( HWND windowHandle, WNDPROC windowProcedure ) noexcept;
 
 }
-
-#endif

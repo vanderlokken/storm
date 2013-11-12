@@ -1,5 +1,4 @@
-#ifndef storm_EventHandlerVector_h
-#define storm_EventHandlerVector_h
+#pragma once
 
 #include <vector>
 
@@ -40,5 +39,3 @@ template< class EventType > void EventHandlerVector<EventType>::operator () ( co
 }
 
 }
-
-#endif

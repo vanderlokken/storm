@@ -1,5 +1,4 @@
-#ifndef storm_Mouse_h
-#define storm_Mouse_h
+#pragma once
 
 #include <memory>
 
@@ -53,5 +52,3 @@ public:
 };
 
 }
-
-#endif

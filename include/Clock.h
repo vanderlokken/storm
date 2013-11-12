@@ -1,5 +1,4 @@
-#ifndef storm_Clock_h
-#define storm_Clock_h
+#pragma once
 
 #include <cstdint>
 #include <memory>
@@ -23,5 +22,3 @@ public:
 };
 
 }
-
-#endif

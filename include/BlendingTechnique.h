@@ -1,5 +1,4 @@
-#ifndef storm_BlendingTechnique_h
-#define storm_BlendingTechnique_h
+#pragma once
 
 #include <memory>
 
@@ -46,5 +45,3 @@ public:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_FrameworkX11_h
-#define storm_FrameworkX11_h
+#pragma once
 
 #include <X11/Xlib.h>
 
@@ -23,5 +22,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_RenderingSystem_h
-#define storm_RenderingSystem_h
+#pragma once
 
 #include <memory>
 
@@ -62,5 +61,3 @@ public:
 };
 
 }
-
-#endif

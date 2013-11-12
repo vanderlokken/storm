@@ -1,5 +1,4 @@
-#ifndef storm_SamplerDx9_h
-#define storm_SamplerDx9_h
+#pragma once
 
 #include "CoreTypesDx9.h"
 #include "Sampler.h"
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

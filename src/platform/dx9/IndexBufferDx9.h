@@ -1,5 +1,4 @@
-#ifndef storm_IndexBufferDx9_h
-#define storm_IndexBufferDx9_h
+#pragma once
 
 #include "CoreTypesDx9.h"
 #include "IndexBuffer.h"
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

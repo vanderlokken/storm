@@ -1,5 +1,4 @@
-#ifndef storm_OutputTechniqueDx9_h
-#define storm_OutputTechniqueDx9_h
+#pragma once
 
 #include "OutputTechnique.h"
 
@@ -16,5 +15,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef storm_BlendingTechniqueDx9_h
-#define storm_BlendingTechniqueDx9_h
+#pragma once
 
 #include "BlendingTechnique.h"
 #include "CoreTypesDx9.h"
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

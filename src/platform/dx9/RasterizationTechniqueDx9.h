@@ -1,5 +1,4 @@
-#ifndef storm_RasterizationTechniqueDx9_h
-#define storm_RasterizationTechniqueDx9_h
+#pragma once
 
 #include "CoreTypesDx9.h"
 #include "RasterizationTechnique.h"
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

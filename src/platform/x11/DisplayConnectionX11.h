@@ -1,5 +1,4 @@
-#ifndef storm_DisplayConnectionX11_h
-#define storm_DisplayConnectionX11_h
+#pragma once
 
 #include <memory>
 
@@ -22,5 +21,3 @@ private:
 };
 
 }
-
-#endif

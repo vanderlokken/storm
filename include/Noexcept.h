@@ -1,5 +1,4 @@
-#ifndef storm_Noexcept_h
-#define storm_Noexcept_h
+#pragma once
 
 #define _ALLOW_KEYWORD_MACROS
 #define noexcept
@@ -10,6 +9,4 @@
 
 #if defined( __GNUC__ ) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
 #   undef noexcept
-#endif
-
 #endif

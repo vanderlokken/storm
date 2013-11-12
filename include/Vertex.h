@@ -1,5 +1,4 @@
-#ifndef storm_Vertex_h
-#define storm_Vertex_h
+#pragma once
 
 namespace storm {
 
@@ -41,5 +40,3 @@ struct Vertex {
 };
 
 }
-
-#endif

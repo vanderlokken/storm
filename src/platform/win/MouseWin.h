@@ -1,5 +1,4 @@
-#ifndef storm_MouseWin_h
-#define storm_MouseWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -70,5 +69,3 @@ private:
 };
 
 }
-
-#endif

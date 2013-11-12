@@ -1,5 +1,4 @@
-#ifndef storm_Storm_h
-#define storm_Storm_h
+#pragma once
 
 #include "BlendingTechnique.h"
 #include "Camera.h"
@@ -16,5 +15,3 @@
 #include "Shader.h"
 #include "Transformation.h"
 #include "VertexBuffer.h"
-
-#endif

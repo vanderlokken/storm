@@ -1,5 +1,4 @@
-#ifndef storm_Sampler_h
-#define storm_Sampler_h
+#pragma once
 
 #include <array>
 #include <memory>
@@ -45,5 +44,3 @@ public:
 };
 
 }
-
-#endif

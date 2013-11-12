@@ -1,7 +1,7 @@
-#ifndef storm_Texture_h
-#define storm_Texture_h
+#pragma once
 
 #include <memory>
+#include <string>
 
 #include "Dimensions.h"
 #include "Noexcept.h"
@@ -13,7 +13,7 @@ class Texture {
 public:
     enum Format {
         FormatXrgbUint8,
-        FormatArgbUint8,
+        FormatArgbUint8
     };
 
     enum LodGenerationMode {
@@ -30,9 +30,10 @@ public:
     };
 
     static std::shared_ptr<Texture> create( const Description&, const void *texels = nullptr );
+    static std::shared_ptr<Texture> load( const std::string &filename );
     static std::shared_ptr<Texture> getDefault();
 
-    virtual ~Texture() noexcept { }
+    virtual ~Texture() { }
 
     virtual void getTexels( unsigned int lodIndex, void *texels ) const = 0;
     virtual void setTexels( unsigned int lodIndex, const void *texels ) = 0;
@@ -41,5 +42,3 @@ public:
 };
 
 }
-
-#endif

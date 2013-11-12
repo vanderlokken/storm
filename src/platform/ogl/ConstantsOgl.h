@@ -1,5 +1,4 @@
-#ifndef storm_ConstantsOgl_h
-#define storm_ConstantsOgl_h
+#pragma once
 
 /*
 ** Copyright (c) 2007-2010 The Khronos Group Inc.
@@ -1416,6 +1415,4 @@
 #ifndef GL_ARB_transform_feedback3
 #define GL_MAX_TRANSFORM_FEEDBACK_BUFFERS 0x8E70
 #define GL_MAX_VERTEX_STREAMS             0x8E71
-#endif
-
 #endif

@@ -1,5 +1,4 @@
-#ifndef storm_CoreTypesOgl_h
-#define storm_CoreTypesOgl_h
+#pragma once
 
 /*
 ** Copyright (c) 2007-2010 The Khronos Group Inc.
@@ -48,5 +47,3 @@ typedef float GLclampf;
 typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
-
-#endif

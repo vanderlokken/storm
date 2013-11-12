@@ -1,5 +1,4 @@
-#ifndef storm_ClockPosix_h
-#define storm_ClockPosix_h
+#pragma once
 
 #include <sys/time.h>
 
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

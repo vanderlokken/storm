@@ -1,5 +1,4 @@
-#ifndef storm_MeshOgl_h
-#define storm_MeshOgl_h
+#pragma once
 
 #include "CoreTypesOgl.h"
 #include "HandleOgl.h"
@@ -42,5 +41,3 @@ private:
 };
 
 }
-
-#endif

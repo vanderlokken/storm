@@ -1,5 +1,4 @@
-#ifndef storm_RenderingSystemOgl_h
-#define storm_RenderingSystemOgl_h
+#pragma once
 
 #include "RenderingSystemCommon.h"
 
@@ -45,5 +44,3 @@ private:
 };
 
 }
-
-#endif

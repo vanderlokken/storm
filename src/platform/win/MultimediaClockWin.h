@@ -1,5 +1,4 @@
-#ifndef storm_MultimediaClockWin_h
-#define storm_MultimediaClockWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -41,5 +40,3 @@ private:
 };
 
 }
-
-#endif

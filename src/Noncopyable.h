@@ -1,9 +1,6 @@
-#ifndef storm_Noncopyable_h
-#define storm_Noncopyable_h
+#pragma once
 
 #define NONCOPYABLE( ClassName ) \
     private: \
         ClassName( const ClassName& ); \
-        ClassName& operator = ( const ClassName& ); \
-
-#endif
+        ClassName& operator = ( const ClassName& );

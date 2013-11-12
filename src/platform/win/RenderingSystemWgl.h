@@ -1,5 +1,4 @@
-#ifndef storm_RenderingSystemWgl_h
-#define storm_RenderingSystemWgl_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

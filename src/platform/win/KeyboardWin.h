@@ -1,5 +1,4 @@
-#ifndef storm_KeyboardWin_h
-#define storm_KeyboardWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -51,5 +50,3 @@ private:
 };
 
 }
-
-#endif

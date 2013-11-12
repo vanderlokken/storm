@@ -1,5 +1,4 @@
-#ifndef storm_InputWin_h
-#define storm_InputWin_h
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
@@ -11,5 +10,3 @@ namespace storm {
 RAWINPUT receiveInputData( HRAWINPUT handle );
 
 }
-
-#endif
