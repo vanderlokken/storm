@@ -31,7 +31,7 @@ KeyboardWin::KeyboardWin()
     return;
 }
 
-KeyboardWin::~KeyboardWin() noexcept {
+KeyboardWin::~KeyboardWin() {
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
     replaceWindowProcedure( windowHandle, _originalWindowProcedure );
     return;
@@ -164,6 +164,7 @@ Keyboard::Key KeyboardWin::convertKey( USHORT code ) {
         'X',        // KeyX
         'Y',        // KeyY
         'Z',        // KeyZ
+        VK_SPACE    // KeySpace
     };
 
     auto searchResult = std::find( codes.cbegin(), codes.cend(), code );
@@ -223,7 +224,7 @@ LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) no
 }
 
 std::shared_ptr<KeyboardWin> KeyboardWin::getInstance() {
-    static std::shared_ptr<KeyboardWin> instance( new KeyboardWin );
+    static const std::shared_ptr<KeyboardWin> instance( new KeyboardWin );
     return instance;
 }
 

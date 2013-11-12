@@ -59,7 +59,8 @@ public:
         KeyW,
         KeyX,
         KeyY,
-        KeyZ
+        KeyZ,
+        KeySpace
     };
 
     struct KeyEvent {
@@ -72,7 +73,7 @@ public:
 
     static std::shared_ptr<Keyboard> getInstance();
 
-    virtual ~Keyboard() noexcept { }
+    virtual ~Keyboard() { }
 
     virtual void addEventHandler( const EventHandler<KeyPressEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& ) = 0;

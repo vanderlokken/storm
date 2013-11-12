@@ -16,7 +16,7 @@ class KeyboardWin : public Keyboard {
 public:
     static std::shared_ptr<KeyboardWin> getInstance();
 
-    virtual ~KeyboardWin() noexcept;
+    virtual ~KeyboardWin();
 
     virtual void addEventHandler( const EventHandler<KeyPressEvent>& );
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& );
@@ -35,7 +35,7 @@ private:
 
     static Key convertKey( USHORT code );
 
-    static const size_t KeyCount = 49;
+    static const size_t KeyCount = 50;
     std::vector< bool > _keyPressed;
 
     EventHandlerVector< KeyPressEvent > _keyPressEventHandlers;
