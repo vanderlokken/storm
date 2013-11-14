@@ -23,7 +23,7 @@ void RenderingSystemOgl::initialize() {
     return;
 }
 
-void RenderingSystemOgl::renderMesh( std::shared_ptr<Mesh> mesh ) {
+void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
     setShaderUniformValues();
 
     const auto &description = mesh->getDescription();
@@ -44,7 +44,7 @@ void RenderingSystemOgl::renderMesh( std::shared_ptr<Mesh> mesh ) {
     return;
 }
 
-void RenderingSystemOgl::setShader( std::shared_ptr<Shader> shader ) {
+void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
     if( getShader(shader->getType()) == shader )
         return;
 
@@ -63,20 +63,20 @@ void RenderingSystemOgl::setShader( std::shared_ptr<Shader> shader ) {
     return;
 }
 
-std::shared_ptr<RasterizationTechnique> RenderingSystemOgl::getRasterizationTechnique() const noexcept {
+RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const noexcept {
     return _rasterizationTechnique;
 }
 
-std::shared_ptr<OutputTechnique> RenderingSystemOgl::getOutputTechnique() const noexcept {
+OutputTechnique::Pointer RenderingSystemOgl::getOutputTechnique() const noexcept {
     return _outputTechnique;
 }
 
-std::shared_ptr<BlendingTechnique> RenderingSystemOgl::getBlendingTechnique() const noexcept {
+BlendingTechnique::Pointer RenderingSystemOgl::getBlendingTechnique() const noexcept {
     return _blendingTechnique;
 }
 
 void RenderingSystemOgl::setRasterizationTechnique(
-    std::shared_ptr<RasterizationTechnique> technique )
+    RasterizationTechnique::Pointer technique )
 {
     if( _rasterizationTechnique == technique ) return;
 
@@ -120,7 +120,7 @@ void RenderingSystemOgl::setRasterizationTechnique(
 }
 
 void RenderingSystemOgl::setOutputTechnique(
-    std::shared_ptr<OutputTechnique> technique )
+    OutputTechnique::Pointer technique )
 {
     if( _outputTechnique == technique ) return;
 
@@ -132,7 +132,7 @@ void RenderingSystemOgl::setOutputTechnique(
 }
 
 void RenderingSystemOgl::setBlendingTechnique(
-    std::shared_ptr<BlendingTechnique> technique )
+    BlendingTechnique::Pointer technique )
 {
     if( _blendingTechnique == technique ) return;
 

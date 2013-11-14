@@ -7,7 +7,7 @@
 
 namespace storm {
 
-std::shared_ptr<Shader> RenderingSystemCommon::getShader( Shader::Type shaderType ) const noexcept {
+Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) const noexcept {
     switch( shaderType ) {
     case Shader::TypeVertex:
         return _vertexShader;
@@ -20,7 +20,7 @@ std::shared_ptr<Shader> RenderingSystemCommon::getShader( Shader::Type shaderTyp
     }
 }
 
-void RenderingSystemCommon::setShader( std::shared_ptr<Shader> shader ) {
+void RenderingSystemCommon::setShader( Shader::Pointer shader ) {
     switch( shader->getType() ) {
     case Shader::TypeVertex:
         _vertexShader = shader;
@@ -38,7 +38,7 @@ void RenderingSystemCommon::setShader( std::shared_ptr<Shader> shader ) {
 
 void RenderingSystemCommon::setShaderUniformValues() {
 
-    std::array< std::shared_ptr<Shader>, 3 > shaders = {
+    std::array< Shader::Pointer, 3 > shaders = {
         _vertexShader,
         _pixelShader,
         _geometryShader

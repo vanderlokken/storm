@@ -26,7 +26,7 @@ const BufferHandleOgl& VertexBufferOgl::getHandle() const noexcept {
     return _buffer.getHandle();
 }
 
-std::shared_ptr<VertexBuffer> VertexBuffer::create(
+VertexBuffer::Pointer VertexBuffer::create(
     const Description &description, const void *vertices )
 {
     return std::make_shared< VertexBufferOgl >( description, vertices );

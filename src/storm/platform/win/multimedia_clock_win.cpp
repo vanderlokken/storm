@@ -1,5 +1,7 @@
 #include <storm/platform/win/multimedia_clock_win.h>
 
+#include <memory>
+
 #include <storm/exception.h>
 
 namespace storm {
@@ -64,12 +66,12 @@ Clock::Time MultimediaClockWin::getTimeChange() const noexcept {
     return _timeChange;
 }
 
-std::shared_ptr<MultimediaClockWin> MultimediaClockWin::getInstance() {
-    static std::shared_ptr<MultimediaClockWin> instance( new MultimediaClockWin );
-    return instance;
+MultimediaClockWin* MultimediaClockWin::getInstance() {
+    static const std::unique_ptr<MultimediaClockWin> instance( new MultimediaClockWin );
+    return instance.get();
 }
 
-std::shared_ptr<Clock> Clock::getInstance() {
+Clock* Clock::getInstance() {
     return MultimediaClockWin::getInstance();
 }
 

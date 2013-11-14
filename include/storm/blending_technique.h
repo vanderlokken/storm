@@ -8,6 +8,8 @@ namespace storm {
 
 class BlendingTechnique {
 public:
+    typedef std::shared_ptr<BlendingTechnique> Pointer;
+
     enum Operation {
         OperationAddition,
         OperationSubtraction,
@@ -36,8 +38,8 @@ public:
         Factor destinationFactor;
     };
 
-    static std::shared_ptr<BlendingTechnique> create( const Description& );
-    static std::shared_ptr<BlendingTechnique> getDefault();
+    static BlendingTechnique::Pointer create( const Description& );
+    static BlendingTechnique::Pointer getDefault();
 
     virtual ~BlendingTechnique() { }
 

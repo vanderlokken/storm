@@ -7,15 +7,15 @@ namespace storm {
 class RenderingSystemCommon : public RenderingSystem {
 public:
 
-    virtual std::shared_ptr<Shader> getShader( Shader::Type ) const noexcept;
-    virtual void setShader( std::shared_ptr<Shader> );
+    virtual Shader::Pointer getShader( Shader::Type ) const noexcept;
+    virtual void setShader( Shader::Pointer );
 
 protected:
     void setShaderUniformValues();
 
-    std::shared_ptr< Shader > _vertexShader;
-    std::shared_ptr< Shader > _pixelShader;
-    std::shared_ptr< Shader > _geometryShader;
+    Shader::Pointer _vertexShader;
+    Shader::Pointer _pixelShader;
+    Shader::Pointer _geometryShader;
 };
 
 }

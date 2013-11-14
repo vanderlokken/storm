@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 
 #include <storm/noexcept.h>
 
@@ -11,7 +10,7 @@ class Clock {
 public:
     typedef uint32_t Time;
 
-    static std::shared_ptr<Clock> getInstance();
+    static Clock* getInstance();
 
     virtual ~Clock() { }
 

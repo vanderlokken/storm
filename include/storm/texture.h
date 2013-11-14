@@ -11,6 +11,8 @@ namespace storm {
 
 class Texture {
 public:
+    typedef std::shared_ptr<Texture> Pointer;
+
     enum Format {
         FormatXrgbUint8,
         FormatArgbUint8
@@ -29,9 +31,9 @@ public:
         ResourceType resourceType;
     };
 
-    static std::shared_ptr<Texture> create( const Description&, const void *texels = nullptr );
-    static std::shared_ptr<Texture> load( const std::string &filename );
-    static std::shared_ptr<Texture> getDefault();
+    static Texture::Pointer create( const Description&, const void *texels = nullptr );
+    static Texture::Pointer load( const std::string &filename );
+    static Texture::Pointer getDefault();
 
     virtual ~Texture() { }
 

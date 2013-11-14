@@ -11,6 +11,8 @@ namespace storm {
 
 class VertexBuffer {
 public:
+    typedef std::shared_ptr<VertexBuffer> Pointer;
+
     struct Description {
         std::vector< Vertex::Attribute > vertexAttributes;
         size_t vertexSize;
@@ -18,10 +20,10 @@ public:
         ResourceType resourceType;
     };
 
-    static std::shared_ptr<VertexBuffer> create( const Description&, const void *vertices = nullptr );
+    static VertexBuffer::Pointer create( const Description&, const void *vertices = nullptr );
 
     template<class Container>
-        static std::shared_ptr<VertexBuffer> create( const Container &vertices );
+        static VertexBuffer::Pointer create( const Container &vertices );
 
     virtual ~VertexBuffer() { }
 
@@ -31,7 +33,7 @@ public:
     virtual const Description& getDescription() const noexcept = 0;
 };
 
-template<class Container> std::shared_ptr<VertexBuffer> VertexBuffer::create( const Container &vertices ) {
+template<class Container> VertexBuffer::Pointer VertexBuffer::create( const Container &vertices ) {
     typedef typename Container::value_type VertexType;
 
     Description description;

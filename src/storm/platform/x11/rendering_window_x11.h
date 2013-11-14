@@ -10,7 +10,7 @@ namespace storm {
 class RenderingWindowX11 : public RenderingWindow {
     NONCOPYABLE( RenderingWindowX11 );
 public:
-    static std::shared_ptr<RenderingWindowX11> getInstance();
+    static RenderingWindowX11* getInstance();
 
     virtual ~RenderingWindowX11();
 

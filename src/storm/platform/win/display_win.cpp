@@ -1,5 +1,7 @@
 #include <storm/platform/win/display_win.h>
 
+#include <memory>
+
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
 #include <windows.h>
@@ -61,12 +63,12 @@ void DisplayWin::setCurrentMode( const Mode &mode ) {
     throwRuntimeError( "Not implemented" );
 }
 
-std::shared_ptr<DisplayWin> DisplayWin::getInstance() {
-    static std::shared_ptr<DisplayWin> instance( new DisplayWin );
-    return instance;
+DisplayWin* DisplayWin::getInstance() {
+    static const std::unique_ptr<DisplayWin> instance( new DisplayWin );
+    return instance.get();
 }
 
-std::shared_ptr<Display> Display::getInstance() {
+Display* Display::getInstance() {
     return DisplayWin::getInstance();
 }
 

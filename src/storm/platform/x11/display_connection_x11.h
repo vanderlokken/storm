@@ -8,7 +8,7 @@ namespace storm {
 
 class DisplayConnectionX11 {
 public:
-    static std::shared_ptr<DisplayConnectionX11> getInstance();
+    static DisplayConnectionX11* getInstance();
 
     ~DisplayConnectionX11();
 

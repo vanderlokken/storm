@@ -9,7 +9,7 @@ const OutputTechnique::Description& OutputTechniqueDx9::getDescription() const n
     return _description;
 }
 
-std::shared_ptr<OutputTechnique> OutputTechnique::create( const Description &description ) {
+OutputTechnique::Pointer OutputTechnique::create( const Description &description ) {
     return std::make_shared< OutputTechniqueDx9 >( description );
 }
 

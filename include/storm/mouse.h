@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <storm/event_handler.h>
 #include <storm/noexcept.h>
 
@@ -33,7 +31,7 @@ public:
         int y;
     };
 
-    static std::shared_ptr<Mouse> getInstance();
+    static Mouse* getInstance();
 
     virtual ~Mouse() { }
 

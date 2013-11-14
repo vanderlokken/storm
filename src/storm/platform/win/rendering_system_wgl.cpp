@@ -103,12 +103,12 @@ void RenderingSystemWgl::setDepthBufferFormat( DepthBufferFormat ) {
     return;
 }
 
-std::shared_ptr<RenderingSystemWgl> RenderingSystemWgl::getInstance() {
-    static const std::shared_ptr<RenderingSystemWgl> instance( new RenderingSystemWgl );
-    return instance;
+RenderingSystemWgl* RenderingSystemWgl::getInstance() {
+    static const std::unique_ptr<RenderingSystemWgl> instance( new RenderingSystemWgl );
+    return instance.get();
 }
 
-std::shared_ptr<RenderingSystem> RenderingSystem::getInstance() {
+RenderingSystem* RenderingSystem::getInstance() {
     return RenderingSystemWgl::getInstance();
 }
 

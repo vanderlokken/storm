@@ -11,7 +11,7 @@ namespace storm {
 class RenderingWindowWin : public RenderingWindow {
     NONCOPYABLE( RenderingWindowWin );
 public:
-    static std::shared_ptr<RenderingWindowWin> getInstance();
+    static RenderingWindowWin* getInstance();
 
     virtual ~RenderingWindowWin();
 

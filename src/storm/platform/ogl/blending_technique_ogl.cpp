@@ -114,7 +114,7 @@ GLenum BlendingTechniqueOgl::convertFactor( Factor factor ) {
     return result;
 }
 
-std::shared_ptr<BlendingTechnique> BlendingTechnique::create( const Description &description ) {
+BlendingTechnique::Pointer BlendingTechnique::create( const Description &description ) {
     return std::make_shared< BlendingTechniqueOgl >( description );
 }
 

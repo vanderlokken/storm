@@ -8,6 +8,8 @@ namespace storm {
 
 class OutputTechnique {
 public:
+    typedef std::shared_ptr<OutputTechnique> Pointer;
+
     enum Condition {
         ConditionFalse,
         ConditionTrue,
@@ -58,8 +60,8 @@ public:
                bool writeDepthValues;
     };
 
-    static std::shared_ptr<OutputTechnique> create( const Description& );
-    static std::shared_ptr<OutputTechnique> getDefault();
+    static OutputTechnique::Pointer create( const Description& );
+    static OutputTechnique::Pointer getDefault();
 
     virtual ~OutputTechnique() { }
 

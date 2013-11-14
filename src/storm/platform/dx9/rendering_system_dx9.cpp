@@ -107,7 +107,7 @@ void RenderingSystemDx9::endFrameRendering() {
     return;
 }
 
-void RenderingSystemDx9::renderMesh( std::shared_ptr<Mesh> mesh ) {
+void RenderingSystemDx9::renderMesh( Mesh::Pointer mesh ) {
     setShaderUniformValues();
 
     const auto &description = mesh->getDescription();
@@ -164,7 +164,7 @@ void RenderingSystemDx9::renderMesh( std::shared_ptr<Mesh> mesh ) {
     return;
 }
 
-void RenderingSystemDx9::setShader( std::shared_ptr<Shader> shader ) {
+void RenderingSystemDx9::setShader( Shader::Pointer shader ) {
     if( getShader(shader->getType()) == shader )
         return;
 
@@ -178,20 +178,20 @@ void RenderingSystemDx9::setShader( std::shared_ptr<Shader> shader ) {
     return;
 }
 
-std::shared_ptr<RasterizationTechnique> RenderingSystemDx9::getRasterizationTechnique() const noexcept {
+RasterizationTechnique::Pointer RenderingSystemDx9::getRasterizationTechnique() const noexcept {
     return _rasterizationTechnique;
 }
 
-std::shared_ptr<OutputTechnique> RenderingSystemDx9::getOutputTechnique() const noexcept {
+OutputTechnique::Pointer RenderingSystemDx9::getOutputTechnique() const noexcept {
     return _outputTechnique;
 }
 
-std::shared_ptr<BlendingTechnique> RenderingSystemDx9::getBlendingTechnique() const noexcept {
+BlendingTechnique::Pointer RenderingSystemDx9::getBlendingTechnique() const noexcept {
     return _blendingTechnique;
 }
 
 void RenderingSystemDx9::setRasterizationTechnique(
-    std::shared_ptr<RasterizationTechnique> technique )
+    RasterizationTechnique::Pointer technique )
 {
     if( _rasterizationTechnique == technique ) return;
 
@@ -211,7 +211,7 @@ void RenderingSystemDx9::setRasterizationTechnique(
 }
 
 void RenderingSystemDx9::setOutputTechnique(
-    std::shared_ptr<OutputTechnique> technique )
+    OutputTechnique::Pointer technique )
 {
     if( _outputTechnique == technique ) return;
 
@@ -223,7 +223,7 @@ void RenderingSystemDx9::setOutputTechnique(
 }
 
 void RenderingSystemDx9::setBlendingTechnique(
-    std::shared_ptr<BlendingTechnique> technique )
+    BlendingTechnique::Pointer technique )
 {
     if( _blendingTechnique == technique ) return;
 
@@ -434,12 +434,12 @@ ComPointer< IDirect3DDevice9 > RenderingSystemDx9::getDevice() {
     return getInstance()->_device;
 }
 
-std::shared_ptr<RenderingSystemDx9> RenderingSystemDx9::getInstance() {
-    static std::shared_ptr<RenderingSystemDx9> instance( new RenderingSystemDx9 );
-    return instance;
+RenderingSystemDx9* RenderingSystemDx9::getInstance() {
+    static std::unique_ptr<RenderingSystemDx9> instance( new RenderingSystemDx9 );
+    return instance.get();
 }
 
-std::shared_ptr<RenderingSystem> RenderingSystem::getInstance() {
+RenderingSystem* RenderingSystem::getInstance() {
     return RenderingSystemDx9::getInstance();
 }
 

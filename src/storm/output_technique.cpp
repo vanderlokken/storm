@@ -2,7 +2,7 @@
 
 namespace storm {
 
-std::shared_ptr<OutputTechnique> OutputTechnique::getDefault() {
+OutputTechnique::Pointer OutputTechnique::getDefault() {
     Description description;
     description.depthTest.enabled = true;
     description.depthTest.passCondition = ConditionLess;
@@ -23,7 +23,7 @@ std::shared_ptr<OutputTechnique> OutputTechnique::getDefault() {
 
     description.writeDepthValues = true;
 
-    static const std::shared_ptr<OutputTechnique> technique( OutputTechnique::create(description) );
+    static const OutputTechnique::Pointer technique = create( description );
     return technique;
 }
 

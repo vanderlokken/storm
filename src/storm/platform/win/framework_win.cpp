@@ -1,5 +1,7 @@
 #include <storm/platform/win/framework_win.h>
 
+#include <memory>
+
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
 #include <windows.h>
@@ -44,12 +46,12 @@ void FrameworkWin::stop() {
     return;
 }
 
-std::shared_ptr<FrameworkWin> FrameworkWin::getInstance() {
-    static std::shared_ptr<FrameworkWin> instance( new FrameworkWin );
-    return instance;
+FrameworkWin* FrameworkWin::getInstance() {
+    static const std::unique_ptr<FrameworkWin> instance( new FrameworkWin );
+    return instance.get();
 }
 
-std::shared_ptr<Framework> Framework::getInstance() {
+Framework* Framework::getInstance() {
     return FrameworkWin::getInstance();
 }
 

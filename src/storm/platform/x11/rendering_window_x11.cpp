@@ -1,5 +1,7 @@
 #include <storm/platform/x11/rendering_window_x11.h>
 
+#include <memory>
+
 #include <storm/exception.h>
 #include <storm/platform/x11/display_connection_x11.h>
 
@@ -75,12 +77,12 @@ Window RenderingWindowX11::getHandle() const noexcept {
     return _handle;
 }
 
-std::shared_ptr<RenderingWindowX11> RenderingWindowX11::getInstance() {
-    static std::shared_ptr<RenderingWindowX11> instance( new RenderingWindowX11 );
-    return instance;
+RenderingWindowX11* RenderingWindowX11::getInstance() {
+    static const std::unique_ptr<RenderingWindowX11> instance( new RenderingWindowX11 );
+    return instance.get();
 }
 
-std::shared_ptr<RenderingWindow> RenderingWindow::getInstance() {
+RenderingWindow* RenderingWindow::getInstance() {
     return RenderingWindowX11::getInstance();
 }
 

@@ -11,7 +11,7 @@ namespace storm {
 
 class MultimediaClockWin : public Clock {
 public:
-    static std::shared_ptr<MultimediaClockWin> getInstance();
+    static MultimediaClockWin* getInstance();
 
     virtual ~MultimediaClockWin();
 

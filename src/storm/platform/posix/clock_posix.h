@@ -8,7 +8,7 @@ namespace storm {
 
 class ClockPosix : public Clock {
 public:
-    static std::shared_ptr<ClockPosix> getInstance();
+    static ClockPosix* getInstance();
 
     virtual ~ClockPosix() { }
 

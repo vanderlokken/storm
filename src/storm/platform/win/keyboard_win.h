@@ -13,7 +13,7 @@ namespace storm {
 class KeyboardWin : public Keyboard {
     NONCOPYABLE( KeyboardWin );
 public:
-    static std::shared_ptr<KeyboardWin> getInstance();
+    static KeyboardWin* getInstance();
 
     virtual ~KeyboardWin();
 

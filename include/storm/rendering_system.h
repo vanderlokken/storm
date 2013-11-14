@@ -1,18 +1,15 @@
 #pragma once
 
-#include <memory>
-
+#include <storm/blending_technique.h>
 #include <storm/color.h>
+#include <storm/mesh.h>
 #include <storm/noexcept.h>
+#include <storm/output_technique.h>
+#include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
 #include <storm/shader.h>
 
 namespace storm {
-
-class BlendingTechnique;
-class Mesh;
-class OutputTechnique;
-class RasterizationTechnique;
 
 class RenderingSystem {
 public:
@@ -26,25 +23,25 @@ public:
         DepthBufferFormatUint32
     };
 
-    static std::shared_ptr<RenderingSystem> getInstance();
+    static RenderingSystem* getInstance();
 
     virtual ~RenderingSystem() { }
 
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
 
-    virtual void renderMesh( std::shared_ptr<Mesh> ) = 0;
+    virtual void renderMesh( Mesh::Pointer ) = 0;
 
-    virtual std::shared_ptr<Shader> getShader( Shader::Type ) const noexcept = 0;
-    virtual void setShader( std::shared_ptr<Shader> ) = 0;
+    virtual Shader::Pointer getShader( Shader::Type ) const noexcept = 0;
+    virtual void setShader( Shader::Pointer ) = 0;
 
-    virtual std::shared_ptr<RasterizationTechnique> getRasterizationTechnique() const noexcept = 0;
-    virtual std::shared_ptr<OutputTechnique> getOutputTechnique() const noexcept = 0;
-    virtual std::shared_ptr<BlendingTechnique> getBlendingTechnique() const noexcept = 0;
+    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const noexcept = 0;
+    virtual OutputTechnique::Pointer getOutputTechnique() const noexcept = 0;
+    virtual BlendingTechnique::Pointer getBlendingTechnique() const noexcept = 0;
 
-    virtual void setRasterizationTechnique( std::shared_ptr<RasterizationTechnique> ) = 0;
-    virtual void setOutputTechnique( std::shared_ptr<OutputTechnique> ) = 0;
-    virtual void setBlendingTechnique( std::shared_ptr<BlendingTechnique> ) = 0;
+    virtual void setRasterizationTechnique( RasterizationTechnique::Pointer ) = 0;
+    virtual void setOutputTechnique( OutputTechnique::Pointer ) = 0;
+    virtual void setBlendingTechnique( BlendingTechnique::Pointer ) = 0;
 
     virtual const Rectangle& getClippingRectangle() const noexcept = 0;
     virtual const Rectangle& getOutputRectangle() const noexcept = 0;

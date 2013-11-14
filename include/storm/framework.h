@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 
 #include <storm/noexcept.h>
 
@@ -11,7 +10,7 @@ class Framework {
 public:
     typedef std::function< void () > Callback;
 
-    static std::shared_ptr<Framework> getInstance();
+    static Framework* getInstance();
 
     virtual ~Framework() { }
 

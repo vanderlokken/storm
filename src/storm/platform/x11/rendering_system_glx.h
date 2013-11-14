@@ -12,7 +12,7 @@ namespace storm {
 
 class RenderingSystemGlx : public RenderingSystemOgl {
 public:
-    static std::shared_ptr<RenderingSystemGlx> getInstance();
+    static RenderingSystemGlx* getInstance();
 
     virtual ~RenderingSystemGlx();
 

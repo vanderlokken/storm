@@ -3,15 +3,16 @@
 #include <memory>
 #include <string>
 
+#include <storm/index_buffer.h>
 #include <storm/noexcept.h>
+#include <storm/vertex_buffer.h>
 
 namespace storm {
 
-class IndexBuffer;
-class VertexBuffer;
-
 class Mesh {
 public:
+    typedef std::shared_ptr<Mesh> Pointer;
+
     enum TriangleTopology {
         TriangleTopologyList,
         TriangleTopologyStrip
@@ -19,12 +20,12 @@ public:
 
     struct Description {
         TriangleTopology triangleTopology;
-        std::shared_ptr<VertexBuffer> vertexBuffer;
-        std::shared_ptr<IndexBuffer> indexBuffer;
+        VertexBuffer::Pointer vertexBuffer;
+        IndexBuffer::Pointer indexBuffer;
     };
 
-    static std::shared_ptr<Mesh> create( const Description& );
-    static std::shared_ptr<Mesh> load( const std::string &filename );
+    static Mesh::Pointer create( const Description& );
+    static Mesh::Pointer load( const std::string &filename );
 
     virtual ~Mesh() { }
 

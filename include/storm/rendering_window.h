@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <storm/dimensions.h>
 #include <storm/noexcept.h>
 
@@ -9,7 +7,7 @@ namespace storm {
 
 class RenderingWindow {
 public:
-    static std::shared_ptr<RenderingWindow> getInstance();
+    static RenderingWindow* getInstance();
 
     virtual ~RenderingWindow() { }
 

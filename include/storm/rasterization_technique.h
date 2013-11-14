@@ -8,6 +8,8 @@ namespace storm {
 
 class RasterizationTechnique {
 public:
+    typedef std::shared_ptr<RasterizationTechnique> Pointer;
+
     enum CullMode {
         CullNothing,
         CullFrontFaces,
@@ -27,8 +29,8 @@ public:
         float slopeScaleDepthBias;
     };
 
-    static std::shared_ptr<RasterizationTechnique> create( const Description& );
-    static std::shared_ptr<RasterizationTechnique> getDefault();
+    static RasterizationTechnique::Pointer create( const Description& );
+    static RasterizationTechnique::Pointer getDefault();
 
     virtual ~RasterizationTechnique() { }
 

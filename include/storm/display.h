@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include <storm/noexcept.h>
@@ -35,7 +34,7 @@ public:
         int _colorDepth;
     };
 
-    static std::shared_ptr<Display> getInstance();
+    static Display* getInstance();
 
     virtual ~Display() { }
 

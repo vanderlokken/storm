@@ -1,5 +1,7 @@
 #include <storm/platform/x11/framework_x11.h>
 
+#include <memory>
+
 #include <storm/exception.h>
 #include <storm/platform/x11/display_connection_x11.h>
 
@@ -53,12 +55,12 @@ void FrameworkX11::stop() {
     return;
 }
 
-std::shared_ptr<FrameworkX11> FrameworkX11::getInstance() {
-    static const std::shared_ptr<FrameworkX11> instance( new FrameworkX11 );
-    return instance;
+FrameworkX11* FrameworkX11::getInstance() {
+    static const std::unique_ptr<FrameworkX11> instance( new FrameworkX11 );
+    return instance.get();
 }
 
-std::shared_ptr<Framework> Framework::getInstance() {
+Framework* Framework::getInstance() {
     return FrameworkX11::getInstance();
 }
 

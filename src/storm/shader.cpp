@@ -6,7 +6,7 @@
 
 namespace storm {
 
-std::shared_ptr<Shader> Shader::load(
+Shader::Pointer Shader::load(
     const std::string &filename, Shader::Type shaderType )
 {
     std::ifstream stream( filename, std::ios::binary );

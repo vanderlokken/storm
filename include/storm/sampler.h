@@ -9,6 +9,8 @@ namespace storm {
 
 class Sampler {
 public:
+    typedef std::shared_ptr<Sampler> Pointer;
+
     enum MinifyingFilter {
         MinifyingFilterNearest,
         MinifyingFilterLinear,
@@ -36,7 +38,7 @@ public:
         Color borderColor;
     };
 
-    static std::shared_ptr<Sampler> create( const Description& );
+    static Sampler::Pointer create( const Description& );
 
     virtual ~Sampler() { }
 

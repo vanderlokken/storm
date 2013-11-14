@@ -100,7 +100,7 @@ ComPointer< IDirect3DVertexDeclaration9 > VertexBufferDx9::getVertexDeclaration(
     return _vertexDeclaration;
 }
 
-std::shared_ptr< VertexBuffer > VertexBuffer::create(
+VertexBuffer::Pointer VertexBuffer::create(
     const Description &description, const void *vertices )
 {
     return std::make_shared< VertexBufferDx9 >( description, vertices );

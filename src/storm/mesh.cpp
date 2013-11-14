@@ -11,7 +11,7 @@
 
 namespace storm {
 
-std::shared_ptr<Mesh> Mesh::load( const std::string &filename ) {
+Mesh::Pointer Mesh::load( const std::string &filename ) {
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )

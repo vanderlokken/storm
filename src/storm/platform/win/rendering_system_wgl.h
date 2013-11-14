@@ -10,7 +10,7 @@ namespace storm {
 
 class RenderingSystemWgl : public RenderingSystemOgl {
 public:
-    static std::shared_ptr<RenderingSystemWgl> getInstance();
+    static RenderingSystemWgl* getInstance();
 
     virtual ~RenderingSystemWgl();
 

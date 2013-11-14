@@ -46,7 +46,7 @@ CGprofile ShaderDx9::selectProfile( Type type ) {
     return result;
 }
 
-std::shared_ptr< Shader > Shader::create( const std::string &sourceCode, Type type ) {
+Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
     return std::make_shared< ShaderDx9 >( sourceCode, type );
 }
 

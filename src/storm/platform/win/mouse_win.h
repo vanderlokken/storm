@@ -13,7 +13,7 @@ namespace storm {
 class MouseWin : public Mouse {
     NONCOPYABLE( MouseWin );
 public:
-    static std::shared_ptr<MouseWin> getInstance();
+    static MouseWin* getInstance();
 
     virtual ~MouseWin();
 

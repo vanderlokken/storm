@@ -1,5 +1,7 @@
 #include <storm/platform/posix/clock_posix.h>
 
+#include <memory>
+
 namespace storm {
 
 ClockPosix::ClockPosix() noexcept
@@ -37,12 +39,12 @@ Clock::Time ClockPosix::getTimeChange() const noexcept {
     return (_systemTime - _previousSystemTime) / MicrosecondsPerMillisecond;
 }
 
-std::shared_ptr<ClockPosix> ClockPosix::getInstance() {
-    static const std::shared_ptr<ClockPosix> instance( new ClockPosix );
-    return instance;
+ClockPosix* ClockPosix::getInstance() {
+    static const std::unique_ptr<ClockPosix> instance( new ClockPosix );
+    return instance.get();
 }
 
-std::shared_ptr<Clock> Clock::getInstance() {
+Clock* Clock::getInstance() {
     return ClockPosix::getInstance();
 }
 

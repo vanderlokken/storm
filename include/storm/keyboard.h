@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <storm/event_handler.h>
 #include <storm/noexcept.h>
 
@@ -70,7 +68,7 @@ public:
     struct KeyRepeatEvent : public KeyEvent { };
     struct KeyReleaseEvent : public KeyEvent { };
 
-    static std::shared_ptr<Keyboard> getInstance();
+    static Keyboard* getInstance();
 
     virtual ~Keyboard() { }
 

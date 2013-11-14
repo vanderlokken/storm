@@ -10,7 +10,7 @@ namespace storm {
 class FrameworkX11 : public Framework {
     NONCOPYABLE( FrameworkX11 );
 public:
-    static std::shared_ptr<FrameworkX11> getInstance();
+    static FrameworkX11* getInstance();
 
     virtual void run( const Callback &callback );
     virtual void stop();

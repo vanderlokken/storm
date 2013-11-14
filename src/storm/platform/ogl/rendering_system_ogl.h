@@ -9,17 +9,17 @@ public:
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
 
-    virtual void renderMesh( std::shared_ptr<Mesh> );
+    virtual void renderMesh( Mesh::Pointer );
 
-    virtual void setShader( std::shared_ptr<Shader> );
+    virtual void setShader( Shader::Pointer );
 
-    virtual std::shared_ptr<RasterizationTechnique> getRasterizationTechnique() const noexcept;
-    virtual std::shared_ptr<OutputTechnique> getOutputTechnique() const noexcept;
-    virtual std::shared_ptr<BlendingTechnique> getBlendingTechnique() const noexcept;
+    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const noexcept;
+    virtual OutputTechnique::Pointer getOutputTechnique() const noexcept;
+    virtual BlendingTechnique::Pointer getBlendingTechnique() const noexcept;
 
-    virtual void setRasterizationTechnique( std::shared_ptr<RasterizationTechnique> );
-    virtual void setOutputTechnique( std::shared_ptr<OutputTechnique> );
-    virtual void setBlendingTechnique( std::shared_ptr<BlendingTechnique> );
+    virtual void setRasterizationTechnique( RasterizationTechnique::Pointer );
+    virtual void setOutputTechnique( OutputTechnique::Pointer );
+    virtual void setBlendingTechnique( BlendingTechnique::Pointer );
 
     virtual const Rectangle& getClippingRectangle() const noexcept;
     virtual const Rectangle& getOutputRectangle() const noexcept;
@@ -38,9 +38,9 @@ protected:
     void initialize();
 
 private:
-    std::shared_ptr<RasterizationTechnique> _rasterizationTechnique;
-    std::shared_ptr<OutputTechnique> _outputTechnique;
-    std::shared_ptr<BlendingTechnique> _blendingTechnique;
+    RasterizationTechnique::Pointer _rasterizationTechnique;
+    OutputTechnique::Pointer _outputTechnique;
+    BlendingTechnique::Pointer _blendingTechnique;
 };
 
 }

@@ -56,7 +56,7 @@ D3DPRIMITIVETYPE MeshDx9::convertTriangleTopology( TriangleTopology triangleTopo
     return result;
 }
 
-std::shared_ptr< Mesh > Mesh::create( const Description &description ) {
+Mesh::Pointer Mesh::create( const Description &description ) {
     return std::make_shared< MeshDx9 >( description );
 }
 

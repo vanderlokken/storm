@@ -64,7 +64,7 @@ D3DFILLMODE RasterizationTechniqueDx9::convertFillMode( FillMode fillMode ) {
     return result;
 }
 
-std::shared_ptr<RasterizationTechnique> RasterizationTechnique::create( const Description &description ) {
+RasterizationTechnique::Pointer RasterizationTechnique::create( const Description &description ) {
     return std::make_shared<RasterizationTechniqueDx9>( description );
 }
 

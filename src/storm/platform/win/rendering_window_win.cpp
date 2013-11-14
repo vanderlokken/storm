@@ -1,5 +1,7 @@
 #include <storm/platform/win/rendering_window_win.h>
 
+#include <memory>
+
 #include <storm/exception.h>
 
 namespace storm {
@@ -122,12 +124,12 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
     return ::DefWindowProc( windowHandle, message, firstParameter, secondParameter );
 }
 
-std::shared_ptr<RenderingWindowWin> RenderingWindowWin::getInstance() {
-    static std::shared_ptr<RenderingWindowWin> instance( new RenderingWindowWin );
-    return instance;
+RenderingWindowWin* RenderingWindowWin::getInstance() {
+    static const std::unique_ptr<RenderingWindowWin> instance( new RenderingWindowWin );
+    return instance.get();
 }
 
-std::shared_ptr<RenderingWindow> RenderingWindow::getInstance() {
+RenderingWindow* RenderingWindow::getInstance() {
     return RenderingWindowWin::getInstance();
 }
 

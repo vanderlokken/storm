@@ -223,12 +223,12 @@ LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) no
     return USE_DEFAULT_PROCESSING;
 }
 
-std::shared_ptr<KeyboardWin> KeyboardWin::getInstance() {
-    static const std::shared_ptr<KeyboardWin> instance( new KeyboardWin );
-    return instance;
+KeyboardWin* KeyboardWin::getInstance() {
+    static const std::unique_ptr<KeyboardWin> instance( new KeyboardWin );
+    return instance.get();
 }
 
-std::shared_ptr<Keyboard> Keyboard::getInstance() {
+Keyboard* Keyboard::getInstance() {
     return KeyboardWin::getInstance();
 }
 

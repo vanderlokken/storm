@@ -108,7 +108,7 @@ D3DFORMAT IndexBufferDx9::selectFormat( size_t indexSize ) {
     return result;
 }
 
-std::shared_ptr< IndexBuffer > IndexBuffer::create(
+IndexBuffer::Pointer IndexBuffer::create(
     const Description &description, const void *indices )
 {
     return std::make_shared< IndexBufferDx9 >( description, indices );

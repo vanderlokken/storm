@@ -2,7 +2,7 @@
 
 namespace storm {
 
-std::shared_ptr<RasterizationTechnique> RasterizationTechnique::getDefault() {
+RasterizationTechnique::Pointer RasterizationTechnique::getDefault() {
     Description description;
     description.cullMode = CullBackFaces;
     description.fillMode = FillSolid;
@@ -10,7 +10,7 @@ std::shared_ptr<RasterizationTechnique> RasterizationTechnique::getDefault() {
     description.depthBias = 0;
     description.slopeScaleDepthBias = 0;
 
-    static const std::shared_ptr<RasterizationTechnique> technique( create(description) );
+    static const RasterizationTechnique::Pointer technique = create( description );
     return technique;
 }
 

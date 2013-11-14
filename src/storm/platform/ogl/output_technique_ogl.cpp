@@ -12,7 +12,7 @@ const OutputTechnique::Description& OutputTechniqueOgl::getDescription() const n
     return _description;
 }
 
-std::shared_ptr<OutputTechnique> OutputTechnique::create( const Description &description ) {
+OutputTechnique::Pointer OutputTechnique::create( const Description &description ) {
     return std::make_shared< OutputTechniqueOgl >( description );
 }
 

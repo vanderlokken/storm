@@ -349,12 +349,12 @@ LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) noexcept {
     return USE_DEFAULT_PROCESSING;
 }
 
-std::shared_ptr<MouseWin> MouseWin::getInstance() {
-    static std::shared_ptr<MouseWin> instance( new MouseWin );
-    return instance;
+MouseWin* MouseWin::getInstance() {
+    static const std::unique_ptr<MouseWin> instance( new MouseWin );
+    return instance.get();
 }
 
-std::shared_ptr<Mouse> Mouse::getInstance() {
+Mouse* Mouse::getInstance() {
     return MouseWin::getInstance();
 }
 

@@ -54,12 +54,12 @@ void RenderingSystemGlx::setDepthBufferFormat( DepthBufferFormat ) {
     return;
 }
 
-std::shared_ptr<RenderingSystemGlx> RenderingSystemGlx::getInstance() {
-    static const std::shared_ptr<RenderingSystemGlx> instance( new RenderingSystemGlx );
-    return instance;
+RenderingSystemGlx* RenderingSystemGlx::getInstance() {
+    static const std::unique_ptr<RenderingSystemGlx> instance( new RenderingSystemGlx );
+    return instance.get();
 }
 
-std::shared_ptr<RenderingSystem> RenderingSystem::getInstance() {
+RenderingSystem* RenderingSystem::getInstance() {
     return RenderingSystemGlx::getInstance();
 }
 

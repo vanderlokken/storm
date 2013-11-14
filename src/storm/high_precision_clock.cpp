@@ -1,5 +1,7 @@
 #include <storm/high_precision_clock.h>
 
+#include <memory>
+
 namespace storm {
 
 using std::chrono::duration_cast;
@@ -29,9 +31,9 @@ Clock::Time HighPrecisionClock::getTimeChange() const noexcept {
     );
 }
 
-std::shared_ptr<Clock> Clock::getInstance() {
-    static const std::shared_ptr<Clock> instance( std::make_shared<HighPrecisionClock>() );
-    return instance;
+Clock* Clock::getInstance() {
+    static const std::unique_ptr<Clock> instance( new HighPrecisionClock );
+    return instance.get();
 }
 
 }
