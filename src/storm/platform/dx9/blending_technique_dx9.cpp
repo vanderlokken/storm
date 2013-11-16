@@ -30,90 +30,54 @@ D3DBLEND BlendingTechniqueDx9::getDestinationFactor() const noexcept {
 }
 
 D3DBLENDOP BlendingTechniqueDx9::convertOperation( Operation operation ) {
-    D3DBLENDOP result;
-
     switch( operation ) {
-    case OperationAddition:
-        result = D3DBLENDOP_ADD;
-        break;
-
-    case OperationSubtraction:
-        result = D3DBLENDOP_SUBTRACT;
-        break;
-
-    case OperationNegativeSubtraction:
-        result = D3DBLENDOP_REVSUBTRACT;
-        break;
-
-    case OperationMinimum:
-        result = D3DBLENDOP_MIN;
-        break;
-
-    case OperationMaximum:
-        result = D3DBLENDOP_MAX;
-        break;
-
+    case Operation::Addition:
+        return D3DBLENDOP_ADD;
+    case Operation::Subtraction:
+        return D3DBLENDOP_SUBTRACT;
+    case Operation::NegativeSubtraction:
+        return D3DBLENDOP_REVSUBTRACT;
+    case Operation::Minimum:
+        return D3DBLENDOP_MIN;
+    case Operation::Maximum:
+        return D3DBLENDOP_MAX;
     default:
         throwInvalidArgument( "'operation' is invalid" );
     }
-    return result;
 }
 
 D3DBLEND BlendingTechniqueDx9::convertFactor( Factor factor ) {
-    D3DBLEND result;
-
     switch( factor ) {
-    case FactorZero:
-        result = D3DBLEND_ZERO;
-        break;
-
-    case FactorOne:
-        result = D3DBLEND_ONE;
-        break;
-
-    case FactorSourceColor:
-        result = D3DBLEND_SRCCOLOR;
-        break;
-
-    case FactorInvertedSourceColor:
-        result = D3DBLEND_INVSRCCOLOR;
-        break;
-
-    case FactorDestinationColor:
-        result = D3DBLEND_DESTCOLOR;
-        break;
-
-    case FactorInvertedDestinationColor:
-        result = D3DBLEND_INVDESTCOLOR;
-        break;
-
-    case FactorSourceAlpha:
-        result = D3DBLEND_SRCALPHA;
-        break;
-
-    case FactorInvertedSourceAlpha:
-        result = D3DBLEND_INVSRCALPHA;
-        break;
-
-    case FactorDestinationAlpha:
-        result = D3DBLEND_DESTALPHA;
-        break;
-
-    case FactorInvertedDestinationAlpha:
-        result = D3DBLEND_INVDESTALPHA;
-        break;
-
-    case FactorSourceAlphaSaturate:
-        result = D3DBLEND_SRCALPHASAT;
-        break;
-
+    case Factor::Zero:
+        return D3DBLEND_ZERO;
+    case Factor::One:
+        return D3DBLEND_ONE;
+    case Factor::SourceColor:
+        return D3DBLEND_SRCCOLOR;
+    case Factor::InvertedSourceColor:
+        return D3DBLEND_INVSRCCOLOR;
+    case Factor::DestinationColor:
+        return D3DBLEND_DESTCOLOR;
+    case Factor::InvertedDestinationColor:
+        return D3DBLEND_INVDESTCOLOR;
+    case Factor::SourceAlpha:
+        return D3DBLEND_SRCALPHA;
+    case Factor::InvertedSourceAlpha:
+        return D3DBLEND_INVSRCALPHA;
+    case Factor::DestinationAlpha:
+        return D3DBLEND_DESTALPHA;
+    case Factor::InvertedDestinationAlpha:
+        return D3DBLEND_INVDESTALPHA;
+    case Factor::SourceAlphaSaturate:
+        return D3DBLEND_SRCALPHASAT;
     default:
         throwInvalidArgument( "'factor' is invalid" );
     }
-    return result;
 }
 
-BlendingTechnique::Pointer BlendingTechnique::create( const Description &description ) {
+BlendingTechnique::Pointer BlendingTechnique::create(
+    const Description &description )
+{
     return std::make_shared<BlendingTechniqueDx9>( description );
 }
 

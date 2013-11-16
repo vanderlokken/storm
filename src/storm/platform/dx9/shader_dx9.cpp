@@ -28,22 +28,14 @@ ShaderCg::CompilerArguments ShaderDx9::selectCompilerArguments(
 }
 
 CGprofile ShaderDx9::selectProfile( Type type ) {
-    CGprofile result;
-
     switch( type ) {
-    case TypeVertex:
-        result = ::cgD3D9GetLatestVertexProfile();
-        break;
-
-    case TypePixel:
-        result = ::cgD3D9GetLatestPixelProfile();
-        break;
-
+    case Type::Vertex:
+        return ::cgD3D9GetLatestVertexProfile();
+    case Type::Pixel:
+        return ::cgD3D9GetLatestPixelProfile();
     default:
         throwInvalidArgument( "'type' is invalid" );
     }
-
-    return result;
 }
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {

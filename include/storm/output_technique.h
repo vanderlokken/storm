@@ -10,26 +10,26 @@ class OutputTechnique {
 public:
     typedef std::shared_ptr<OutputTechnique> Pointer;
 
-    enum Condition {
-        ConditionFalse,
-        ConditionTrue,
-        ConditionLess,
-        ConditionLessOrEqual,
-        ConditionGreater,
-        ConditionGreaterOrEqual,
-        ConditionEqual,
-        ConditionNotEqual
+    enum class Condition {
+        False,
+        True,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual,
+        Equal,
+        NotEqual
     };
 
-    enum StencilOperation {
-        StencilOperationZero,
-        StencilOperationKeep,
-        StencilOperationReplace,
-        StencilOperationIncrementTruncate,
-        StencilOperationDecrementTruncate,
-        StencilOperationIncrement,
-        StencilOperationDecrement,
-        StencilOperationInvert
+    enum class StencilOperation {
+        Zero,
+        Keep,
+        Replace,
+        IncrementTruncate,
+        DecrementTruncate,
+        Increment,
+        Decrement,
+        Invert
     };
 
     struct DepthTest {

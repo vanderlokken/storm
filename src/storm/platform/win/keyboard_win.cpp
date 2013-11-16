@@ -53,8 +53,9 @@ void KeyboardWin::addEventHandler( const EventHandler<KeyReleaseEvent> &handler 
 }
 
 bool KeyboardWin::isKeyPressed( Key key ) const noexcept {
-    if( key < KeyCount )
-        return _keyPressed[key];
+    const size_t keyIndex = static_cast<size_t>( key );
+    if( keyIndex < KeyCount )
+        return _keyPressed[keyIndex];
     else
         return false;
 }
@@ -70,10 +71,12 @@ void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
         return;
     }
 
-    if( keyboard.Message == WM_KEYDOWN && _keyPressed[key] == false )
+    const size_t keyIndex = static_cast<size_t>( key );
+
+    if( keyboard.Message == WM_KEYDOWN && _keyPressed[keyIndex] == false )
         processKeyPress( key );
 
-    if( keyboard.Message == WM_KEYDOWN && _keyPressed[key] == true )
+    if( keyboard.Message == WM_KEYDOWN && _keyPressed[keyIndex] == true )
         processKeyRepeat( key );
 
     if( keyboard.Message == WM_KEYUP )
@@ -83,7 +86,8 @@ void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
 }
 
 void KeyboardWin::processKeyPress( Key key ) {
-    _keyPressed[key] = true;
+    const size_t keyIndex = static_cast<size_t>( key );
+    _keyPressed[keyIndex] = true;
 
     KeyPressEvent event; event.key = key;
     _keyPressEventHandlers( event );
@@ -103,10 +107,12 @@ void KeyboardWin::processKeyRelease( Key key ) {
     // For example a user can press some key while the rendering window is not
     // active and then activate the rendering window and release the pressed key
 
-    if( !_keyPressed[key] )
+    const size_t keyIndex = static_cast<size_t>( key );
+
+    if( !_keyPressed[keyIndex] )
         return;
 
-    _keyPressed[key] = false;
+    _keyPressed[keyIndex] = false;
 
     KeyReleaseEvent event; event.key = key;
     _keyReleaseEventHandlers( event );
@@ -115,56 +121,56 @@ void KeyboardWin::processKeyRelease( Key key ) {
 
 Keyboard::Key KeyboardWin::convertKey( USHORT code ) {
     std::array< USHORT, KeyCount > codes = {
-        VK_ESCAPE,  // KeyEscape
-        VK_F1,      // KeyF1
-        VK_F2,      // KeyF2
-        VK_F3,      // KeyF3
-        VK_F4,      // KeyF4
-        VK_F5,      // KeyF5
-        VK_F6,      // KeyF6
-        VK_F7,      // KeyF7
-        VK_F8,      // KeyF8
-        VK_F9,      // KeyF9
-        VK_F10,     // KeyF10
-        VK_F11,     // KeyF11
-        VK_F12,     // KeyF12
-        VK_NUMPAD0, // KeyDigit0
-        VK_NUMPAD1, // KeyDigit1
-        VK_NUMPAD2, // KeyDigit2
-        VK_NUMPAD3, // KeyDigit3
-        VK_NUMPAD4, // KeyDigit4
-        VK_NUMPAD5, // KeyDigit5
-        VK_NUMPAD6, // KeyDigit6
-        VK_NUMPAD7, // KeyDigit7
-        VK_NUMPAD8, // KeyDigit8
-        VK_NUMPAD9, // KeyDigit9
-        'A',        // KeyA
-        'B',        // KeyB
-        'C',        // KeyC
-        'D',        // KeyD
-        'E',        // KeyE
-        'F',        // KeyF
-        'G',        // KeyG
-        'H',        // KeyH
-        'I',        // KeyI
-        'J',        // KeyJ
-        'K',        // KeyK
-        'L',        // KeyL
-        'M',        // KeyM
-        'N',        // KeyN
-        'O',        // KeyO
-        'P',        // KeyP
-        'Q',        // KeyQ
-        'R',        // KeyR
-        'S',        // KeyS
-        'T',        // KeyT
-        'U',        // KeyU
-        'V',        // KeyV
-        'W',        // KeyW
-        'X',        // KeyX
-        'Y',        // KeyY
-        'Z',        // KeyZ
-        VK_SPACE    // KeySpace
+        VK_ESCAPE,  // Escape
+        VK_F1,      // F1
+        VK_F2,      // F2
+        VK_F3,      // F3
+        VK_F4,      // F4
+        VK_F5,      // F5
+        VK_F6,      // F6
+        VK_F7,      // F7
+        VK_F8,      // F8
+        VK_F9,      // F9
+        VK_F10,     // F10
+        VK_F11,     // F11
+        VK_F12,     // F12
+        VK_NUMPAD0, // Digit0
+        VK_NUMPAD1, // Digit1
+        VK_NUMPAD2, // Digit2
+        VK_NUMPAD3, // Digit3
+        VK_NUMPAD4, // Digit4
+        VK_NUMPAD5, // Digit5
+        VK_NUMPAD6, // Digit6
+        VK_NUMPAD7, // Digit7
+        VK_NUMPAD8, // Digit8
+        VK_NUMPAD9, // Digit9
+        'A',        // A
+        'B',        // B
+        'C',        // C
+        'D',        // D
+        'E',        // E
+        'F',        // F
+        'G',        // G
+        'H',        // H
+        'I',        // I
+        'J',        // J
+        'K',        // K
+        'L',        // L
+        'M',        // M
+        'N',        // N
+        'O',        // O
+        'P',        // P
+        'Q',        // Q
+        'R',        // R
+        'S',        // S
+        'T',        // T
+        'U',        // U
+        'V',        // V
+        'W',        // W
+        'X',        // X
+        'Y',        // Y
+        'Z',        // Z
+        VK_SPACE    // Space
     };
 
     auto searchResult = std::find( codes.cbegin(), codes.cend(), code );

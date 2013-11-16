@@ -395,39 +395,25 @@ void RenderingSystemDx9::setRenderingState( D3DRENDERSTATETYPE state, unsigned i
 }
 
 D3DFORMAT RenderingSystemDx9::convertColorBufferFormat( ColorBufferFormat format ) {
-    D3DFORMAT result;
-
     switch( format ) {
-    case ColorBufferFormatXrgbUint8:
-        result = D3DFMT_X8R8G8B8;
-        break;
-
+    case ColorBufferFormat::XrgbUint8:
+        return D3DFMT_X8R8G8B8;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
-    return result;
 }
 
 D3DFORMAT RenderingSystemDx9::convertDepthBufferFormat( DepthBufferFormat format ) {
-    D3DFORMAT result;
-
     switch( format ) {
-    case DepthBufferFormatUint24:
-        result = D3DFMT_D24X8;
-        break;
-
-    case DepthBufferFormatUint24Stencil8:
-        result = D3DFMT_D24S8;
-        break;
-
-    case DepthBufferFormatUint32:
-        result = D3DFMT_D32;
-        break;
-
+    case DepthBufferFormat::Uint24:
+        return D3DFMT_D24X8;
+    case DepthBufferFormat::Uint24Stencil8:
+        return D3DFMT_D24S8;
+    case DepthBufferFormat::Uint32:
+        return D3DFMT_D32;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
-    return result;
 }
 
 ComPointer< IDirect3DDevice9 > RenderingSystemDx9::getDevice() {

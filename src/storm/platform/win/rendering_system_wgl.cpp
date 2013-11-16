@@ -96,11 +96,12 @@ void RenderingSystemWgl::endFrameRendering() {
 }
 
 void RenderingSystemWgl::setColorBufferFormat( ColorBufferFormat ) {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
 }
 
 void RenderingSystemWgl::setDepthBufferFormat( DepthBufferFormat ) {
     return;
+    // throwNotImplemented();
 }
 
 RenderingSystemWgl* RenderingSystemWgl::getInstance() {

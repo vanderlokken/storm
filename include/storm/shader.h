@@ -17,10 +17,10 @@ class Shader {
 public:
     typedef std::shared_ptr<Shader> Pointer;
 
-    enum Type {
-        TypeVertex,
-        TypePixel,
-        TypeGeometry
+    enum class Type {
+        Vertex,
+        Pixel,
+        Geometry
     };
 
     class Uniform {

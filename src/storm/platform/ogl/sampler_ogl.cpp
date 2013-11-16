@@ -22,73 +22,44 @@ const Sampler::Description& SamplerOgl::getDescription() const noexcept {
 }
 
 GLenum SamplerOgl::convertMinifyingFilter( MinifyingFilter minifyingFilter ) {
-    GLenum result;
-
     switch( minifyingFilter ) {
-    case MinifyingFilterNearest:
-        result = GL_NEAREST;
-        break;
-
-    case MinifyingFilterLinear:
-        result = GL_LINEAR;
-        break;
-
-    case MinifyingFilterBilinear:
-        result = GL_LINEAR_MIPMAP_NEAREST;
-        break;
-
-    case MinifyingFilterTrilinear:
-        result = GL_LINEAR_MIPMAP_LINEAR;
-        break;
-
+    case MinifyingFilter::Nearest:
+        return GL_NEAREST;
+    case MinifyingFilter::Linear:
+        return GL_LINEAR;
+    case MinifyingFilter::Bilinear:
+        return GL_LINEAR_MIPMAP_NEAREST;
+    case MinifyingFilter::Trilinear:
+        return GL_LINEAR_MIPMAP_LINEAR;
     default:
         throwInvalidArgument( "'minifyingFilter' is invalid" );
     }
-    return result;
 }
 
 GLenum SamplerOgl::convertMagnifyingFilter( MagnifyingFilter magnifyingFilter ) {
-    GLenum result;
-
     switch( magnifyingFilter ) {
-    case MagnifyingFilterNearest:
-        result = GL_NEAREST;
-        break;
-
-    case MagnifyingFilterLinear:
-        result = GL_LINEAR;
-        break;
-
+    case MagnifyingFilter::Nearest:
+        return GL_NEAREST;
+    case MagnifyingFilter::Linear:
+        return GL_LINEAR;
     default:
         throwInvalidArgument( "'magnifyingFilter' is invalid" );
     }
-    return result;
 }
 
 GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
-    GLenum result;
-
     switch( wrapMode ) {
-    case WrapClamped:
-        result = GL_CLAMP_TO_EDGE;
-        break;
-
-    case WrapRepeated:
-        result = GL_REPEAT;
-        break;
-
-    case WrapMirrored:
-        result = GL_MIRRORED_REPEAT;
-        break;
-
-    case WrapWithBorderColor:
-        result = GL_CLAMP_TO_BORDER;
-        break;
-
+    case WrapMode::Clamped:
+        return GL_CLAMP_TO_EDGE;
+    case WrapMode::Repeated:
+        return GL_REPEAT;
+    case WrapMode::Mirrored:
+        return GL_MIRRORED_REPEAT;
+    case WrapMode::WithBorderColor:
+        return GL_CLAMP_TO_BORDER;
     default:
         throwInvalidArgument( "'wrapMode' is invalid" );
     }
-    return result;
 }
 
 }

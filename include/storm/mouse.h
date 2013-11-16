@@ -7,12 +7,12 @@ namespace storm {
 
 class Mouse {
 public:
-    enum Button {
-        ButtonLeft,
-        ButtonRight,
-        ButtonMiddle,
-        ButtonSideFirst,
-        ButtonSideSecond
+    enum class Button {
+        Left,
+        Right,
+        Middle,
+        SideFirst,
+        SideSecond
     };
 
     struct ButtonEvent {

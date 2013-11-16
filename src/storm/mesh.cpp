@@ -51,21 +51,21 @@ Mesh::Pointer Mesh::load( const std::string &filename ) {
     vertexBufferDescription.vertexAttributes = attributes;
     vertexBufferDescription.vertexSize = vertexSize;
     vertexBufferDescription.bufferSize = vertexDataSize;
-    vertexBufferDescription.resourceType = ResourceTypeStatic;
+    vertexBufferDescription.resourceType = ResourceType::Static;
 
     const size_t indexSize = 2;
 
     IndexBuffer::Description indexBufferDescription;
     indexBufferDescription.indexSize = indexSize;
     indexBufferDescription.bufferSize = indexDataSize;
-    indexBufferDescription.resourceType = ResourceTypeStatic;
+    indexBufferDescription.resourceType = ResourceType::Static;
 
-    Mesh::Description meshDescription;
+    Description meshDescription;
     meshDescription.vertexBuffer = VertexBuffer::create( vertexBufferDescription, vertexData.data() );
     meshDescription.indexBuffer = IndexBuffer::create( indexBufferDescription, indexData.data() );
-    meshDescription.triangleTopology = Mesh::TriangleTopologyList;
+    meshDescription.triangleTopology = TriangleTopology::List;
 
-    return Mesh::create( meshDescription );
+    return create( meshDescription );
 }
 
 }

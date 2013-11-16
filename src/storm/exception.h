@@ -11,6 +11,9 @@
 #define throwInvalidArgument( description ) \
     throw std::invalid_argument( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, description) )
 
+#define throwNotImplemented() \
+    throw std::runtime_error( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, "Not implemented") )
+
 namespace storm {
 
 const char* formatExceptionMessage(

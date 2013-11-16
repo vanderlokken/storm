@@ -25,43 +25,27 @@ D3DFILLMODE RasterizationTechniqueDx9::getFillMode() const noexcept {
 }
 
 D3DCULLMODE RasterizationTechniqueDx9::convertCullMode( CullMode cullMode ) {
-    D3DCULLMODE result;
-
     switch( cullMode ) {
-    case CullNothing:
-        result = D3DCULL_NONE;
-        break;
-
-    case CullFrontFaces:
-        result = D3DCULL_CW;
-        break;
-
-    case CullBackFaces:
-        result = D3DCULL_CCW;
-        break;
-
+    case CullMode::Nothing:
+        return D3DCULL_NONE;
+    case CullMode::FrontFaces:
+        return D3DCULL_CW;
+    case CullMode::BackFaces:
+        return D3DCULL_CCW;
     default:
         throwInvalidArgument( "'cullMode' is invalid" );
     }
-    return result;
 }
 
 D3DFILLMODE RasterizationTechniqueDx9::convertFillMode( FillMode fillMode ) {
-    D3DFILLMODE result;
-
     switch( fillMode ) {
-    case FillSolid:
-        result = D3DFILL_SOLID;
-        break;
-
-    case FillWireframe:
-        result = D3DFILL_WIREFRAME;
-        break;
-
+    case FillMode::Solid:
+        return D3DFILL_SOLID;
+    case FillMode::Wireframe:
+        return D3DFILL_WIREFRAME;
     default:
         throwInvalidArgument( "'fillMode' is invalid" );
     }
-    return result;
 }
 
 RasterizationTechnique::Pointer RasterizationTechnique::create( const Description &description ) {

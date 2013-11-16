@@ -31,90 +31,54 @@ GLenum BlendingTechniqueOgl::getDestinationFactor() const noexcept {
 }
 
 GLenum BlendingTechniqueOgl::convertOperation( Operation operation ) {
-    GLenum result;
-
     switch( operation ) {
-    case OperationAddition:
-        result = GL_FUNC_ADD;
-        break;
-
-    case OperationSubtraction:
-        result = GL_FUNC_SUBTRACT;
-        break;
-
-    case OperationNegativeSubtraction:
-        result = GL_FUNC_REVERSE_SUBTRACT;
-        break;
-
-    case OperationMinimum:
-        result = GL_MIN;
-        break;
-
-    case OperationMaximum:
-        result = GL_MAX;
-        break;
-
+    case Operation::Addition:
+        return GL_FUNC_ADD;
+    case Operation::Subtraction:
+        return GL_FUNC_SUBTRACT;
+    case Operation::NegativeSubtraction:
+        return GL_FUNC_REVERSE_SUBTRACT;
+    case Operation::Minimum:
+        return GL_MIN;
+    case Operation::Maximum:
+        return GL_MAX;
     default:
         throwInvalidArgument( "'operation' is invalid" );
     }
-    return result;
 }
 
 GLenum BlendingTechniqueOgl::convertFactor( Factor factor ) {
-    GLenum result;
-
     switch( factor ) {
-    case FactorZero:
-        result = GL_ZERO;
-        break;
-
-    case FactorOne:
-        result = GL_ONE;
-        break;
-
-    case FactorSourceColor:
-        result = GL_SRC_COLOR;
-        break;
-
-    case FactorInvertedSourceColor:
-        result = GL_ONE_MINUS_SRC_COLOR;
-        break;
-
-    case FactorDestinationColor:
-        result = GL_DST_COLOR;
-        break;
-
-    case FactorInvertedDestinationColor:
-        result = GL_ONE_MINUS_DST_COLOR;
-        break;
-
-    case FactorSourceAlpha:
-        result = GL_SRC_ALPHA;
-        break;
-
-    case FactorInvertedSourceAlpha:
-        result = GL_ONE_MINUS_SRC_ALPHA;
-        break;
-
-    case FactorDestinationAlpha:
-        result = GL_DST_ALPHA;
-        break;
-
-    case FactorInvertedDestinationAlpha:
-        result = GL_ONE_MINUS_DST_ALPHA;
-        break;
-
-    case FactorSourceAlphaSaturate:
-        result = GL_SRC_ALPHA_SATURATE;
-        break;
-
+    case Factor::Zero:
+        return GL_ZERO;
+    case Factor::One:
+        return GL_ONE;
+    case Factor::SourceColor:
+        return GL_SRC_COLOR;
+    case Factor::InvertedSourceColor:
+        return GL_ONE_MINUS_SRC_COLOR;
+    case Factor::DestinationColor:
+        return GL_DST_COLOR;
+    case Factor::InvertedDestinationColor:
+        return GL_ONE_MINUS_DST_COLOR;
+    case Factor::SourceAlpha:
+        return GL_SRC_ALPHA;
+    case Factor::InvertedSourceAlpha:
+        return GL_ONE_MINUS_SRC_ALPHA;
+    case Factor::DestinationAlpha:
+        return GL_DST_ALPHA;
+    case Factor::InvertedDestinationAlpha:
+        return GL_ONE_MINUS_DST_ALPHA;
+    case Factor::SourceAlphaSaturate:
+        return GL_SRC_ALPHA_SATURATE;
     default:
         throwInvalidArgument( "'factor' is invalid" );
     }
-    return result;
 }
 
-BlendingTechnique::Pointer BlendingTechnique::create( const Description &description ) {
+BlendingTechnique::Pointer BlendingTechnique::create(
+    const Description &description )
+{
     return std::make_shared< BlendingTechniqueOgl >( description );
 }
 

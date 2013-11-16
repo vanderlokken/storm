@@ -13,9 +13,9 @@ class Mesh {
 public:
     typedef std::shared_ptr<Mesh> Pointer;
 
-    enum TriangleTopology {
-        TriangleTopologyList,
-        TriangleTopologyStrip
+    enum class TriangleTopology {
+        List,
+        Strip
     };
 
     struct Description {

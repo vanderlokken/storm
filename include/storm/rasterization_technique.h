@@ -10,15 +10,15 @@ class RasterizationTechnique {
 public:
     typedef std::shared_ptr<RasterizationTechnique> Pointer;
 
-    enum CullMode {
-        CullNothing,
-        CullFrontFaces,
-        CullBackFaces
+    enum class CullMode {
+        Nothing,
+        FrontFaces,
+        BackFaces
     };
 
-    enum FillMode {
-        FillSolid,
-        FillWireframe
+    enum class FillMode {
+        Solid,
+        Wireframe
     };
 
     struct Description {

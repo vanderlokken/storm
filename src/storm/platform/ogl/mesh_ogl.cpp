@@ -84,94 +84,87 @@ void MeshOgl::setVertexAttributes() {
 }
 
 GLenum MeshOgl::convertTriangleTopology( TriangleTopology triangleTopology ) {
-    GLenum result;
-
     switch( triangleTopology ) {
-    case TriangleTopologyList:
-        result = GL_TRIANGLES;
-        break;
-
-    case TriangleTopologyStrip:
-        result = GL_TRIANGLE_STRIP;
-        break;
-
+    case TriangleTopology::List:
+        return GL_TRIANGLES;
+    case TriangleTopology::Strip:
+        return GL_TRIANGLE_STRIP;
     default:
         throwInvalidArgument( "'triangleTopology' is invalid" );
     }
-    return result;
 }
 
 MeshOgl::VertexAttributeFormat MeshOgl::convertVertexAttributeFormat( Vertex::Attribute::Format format ) {
     VertexAttributeFormat result;
 
     switch( format ) {
-    case Vertex::Attribute::FormatFloat:
+    case Vertex::Attribute::Format::Float:
         result.componentCount = 1;
         result.componentType = GL_FLOAT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format2Float:
+    case Vertex::Attribute::Format::Vector2Float:
         result.componentCount = 2;
         result.componentType = GL_FLOAT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format3Float:
+    case Vertex::Attribute::Format::Vector3Float:
         result.componentCount = 3;
         result.componentType = GL_FLOAT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format4Float:
+    case Vertex::Attribute::Format::Vector4Float:
         result.componentCount = 4;
         result.componentType = GL_FLOAT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format4Uint8:
+    case Vertex::Attribute::Format::Vector4Uint8:
         result.componentCount = 4;
         result.componentType = GL_UNSIGNED_BYTE;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format4Uint8Normalized:
+    case Vertex::Attribute::Format::Vector4Uint8Normalized:
         result.componentCount = 4;
         result.componentType = GL_UNSIGNED_BYTE;
         result.componentNormalized = GL_TRUE;
         break;
 
-    case Vertex::Attribute::Format2Int16:
+    case Vertex::Attribute::Format::Vector2Int16:
         result.componentCount = 2;
         result.componentType = GL_SHORT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format2Int16Normalized:
+    case Vertex::Attribute::Format::Vector2Int16Normalized:
         result.componentCount = 2;
         result.componentType = GL_SHORT;
         result.componentNormalized = GL_TRUE;
         break;
 
-    case Vertex::Attribute::Format4Int16:
+    case Vertex::Attribute::Format::Vector4Int16:
         result.componentCount = 4;
         result.componentType = GL_SHORT;
         result.componentNormalized = GL_FALSE;
         break;
 
-    case Vertex::Attribute::Format4Int16Normalized:
+    case Vertex::Attribute::Format::Vector4Int16Normalized:
         result.componentCount = 4;
         result.componentType = GL_SHORT;
         result.componentNormalized = GL_TRUE;
         break;
 
-    case Vertex::Attribute::Format2Uint16Normalized:
+    case Vertex::Attribute::Format::Vector2Uint16Normalized:
         result.componentCount = 2;
         result.componentType = GL_UNSIGNED_SHORT;
         result.componentNormalized = GL_TRUE;
         break;
 
-    case Vertex::Attribute::Format4Uint16Normalized:
+    case Vertex::Attribute::Format::Vector4Uint16Normalized:
         result.componentCount = 4;
         result.componentType = GL_UNSIGNED_SHORT;
         result.componentNormalized = GL_TRUE;

@@ -5,21 +5,21 @@ namespace storm {
 OutputTechnique::Pointer OutputTechnique::getDefault() {
     Description description;
     description.depthTest.enabled = true;
-    description.depthTest.passCondition = ConditionLess;
+    description.depthTest.passCondition = Condition::Less;
 
     description.stencilTest.enabled = false;
     description.stencilTest.referenceValue = 0;
     description.stencilTest.mask = ~0U;
 
-    description.stencilTest.algorithmForFrontFaces.passCondition = ConditionTrue;
-    description.stencilTest.algorithmForFrontFaces.operationOnStencilTestFail = StencilOperationKeep;
-    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestFail = StencilOperationKeep;
-    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestPass = StencilOperationKeep;
+    description.stencilTest.algorithmForFrontFaces.passCondition = Condition::True;
+    description.stencilTest.algorithmForFrontFaces.operationOnStencilTestFail = StencilOperation::Keep;
+    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestFail = StencilOperation::Keep;
+    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestPass = StencilOperation::Keep;
 
-    description.stencilTest.algorithmForBackFaces.passCondition = ConditionTrue;
-    description.stencilTest.algorithmForBackFaces.operationOnStencilTestFail = StencilOperationKeep;
-    description.stencilTest.algorithmForBackFaces.operationOnDepthTestFail = StencilOperationKeep;
-    description.stencilTest.algorithmForBackFaces.operationOnDepthTestPass = StencilOperationKeep;
+    description.stencilTest.algorithmForBackFaces.passCondition = Condition::True;
+    description.stencilTest.algorithmForBackFaces.operationOnStencilTestFail = StencilOperation::Keep;
+    description.stencilTest.algorithmForBackFaces.operationOnDepthTestFail = StencilOperation::Keep;
+    description.stencilTest.algorithmForBackFaces.operationOnDepthTestPass = StencilOperation::Keep;
 
     description.writeDepthValues = true;
 

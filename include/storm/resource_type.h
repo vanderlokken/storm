@@ -2,10 +2,10 @@
 
 namespace storm {
 
-enum ResourceType {
-    ResourceTypeStatic,
-    ResourceTypeDynamic,
-    ResourceTypeOutput
+enum class ResourceType {
+    Static,
+    Dynamic,
+    Output
 };
 
 }

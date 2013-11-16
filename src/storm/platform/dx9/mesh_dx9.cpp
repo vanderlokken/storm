@@ -21,39 +21,28 @@ D3DPRIMITIVETYPE MeshDx9::getTriangleTopology() const noexcept {
 }
 
 UINT MeshDx9::getTriangleCount() const noexcept {
-    UINT result = 0;
-
     const auto &indexBufferDescription = _description.indexBuffer->getDescription();
     const size_t indexCount = indexBufferDescription.bufferSize / indexBufferDescription.indexSize;
 
     switch( _triangleTopology ) {
     case D3DPT_TRIANGLELIST:
-        result = indexCount / 3;
-        break;
-
+        return indexCount / 3;
     case D3DPT_TRIANGLESTRIP:
-        result = indexCount - 2;
-        break;
+        return indexCount - 2;
+    default:
+        throwNotImplemented();
     }
-    return result;
 }
 
 D3DPRIMITIVETYPE MeshDx9::convertTriangleTopology( TriangleTopology triangleTopology ) {
-    D3DPRIMITIVETYPE result;
-
     switch( triangleTopology ) {
-    case TriangleTopologyList:
-        result = D3DPT_TRIANGLELIST;
-        break;
-
-    case TriangleTopologyStrip:
-        result = D3DPT_TRIANGLESTRIP;
-        break;
-
+    case TriangleTopology::List:
+        return D3DPT_TRIANGLELIST;
+    case TriangleTopology::Strip:
+        return D3DPT_TRIANGLESTRIP;
     default:
         throwInvalidArgument( "'triangleTopology' is invalid" );
     }
-    return result;
 }
 
 Mesh::Pointer Mesh::create( const Description &description ) {

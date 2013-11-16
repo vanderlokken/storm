@@ -11,23 +11,23 @@ class Sampler {
 public:
     typedef std::shared_ptr<Sampler> Pointer;
 
-    enum MinifyingFilter {
-        MinifyingFilterNearest,
-        MinifyingFilterLinear,
-        MinifyingFilterBilinear,
-        MinifyingFilterTrilinear
+    enum class MinifyingFilter {
+        Nearest,
+        Linear,
+        Bilinear,
+        Trilinear
     };
 
-    enum MagnifyingFilter {
-        MagnifyingFilterNearest,
-        MagnifyingFilterLinear
+    enum class MagnifyingFilter {
+        Nearest,
+        Linear
     };
 
-    enum WrapMode {
-        WrapClamped,
-        WrapRepeated,
-        WrapMirrored,
-        WrapWithBorderColor
+    enum class WrapMode {
+        Clamped,
+        Repeated,
+        Mirrored,
+        WithBorderColor
     };
 
     struct Description {

@@ -58,8 +58,9 @@ void MouseWin::addEventHandler( const EventHandler<MovementEvent> &handler ) {
 }
 
 bool MouseWin::isButtonPressed( Button button ) const noexcept {
-    if( button <= ButtonCount )
-        return _buttonPressed[button];
+    const size_t buttonIndex = static_cast<size_t>( button );
+    if( buttonIndex <= ButtonCount )
+        return _buttonPressed[buttonIndex];
     else
         return false;
 }
@@ -111,19 +112,19 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
     // Button release events
 
     if( stateChanges & RI_MOUSE_BUTTON_1_UP )
-        processButtonRelease( ButtonLeft );
+        processButtonRelease( Button::Left );
 
     if( stateChanges & RI_MOUSE_BUTTON_2_UP )
-        processButtonRelease( ButtonRight );
+        processButtonRelease( Button::Right );
 
     if( stateChanges & RI_MOUSE_BUTTON_3_UP )
-        processButtonRelease( ButtonMiddle );
+        processButtonRelease( Button::Middle );
 
     if( stateChanges & RI_MOUSE_BUTTON_4_UP )
-        processButtonRelease( ButtonSideFirst );
+        processButtonRelease( Button::SideFirst );
 
     if( stateChanges & RI_MOUSE_BUTTON_5_UP )
-        processButtonRelease( ButtonSideSecond );
+        processButtonRelease( Button::SideSecond );
 
     // The further events are processed only when the cursor is inside
     // the client area of the rendering window and the rendering window is active
@@ -137,19 +138,19 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
     // Button press events
 
     if( stateChanges & RI_MOUSE_BUTTON_1_DOWN )
-        processButtonPress( ButtonLeft );
+        processButtonPress( Button::Left );
 
     if( stateChanges & RI_MOUSE_BUTTON_2_DOWN )
-        processButtonPress( ButtonRight );
+        processButtonPress( Button::Right );
 
     if( stateChanges & RI_MOUSE_BUTTON_3_DOWN )
-        processButtonPress( ButtonMiddle );
+        processButtonPress( Button::Middle );
 
     if( stateChanges & RI_MOUSE_BUTTON_4_DOWN )
-        processButtonPress( ButtonSideFirst );
+        processButtonPress( Button::SideFirst );
 
     if( stateChanges & RI_MOUSE_BUTTON_5_DOWN )
-        processButtonPress( ButtonSideSecond );
+        processButtonPress( Button::SideSecond );
 
     // A wheel scroll event
 
@@ -170,7 +171,8 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
 }
 
 void MouseWin::processButtonPress( Button button ) {
-    _buttonPressed[button] = true;
+    const size_t buttonIndex = static_cast<size_t>( button );
+    _buttonPressed[buttonIndex] = true;
 
     ButtonPressEvent event;
     event.button = button;
@@ -185,10 +187,12 @@ void MouseWin::processButtonRelease( Button button ) {
     // For example a user can press some button while the rendering window is not
     // active and then activate the rendering window and release the pressed button
 
-    if( !_buttonPressed[button] )
+    const size_t buttonIndex = static_cast<size_t>( button );
+
+    if( !_buttonPressed[buttonIndex] )
         return;
 
-    _buttonPressed[button] = false;
+    _buttonPressed[buttonIndex] = false;
 
     ButtonReleaseEvent event;
     event.button = button;
@@ -331,11 +335,11 @@ LRESULT MouseWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) noexc
     if( !activated ) {
         unlockCursor();
 
-        processButtonRelease( ButtonLeft );
-        processButtonRelease( ButtonRight );
-        processButtonRelease( ButtonMiddle );
-        processButtonRelease( ButtonSideFirst );
-        processButtonRelease( ButtonSideSecond );
+        processButtonRelease( Button::Left );
+        processButtonRelease( Button::Right );
+        processButtonRelease( Button::Middle );
+        processButtonRelease( Button::SideFirst );
+        processButtonRelease( Button::SideSecond );
     }
 
     return USE_DEFAULT_PROCESSING;

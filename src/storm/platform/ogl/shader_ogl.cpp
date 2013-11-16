@@ -25,22 +25,14 @@ ShaderCg::CompilerArguments ShaderOgl::selectCompilerArguments(
 }
 
 CGprofile ShaderOgl::selectProfile( Type type ) {
-    CGprofile result;
-
     switch( type ) {
-    case TypeVertex:
-        result = ::cgGLGetLatestProfile( CG_GL_VERTEX );
-        break;
-
-    case TypePixel:
-        result = ::cgGLGetLatestProfile( CG_GL_FRAGMENT );
-        break;
-
+    case Type::Vertex:
+        return ::cgGLGetLatestProfile( CG_GL_VERTEX );
+    case Type::Pixel:
+        return ::cgGLGetLatestProfile( CG_GL_FRAGMENT );
     default:
         throwInvalidArgument( "'type' is invalid" );
     }
-
-    return result;
 }
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {

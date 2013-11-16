@@ -13,14 +13,14 @@ class Texture {
 public:
     typedef std::shared_ptr<Texture> Pointer;
 
-    enum Format {
-        FormatXrgbUint8,
-        FormatArgbUint8
+    enum class Format {
+        XrgbUint8,
+        ArgbUint8
     };
 
-    enum LodGenerationMode {
-        LodGenerationAutomatic,
-        LodGenerationCustom
+    enum class LodGenerationMode {
+        Automatic,
+        Custom
     };
 
     struct Description {

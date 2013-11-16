@@ -10,26 +10,26 @@ class BlendingTechnique {
 public:
     typedef std::shared_ptr<BlendingTechnique> Pointer;
 
-    enum Operation {
-        OperationAddition,
-        OperationSubtraction,
-        OperationNegativeSubtraction,
-        OperationMinimum,
-        OperationMaximum
+    enum class Operation {
+        Addition,
+        Subtraction,
+        NegativeSubtraction,
+        Minimum,
+        Maximum
     };
 
-    enum Factor {
-        FactorZero,
-        FactorOne,
-        FactorSourceColor,
-        FactorInvertedSourceColor,
-        FactorDestinationColor,
-        FactorInvertedDestinationColor,
-        FactorSourceAlpha,
-        FactorInvertedSourceAlpha,
-        FactorDestinationAlpha,
-        FactorInvertedDestinationAlpha,
-        FactorSourceAlphaSaturate
+    enum class Factor {
+        Zero,
+        One,
+        SourceColor,
+        InvertedSourceColor,
+        DestinationColor,
+        InvertedDestinationColor,
+        SourceAlpha,
+        InvertedSourceAlpha,
+        DestinationAlpha,
+        InvertedDestinationAlpha,
+        SourceAlphaSaturate
     };
 
     struct Description {

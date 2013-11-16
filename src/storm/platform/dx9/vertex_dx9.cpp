@@ -73,103 +73,57 @@ ComPointer< IDirect3DVertexDeclaration9 > convert(
 }
 
 BYTE convertAttributeSemantics( Vertex::Attribute::Semantics semantics ) {
-    BYTE result;
-
     switch( semantics ) {
-    case Vertex::Attribute::SemanticsPosition:
-        result = D3DDECLUSAGE_POSITION;
-        break;
-
-    case Vertex::Attribute::SemanticsNormal:
-        result = D3DDECLUSAGE_NORMAL;
-        break;
-
-    case Vertex::Attribute::SemanticsTangent:
-        result = D3DDECLUSAGE_TANGENT;
-        break;
-
-    case Vertex::Attribute::SemanticsBinormal:
-        result = D3DDECLUSAGE_BINORMAL;
-        break;
-
-    case Vertex::Attribute::SemanticsColor:
-        result = D3DDECLUSAGE_COLOR;
-        break;
-
-    case Vertex::Attribute::SemanticsTextureCoordinates:
-        result = D3DDECLUSAGE_TEXCOORD;
-        break;
-
-    case Vertex::Attribute::SemanticsBlendingWeights:
-        result = D3DDECLUSAGE_BLENDWEIGHT;
-        break;
-
-    case Vertex::Attribute::SemanticsBlendingIndices:
-        result = D3DDECLUSAGE_BLENDINDICES;
-        break;
-
+    case Vertex::Attribute::Semantics::Position:
+        return D3DDECLUSAGE_POSITION;
+    case Vertex::Attribute::Semantics::Normal:
+        return D3DDECLUSAGE_NORMAL;
+    case Vertex::Attribute::Semantics::Tangent:
+        return D3DDECLUSAGE_TANGENT;
+    case Vertex::Attribute::Semantics::Binormal:
+        return D3DDECLUSAGE_BINORMAL;
+    case Vertex::Attribute::Semantics::Color:
+        return D3DDECLUSAGE_COLOR;
+    case Vertex::Attribute::Semantics::TextureCoordinates:
+        return D3DDECLUSAGE_TEXCOORD;
+    case Vertex::Attribute::Semantics::BlendingWeights:
+        return D3DDECLUSAGE_BLENDWEIGHT;
+    case Vertex::Attribute::Semantics::BlendingIndices:
+        return D3DDECLUSAGE_BLENDINDICES;
     default:
         throwInvalidArgument( "'semantics' is invalid" );
     }
-    return result;
 }
 
 BYTE convertAttributeFormat( Vertex::Attribute::Format format ) {
-    BYTE result;
-
     switch( format ) {
-    case Vertex::Attribute::FormatFloat:
-        result = D3DDECLTYPE_FLOAT1;
-        break;
-
-    case Vertex::Attribute::Format2Float:
-        result = D3DDECLTYPE_FLOAT2;
-        break;
-
-    case Vertex::Attribute::Format3Float:
-        result = D3DDECLTYPE_FLOAT3;
-        break;
-
-    case Vertex::Attribute::Format4Float:
-        result = D3DDECLTYPE_FLOAT4;
-        break;
-
-    case Vertex::Attribute::Format4Uint8:
-        result = D3DDECLTYPE_UBYTE4;
-        break;
-
-    case Vertex::Attribute::Format4Uint8Normalized:
-        result = D3DDECLTYPE_UBYTE4N;
-        break;
-
-    case Vertex::Attribute::Format2Int16:
-        result = D3DDECLTYPE_SHORT2;
-        break;
-
-    case Vertex::Attribute::Format2Int16Normalized:
-        result = D3DDECLTYPE_SHORT2N;
-        break;
-
-    case Vertex::Attribute::Format4Int16:
-        result = D3DDECLTYPE_SHORT4;
-        break;
-
-    case Vertex::Attribute::Format4Int16Normalized:
-        result = D3DDECLTYPE_SHORT4N;
-        break;
-
-    case Vertex::Attribute::Format2Uint16Normalized:
-        result = D3DDECLTYPE_USHORT2N;
-        break;
-
-    case Vertex::Attribute::Format4Uint16Normalized:
-        result = D3DDECLTYPE_USHORT4N;
-        break;
-
+    case Vertex::Attribute::Format::Float:
+        return D3DDECLTYPE_FLOAT1;
+    case Vertex::Attribute::Format::Vector2Float:
+        return D3DDECLTYPE_FLOAT2;
+    case Vertex::Attribute::Format::Vector3Float:
+        return D3DDECLTYPE_FLOAT3;
+    case Vertex::Attribute::Format::Vector4Float:
+        return D3DDECLTYPE_FLOAT4;
+    case Vertex::Attribute::Format::Vector4Uint8:
+        return D3DDECLTYPE_UBYTE4;
+    case Vertex::Attribute::Format::Vector4Uint8Normalized:
+        return D3DDECLTYPE_UBYTE4N;
+    case Vertex::Attribute::Format::Vector2Int16:
+        return D3DDECLTYPE_SHORT2;
+    case Vertex::Attribute::Format::Vector2Int16Normalized:
+        return D3DDECLTYPE_SHORT2N;
+    case Vertex::Attribute::Format::Vector4Int16:
+        return D3DDECLTYPE_SHORT4;
+    case Vertex::Attribute::Format::Vector4Int16Normalized:
+        return D3DDECLTYPE_SHORT4N;
+    case Vertex::Attribute::Format::Vector2Uint16Normalized:
+        return D3DDECLTYPE_USHORT2N;
+    case Vertex::Attribute::Format::Vector4Uint16Normalized:
+        return D3DDECLTYPE_USHORT4N;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
-    return result;
 }
 
 bool operator < ( const Vertex::Attribute &first, const Vertex::Attribute &second ) noexcept {

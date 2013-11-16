@@ -5,30 +5,30 @@ namespace storm {
 struct Vertex {
 
     struct Attribute {
-        enum Semantics {
-            SemanticsPosition,
-            SemanticsNormal,
-            SemanticsTangent,
-            SemanticsBinormal,
-            SemanticsColor,
-            SemanticsTextureCoordinates,
-            SemanticsBlendingWeights,
-            SemanticsBlendingIndices
+        enum class Semantics {
+            Position,
+            Normal,
+            Tangent,
+            Binormal,
+            Color,
+            TextureCoordinates,
+            BlendingWeights,
+            BlendingIndices
         };
 
-        enum Format {
-            FormatFloat,
-            Format2Float,
-            Format3Float,
-            Format4Float,
-            Format4Uint8,
-            Format4Uint8Normalized,
-            Format2Int16,
-            Format2Int16Normalized,
-            Format4Int16,
-            Format4Int16Normalized,
-            Format2Uint16Normalized,
-            Format4Uint16Normalized
+        enum class Format {
+            Float,
+            Vector2Float,
+            Vector3Float,
+            Vector4Float,
+            Vector4Uint8,
+            Vector4Uint8Normalized,
+            Vector2Int16,
+            Vector2Int16Normalized,
+            Vector4Int16,
+            Vector4Int16Normalized,
+            Vector2Uint16Normalized,
+            Vector4Uint16Normalized
         };
 
         unsigned short getSize() const;

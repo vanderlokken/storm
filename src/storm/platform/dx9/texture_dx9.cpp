@@ -15,12 +15,12 @@ TextureDx9::TextureDx9( const Description &description, const void *texels )
 
     const UINT width = _description.dimensions.getWidth();
     const UINT height = _description.dimensions.getHeight();
-    const UINT levelCount = (_description.lodGenerationMode == LodGenerationCustom) ? _description.customLodCount : 0;
+    const UINT levelCount = (_description.lodGenerationMode == LodGenerationMode::Custom) ? _description.customLodCount : 0;
           DWORD usage = selectResourceUsage( _description.resourceType );
     const D3DPOOL pool = selectResourcePool( _description.resourceType );
     const D3DFORMAT format = convertFormat( _description.format );
 
-    usage |= _description.lodGenerationMode == LodGenerationAutomatic ? D3DUSAGE_AUTOGENMIPMAP : 0;
+    usage |= _description.lodGenerationMode == LodGenerationMode::Automatic ? D3DUSAGE_AUTOGENMIPMAP : 0;
 
     const HRESULT result = device->CreateTexture(
         width, height, levelCount, usage, format, pool, _texture.getAddress(), nullptr );
@@ -74,36 +74,24 @@ ComPointer< IDirect3DTexture9 > TextureDx9::getTexture() const noexcept {
 }
 
 size_t TextureDx9::getTexelSize() const {
-    size_t result;
-
     switch( _description.format ) {
-    case FormatXrgbUint8:
-    case FormatArgbUint8:
-        result = 4;
-        break;
-
+    case Format::XrgbUint8:
+    case Format::ArgbUint8:
+        return 4;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
-    return result;
 }
 
 D3DFORMAT TextureDx9::convertFormat( Format format ) {
-    D3DFORMAT result;
-
     switch( format ) {
-    case FormatXrgbUint8:
-        result = D3DFMT_X8R8G8B8;
-        break;
-
-    case FormatArgbUint8:
-        result = D3DFMT_A8R8G8B8;
-        break;
-
+    case Format::XrgbUint8:
+        return D3DFMT_X8R8G8B8;
+    case Format::ArgbUint8:
+        return D3DFMT_A8R8G8B8;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
-    return result;
 }
 
 }

@@ -4,8 +4,8 @@ namespace storm {
 
 RasterizationTechnique::Pointer RasterizationTechnique::getDefault() {
     Description description;
-    description.cullMode = CullBackFaces;
-    description.fillMode = FillSolid;
+    description.cullMode = CullMode::BackFaces;
+    description.fillMode = FillMode::Solid;
     description.rectangleClippingEnabled = false;
     description.depthBias = 0;
     description.slopeScaleDepthBias = 0;

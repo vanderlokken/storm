@@ -9,11 +9,11 @@ namespace storm {
 
 Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) const noexcept {
     switch( shaderType ) {
-    case Shader::TypeVertex:
+    case Shader::Type::Vertex:
         return _vertexShader;
-    case Shader::TypePixel:
+    case Shader::Type::Pixel:
         return _pixelShader;
-    case Shader::TypeGeometry:
+    case Shader::Type::Geometry:
         return _geometryShader;
     default:
         throwInvalidArgument( "'shaderType' is invalid" );
@@ -22,13 +22,13 @@ Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) cons
 
 void RenderingSystemCommon::setShader( Shader::Pointer shader ) {
     switch( shader->getType() ) {
-    case Shader::TypeVertex:
+    case Shader::Type::Vertex:
         _vertexShader = shader;
         break;
-    case Shader::TypePixel:
+    case Shader::Type::Pixel:
         _pixelShader = shader;
         break;
-    case Shader::TypeGeometry:
+    case Shader::Type::Geometry:
         _geometryShader = shader;
         break;
     default:

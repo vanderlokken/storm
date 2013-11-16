@@ -13,14 +13,14 @@ namespace storm {
 
 class RenderingSystem {
 public:
-    enum ColorBufferFormat {
-        ColorBufferFormatXrgbUint8
+    enum class ColorBufferFormat {
+        XrgbUint8
     };
 
-    enum DepthBufferFormat {
-        DepthBufferFormatUint24,
-        DepthBufferFormatUint24Stencil8,
-        DepthBufferFormatUint32
+    enum class DepthBufferFormat {
+        Uint24,
+        Uint24Stencil8,
+        Uint32
     };
 
     static RenderingSystem* getInstance();

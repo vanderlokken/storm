@@ -68,7 +68,7 @@ void IndexBufferDx9::setIndices( size_t offset, size_t size, const void *indices
 
     DWORD flags = 0;
 
-    if( _description.resourceType == ResourceTypeDynamic && offset == 0 && size == _description.bufferSize )
+    if( _description.resourceType == ResourceType::Dynamic && offset == 0 && size == _description.bufferSize )
         flags = D3DLOCK_DISCARD;
 
     const HRESULT lockResult = _buffer->Lock( offset, size, &data, flags );

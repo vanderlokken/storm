@@ -52,7 +52,7 @@ void TextureOgl::setTexels( unsigned int lodIndex, const void *texels ) {
         format, type, texels );
     checkResult( "::glTexImage2D" );
 
-    if( _description.lodGenerationMode == LodGenerationAutomatic &&
+    if( _description.lodGenerationMode == LodGenerationMode::Automatic &&
         lodIndex == 0 )
     {
         ::glGenerateMipmap( GL_TEXTURE_2D );
@@ -68,9 +68,9 @@ const TextureHandleOgl& TextureOgl::getHandle() const noexcept {
 
 GLenum TextureOgl::convertFormat( Format format ) {
     switch( format ) {
-    case FormatXrgbUint8:
+    case Format::XrgbUint8:
         return GL_RGB;
-    case FormatArgbUint8:
+    case Format::ArgbUint8:
         return GL_RGBA;
     default:
         throwInvalidArgument( "'format' is invalid" );
@@ -79,9 +79,9 @@ GLenum TextureOgl::convertFormat( Format format ) {
 
 GLint TextureOgl::selectInternalFormat( Format format ) {
     switch( format ) {
-    case FormatXrgbUint8:
-    case FormatArgbUint8:
-        return GL_RGBA;
+    case Format::XrgbUint8:
+    case Format::ArgbUint8:
+        return GL_BGRA;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
