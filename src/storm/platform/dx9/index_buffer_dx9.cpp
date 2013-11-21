@@ -91,21 +91,14 @@ ComPointer< IDirect3DIndexBuffer9 > IndexBufferDx9::getBuffer() const noexcept {
 }
 
 D3DFORMAT IndexBufferDx9::selectFormat( size_t indexSize ) {
-    D3DFORMAT result;
-
     switch( indexSize ) {
     case 2:
-        result = D3DFMT_INDEX16;
-        break;
-
+        return D3DFMT_INDEX16;
     case 4:
-        result = D3DFMT_INDEX32;
-        break;
-
+        return D3DFMT_INDEX32;
     default:
         throwInvalidArgument( "'indexSize' is invalid" );
     }
-    return result;
 }
 
 IndexBuffer::Pointer IndexBuffer::create(

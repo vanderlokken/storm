@@ -36,21 +36,14 @@ GLenum IndexBufferOgl::getIndexFormat() const noexcept {
 }
 
 GLenum IndexBufferOgl::selectIndexFormat( size_t indexSize ) {
-    GLenum result;
-
     switch( indexSize ) {
     case 2:
-        result = GL_UNSIGNED_SHORT;
-        break;
-
+        return GL_UNSIGNED_SHORT;
     case 4:
-        result = GL_UNSIGNED_INT;
-        break;
-
+        return GL_UNSIGNED_INT;
     default:
         throwInvalidArgument( "'indexSize' is invalid" );
     }
-    return result;
 }
 
 IndexBuffer::Pointer IndexBuffer::create(
