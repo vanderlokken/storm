@@ -7,7 +7,7 @@
 #include <storm/index_buffer.h>
 #include <storm/framework.h>
 #include <storm/keyboard.h>
-#include <storm/math_constants.h>
+#include <storm/math.h>
 #include <storm/mesh.h>
 #include <storm/mouse.h>
 #include <storm/rendering_system.h>

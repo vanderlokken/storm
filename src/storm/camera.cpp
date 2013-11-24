@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <storm/math_constants.h>
+#include <storm/math.h>
 
 namespace storm {
 
