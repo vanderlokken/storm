@@ -10,6 +10,7 @@
 #include <storm/math.h>
 #include <storm/mesh.h>
 #include <storm/mouse.h>
+#include <storm/quaternion.h>
 #include <storm/rendering_system.h>
 #include <storm/rendering_window.h>
 #include <storm/shader.h>
