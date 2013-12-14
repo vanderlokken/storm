@@ -38,6 +38,7 @@ public:
 
     Matrix toRotationMatrix() const noexcept;
 
+    static Quaternion fromAxisAngle( const Vector&, float ) noexcept;
     static Quaternion slerp(
         const Quaternion&, const Quaternion&, float ) noexcept;
 

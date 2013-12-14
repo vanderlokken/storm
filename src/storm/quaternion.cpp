@@ -138,6 +138,17 @@ Matrix Quaternion::toRotationMatrix() const noexcept {
     );
 }
 
+Quaternion Quaternion::fromAxisAngle(
+    const Vector &axis, float angle ) noexcept
+{
+    const float sine = sin( angle / 2 );
+    return Quaternion(
+        axis.getX() * sine,
+        axis.getY() * sine,
+        axis.getZ() * sine,
+        cos(angle / 2) );
+}
+
 Quaternion Quaternion::slerp(
     const Quaternion &first, const Quaternion &second, float position ) noexcept
 {
