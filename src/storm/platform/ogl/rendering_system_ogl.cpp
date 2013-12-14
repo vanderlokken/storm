@@ -1,8 +1,8 @@
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
-#include <storm/platform/ogl/constants_ogl.h>
-#include <storm/platform/ogl/functions_ogl.h>
+#include <storm/platform/ogl/api_ogl.h>
 
+#define CGGL_NO_OPENGL
 #include <Cg/cgGL.h>
 
 #include <storm/output_technique.h>
@@ -17,6 +17,7 @@
 namespace storm {
 
 void RenderingSystemOgl::initialize() {
+    loadOpenGlApi();
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
@@ -224,6 +225,11 @@ void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
     ::glClear( GL_STENCIL_BUFFER_BIT );
     checkResult( "::glClear" );
     return;
+}
+
+void RenderingSystemOgl::installOpenGlContext() {
+    // OpenGL context is installed when the rendering system is being created
+    RenderingSystem::getInstance();
 }
 
 }

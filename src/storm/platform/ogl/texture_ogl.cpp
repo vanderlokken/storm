@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 
 namespace storm {
 

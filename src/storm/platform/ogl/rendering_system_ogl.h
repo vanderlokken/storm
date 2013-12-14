@@ -34,6 +34,8 @@ public:
     virtual void setColorBufferFormat( ColorBufferFormat ) = 0;
     virtual void setDepthBufferFormat( DepthBufferFormat ) = 0;
 
+    static void installOpenGlContext();
+
 protected:
     void initialize();
 

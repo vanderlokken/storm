@@ -1,7 +1,7 @@
 #pragma once
 
 #include <storm/blending_technique.h>
-#include <storm/platform/ogl/core_types_ogl.h>
+#include <storm/platform/ogl/api_ogl.h>
 
 namespace storm {
 

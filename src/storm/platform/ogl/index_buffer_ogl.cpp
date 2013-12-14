@@ -1,7 +1,7 @@
 #include <storm/platform/ogl/index_buffer_ogl.h>
 
 #include <storm/exception.h>
-#include <storm/platform/ogl/constants_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 
 namespace storm {
 
@@ -49,6 +49,8 @@ GLenum IndexBufferOgl::selectIndexFormat( size_t indexSize ) {
 IndexBuffer::Pointer IndexBuffer::create(
     const Description &description, const void *indices )
 {
+    RenderingSystemOgl::installOpenGlContext();
+
     return std::make_shared< IndexBufferOgl >( description, indices );
 }
 

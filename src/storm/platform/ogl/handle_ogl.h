@@ -2,7 +2,7 @@
 
 #include <storm/noexcept.h>
 #include <storm/noncopyable.h>
-#include <storm/platform/ogl/core_types_ogl.h>
+#include <storm/platform/ogl/api_ogl.h>
 
 namespace storm {
 

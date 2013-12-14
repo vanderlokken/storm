@@ -1,8 +1,12 @@
 #include <storm/platform/ogl/shader_ogl.h>
 
+#include <storm/platform/ogl/api_ogl.h>
+
+#define CGGL_NO_OPENGL
 #include <Cg/cgGL.h>
 
 #include <storm/exception.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 
 namespace storm {
 
@@ -36,6 +40,8 @@ CGprofile ShaderOgl::selectProfile( Type type ) {
 }
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
+    RenderingSystemOgl::installOpenGlContext();
+
     return std::make_shared< ShaderOgl >( sourceCode, type );
 }
 

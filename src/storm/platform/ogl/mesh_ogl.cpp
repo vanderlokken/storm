@@ -3,10 +3,9 @@
 #include <numeric>
 
 #include <storm/exception.h>
-#include <storm/platform/ogl/constants_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
-#include <storm/platform/ogl/functions_ogl.h>
 #include <storm/platform/ogl/index_buffer_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/platform/ogl/vertex_buffer_ogl.h>
 
 namespace storm {
@@ -177,6 +176,8 @@ MeshOgl::VertexAttributeFormat MeshOgl::convertVertexAttributeFormat( Vertex::At
 }
 
 std::shared_ptr<Mesh> Mesh::create( const Description &description ) {
+    RenderingSystemOgl::installOpenGlContext();
+
     return std::make_shared< MeshOgl >( description );
 }
 

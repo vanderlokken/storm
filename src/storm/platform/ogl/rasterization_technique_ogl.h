@@ -1,6 +1,6 @@
 #pragma once
 
-#include <storm/platform/ogl/core_types_ogl.h>
+#include <storm/platform/ogl/api_ogl.h>
 #include <storm/rasterization_technique.h>
 
 namespace storm {

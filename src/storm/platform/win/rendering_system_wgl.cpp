@@ -1,6 +1,7 @@
 #include <storm/platform/win/rendering_system_wgl.h>
 
 #include <storm/exception.h>
+#include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/win/rendering_window_win.h>
 
 // ----------------------------------------------------------------------------
@@ -13,7 +14,7 @@
 
 #define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
 
-HGLRC wglCreateContextAttribsARB( HDC, HGLRC, const int* );
+typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
 
 // ----------------------------------------------------------------------------
 
@@ -21,10 +22,9 @@ namespace storm {
 
 RenderingSystemWgl::RenderingSystemWgl()
     : _renderingWindowHandle( RenderingWindowWin::getInstance()->getHandle() ),
-      _deviceContextHandle( 0 ),
+      _deviceContextHandle( ::GetDC(_renderingWindowHandle) ),
       _renderingContextHandle( 0 )
 {
-    _deviceContextHandle = ::GetDC( _renderingWindowHandle );
     if( !_deviceContextHandle )
         throwRuntimeError( "::GetDC has failed" );
 
@@ -56,6 +56,10 @@ RenderingSystemWgl::RenderingSystemWgl()
 
     ::wglMakeCurrent( _deviceContextHandle, compatibilityContext );
 
+    const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
+        reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
+            ::wglGetProcAddress("wglCreateContextAttribsARB") );
+
     const int openGl_3_3_ContextAttributes[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
         WGL_CONTEXT_MINOR_VERSION_ARB, 3,
@@ -63,7 +67,7 @@ RenderingSystemWgl::RenderingSystemWgl()
         0
     };
 
-    _renderingContextHandle = ::wglCreateContextAttribsARB(
+    _renderingContextHandle = wglCreateContextAttribsARB(
         _deviceContextHandle, 0, openGl_3_3_ContextAttributes );
 
     ::wglDeleteContext( compatibilityContext );
@@ -79,9 +83,8 @@ RenderingSystemWgl::RenderingSystemWgl()
 }
 
 RenderingSystemWgl::~RenderingSystemWgl() {
-    ::wglMakeCurrent( 0, 0 );
-    ::ReleaseDC( _renderingWindowHandle, _deviceContextHandle );
     ::wglDeleteContext( _renderingContextHandle );
+    ::ReleaseDC( _renderingWindowHandle, _deviceContextHandle );
     return;
 }
 

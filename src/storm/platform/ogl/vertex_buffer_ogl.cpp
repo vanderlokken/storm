@@ -1,5 +1,7 @@
 #include <storm/platform/ogl/vertex_buffer_ogl.h>
 
+#include <storm/platform/ogl/rendering_system_ogl.h>
+
 namespace storm {
 
 VertexBufferOgl::VertexBufferOgl( const Description &description, const void *vertices )
@@ -29,6 +31,8 @@ const BufferHandleOgl& VertexBufferOgl::getHandle() const noexcept {
 VertexBuffer::Pointer VertexBuffer::create(
     const Description &description, const void *vertices )
 {
+    RenderingSystemOgl::installOpenGlContext();
+
     return std::make_shared< VertexBufferOgl >( description, vertices );
 }
 

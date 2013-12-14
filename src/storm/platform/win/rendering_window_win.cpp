@@ -31,7 +31,8 @@ RenderingWindowWin::RenderingWindowWin()
 
     const wchar_t *className = windowClass.lpszClassName;
     const wchar_t *windowName = L"";
-    const DWORD style = WS_CAPTION | WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
+    const DWORD style = WS_CAPTION | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
+        WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
     const int x = 0;
     const int y = 0;
     const int width = 0;
