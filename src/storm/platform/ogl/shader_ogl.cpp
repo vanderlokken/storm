@@ -7,8 +7,13 @@
 
 #include <storm/exception.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
+#include <storm/platform/ogl/texture_ogl.h>
 
 namespace storm {
+
+// ----------------------------------------------------------------------------
+//  ShaderOgl
+// ----------------------------------------------------------------------------
 
 ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
     : ShaderCg( selectCompilerArguments(sourceCode, type), type )
@@ -38,6 +43,20 @@ CGprofile ShaderOgl::selectProfile( Type type ) {
         throwInvalidArgument( "'type' is invalid" );
     }
 }
+
+// ----------------------------------------------------------------------------
+//  Shader::Uniform
+// ----------------------------------------------------------------------------
+
+void Shader::Uniform::setValue( Texture::Pointer texture ) {
+    ::cgGLSetTextureParameter( static_cast<CGparameter>(_identifier),
+        std::static_pointer_cast<TextureOgl>(texture)->getHandle() );
+    return;
+}
+
+// ----------------------------------------------------------------------------
+//  Shader
+// ----------------------------------------------------------------------------
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
     RenderingSystemOgl::installOpenGlContext();

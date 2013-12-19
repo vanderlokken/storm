@@ -9,8 +9,12 @@ namespace storm {
 class Color {
 public:
     Color() noexcept;
-    Color( unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255 ) noexcept;
-    Color( float normalizedR, float normalizedG, float normalizedB, float normalizedA = 1.0f ) noexcept;
+
+    Color(
+        unsigned char r,
+        unsigned char g,
+        unsigned char b,
+        unsigned char a = 255 ) noexcept;
 
     explicit Color( uint32_t argb ) noexcept;
 
@@ -35,6 +39,12 @@ public:
     void setNormalizedG( float ) noexcept;
     void setNormalizedB( float ) noexcept;
     void setNormalizedA( float ) noexcept;
+
+    static Color fromNormalized(
+        float normalizedR,
+        float normalizedG,
+        float normalizedB,
+        float normalizedA = 1.0f ) noexcept;
 
     static const Color Black;
     static const Color White;

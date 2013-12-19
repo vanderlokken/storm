@@ -82,7 +82,7 @@ GLint TextureOgl::selectInternalFormat( Format format ) {
     switch( format ) {
     case Format::XrgbUint8:
     case Format::ArgbUint8:
-        return GL_BGRA;
+        return GL_RGBA8;
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
@@ -90,6 +90,14 @@ GLint TextureOgl::selectInternalFormat( Format format ) {
 
 const Texture::Description& TextureOgl::getDescription() const noexcept {
     return _description;
+}
+
+Texture::Pointer Texture::create(
+    const Description &description, const void *texels )
+{
+    RenderingSystemOgl::installOpenGlContext();
+
+    return std::make_shared< TextureOgl >( description, texels );
 }
 
 }

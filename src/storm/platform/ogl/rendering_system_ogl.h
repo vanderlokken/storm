@@ -34,6 +34,8 @@ public:
     virtual void setColorBufferFormat( ColorBufferFormat ) = 0;
     virtual void setDepthBufferFormat( DepthBufferFormat ) = 0;
 
+    // This method should be called to prevent situations when OpenGL API is
+    // being accessed with no context being installed.
     static void installOpenGlContext();
 
 protected:

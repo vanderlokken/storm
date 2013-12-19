@@ -38,7 +38,7 @@ template<class Container> IndexBuffer::Pointer IndexBuffer::create( const Contai
     Description description;
     description.indexSize = sizeof( IndexType );
     description.bufferSize = sizeof( IndexType ) * indices.size();
-    description.resourceType = ResourceTypeStatic;
+    description.resourceType = ResourceType::Static;
 
     return create( description, indices.data() );
 }

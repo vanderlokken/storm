@@ -8,14 +8,6 @@ Color::Color() noexcept
 Color::Color( unsigned char r, unsigned char g, unsigned char b, unsigned char a ) noexcept
     : _value( (a << 24) | (r << 16) | (g << 8) | (b << 0) ) { }
 
-Color::Color( float normalizedR, float normalizedG, float normalizedB, float normalizedA ) noexcept
-    : _value(
-        (convertNormalizedValue(normalizedA) << 24) |
-        (convertNormalizedValue(normalizedR) << 16) |
-        (convertNormalizedValue(normalizedG) << 8) |
-        (convertNormalizedValue(normalizedB) << 0)
-      ) { }
-
 Color::Color( uint32_t argb ) noexcept
     : _value( argb ) { }
 
@@ -93,6 +85,20 @@ void Color::setNormalizedB( float normalizedB ) noexcept {
 void Color::setNormalizedA( float normalizedA ) noexcept {
     setA( convertNormalizedValue(normalizedA) );
     return;
+}
+
+Color Color::fromNormalized(
+    float normalizedR,
+    float normalizedG,
+    float normalizedB,
+    float normalizedA ) noexcept
+{
+    return Color(
+        (convertNormalizedValue(normalizedA) << 24) |
+        (convertNormalizedValue(normalizedR) << 16) |
+        (convertNormalizedValue(normalizedG) << 8) |
+        (convertNormalizedValue(normalizedB) << 0)
+    );
 }
 
 unsigned char Color::convertNormalizedValue( float normalizedValue ) noexcept {

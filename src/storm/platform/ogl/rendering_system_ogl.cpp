@@ -21,6 +21,8 @@ void RenderingSystemOgl::initialize() {
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
+    ::cgGLSetManageTextureParameters(
+        CGContextInstance::getInstance(), CG_TRUE );
     return;
 }
 

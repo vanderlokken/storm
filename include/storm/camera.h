@@ -9,8 +9,6 @@ namespace storm {
 
 class Camera {
 public:
-    void activate() const;
-
     const Vector& getPosition() const noexcept;
     void setPosition( const Vector& ) noexcept;
 

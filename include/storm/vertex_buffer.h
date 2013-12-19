@@ -41,7 +41,7 @@ template<class Container> VertexBuffer::Pointer VertexBuffer::create( const Cont
         std::vector< Vertex::Attribute >( std::begin(VertexType::attributes), std::end(VertexType::attributes) );
     description.vertexSize = sizeof( VertexType );
     description.bufferSize = sizeof( VertexType ) * vertices.size();
-    description.resourceType = ResourceTypeStatic;
+    description.resourceType = ResourceType::Static;
 
     return create( description, vertices.data() );
 }
