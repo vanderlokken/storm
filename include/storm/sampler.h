@@ -39,6 +39,7 @@ public:
     };
 
     static Sampler::Pointer create( const Description& );
+    static Sampler::Pointer getDefault();
 
     virtual ~Sampler() { }
 
