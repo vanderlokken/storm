@@ -1,5 +1,7 @@
 #include <storm/platform/ogl/api_ogl.h>
 
+#include <storm/platform/ogl/check_result_ogl.h>
+
 PFNGLCULLFACEPROC glCullFace = nullptr;
 PFNGLFRONTFACEPROC glFrontFace = nullptr;
 PFNGLHINTPROC glHint = nullptr;
@@ -1195,4 +1197,15 @@ void loadOpenGlApi() {
     glTexPageCommitmentARB = static_cast<PFNGLTEXPAGECOMMITMENTARBPROC>( load("glTexPageCommitmentARB") );
 }
 
+OpenGlVersion getOpenGlVersion() {
+    OpenGlVersion version;
+
+    ::glGetIntegerv( GL_MAJOR_VERSION, &version.first );
+    checkResult( "::glGetIntegerv" );
+    ::glGetIntegerv( GL_MINOR_VERSION, &version.second );
+    checkResult( "::glGetIntegerv" );
+
+    return version;
 }
+
+} // namespace storm

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #ifdef _WIN32
 #define NOMINMAX
 #endif
@@ -7,7 +9,12 @@
 #include <gl/glcorearb.h> // http://www.opengl.org/registry/api/GL/glcorearb.h
 
 namespace storm {
+
 void loadOpenGlApi();
+
+typedef std::pair<int, int> OpenGlVersion;
+OpenGlVersion getOpenGlVersion();
+
 }
 
 extern PFNGLCULLFACEPROC glCullFace;
