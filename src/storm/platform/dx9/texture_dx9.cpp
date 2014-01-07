@@ -75,7 +75,8 @@ ComPointer< IDirect3DTexture9 > TextureDx9::getTexture() const noexcept {
 
 size_t TextureDx9::getTexelSize() const {
     switch( _description.format ) {
-    case Format::XrgbUint8:
+    case Format::RgbUint8:
+        return 3;
     case Format::ArgbUint8:
         return 4;
     default:
@@ -85,8 +86,8 @@ size_t TextureDx9::getTexelSize() const {
 
 D3DFORMAT TextureDx9::convertFormat( Format format ) {
     switch( format ) {
-    case Format::XrgbUint8:
-        return D3DFMT_X8R8G8B8;
+    case Format::RgbUint8:
+        return D3DFMT_R8G8B8;
     case Format::ArgbUint8:
         return D3DFMT_A8R8G8B8;
     default:

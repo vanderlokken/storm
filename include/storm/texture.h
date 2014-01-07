@@ -14,7 +14,7 @@ public:
     typedef std::shared_ptr<Texture> Pointer;
 
     enum class Format {
-        XrgbUint8,
+        RgbUint8,
         ArgbUint8
     };
 

@@ -69,7 +69,7 @@ const TextureHandleOgl& TextureOgl::getHandle() const noexcept {
 
 GLenum TextureOgl::convertFormat( Format format ) {
     switch( format ) {
-    case Format::XrgbUint8:
+    case Format::RgbUint8:
         return GL_RGB;
     case Format::ArgbUint8:
         return GL_RGBA;
@@ -80,7 +80,7 @@ GLenum TextureOgl::convertFormat( Format format ) {
 
 GLint TextureOgl::selectInternalFormat( Format format ) {
     switch( format ) {
-    case Format::XrgbUint8:
+    case Format::RgbUint8:
     case Format::ArgbUint8:
         return GL_RGBA8;
     default:
