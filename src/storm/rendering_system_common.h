@@ -11,8 +11,6 @@ public:
     virtual void setShader( Shader::Pointer );
 
 protected:
-    void setShaderUniformValues();
-
     Shader::Pointer _vertexShader;
     Shader::Pointer _pixelShader;
     Shader::Pointer _geometryShader;

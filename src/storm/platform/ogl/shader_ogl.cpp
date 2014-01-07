@@ -1,62 +1,144 @@
 #include <storm/platform/ogl/shader_ogl.h>
 
-#include <storm/platform/ogl/api_ogl.h>
-
-#define CGGL_NO_OPENGL
-#include <Cg/cgGL.h>
-
 #include <storm/exception.h>
+#include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
-#include <storm/platform/ogl/texture_ogl.h>
 
 namespace storm {
 
-// ----------------------------------------------------------------------------
-//  ShaderOgl
-// ----------------------------------------------------------------------------
+ProgramHandleOgl::ProgramHandleOgl(
+    GLenum shaderType, const char *sourceCode )
+{
+    _handle = ::glCreateShaderProgramv( shaderType, 1, &sourceCode );
+    checkResult( "::glCreateShaderProgramv" );
+}
+
+ProgramHandleOgl::~ProgramHandleOgl() {
+    ::glDeleteProgram( _handle );
+}
 
 ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
-    : ShaderCg( selectCompilerArguments(sourceCode, type), type )
+    : _type( type ), _handle( convertType(type), sourceCode.c_str() )
 {
-    ::cgGLLoadProgram( _program );
-    checkCgError( "::cgGLLoadProgram" );
+    auto getParameter = [this]( GLenum parameter ) {
+        GLint value = 0;
+
+        ::glGetProgramiv( _handle, parameter, &value );
+        checkResult( "::glGetProgramiv" );
+
+        return value;
+    };
+
+    if( getParameter(GL_LINK_STATUS) == GL_FALSE ) {
+        std::string log( getParameter(GL_INFO_LOG_LENGTH), 0 );
+
+        ::glGetProgramInfoLog( _handle, log.size(), nullptr, &log[0] );
+        checkResult( "::glGetProgramInfoLog" );
+
+        throwRuntimeError( "Shader compilation failed:\n" + log );
+    }
 }
 
-ShaderCg::CompilerArguments ShaderOgl::selectCompilerArguments(
-    const std::string &sourceCode, Type type )
-{
-    CompilerArguments compilerArguments;
-    compilerArguments.sourceCode = sourceCode.c_str();
-    compilerArguments.profile = selectProfile( type );
-    compilerArguments.compilerOptions =
-        ::cgGLGetOptimalOptions( compilerArguments.profile );
-    return compilerArguments;
+Shader::Type ShaderOgl::getType() const noexcept {
+    return _type;
 }
 
-CGprofile ShaderOgl::selectProfile( Type type ) {
+Shader::Uniform ShaderOgl::getUniform( const std::string &identifier ) const {
+    const GLint location =
+        ::glGetUniformLocation( _handle, identifier.c_str() );
+    checkResult( "::glGetUniformLocation" );
+
+    if( location == -1 )
+        throwRuntimeError( "Invalid uniform identifier" );
+
+    return Uniform( reinterpret_cast<void*>(location),
+        std::const_pointer_cast<ShaderOgl>(shared_from_this()) );
+}
+
+const ProgramHandleOgl& ShaderOgl::getHandle() const {
+    return _handle;
+}
+
+GLenum ShaderOgl::convertType( Type type ) {
     switch( type ) {
     case Type::Vertex:
-        return ::cgGLGetLatestProfile( CG_GL_VERTEX );
+        return GL_VERTEX_SHADER;
     case Type::Pixel:
-        return ::cgGLGetLatestProfile( CG_GL_FRAGMENT );
+        return GL_FRAGMENT_SHADER;
+    case Type::Geometry:
+        return GL_GEOMETRY_SHADER;
     default:
         throwInvalidArgument( "'type' is invalid" );
     }
 }
 
-// ----------------------------------------------------------------------------
 //  Shader::Uniform
-// ----------------------------------------------------------------------------
 
-void Shader::Uniform::setValue( Texture::Pointer texture ) {
-    ::cgGLSetTextureParameter( static_cast<CGparameter>(_identifier),
-        std::static_pointer_cast<TextureOgl>(texture)->getHandle() );
-    return;
+Shader::Uniform::Uniform( void *identifier, Shader::Pointer shader )
+    : _identifier( identifier ), _shader( shader )
+{
 }
 
-// ----------------------------------------------------------------------------
-//  Shader
-// ----------------------------------------------------------------------------
+#define _program std::static_pointer_cast< ShaderOgl >( _shader )->getHandle()
+#define _location reinterpret_cast< GLint >( _identifier )
+
+void Shader::Uniform::setValue( int value ) {
+    ::glProgramUniform1i( _program, _location, value );
+    checkResult( "::glProgramUniform1i" );
+}
+
+void Shader::Uniform::setValue( float value ) {
+    ::glProgramUniform1f( _program, _location, value );
+    checkResult( "::glProgramUniform1f" );
+}
+
+void Shader::Uniform::setValue( const Color &value ) {
+    ::glProgramUniform4f(
+        _program,
+        _location,
+        value.getNormalizedR(),
+        value.getNormalizedG(),
+        value.getNormalizedB(),
+        value.getNormalizedA() );
+    checkResult( "::glProgramUniform4f" );
+}
+
+void Shader::Uniform::setValue( const Vector &value ) {
+    ::glProgramUniform3f(
+        _program, _location, value.getX(), value.getY(), value.getZ() );
+    checkResult( "::glProgramUniform3f" );
+}
+
+void Shader::Uniform::setValue( const Matrix &value ) {
+    const GLsizei count = 1;
+    const GLboolean transpose = true;
+
+    ::glProgramUniformMatrix4fv(
+        _program, _location, count, transpose, value[0] );
+    checkResult( "::glProgramUniformMatrix4fv" );
+}
+
+void Shader::Uniform::setValue( const std::vector<Matrix> &matrices ) {
+    const GLsizei count = matrices.size();
+    const GLboolean transpose = true;
+
+    ::glProgramUniformMatrix4fv(
+        _program, _location, count, transpose, matrices.front()[0] );
+    checkResult( "::glProgramUniformMatrix4fv" );
+}
+
+#undef _program
+#undef _location
+
+void Shader::Uniform::setValue( Texture::Pointer texture ) {
+    throwNotImplemented();
+}
+
+void Shader::Uniform::setValue( Sampler::Pointer sampler ) {
+    throwNotImplemented();
+}
+
+// Shader
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
     RenderingSystemOgl::installOpenGlContext();

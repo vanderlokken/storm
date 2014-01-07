@@ -1,9 +1,6 @@
 #include <storm/rendering_system_common.h>
 
-#include <array>
-
 #include <storm/exception.h>
-#include <storm/shader_cg.h>
 
 namespace storm {
 
@@ -34,22 +31,6 @@ void RenderingSystemCommon::setShader( Shader::Pointer shader ) {
     default:
         throwInvalidArgument( "'shader' is invalid" );
     }
-}
-
-void RenderingSystemCommon::setShaderUniformValues() {
-
-    std::array< Shader::Pointer, 3 > shaders = {
-        _vertexShader,
-        _pixelShader,
-        _geometryShader
-    };
-
-    for( const auto &shader : shaders ) {
-        auto shaderCg = std::static_pointer_cast< ShaderCg >( shader );
-        if( shaderCg )
-            shaderCg->updateUniformValues();
-    }
-    return;
 }
 
 }

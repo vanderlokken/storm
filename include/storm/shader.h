@@ -6,12 +6,11 @@
 
 #include <storm/color.h>
 #include <storm/matrix.h>
+#include <storm/sampler.h>
 #include <storm/texture.h>
 #include <storm/vector.h>
 
 namespace storm {
-
-class Sampler;
 
 class Shader {
 public:
@@ -25,7 +24,7 @@ public:
 
     class Uniform {
     public:
-        Uniform( void* );
+        Uniform( void*, Shader::Pointer );
 
         void setValue( int value );
         void setValue( float value );
@@ -36,9 +35,11 @@ public:
         void setValue( const std::vector<Matrix> &matrices );
 
         void setValue( Texture::Pointer texture );
+        void setValue( Sampler::Pointer sampler );
 
     private:
         void *_identifier;
+        Shader::Pointer _shader;
     };
 
     static Shader::Pointer create( const std::string &sourceCode, Type type );

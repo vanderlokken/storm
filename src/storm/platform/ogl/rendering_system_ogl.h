@@ -1,8 +1,15 @@
 #pragma once
 
+#include <storm/platform/ogl/handle_ogl.h>
 #include <storm/rendering_system_common.h>
 
 namespace storm {
+
+class ProgramPipelineHandleOgl : public HandleOgl {
+public:
+    ProgramPipelineHandleOgl();
+    ~ProgramPipelineHandleOgl();
+};
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
@@ -42,6 +49,10 @@ protected:
     void initialize();
 
 private:
+    // This object should be constructed after OpenGL context creation. To
+    // ensure this we're using heap allocation instead of stack allocation.
+    std::unique_ptr<ProgramPipelineHandleOgl> _programPipeline;
+
     RasterizationTechnique::Pointer _rasterizationTechnique;
     OutputTechnique::Pointer _outputTechnique;
     BlendingTechnique::Pointer _blendingTechnique;

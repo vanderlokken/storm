@@ -1,22 +1,32 @@
 #pragma once
 
-#include <stdexcept>
+#include <exception>
+#include <string>
 
 #define throwRuntimeError( description ) \
-    throw std::runtime_error( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, description) )
+    throw Exception( __FILE__, __LINE__, __FUNCTION__, description )
 
 #define throwLogicError( description ) \
-    throw std::logic_error( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, description) )
+    throw Exception( __FILE__, __LINE__, __FUNCTION__, description )
 
 #define throwInvalidArgument( description ) \
-    throw std::invalid_argument( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, description) )
+    throw Exception( __FILE__, __LINE__, __FUNCTION__, description )
 
 #define throwNotImplemented() \
-    throw std::runtime_error( formatExceptionMessage(__FILE__, __LINE__, __FUNCTION__, "Not implemented") )
+    throw Exception( __FILE__, __LINE__, __FUNCTION__, "Not implemented" )
 
 namespace storm {
 
-const char* formatExceptionMessage(
-    const char *fileName, long line, const char *functionName, const char *description );
+class Exception : public std::exception {
+public:
+    Exception(
+        const char *fileName, long line, const char *functionName,
+        const std::string &description );
+
+    virtual const char* what() const;
+
+private:
+    std::string _message;
+};
 
 }

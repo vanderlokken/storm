@@ -1,20 +1,23 @@
 #include <storm/exception.h>
 
-#if defined( _MSC_VER ) && ( _MSC_VER <= 1800 )
-#   define snprintf sprintf_s
-#endif
+#include <sstream>
 
 namespace storm {
 
-const char* formatExceptionMessage(
-    const char *fileName, long line, const char *functionName, const char *description )
+Exception::Exception(
+    const char *fileName, long line, const char *functionName,
+    const std::string &description )
 {
-    const size_t size = 1024;
-    static char message[ size ];
+    std::stringstream messageStream;
 
-    ::snprintf( message, size, "%s(%ld): %s\n%s", fileName, line, functionName, description );
+    messageStream << fileName << "(" << line << "): " << functionName <<
+        std::endl << description;
 
-    return message;
+    _message = messageStream.str();
+}
+
+const char* Exception::what() const {
+    return _message.c_str();
 }
 
 }

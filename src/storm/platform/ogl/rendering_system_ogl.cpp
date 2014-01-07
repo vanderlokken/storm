@@ -2,9 +2,6 @@
 
 #include <storm/platform/ogl/api_ogl.h>
 
-#define CGGL_NO_OPENGL
-#include <Cg/cgGL.h>
-
 #include <storm/output_technique.h>
 #include <storm/platform/ogl/blending_technique_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
@@ -16,19 +13,29 @@
 
 namespace storm {
 
+ProgramPipelineHandleOgl::ProgramPipelineHandleOgl() {
+    ::glGenProgramPipelines( 1, &_handle );
+    checkResult( "::glGenProgramPipelines" );
+}
+
+ProgramPipelineHandleOgl::~ProgramPipelineHandleOgl() {
+    ::glDeleteProgramPipelines( 1, &_handle );
+}
+
 void RenderingSystemOgl::initialize() {
     loadOpenGlApi();
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
-    ::cgGLSetManageTextureParameters(
-        CGContextInstance::getInstance(), CG_TRUE );
+
+    _programPipeline.reset( new ProgramPipelineHandleOgl );
+
+    ::glBindProgramPipeline( *_programPipeline );
+    checkResult( "::glBindProgramPipeline" );
     return;
 }
 
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
-    setShaderUniformValues();
-
     const auto &description = mesh->getDescription();
 
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
@@ -48,21 +55,25 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
 }
 
 void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
-    if( getShader(shader->getType()) == shader )
+    const Shader::Type shaderType = shader->getType();
+
+    if( getShader(shaderType) == shader )
         return;
 
     RenderingSystemCommon::setShader( shader );
 
-    auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
+    const auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
 
-    const CGprogram program = nativeShader->getProgram();
+    GLbitfield stage = 0;
+    if( shaderType == Shader::Type::Vertex )
+        stage = GL_VERTEX_SHADER_BIT;
+    else if( shaderType == Shader::Type::Pixel )
+        stage = GL_FRAGMENT_SHADER_BIT;
+    else if( shaderType == Shader::Type::Geometry )
+        stage = GL_GEOMETRY_SHADER_BIT;
 
-    ::cgGLBindProgram( program );
-    checkCgError( "::cgGLBindProgram" );
-
-    ::cgGLEnableProfile( ::cgGetProgramProfile(program) );
-    checkCgError( "::cgGLEnableProfile" );
-
+    ::glUseProgramStages( *_programPipeline, stage, nativeShader->getHandle() );
+    checkResult( "::glUseProgramStages" );
     return;
 }
 
