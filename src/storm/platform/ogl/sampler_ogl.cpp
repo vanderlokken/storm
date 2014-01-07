@@ -1,23 +1,64 @@
 #include <storm/platform/ogl/sampler_ogl.h>
 
 #include <storm/exception.h>
+#include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 
 namespace storm {
 
-SamplerOgl::SamplerOgl( const Description &description )
-    : _description( description ),
-      _minifyingFilter( convertMinifyingFilter(description.minifyingFilter) ),
-      _magnifyingFilter( convertMagnifyingFilter(description.magnifyingFilter) ),
-      _borderColor( description.borderColor.get() )
-{
-    _wrapModes[0] = convertWrapMode( description.wrapModes[0] );
-    _wrapModes[1] = convertWrapMode( description.wrapModes[1] );
-    _wrapModes[2] = convertWrapMode( description.wrapModes[2] );
+SamplerHandleOgl::SamplerHandleOgl() {
+    ::glGenSamplers( 1, &_handle );
+    checkResult( "::glGenSamplers" );
     return;
+}
+
+SamplerHandleOgl::~SamplerHandleOgl() {
+    ::glDeleteSamplers( 1, &_handle );
+    return;
+}
+
+SamplerOgl::SamplerOgl( const Description &description )
+    : _description( description )
+{
+    auto setParameter = [this](GLenum parameter, GLint value) {
+        ::glSamplerParameteri( _handle, parameter, value );
+        checkResult( "::glSamplerParameteri" );
+    };
+
+    setParameter( GL_TEXTURE_MIN_FILTER,
+        convertMinifyingFilter(description.minifyingFilter) );
+    setParameter( GL_TEXTURE_MAG_FILTER,
+        convertMagnifyingFilter(description.magnifyingFilter) );
+    setParameter( GL_TEXTURE_WRAP_S,
+        convertWrapMode(description.wrapModes[0]) );
+    setParameter( GL_TEXTURE_WRAP_T,
+        convertWrapMode(description.wrapModes[1]) );
+    setParameter( GL_TEXTURE_WRAP_R,
+        convertWrapMode(description.wrapModes[2]) );
+
+    const float color[] = {
+        description.borderColor.getNormalizedR(),
+        description.borderColor.getNormalizedG(),
+        description.borderColor.getNormalizedB(),
+        description.borderColor.getNormalizedA()
+    };
+    ::glSamplerParameterfv( _handle, GL_TEXTURE_BORDER_COLOR, color );
+    checkResult( "::glSamplerParameterfv" );
+
+    // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
+    #define TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+
+    ::glSamplerParameterf( _handle, TEXTURE_MAX_ANISOTROPY_EXT,
+        static_cast< float >(description.maximalAnisotropyDegree) );
+    checkResult( "::glSamplerParameterf" );
 }
 
 const Sampler::Description& SamplerOgl::getDescription() const noexcept {
     return _description;
+}
+
+const SamplerHandleOgl& SamplerOgl::getHandle() const {
+    return _handle;
 }
 
 GLenum SamplerOgl::convertMinifyingFilter( MinifyingFilter minifyingFilter ) {
@@ -59,6 +100,12 @@ GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
     default:
         throwInvalidArgument( "'wrapMode' is invalid" );
     }
+}
+
+Sampler::Pointer Sampler::create( const Description &description ) {
+    RenderingSystemOgl::installOpenGlContext();
+
+    return std::make_shared< SamplerOgl >( description );
 }
 
 }

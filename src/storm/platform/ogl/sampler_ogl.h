@@ -1,9 +1,16 @@
 #pragma once
 
 #include <storm/platform/ogl/api_ogl.h>
+#include <storm/platform/ogl/handle_ogl.h>
 #include <storm/sampler.h>
 
 namespace storm {
+
+class SamplerHandleOgl : public HandleOgl {
+public:
+    SamplerHandleOgl();
+    ~SamplerHandleOgl();
+};
 
 class SamplerOgl : public Sampler {
 public:
@@ -11,16 +18,15 @@ public:
 
     virtual const Description& getDescription() const noexcept;
 
-private:
+    const SamplerHandleOgl& getHandle() const;
+
+protected:
     static GLenum convertMinifyingFilter( MinifyingFilter );
     static GLenum convertMagnifyingFilter( MagnifyingFilter );
     static GLenum convertWrapMode( WrapMode );
 
     Description _description;
-    GLenum _minifyingFilter;
-    GLenum _magnifyingFilter;
-    std::array<GLenum, 3> _wrapModes;
-    GLuint _borderColor;
+    SamplerHandleOgl _handle;
 };
 
 }

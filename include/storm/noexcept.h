@@ -1,6 +1,9 @@
 #pragma once
 
-#define _ALLOW_KEYWORD_MACROS
+#if defined( _MSC_VER ) && ( _MSC_VER <= 1800 )
+#   define _ALLOW_KEYWORD_MACROS
+#endif
+
 #define noexcept
 
 #if defined( __clang__ )
