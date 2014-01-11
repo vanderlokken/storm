@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include <storm/noncopyable.h>
 #include <storm/platform/ogl/handle_ogl.h>
 #include <storm/shader.h>
@@ -23,11 +25,26 @@ public:
 
     const ProgramHandleOgl& getHandle() const;
 
+    void bindSamplers() const;
+
 private:
+    GLint getProgramParameter( GLenum parameter ) const;
+
+    void createSamplersMapping();
+
     static GLenum convertType( Type );
 
     Type _type;
     ProgramHandleOgl _handle;
+
+    struct GlslSampler {
+        GLint textureUnit;
+        Texture::Pointer texture;
+        Sampler::Pointer sampler;
+    };
+    std::map<GLint, GlslSampler> _samplersMapping;
+
+    friend class Uniform;
 };
 
 }

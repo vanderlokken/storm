@@ -74,7 +74,8 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
 
     ::glUseProgramStages( *_programPipeline, stage, nativeShader->getHandle() );
     checkResult( "::glUseProgramStages" );
-    return;
+
+    nativeShader->bindSamplers();
 }
 
 RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const noexcept {

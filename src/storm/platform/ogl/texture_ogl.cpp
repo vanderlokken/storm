@@ -35,8 +35,25 @@ void TextureOgl::getTexels( unsigned int lodIndex, void *texels ) const {
 
 void TextureOgl::setTexels( unsigned int lodIndex, const void *texels ) {
 
-    ::glBindTexture( GL_TEXTURE_2D, _texture );
-    checkResult( "::glBindTexture" );
+    class ScopeTextureBinding {
+    public:
+        ScopeTextureBinding( GLuint binding ) {
+            ::glGetIntegerv( GL_TEXTURE_BINDING_2D, &_previousBinding );
+            checkResult( "::glGetIntegerv" );
+
+            ::glBindTexture( GL_TEXTURE_2D, binding );
+            checkResult( "::glBindTexture" );
+        }
+
+        ~ScopeTextureBinding() {
+            ::glBindTexture( GL_TEXTURE_2D, _previousBinding );
+        }
+
+    private:
+        GLint _previousBinding;
+    };
+
+    ScopeTextureBinding scopeTextureBinding( _texture );
 
     const GLenum target = GL_TEXTURE_2D;
     const GLint level = lodIndex;
