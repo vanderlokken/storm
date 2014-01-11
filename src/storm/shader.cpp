@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

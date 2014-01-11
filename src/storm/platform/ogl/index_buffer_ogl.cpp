@@ -1,7 +1,7 @@
 #include <storm/platform/ogl/index_buffer_ogl.h>
 
-#include <storm/exception.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

@@ -5,8 +5,8 @@
 #include <numeric>
 #include <vector>
 
-#include <storm/exception.h>
 #include <storm/index_buffer.h>
+#include <storm/throw_exception.h>
 #include <storm/vertex_buffer.h>
 
 namespace storm {

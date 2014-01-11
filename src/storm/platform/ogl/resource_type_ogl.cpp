@@ -1,6 +1,6 @@
 #include <storm/platform/ogl/resource_type_ogl.h>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

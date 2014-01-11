@@ -1,6 +1,6 @@
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

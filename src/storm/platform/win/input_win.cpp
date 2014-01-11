@@ -1,7 +1,7 @@
 #include <storm/platform/win/input_win.h>
 
-#include <storm/exception.h>
 #include <storm/platform/win/rendering_window_win.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

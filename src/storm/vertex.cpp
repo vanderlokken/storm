@@ -1,6 +1,6 @@
 #include <storm/vertex.h>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

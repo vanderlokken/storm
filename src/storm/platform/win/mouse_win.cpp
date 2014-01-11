@@ -1,9 +1,9 @@
 #include <storm/platform/win/mouse_win.h>
 
-#include <storm/exception.h>
 #include <storm/platform/win/input_win.h>
 #include <storm/platform/win/rendering_window_win.h>
 #include <storm/platform/win/window_procedure_win.h>
+#include <storm/throw_exception.h>
 
 // The following definitions were taken from MSDN
 // See http://msdn.microsoft.com/en-us/library/ff543477%28v=VS.85%29.aspx

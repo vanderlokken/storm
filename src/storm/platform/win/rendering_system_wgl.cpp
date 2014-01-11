@@ -1,8 +1,8 @@
 #include <storm/platform/win/rendering_system_wgl.h>
 
-#include <storm/exception.h>
 #include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/win/rendering_window_win.h>
+#include <storm/throw_exception.h>
 
 // ----------------------------------------------------------------------------
 //  WGL_ARB_create_context extension

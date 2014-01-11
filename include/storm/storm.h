@@ -4,6 +4,7 @@
 #include <storm/camera.h>
 #include <storm/clock.h>
 #include <storm/common_vertex_types.h>
+#include <storm/exception.h>
 #include <storm/index_buffer.h>
 #include <storm/framework.h>
 #include <storm/keyboard.h>

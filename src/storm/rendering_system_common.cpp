@@ -1,6 +1,6 @@
 #include <storm/rendering_system_common.h>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

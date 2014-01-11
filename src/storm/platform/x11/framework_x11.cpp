@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include <storm/exception.h>
 #include <storm/platform/x11/display_connection_x11.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

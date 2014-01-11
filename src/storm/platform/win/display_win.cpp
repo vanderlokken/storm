@@ -6,7 +6,7 @@
 #define STRICT
 #include <windows.h>
 
-#include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 

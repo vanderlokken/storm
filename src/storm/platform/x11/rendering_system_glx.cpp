@@ -1,8 +1,8 @@
 #include <storm/platform/x11/rendering_system_glx.h>
 
-#include <storm/exception.h>
 #include <storm/platform/x11/display_connection_x11.h>
 #include <storm/platform/x11/rendering_window_x11.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
