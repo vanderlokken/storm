@@ -49,6 +49,8 @@ protected:
     void initialize();
 
 private:
+    static void setBooleanGlState( GLenum state, bool value );
+
     // This object should be constructed after OpenGL context creation. To
     // ensure this we're using heap allocation instead of stack allocation.
     std::unique_ptr<ProgramPipelineHandleOgl> _programPipeline;

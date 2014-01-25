@@ -7,6 +7,7 @@
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/index_buffer_ogl.h>
 #include <storm/platform/ogl/mesh_ogl.h>
+#include <storm/platform/ogl/output_technique_ogl.h>
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 #include <storm/platform/ogl/vertex_buffer_ogl.h>
@@ -100,18 +101,15 @@ void RenderingSystemOgl::setRasterizationTechnique(
     GLenum cullMode = nativeTechnique->getCullMode();
     GLenum fillMode = nativeTechnique->getFillMode();
 
-    if( cullMode != GL_NONE ) {
-        ::glEnable( GL_CULL_FACE );
-        checkResult( "::glEnable" );
+    const bool cullingEnabled = (cullMode != GL_NONE);
+    setBooleanGlState( GL_CULL_FACE, cullingEnabled );
 
+    if( cullingEnabled ) {
         ::glFrontFace( GL_CW );
         checkResult( "::glFrontFace" );
 
         ::glCullFace( cullMode );
         checkResult( "::glCullFace" );
-    } else {
-        ::glDisable( GL_CULL_FACE );
-        checkResult( "::glDisable" );
     }
 
     ::glPolygonMode( GL_FRONT_AND_BACK, fillMode );
@@ -119,13 +117,7 @@ void RenderingSystemOgl::setRasterizationTechnique(
 
     const auto &description = nativeTechnique->getDescription();
 
-    if( description.rectangleClippingEnabled ) {
-        ::glEnable( GL_SCISSOR_TEST );
-        checkResult( "::glEnable" );
-    } else {
-        ::glDisable( GL_SCISSOR_TEST );
-        checkResult( "::glDisable" );
-    }
+    setBooleanGlState( GL_SCISSOR_TEST, description.rectangleClippingEnabled );
 
     ::glPolygonOffset( description.slopeScaleDepthBias, description.depthBias );
     checkResult( "::glPolygonOffset" );
@@ -139,8 +131,54 @@ void RenderingSystemOgl::setOutputTechnique(
 {
     if( _outputTechnique == technique ) return;
 
-    ::glEnable( GL_DEPTH_TEST );
-    checkResult( "::glEnable" );
+    auto nativeTechnique =
+        std::static_pointer_cast< OutputTechniqueOgl >( technique );
+
+    const auto &description = nativeTechnique->getNativeDescription();
+
+    const auto &depthTest = description.depthTest;
+    const auto &stencilTest = description.stencilTest;
+
+    setBooleanGlState( GL_DEPTH_TEST, depthTest.enabled );
+    setBooleanGlState( GL_STENCIL_TEST, stencilTest.enabled );
+
+    if( depthTest.enabled ) {
+        ::glDepthFunc( depthTest.passCondition );
+        checkResult( "::glDepthFunc" );
+    }
+
+    if( stencilTest.enabled ) {
+        ::glStencilOpSeparate(
+            GL_FRONT,
+            stencilTest.algorithmForFrontFaces.operationOnStencilTestFail,
+            stencilTest.algorithmForFrontFaces.operationOnDepthTestFail,
+            stencilTest.algorithmForFrontFaces.operationOnDepthTestPass );
+        checkResult( "::glStencilOpSeparate" );
+
+        ::glStencilOpSeparate(
+            GL_BACK,
+            stencilTest.algorithmForBackFaces.operationOnStencilTestFail,
+            stencilTest.algorithmForBackFaces.operationOnDepthTestFail,
+            stencilTest.algorithmForBackFaces.operationOnDepthTestPass );
+        checkResult( "::glStencilOpSeparate" );
+
+        ::glStencilFuncSeparate(
+            GL_FRONT,
+            stencilTest.algorithmForFrontFaces.passCondition,
+            stencilTest.referenceValue,
+            stencilTest.mask );
+        checkResult( "::glStencilFuncSeparate" );
+
+        ::glStencilFuncSeparate(
+            GL_BACK,
+            stencilTest.algorithmForBackFaces.passCondition,
+            stencilTest.referenceValue,
+            stencilTest.mask );
+        checkResult( "::glStencilFuncSeparate" );
+    }
+
+    ::glDepthMask( description.writeDepthValues );
+    checkResult( "::glDepthMask" );
 
     _outputTechnique = technique;
     return;
@@ -153,10 +191,10 @@ void RenderingSystemOgl::setBlendingTechnique(
 
     auto nativeTechnique = std::static_pointer_cast< BlendingTechniqueOgl >( technique );
 
-    if( nativeTechnique ) {
-        ::glEnable( GL_BLEND );
-        checkResult( "::glEnable" );
+    const bool blendingEnabled = static_cast< bool >( nativeTechnique );
+    setBooleanGlState( GL_BLEND, blendingEnabled );
 
+    if( blendingEnabled ) {
         GLenum operation = nativeTechnique->getOperation();
         GLenum sourceFactor = nativeTechnique->getSourceFactor();
         GLenum destinationFactor = nativeTechnique->getDestinationFactor();
@@ -166,9 +204,6 @@ void RenderingSystemOgl::setBlendingTechnique(
 
         ::glBlendFunc( sourceFactor, destinationFactor );
         checkResult( "::glBlendFunc" );
-    } else {
-        ::glDisable( GL_BLEND );
-        checkResult( "::glDisable" );
     }
 
     _blendingTechnique = technique;
@@ -244,6 +279,16 @@ void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
 void RenderingSystemOgl::installOpenGlContext() {
     // OpenGL context is installed when the rendering system is being created
     RenderingSystem::getInstance();
+}
+
+void RenderingSystemOgl::setBooleanGlState( GLenum state, bool value ) {
+    if( value ) {
+        ::glEnable( state );
+        checkResult( "::glEnable" );
+    } else {
+        ::glDisable( state );
+        checkResult( "::glDisable" );
+    }
 }
 
 }
