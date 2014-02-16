@@ -1,6 +1,7 @@
 #include <storm/platform/ogl/texture_ogl.h>
 
 #include <algorithm>
+#include <cmath>
 
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
@@ -18,95 +19,291 @@ TextureHandleOgl::~TextureHandleOgl() {
     return;
 }
 
-TextureOgl::TextureOgl( const Description &description, const void *texels )
-    : _description( description )
-{
-    // TODO: use glTexStorage2D if possible
-
-    if( texels )
-        setTexels( 0, texels );
-
-    return;
-}
-
-void TextureOgl::getTexels( unsigned int lodIndex, void *texels ) const {
-    throwRuntimeError( "Not implemented" );
-}
-
-void TextureOgl::setTexels( unsigned int lodIndex, const void *texels ) {
-
-    class ScopeTextureBinding {
-    public:
-        ScopeTextureBinding( GLuint binding ) {
-            ::glGetIntegerv( GL_TEXTURE_BINDING_2D, &_previousBinding );
-            checkResult( "::glGetIntegerv" );
-
-            ::glBindTexture( GL_TEXTURE_2D, binding );
-            checkResult( "::glBindTexture" );
-        }
-
-        ~ScopeTextureBinding() {
-            ::glBindTexture( GL_TEXTURE_2D, _previousBinding );
-        }
-
-    private:
-        GLint _previousBinding;
-    };
-
-    ScopeTextureBinding scopeTextureBinding( _texture );
-
-    const GLenum target = GL_TEXTURE_2D;
-    const GLint level = lodIndex;
-    const GLint internalFormat = selectInternalFormat( _description.format );
-    const GLsizei width =
-        std::max( _description.dimensions.getWidth() >> lodIndex, 1U );
-    const GLsizei height =
-        std::max( _description.dimensions.getHeight() >> lodIndex, 1U );
-    const GLint border = 0;
-    const GLenum format = convertFormat( _description.format );
-    const GLenum type = GL_UNSIGNED_BYTE;
-
-    ::glTexImage2D( target, level, internalFormat, width, height, border,
-        format, type, texels );
-    checkResult( "::glTexImage2D" );
-
-    if( _description.lodGenerationMode == LodGenerationMode::Automatic &&
-        lodIndex == 0 )
+class ScopeTextureBinding {
+public:
+    ScopeTextureBinding( GLenum target, GLuint binding )
+        : _target( target )
     {
-        ::glGenerateMipmap( GL_TEXTURE_2D );
-        checkResult( "::glGenerateMipmap" );
+        GLenum bindingEnumeration;
+        switch( _target ) {
+        case GL_TEXTURE_1D:
+            bindingEnumeration = GL_TEXTURE_BINDING_1D;
+            break;
+        case GL_TEXTURE_2D:
+            bindingEnumeration = GL_TEXTURE_BINDING_2D;
+            break;
+        case GL_TEXTURE_2D_MULTISAMPLE:
+            bindingEnumeration = GL_TEXTURE_BINDING_2D_MULTISAMPLE;
+            break;
+        case GL_TEXTURE_3D:
+            bindingEnumeration = GL_TEXTURE_BINDING_3D;
+            break;
+        case GL_TEXTURE_1D_ARRAY:
+            bindingEnumeration = GL_TEXTURE_BINDING_1D_ARRAY;
+            break;
+        case GL_TEXTURE_2D_ARRAY:
+            bindingEnumeration = GL_TEXTURE_BINDING_2D_ARRAY;
+            break;
+        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
+            bindingEnumeration = GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
+            break;
+        case GL_TEXTURE_CUBE_MAP:
+            bindingEnumeration = GL_TEXTURE_BINDING_CUBE_MAP;
+            break;
+        case GL_TEXTURE_BUFFER:
+            bindingEnumeration = GL_TEXTURE_BINDING_BUFFER;
+            break;
+        default:
+            storm_assert( false );
+        }
+
+        ::glGetIntegerv( bindingEnumeration, &_previousBinding );
+        checkResult( "::glGetIntegerv" );
+
+        ::glBindTexture( target, binding );
+        checkResult( "::glBindTexture" );
     }
 
-    return;
+    ~ScopeTextureBinding() {
+        ::glBindTexture( _target, _previousBinding );
+    }
+
+private:
+    GLenum _target;
+    GLint _previousBinding;
+};
+
+TextureOgl::TextureOgl( const Description &description, const void *texels )
+    : _description( description ),
+      _texelDescription( selectTexelDescription(description.format) ),
+      _target( selectTarget(description.layout) )
+{
+#ifdef _DEBUG
+    validateDescription( description );
+#endif
+
+    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+
+    const unsigned int dimensionsMaximum = std::max(
+        {_description.width, _description.height, _description.depth} );
+    const unsigned int levels​Maximum =
+        static_cast<unsigned int>( log2(dimensionsMaximum) ) + 1;
+    const unsigned int levels​ = (_description.mipLevels == CompleteMipMap) ?
+        levels​Maximum : _description.mipLevels;
+    storm_assert( levels​ <= levels​Maximum );
+
+    switch( _description.layout ) {
+    case Layout::Separate1d:
+        ::glTexStorage1D(
+            _target, levels​, _texelDescription.internalFormat,
+            description.width );
+        checkResult( "::glTexStorage1D" );
+        break;
+    case Layout::Separate2d:
+        ::glTexStorage2D(
+            _target, levels​, _texelDescription.internalFormat,
+            description.width,
+            description.height );
+        checkResult( "::glTexStorage2D" );
+        break;
+    case Layout::Separate3d:
+    case Layout::Layered2d:
+        ::glTexStorage3D(
+            _target, levels​, _texelDescription.internalFormat,
+            description.width,
+            description.height,
+            description.depth );
+        checkResult( "::glTexStorage3D" );
+        break;
+    case Layout::Layered1d:
+        ::glTexStorage2D(
+            _target, levels​, _texelDescription.internalFormat,
+            description.width,
+            description.depth );
+        checkResult( "::glTexStorage2D" );
+        break;
+    default:
+        throwNotImplemented();
+    }
+
+    if( texels )
+        throwNotImplemented();
+}
+
+void TextureOgl::getTexels( const Region &region, void *texels ) const {
+    storm_assert(
+        _description.layout != Layout::Separate2dMsaa &&
+        _description.layout != Layout::Layered2dMsaa );
+
+    throwNotImplemented();
+}
+
+void TextureOgl::setTexels( const Region &region, const void *texels ) {
+    storm_assert(
+        _description.layout != Layout::Separate2dMsaa &&
+        _description.layout != Layout::Layered2dMsaa );
+
+    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+
+    switch( _description.layout ) {
+    case Layout::Separate1d:
+        ::glTexSubImage1D(
+            _target,
+            region.mipLevel,
+            region.x,
+            region.width,
+            _texelDescription.format, _texelDescription.type, texels );
+        checkResult( "::glTexSubImage1D" );
+        break;
+    case Layout::Separate2d:
+        ::glTexSubImage2D(
+            _target,
+            region.mipLevel,
+            region.x,
+            region.y,
+            region.width,
+            region.height,
+            _texelDescription.format, _texelDescription.type, texels );
+        checkResult( "::glTexSubImage2D" );
+        break;
+    case Layout::Layered2d:
+    case Layout::Separate3d:
+        ::glTexSubImage3D(
+            _target,
+            region.mipLevel,
+            region.x,
+            region.y,
+            region.z,
+            region.width,
+            region.height,
+            region.depth,
+            _texelDescription.format, _texelDescription.type, texels );
+        checkResult( "::glTexSubImage3D" );
+        break;
+    case Layout::Layered1d:
+        ::glTexSubImage2D(
+            _target,
+            region.mipLevel,
+            region.x,
+            region.z,
+            region.width,
+            region.depth,
+            _texelDescription.format, _texelDescription.type, texels );
+        checkResult( "::glTexSubImage2D" );
+        break;
+    default:
+        throwNotImplemented();
+    }
+}
+
+void TextureOgl::generateMipMap() {
+    storm_assert(
+        _description.layout != Layout::Separate2dMsaa &&
+        _description.layout != Layout::Layered2dMsaa &&
+        _description.layout != Layout::Buffer );
+
+    ::glGenerateMipmap( _target );
+    checkResult( "::glGenerateMipmap" );
+}
+
+const Texture::Description& TextureOgl::getDescription() const noexcept {
+    return _description;
 }
 
 const TextureHandleOgl& TextureOgl::getHandle() const noexcept {
     return _texture;
 }
 
-GLenum TextureOgl::convertFormat( Format format ) {
-    switch( format ) {
-    case Format::RgbUint8:
-        return GL_RGB;
-    case Format::ArgbUint8:
-        return GL_RGBA;
+GLenum TextureOgl::getTarget() const noexcept {
+    return _target;
+}
+
+void TextureOgl::validateDescription( const Description &description ) {
+    switch( description.layout ) {
+    case Layout::Separate1d:
+        storm_assert( description.height == 1 );
+        storm_assert( description.depth == 1 );
+        storm_assert( description.texelSamples == 1 );
+        return;
+    case Layout::Separate2d:
+        storm_assert( description.depth == 1 );
+        storm_assert( description.texelSamples == 1 );
+        return;
+    case Layout::Separate2dMsaa:
+        storm_assert( description.depth == 1 );
+        storm_assert( description.mipLevels == 1 );
+        storm_assert( description.resourceType == ResourceType::Dynamic );
+        return;
+    case Layout::Separate3d:
+        storm_assert( description.texelSamples == 1 );
+        return;
+    case Layout::Layered1d:
+        storm_assert( description.height == 1 );
+        storm_assert( description.texelSamples == 1 );
+        return;
+    case Layout::Layered2d:
+        storm_assert( description.texelSamples == 1 );
+        return;
+    case Layout::Layered2dMsaa:
+        storm_assert( description.mipLevels == 1 );
+        storm_assert( description.resourceType == ResourceType::Dynamic );
+        return;
+    case Layout::CubeMap:
+        throwNotImplemented();
+    case Layout::Buffer:
+        storm_assert( description.height == 1 );
+        storm_assert( description.depth == 1 );
+        storm_assert( description.texelSamples == 1 );
+        storm_assert( description.mipLevels == 1 );
+        return;
     default:
-        throwInvalidArgument( "'format' is invalid" );
+        storm_assert( false );
     }
 }
 
-GLint TextureOgl::selectInternalFormat( Format format ) {
-    switch( format ) {
-    case Format::RgbUint8:
-    case Format::ArgbUint8:
-        return GL_RGBA8;
+GLenum TextureOgl::selectTarget( Layout layout ) {
+    switch( layout ) {
+    case Layout::Separate1d:
+        return GL_TEXTURE_1D;
+    case Layout::Separate2d:
+        return GL_TEXTURE_2D;
+    case Layout::Separate2dMsaa:
+        return GL_TEXTURE_2D_MULTISAMPLE;
+    case Layout::Separate3d:
+        return GL_TEXTURE_3D;
+    case Layout::Layered1d:
+        return GL_TEXTURE_1D_ARRAY;
+    case Layout::Layered2d:
+        return GL_TEXTURE_2D_ARRAY;
+    case Layout::Layered2dMsaa:
+        return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+    case Layout::CubeMap:
+        return GL_TEXTURE_CUBE_MAP;
+    case Layout::Buffer:
+        return GL_TEXTURE_BUFFER;
     default:
-        throwInvalidArgument( "'format' is invalid" );
+        throwInvalidArgument( "'layout' is invalid" );
     }
 }
 
-const Texture::Description& TextureOgl::getDescription() const noexcept {
-    return _description;
+TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
+{
+    switch( format ) {
+    case Format::RgbUint8:
+        return { GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE };
+    case Format::ArgbUint8:
+        return { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE };
+    case Format::DepthUint16:
+        return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+    case Format::DepthUint24:
+        return { GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+    case Format::DepthUint32:
+        return { GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+    case Format::DepthUint24StencilUint8:
+        return { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE };
+    default:
+        throwInvalidArgument( "'format' is invalid" );
+    }
 }
 
 Texture::Pointer Texture::create(

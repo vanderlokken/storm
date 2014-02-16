@@ -66,7 +66,7 @@ void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
     try {
         key = convertKey( keyboard.VKey );
 
-    } catch( std::invalid_argument& ) {
+    } catch( storm::Exception& ) {
         // Unknown keys are silently ignored
         return;
     }

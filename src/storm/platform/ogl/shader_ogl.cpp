@@ -19,8 +19,11 @@ void bindTexture( Texture::Pointer texture, GLint textureUnit ) {
     ::glActiveTexture( GL_TEXTURE0 + textureUnit );
     checkResult( "::glActiveTexture" );
 
-    ::glBindTexture(
-        GL_TEXTURE_2D, nativeTexture ? nativeTexture->getHandle() : 0 );
+    if( nativeTexture )
+        ::glBindTexture(
+            nativeTexture->getTarget(), nativeTexture->getHandle() );
+    else
+        ::glBindTexture( GL_TEXTURE_2D, 0 );
     checkResult( "::glBindTexture" );
 }
 

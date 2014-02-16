@@ -13,3 +13,7 @@
 
 #define throwNotImplemented() \
     throw Exception( __FILE__, __LINE__, __FUNCTION__, "Not implemented" )
+
+#define storm_assert( expression ) \
+    if( expression ) { } else {    \
+        throwRuntimeError( "Assertion failed: " #expression ); }
