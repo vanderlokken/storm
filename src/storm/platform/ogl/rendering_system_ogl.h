@@ -13,8 +13,8 @@ public:
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
-    virtual void beginFrameRendering() = 0;
-    virtual void endFrameRendering() = 0;
+    virtual void beginFrameRendering();
+    virtual void endFrameRendering();
 
     virtual void renderMesh( Mesh::Pointer );
 
@@ -34,12 +34,11 @@ public:
     virtual void setClippingRectangle( const Rectangle& );
     virtual void setOutputRectangle( const Rectangle& );
 
+    virtual void setRenderingBufferSet( RenderingBufferSet::Pointer );
+
     virtual void clearColorBuffer( const Color &color = Color::Black );
     virtual void clearDepthBuffer( float depth = 1.0f );
     virtual void clearStencilBuffer( unsigned int stencil = 0 );
-
-    virtual void setColorBufferFormat( ColorBufferFormat ) = 0;
-    virtual void setDepthBufferFormat( DepthBufferFormat ) = 0;
 
     // This method should be called to prevent situations when OpenGL API is
     // being accessed with no context being installed.
@@ -58,6 +57,8 @@ private:
     RasterizationTechnique::Pointer _rasterizationTechnique;
     OutputTechnique::Pointer _outputTechnique;
     BlendingTechnique::Pointer _blendingTechnique;
+
+    RenderingBufferSet::Pointer _renderingBufferSet;
 };
 
 }

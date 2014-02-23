@@ -7,22 +7,13 @@
 #include <storm/output_technique.h>
 #include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
+#include <storm/rendering_buffer_set.h>
 #include <storm/shader.h>
 
 namespace storm {
 
 class RenderingSystem {
 public:
-    enum class ColorBufferFormat {
-        XrgbUint8
-    };
-
-    enum class DepthBufferFormat {
-        Uint24,
-        Uint24Stencil8,
-        Uint32
-    };
-
     static RenderingSystem* getInstance();
 
     virtual ~RenderingSystem() { }
@@ -49,12 +40,11 @@ public:
     virtual void setClippingRectangle( const Rectangle& ) = 0;
     virtual void setOutputRectangle( const Rectangle& ) = 0;
 
+    virtual void setRenderingBufferSet( RenderingBufferSet::Pointer ) = 0;
+
     virtual void clearColorBuffer( const Color &color = Color::Black ) = 0;
     virtual void clearDepthBuffer( float depth = 1.0f ) = 0;
     virtual void clearStencilBuffer( unsigned int stencil = 0 ) = 0;
-
-    virtual void setColorBufferFormat( ColorBufferFormat ) = 0;
-    virtual void setDepthBufferFormat( DepthBufferFormat ) = 0;
 };
 
 }

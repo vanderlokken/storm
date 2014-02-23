@@ -9,6 +9,7 @@
 #include <storm/platform/ogl/mesh_ogl.h>
 #include <storm/platform/ogl/output_technique_ogl.h>
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
+#include <storm/platform/ogl/rendering_buffer_set_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 #include <storm/platform/ogl/vertex_buffer_ogl.h>
 
@@ -33,6 +34,13 @@ void RenderingSystemOgl::initialize() {
 
     ::glBindProgramPipeline( *_programPipeline );
     checkResult( "::glBindProgramPipeline" );
+}
+
+void RenderingSystemOgl::beginFrameRendering() {
+    return;
+}
+
+void RenderingSystemOgl::endFrameRendering() {
     return;
 }
 
@@ -242,6 +250,24 @@ void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
 
     checkResult( "::glViewport" );
     return;
+}
+
+void RenderingSystemOgl::setRenderingBufferSet(
+    RenderingBufferSet::Pointer renderingBufferSet )
+{
+    if( _renderingBufferSet == renderingBufferSet )
+        return;
+
+    auto nativeBufferSet =
+        std::static_pointer_cast< RenderingBufferSetOgl >( renderingBufferSet );
+
+    const GLint framebufferHandle =
+        nativeBufferSet ? nativeBufferSet->getHandle() : 0;
+
+    ::glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
+    checkResult( "::glBindFramebuffer" );
+
+    _renderingBufferSet = renderingBufferSet;
 }
 
 void RenderingSystemOgl::clearColorBuffer( const Color &color ) {

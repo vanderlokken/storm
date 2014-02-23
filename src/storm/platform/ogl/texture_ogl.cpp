@@ -122,6 +122,25 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
             description.depth );
         checkResult( "::glTexStorage2D" );
         break;
+    case Layout::Separate2dMsaa:
+        ::glTexStorage2DMultisample(
+            _target, description.texelSamples,
+            _texelDescription.internalFormat,
+            description.width,
+            description.height,
+            GL_TRUE );
+        checkResult( "::glTexStorage2DMultisample" );
+        break;
+    case Layout::Layered2dMsaa:
+        ::glTexStorage3DMultisample(
+            _target, description.texelSamples,
+            _texelDescription.internalFormat,
+            description.width,
+            description.height,
+            description.depth,
+            GL_TRUE );
+        checkResult( "::glTexStorage3DMultisample" );
+        break;
     default:
         throwNotImplemented();
     }

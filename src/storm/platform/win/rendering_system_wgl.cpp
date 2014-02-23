@@ -31,12 +31,13 @@ RenderingSystemWgl::RenderingSystemWgl()
     PIXELFORMATDESCRIPTOR pixelFormatDescriptor;
     pixelFormatDescriptor.nSize = sizeof( pixelFormatDescriptor );
     pixelFormatDescriptor.nVersion = 1;
-    pixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
+        PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
     pixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
     pixelFormatDescriptor.cColorBits = 24;
     pixelFormatDescriptor.cAlphaBits = 0;
     pixelFormatDescriptor.cAccumBits = 0;
-    pixelFormatDescriptor.cDepthBits = 24;
+    pixelFormatDescriptor.cDepthBits = 0;
     pixelFormatDescriptor.cStencilBits = 0;
     pixelFormatDescriptor.cAuxBuffers = 0;
     pixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
@@ -88,23 +89,11 @@ RenderingSystemWgl::~RenderingSystemWgl() {
     return;
 }
 
-void RenderingSystemWgl::beginFrameRendering() {
-    return;
-}
-
 void RenderingSystemWgl::endFrameRendering() {
+    RenderingSystemOgl::endFrameRendering();
+
     if( !::SwapBuffers(_deviceContextHandle) )
         throwRuntimeError( "::SwapBuffers has failed" );
-    return;
-}
-
-void RenderingSystemWgl::setColorBufferFormat( ColorBufferFormat ) {
-    throwNotImplemented();
-}
-
-void RenderingSystemWgl::setDepthBufferFormat( DepthBufferFormat ) {
-    return;
-    // throwNotImplemented();
 }
 
 RenderingSystemWgl* RenderingSystemWgl::getInstance() {
