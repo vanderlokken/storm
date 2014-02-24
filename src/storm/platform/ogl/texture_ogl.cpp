@@ -84,10 +84,7 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
-    const unsigned int dimensionsMaximum = std::max(
-        {_description.width, _description.height, _description.depth} );
-    const unsigned int levels​Maximum =
-        static_cast<unsigned int>( log2(dimensionsMaximum) ) + 1;
+    const unsigned int levels​Maximum = getMipLevelsMaximum( _description );
     const unsigned int levels​ = (_description.mipLevels == CompleteMipMap) ?
         levels​Maximum : _description.mipLevels;
     storm_assert( levels​ <= levels​Maximum );
@@ -323,6 +320,29 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
     default:
         throwInvalidArgument( "'format' is invalid" );
     }
+}
+
+unsigned int TextureOgl::getMipLevelsMaximum( const Description &description ) {
+    unsigned int dimensionsMaximum = 1;
+
+    switch( description.layout ) {
+    case Layout::Separate1d:
+    case Layout::Layered1d:
+        dimensionsMaximum = description.width;
+        break;
+    case Layout::Separate2d:
+    case Layout::Layered2d:
+        dimensionsMaximum = std::max( description.width, description.height );
+        break;
+    case Layout::Separate3d:
+        dimensionsMaximum = std::max(
+            {description.width, description.height, description.depth} );
+        break;
+    case Layout::CubeMap:
+        throwNotImplemented();
+    }
+
+    return static_cast<unsigned int>( log2(dimensionsMaximum) ) + 1;
 }
 
 Texture::Pointer Texture::create(

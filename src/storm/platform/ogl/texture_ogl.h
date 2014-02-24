@@ -40,6 +40,8 @@ private:
 
     static TexelDescription selectTexelDescription( Format );
 
+    static unsigned int getMipLevelsMaximum( const Description& );
+
     Description _description;
     TexelDescription _texelDescription;
     TextureHandleOgl _texture;
