@@ -26,6 +26,19 @@ ProgramPipelineHandleOgl::~ProgramPipelineHandleOgl() {
 
 void RenderingSystemOgl::initialize() {
     loadOpenGlApi();
+
+    const OpenGlSupportStatus &supportStatus = getOpenGlSupportStatus();
+
+    if( supportStatus.version < OpenGlVersion(4, 3) ) {
+        if( !supportStatus.ARB_separate_shader_objects ||
+            !supportStatus.ARB_texture_storage ||
+            !supportStatus.ARB_texture_storage_multisample )
+        {
+            throw SystemRequirementsNotMet(
+                "Video driver doesn't support required OpenGL extension" );
+        }
+    }
+
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );

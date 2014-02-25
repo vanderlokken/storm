@@ -1,5 +1,8 @@
 #include <storm/platform/ogl/api_ogl.h>
 
+#include <map>
+#include <string>
+
 #include <storm/platform/ogl/check_result_ogl.h>
 
 PFNGLCULLFACEPROC glCullFace = nullptr;
@@ -1197,15 +1200,49 @@ void loadOpenGlApi() {
     glTexPageCommitmentARB = static_cast<PFNGLTEXPAGECOMMITMENTARBPROC>( load("glTexPageCommitmentARB") );
 }
 
-OpenGlVersion getOpenGlVersion() {
-    OpenGlVersion version;
+const OpenGlSupportStatus& getOpenGlSupportStatus() {
+    auto loadStatus = []() {
+        OpenGlSupportStatus status = { OpenGlVersion(0, 0) };
 
-    ::glGetIntegerv( GL_MAJOR_VERSION, &version.first );
-    checkResult( "::glGetIntegerv" );
-    ::glGetIntegerv( GL_MINOR_VERSION, &version.second );
-    checkResult( "::glGetIntegerv" );
+        ::glGetIntegerv( GL_MAJOR_VERSION, &status.version.first );
+        checkResult( "::glGetIntegerv" );
+        ::glGetIntegerv( GL_MINOR_VERSION, &status.version.second );
+        checkResult( "::glGetIntegerv" );
 
-    return version;
+        GLint extensionsNumber = 0;
+        ::glGetIntegerv( GL_NUM_EXTENSIONS, &extensionsNumber );
+        checkResult( "::glGetIntegerv" );
+
+        const std::map< std::string, bool* > extensionSupport = {
+            {
+                "GL_ARB_separate_shader_objects",
+                &status.ARB_separate_shader_objects
+            },
+            {
+                "GL_ARB_texture_storage",
+                &status.ARB_texture_storage
+            },
+            {
+                "GL_ARB_texture_storage_multisample",
+                &status.ARB_texture_storage_multisample
+            }
+        };
+
+        for( GLint index = 0; index < extensionsNumber; ++index ) {
+            const char *extensionName = reinterpret_cast< const char* >(
+                ::glGetStringi(GL_EXTENSIONS, index) );
+            checkResult( "::glGetStringi" );
+
+            auto searchResult = extensionSupport.find( extensionName );
+            if( searchResult != extensionSupport.end() )
+                *(searchResult->second) = true;
+        }
+
+        return status;
+    };
+
+    static const OpenGlSupportStatus openGlSupportStatus = loadStatus();
+    return openGlSupportStatus;
 }
 
 } // namespace storm

@@ -13,7 +13,15 @@ namespace storm {
 void loadOpenGlApi();
 
 typedef std::pair<int, int> OpenGlVersion;
-OpenGlVersion getOpenGlVersion();
+
+struct OpenGlSupportStatus {
+    OpenGlVersion version;
+    bool ARB_separate_shader_objects;
+    bool ARB_texture_storage;
+    bool ARB_texture_storage_multisample;
+};
+
+const OpenGlSupportStatus& getOpenGlSupportStatus();
 
 }
 
