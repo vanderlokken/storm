@@ -10,25 +10,23 @@
 
 namespace storm {
 
-DisplayWin::DisplayWin()
-    : _currentMode( 0, 0, 0, 0 )
-{
+DisplayWin::DisplayWin() {
     const wchar_t *deviceName = nullptr;
 
     DEVMODE mode;
     mode.dmSize = sizeof( mode );
     mode.dmDriverExtra = 0;
 
-    const BOOL result = ::EnumDisplaySettings( deviceName, ENUM_CURRENT_SETTINGS, &mode );
+    const BOOL result = ::EnumDisplaySettings(
+        deviceName, ENUM_CURRENT_SETTINGS, &mode );
     if( !result ) {
         throwRuntimeError( "::EnumDisplaySettings has failed" );
     }
 
-    _currentMode = Mode(
-        mode.dmPelsWidth,
-        mode.dmPelsHeight,
-        mode.dmDisplayFrequency,
-        mode.dmBitsPerPel );
+    _currentMode.width = mode.dmPelsWidth;
+    _currentMode.height = mode.dmPelsHeight;
+    _currentMode.refreshRate = mode.dmDisplayFrequency;
+    _currentMode.colorDepth = mode.dmBitsPerPel;
     return;
 }
 

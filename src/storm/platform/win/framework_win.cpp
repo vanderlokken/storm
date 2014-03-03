@@ -15,8 +15,7 @@ FrameworkWin::FrameworkWin() noexcept {
 }
 
 void FrameworkWin::run( const Callback &callback ) {
-    if( !callback )
-        throwInvalidArgument( "'callback' is invalid" );
+    storm_assert( callback );
 
     bool processing = true;
 

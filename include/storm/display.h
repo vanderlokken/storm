@@ -8,30 +8,11 @@ namespace storm {
 
 class Display {
 public:
-    class Mode {
-    public:
-        Mode( unsigned int width, unsigned int height, unsigned int refreshRate, unsigned int colorDepth ) noexcept;
-
-        unsigned int getWidth() const noexcept;
-        void setWidth( unsigned int ) noexcept;
-
-        unsigned int getHeight() const noexcept;
-        void setHeight( unsigned int ) noexcept;
-
-        unsigned int getRefreshRate() const noexcept;
-        void setRefreshRate( unsigned int ) noexcept;
-
-        unsigned int getColorDepth() const noexcept;
-        void setColorDepth( unsigned int ) noexcept;
-
-        bool operator == ( const Mode& ) const noexcept;
-        bool operator != ( const Mode& ) const noexcept;
-
-    private:
-        int _width;
-        int _height;
-        int _refreshRate;
-        int _colorDepth;
+    struct Mode {
+        int width;
+        int height;
+        int refreshRate;
+        int colorDepth;
     };
 
     static Display* getInstance();
