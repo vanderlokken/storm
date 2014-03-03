@@ -7,6 +7,12 @@
 
 namespace storm {
 
+struct PositionedVertex {
+    Vector position;
+
+    static VertexFormat::Pointer getFormat();
+};
+
 struct TexturedVertex {
     Vector position;
     FlatVector textureCoordinates;

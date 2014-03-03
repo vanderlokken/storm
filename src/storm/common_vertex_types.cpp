@@ -4,6 +4,18 @@ namespace storm {
 
 typedef VertexFormat::Attribute VertexAttribute;
 
+VertexFormat::Pointer PositionedVertex::getFormat() {
+    static const std::vector<VertexAttribute> attributes = {
+        {
+            VertexAttribute::Semantics::Position,
+            VertexAttribute::Format::Vector3Float
+        }
+    };
+    static const VertexFormat::Pointer format =
+        VertexFormat::create( {attributes} );
+    return format;
+}
+
 VertexFormat::Pointer TexturedVertex::getFormat() {
     static const std::vector<VertexAttribute> attributes = {
         {
