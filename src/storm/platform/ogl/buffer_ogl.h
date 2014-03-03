@@ -1,7 +1,7 @@
 #pragma once
 
+#include <storm/buffer.h>
 #include <storm/platform/ogl/handle_ogl.h>
-#include <storm/resource_type.h>
 
 namespace storm {
 
@@ -11,19 +11,21 @@ public:
     ~BufferHandleOgl();
 };
 
-class BufferOgl {
+class BufferOgl : public Buffer {
     NONCOPYABLE( BufferOgl );
 public:
-    BufferOgl( size_t size, const void *data, ResourceType resourceType );
+    BufferOgl( const Description&, const void *data );
 
-    void getData( size_t offset, size_t size, void *data ) const;
-    void setData( size_t offset, size_t size, const void *data );
+    virtual void getData( size_t offset, size_t size, void *data ) const;
+    virtual void setData( size_t offset, size_t size, const void *data );
+
+    virtual const Description& getDescription() const noexcept;
 
     const BufferHandleOgl& getHandle() const noexcept;
 
 private:
+    Description _description;
     BufferHandleOgl _handle;
-    size_t _size;
 };
 
 }

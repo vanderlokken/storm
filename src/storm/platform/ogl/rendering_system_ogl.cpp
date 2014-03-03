@@ -2,16 +2,14 @@
 
 #include <storm/platform/ogl/api_ogl.h>
 
-#include <storm/output_technique.h>
 #include <storm/platform/ogl/blending_technique_ogl.h>
+#include <storm/platform/ogl/buffer_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
-#include <storm/platform/ogl/index_buffer_ogl.h>
 #include <storm/platform/ogl/mesh_ogl.h>
 #include <storm/platform/ogl/output_technique_ogl.h>
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 #include <storm/platform/ogl/rendering_buffer_set_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
-#include <storm/platform/ogl/vertex_buffer_ogl.h>
 
 namespace storm {
 
@@ -58,17 +56,23 @@ void RenderingSystemOgl::endFrameRendering() {
 }
 
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
-    const auto &description = mesh->getDescription();
-
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
-    auto nativeIndexBuffer = std::static_pointer_cast< IndexBufferOgl >( description.indexBuffer );
 
     ::glBindVertexArray( nativeMesh->getHandle() );
     checkResult( "::glBindVertexArray" );
 
+    const auto &indexBufferDescription =
+        mesh->getDescription().indexBuffer->getDescription();
+
+    storm_assert(
+        indexBufferDescription.elementSize == 2 ||
+        indexBufferDescription.elementSize == 4 );
+
     const GLenum triangleTopology = nativeMesh->getTriangleTopology();
-    const GLsizei indexCount = nativeIndexBuffer->getDescription().bufferSize / nativeIndexBuffer->getDescription().indexSize;
-    const GLenum indexFormat = nativeIndexBuffer->getIndexFormat();
+    const GLsizei indexCount =
+        indexBufferDescription.size / indexBufferDescription.elementSize;
+    const GLenum indexFormat = (indexBufferDescription.elementSize == 2) ?
+        GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
 
     ::glDrawElements( triangleTopology, indexCount, indexFormat, indexOffset );
@@ -97,7 +101,7 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
     ::glUseProgramStages( *_programPipeline, stage, nativeShader->getHandle() );
     checkResult( "::glUseProgramStages" );
 
-    nativeShader->bindSamplers();
+    nativeShader->install();
 }
 
 RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const noexcept {

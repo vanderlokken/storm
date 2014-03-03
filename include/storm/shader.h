@@ -2,13 +2,10 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
-#include <storm/color.h>
-#include <storm/matrix.h>
+#include <storm/buffer.h>
 #include <storm/sampler.h>
 #include <storm/texture.h>
-#include <storm/vector.h>
 
 namespace storm {
 
@@ -22,25 +19,7 @@ public:
         Geometry
     };
 
-    class Uniform {
-    public:
-        Uniform( void*, Shader::Pointer );
-
-        void setValue( int value );
-        void setValue( float value );
-
-        void setValue( const Color &value );
-        void setValue( const Vector &value );
-        void setValue( const Matrix &value );
-        void setValue( const std::vector<Matrix> &matrices );
-
-        void setValue( Texture::Pointer texture );
-        void setValue( Sampler::Pointer sampler );
-
-    private:
-        void *_identifier;
-        Shader::Pointer _shader;
-    };
+    typedef std::shared_ptr<void> ValueHandle;
 
     static Shader::Pointer create( const std::string &sourceCode, Type type );
     static Shader::Pointer load( const std::string &filename, Type type );
@@ -48,7 +27,25 @@ public:
     virtual ~Shader() { }
 
     virtual Type getType() const noexcept = 0;
-    virtual Uniform getUniform( const std::string &identifier ) const = 0;
+
+    virtual ValueHandle getValueHandle(
+        const std::string &identifier ) const = 0;
+
+    virtual void setValue( ValueHandle handle, Buffer::Pointer ) = 0;
+    virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
+    virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;
+
+    void setValue( const std::string &identifier, Buffer::Pointer buffer ) {
+        setValue( getValueHandle(identifier), buffer );
+    }
+
+    void setValue( const std::string &identifier, Sampler::Pointer sampler ) {
+        setValue( getValueHandle(identifier), sampler );
+    }
+
+    void setValue( const std::string &identifier, Texture::Pointer texture ) {
+        setValue( getValueHandle(identifier), texture );
+    }
 };
 
 }

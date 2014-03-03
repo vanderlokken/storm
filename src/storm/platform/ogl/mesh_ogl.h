@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/mesh.h>
-#include <storm/vertex.h>
 #include <storm/platform/ogl/handle_ogl.h>
 
 namespace storm {
@@ -22,17 +21,7 @@ public:
     const MeshHandleOgl& getHandle() const noexcept;
 
 private:
-    void setVertexAttributes();
-
     static GLenum convertTriangleTopology( TriangleTopology );
-
-    struct VertexAttributeFormat {
-        GLint componentCount;
-        GLenum componentType;
-        GLboolean componentNormalized;
-    };
-
-    static VertexAttributeFormat convertVertexAttributeFormat( Vertex::Attribute::Format );
 
     Description _description;
     GLenum _triangleTopology;

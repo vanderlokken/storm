@@ -3,9 +3,9 @@
 #include <memory>
 #include <string>
 
-#include <storm/index_buffer.h>
+#include <storm/buffer.h>
 #include <storm/noexcept.h>
-#include <storm/vertex_buffer.h>
+#include <storm/vertex_format.h>
 
 namespace storm {
 
@@ -19,13 +19,14 @@ public:
     };
 
     struct Description {
+        Buffer::Pointer indexBuffer;
+        Buffer::Pointer vertexBuffer;
+        VertexFormat::Pointer vertexFormat;
         TriangleTopology triangleTopology;
-        VertexBuffer::Pointer vertexBuffer;
-        IndexBuffer::Pointer indexBuffer;
     };
 
-    static Mesh::Pointer create( const Description& );
-    static Mesh::Pointer load( const std::string &filename );
+    static Pointer create( const Description& );
+    static Pointer load( const std::string &filename );
 
     virtual ~Mesh() { }
 

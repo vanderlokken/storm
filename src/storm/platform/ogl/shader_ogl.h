@@ -14,37 +14,46 @@ public:
     ~ProgramHandleOgl();
 };
 
-class ShaderOgl :
-    public Shader, public std::enable_shared_from_this< ShaderOgl > {
-        NONCOPYABLE( ShaderOgl );
+class ShaderOgl : public Shader {
+    NONCOPYABLE( ShaderOgl );
 public:
     ShaderOgl( const std::string &sourceCode, Type type );
 
     virtual Type getType() const noexcept;
-    virtual Uniform getUniform( const std::string &identifier ) const;
+
+    virtual ValueHandle getValueHandle( const std::string &identifier ) const;
+
+    virtual void setValue( ValueHandle handle, Buffer::Pointer );
+    virtual void setValue( ValueHandle handle, Sampler::Pointer );
+    virtual void setValue( ValueHandle handle, Texture::Pointer );
 
     const ProgramHandleOgl& getHandle() const;
 
-    void bindSamplers() const;
+    void install() const;
 
 private:
     GLint getProgramParameter( GLenum parameter ) const;
 
     void createSamplersMapping();
+    void createUniformBlocksMapping();
 
     static GLenum convertType( Type );
 
-    Type _type;
-    ProgramHandleOgl _handle;
-
     struct GlslSampler {
-        GLint textureUnit;
+        GLuint textureUnit;
         Texture::Pointer texture;
         Sampler::Pointer sampler;
     };
-    std::map<GLint, GlslSampler> _samplersMapping;
 
-    friend class Uniform;
+    struct GlslUniformBlock {
+        GLuint bindingPoint;
+        Buffer::Pointer buffer;
+    };
+
+    Type _type;
+    ProgramHandleOgl _handle;
+    std::map<GLint, GlslSampler> _samplersMapping;
+    std::map<GLint, GlslUniformBlock> _uniformBlocksMapping;
 };
 
 }

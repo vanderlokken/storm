@@ -2,16 +2,54 @@
 
 namespace storm {
 
-const Vertex::Attribute TexturedVertex::attributes[] = {
-    {Vertex::Attribute::Semantics::Position,           Vertex::Attribute::Format::Vector3Float},
-    {Vertex::Attribute::Semantics::TextureCoordinates, Vertex::Attribute::Format::Vector2Float} };
+typedef VertexFormat::Attribute VertexAttribute;
 
-const Vertex::Attribute ColoredVertex::attributes[] = {
-    {Vertex::Attribute::Semantics::Position, Vertex::Attribute::Format::Vector3Float},
-    {Vertex::Attribute::Semantics::Color,    Vertex::Attribute::Format::Vector4Uint8Normalized} };
+VertexFormat::Pointer TexturedVertex::getFormat() {
+    static const std::vector<VertexAttribute> attributes = {
+        {
+            VertexAttribute::Semantics::Position,
+            VertexAttribute::Format::Vector3Float
+        },
+        {
+            VertexAttribute::Semantics::TextureCoordinates,
+            VertexAttribute::Format::Vector2Float
+        }
+    };
+    static const VertexFormat::Pointer format =
+        VertexFormat::create( {attributes} );
+    return format;
+}
 
-const Vertex::Attribute OrientedVertex::attributes[] = {
-    {Vertex::Attribute::Semantics::Position, Vertex::Attribute::Format::Vector3Float},
-    {Vertex::Attribute::Semantics::Normal,   Vertex::Attribute::Format::Vector3Float} };
+VertexFormat::Pointer ColoredVertex::getFormat() {
+    static const std::vector<VertexAttribute> attributes = {
+        {
+            VertexAttribute::Semantics::Position,
+            VertexAttribute::Format::Vector3Float
+        },
+        {
+            VertexAttribute::Semantics::Color,
+            VertexAttribute::Format::Vector4Uint8Normalized
+        }
+    };
+    static const VertexFormat::Pointer format =
+        VertexFormat::create( {attributes} );
+    return format;
+}
+
+VertexFormat::Pointer OrientedVertex::getFormat() {
+    static const std::vector<VertexAttribute> attributes = {
+        {
+            VertexAttribute::Semantics::Position,
+            VertexAttribute::Format::Vector3Float
+        },
+        {
+            VertexAttribute::Semantics::Normal,
+            VertexAttribute::Format::Vector3Float
+        }
+    };
+    static const VertexFormat::Pointer format =
+        VertexFormat::create( {attributes} );
+    return format;
+}
 
 }

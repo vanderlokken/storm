@@ -1,11 +1,11 @@
 #pragma once
 
 #include <storm/blending_technique.h>
+#include <storm/buffer.h>
 #include <storm/camera.h>
 #include <storm/clock.h>
 #include <storm/common_vertex_types.h>
 #include <storm/exception.h>
-#include <storm/index_buffer.h>
 #include <storm/framework.h>
 #include <storm/keyboard.h>
 #include <storm/math.h>
@@ -16,4 +16,4 @@
 #include <storm/rendering_window.h>
 #include <storm/shader.h>
 #include <storm/transformation.h>
-#include <storm/vertex_buffer.h>
+#include <storm/vertex_format.h>

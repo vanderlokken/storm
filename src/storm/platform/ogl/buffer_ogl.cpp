@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/platform/ogl/resource_type_ogl.h>
 
 namespace storm {
@@ -21,15 +22,15 @@ BufferHandleOgl::~BufferHandleOgl() {
 // GL_COPY_WRITE_BUFFER and GL_COPY_READ_BUFFER are not used in the rendering process
 // so it's safe to overwrite these targets and to use them in the data transfer operations.
 
-BufferOgl::BufferOgl( size_t size, const void *data, ResourceType resourceType )
-    : _size( size )
+BufferOgl::BufferOgl( const Description &description, const void *data )
+    : _description( description )
 {
     ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
     checkResult( "::glBindBuffer" );
 
-    const GLenum usage = getResourceUsage( resourceType );
+    const GLenum usage = getResourceUsage( _description.resourceType );
 
-    ::glBufferData( GL_COPY_WRITE_BUFFER, size, data, usage );
+    ::glBufferData( GL_COPY_WRITE_BUFFER, _description.size, data, usage );
     checkResult( "::glBufferData" );
 
     return;
@@ -45,7 +46,7 @@ void BufferOgl::getData( size_t offset, size_t size, void *data ) const {
 }
 
 void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
-    if( offset + size > _size ) {
+    if( offset + size > _description.size ) {
         throwInvalidArgument( "The specified offset and size are not correct" );
     }
 
@@ -65,8 +66,20 @@ void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     return;
 }
 
+const Buffer::Description& BufferOgl::getDescription() const noexcept {
+    return _description;
+}
+
 const BufferHandleOgl& BufferOgl::getHandle() const noexcept {
     return _handle;
+}
+
+Buffer::Pointer Buffer::create(
+    const Description &description, const void *data )
+{
+    RenderingSystemOgl::installOpenGlContext();
+
+    return std::make_shared<BufferOgl>( description, data );
 }
 
 }

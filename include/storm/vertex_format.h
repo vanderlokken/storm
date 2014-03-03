@@ -1,8 +1,15 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include <storm/noexcept.h>
+
 namespace storm {
 
-struct Vertex {
+class VertexFormat {
+public:
+    typedef std::shared_ptr<VertexFormat> Pointer;
 
     struct Attribute {
         enum class Semantics {
@@ -31,12 +38,21 @@ struct Vertex {
             Vector4Uint16Normalized
         };
 
-        unsigned short getSize() const;
-
         Semantics semantics;
         Format format;
     };
 
+    struct Description {
+        std::vector<Attribute> attributes;
+    };
+
+    static Pointer create( const Description& );
+
+    virtual ~VertexFormat() { }
+
+    virtual const Description& getDescription() const noexcept = 0;
+
+    virtual size_t getVertexSize() const = 0;
 };
 
 }

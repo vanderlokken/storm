@@ -2,6 +2,7 @@
 
 #include <numeric>
 
+#include <storm/platform/ogl/buffer_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/platform/ogl/sampler_ogl.h>
@@ -12,7 +13,18 @@ namespace storm {
 
 namespace {
 
-void bindTexture( Texture::Pointer texture, GLint textureUnit ) {
+struct ValueHandleImplementation {
+    enum class Type {
+        UniformBlock,
+        Sampler
+    };
+
+    const ShaderOgl *shader;
+    Type type;
+    GLint index;
+};
+
+void bindTexture( Texture::Pointer texture, GLuint textureUnit ) {
     const auto nativeTexture =
         std::static_pointer_cast< TextureOgl >( texture );
 
@@ -27,12 +39,24 @@ void bindTexture( Texture::Pointer texture, GLint textureUnit ) {
     checkResult( "::glBindTexture" );
 }
 
-void bindSampler( Sampler::Pointer sampler, GLint textureUnit ) {
+void bindSampler( Sampler::Pointer sampler, GLuint textureUnit ) {
     const auto nativeSampler =
         std::static_pointer_cast< SamplerOgl >( sampler );
 
+    storm_assert( nativeSampler );
+
     ::glBindSampler( textureUnit, nativeSampler->getHandle() );
     checkResult( "::glBindSampler" );
+}
+
+void bindUniformBuffer( Buffer::Pointer buffer, GLuint bindingPoint ) {
+    const auto nativeBuffer = std::static_pointer_cast<BufferOgl>( buffer );
+
+    storm_assert( nativeBuffer );
+
+    ::glBindBufferBase( GL_UNIFORM_BUFFER, bindingPoint,
+        nativeBuffer->getHandle() );
+    checkResult( "::glBindBufferBase" );
 }
 
 } // namespace
@@ -65,32 +89,101 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
     }
 
     createSamplersMapping();
+    createUniformBlocksMapping();
 }
 
 Shader::Type ShaderOgl::getType() const noexcept {
     return _type;
 }
 
-Shader::Uniform ShaderOgl::getUniform( const std::string &identifier ) const {
+Shader::ValueHandle ShaderOgl::getValueHandle(
+    const std::string &identifier ) const
+{
     const GLint location =
         ::glGetUniformLocation( _handle, identifier.c_str() );
     checkResult( "::glGetUniformLocation" );
 
-    if( location == -1 )
+    if( location != -1 ) {
+        storm_assert( _samplersMapping.count(location) );
+
+        const auto valueHandle = std::make_shared<ValueHandleImplementation>();
+        valueHandle->shader = this;
+        valueHandle->type = ValueHandleImplementation::Type::Sampler;
+        valueHandle->index = location;
+        return valueHandle;
+    }
+
+    const GLint blockIndex =
+        ::glGetUniformBlockIndex( _handle, identifier.c_str() );
+    checkResult( "::glGetUniformBlockIndex" );
+
+    if( blockIndex == GL_INVALID_INDEX )
         throwRuntimeError( "Invalid uniform identifier" );
 
-    return Uniform( reinterpret_cast<void*>(location),
-        std::const_pointer_cast<ShaderOgl>(shared_from_this()) );
+    const auto valueHandle = std::make_shared<ValueHandleImplementation>();
+    valueHandle->shader = this;
+    valueHandle->type = ValueHandleImplementation::Type::UniformBlock;
+    valueHandle->index = blockIndex;
+    return valueHandle;
+}
+
+void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
+    const auto handleImplementation =
+        std::static_pointer_cast<ValueHandleImplementation>( handle );
+
+    storm_assert( handleImplementation->shader == this );
+    storm_assert( handleImplementation->type ==
+        ValueHandleImplementation::Type::UniformBlock );
+
+    GlslUniformBlock &glslUniformBlock =
+        _uniformBlocksMapping[handleImplementation->index];
+    glslUniformBlock.buffer = buffer;
+
+    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+         bindUniformBuffer( buffer, glslUniformBlock.bindingPoint );
+}
+
+void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
+    const auto handleImplementation =
+        std::static_pointer_cast<ValueHandleImplementation>( handle );
+
+    storm_assert( handleImplementation->shader == this );
+    storm_assert( handleImplementation->type ==
+        ValueHandleImplementation::Type::Sampler );
+
+    GlslSampler &glslSampler = _samplersMapping[handleImplementation->index];
+    glslSampler.texture = texture;
+
+    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+         bindTexture( texture, glslSampler.textureUnit );
+}
+
+void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
+    const auto handleImplementation =
+        std::static_pointer_cast<ValueHandleImplementation>( handle );
+
+    storm_assert( handleImplementation->shader == this );
+    storm_assert( handleImplementation->type ==
+        ValueHandleImplementation::Type::Sampler );
+
+    GlslSampler &glslSampler = _samplersMapping[handleImplementation->index];
+    glslSampler.sampler = sampler;
+
+    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+        bindSampler( sampler, glslSampler.textureUnit );
 }
 
 const ProgramHandleOgl& ShaderOgl::getHandle() const {
     return _handle;
 }
 
-void ShaderOgl::bindSamplers() const {
+void ShaderOgl::install() const {
     for( const auto &key: _samplersMapping ) {
         bindTexture( key.second.texture, key.second.textureUnit );
         bindSampler( key.second.sampler, key.second.textureUnit );
+    }
+    for( const auto &key: _uniformBlocksMapping ) {
+        bindUniformBuffer( key.second.buffer, key.second.bindingPoint );
     }
 }
 
@@ -123,30 +216,15 @@ void ShaderOgl::createSamplersMapping() {
         _handle, activeUniforms, indices.data(), GL_UNIFORM_SIZE, &sizes[0] );
     checkResult( "::glGetActiveUniformsiv" );
 
-    GLint textureUnit;
-    GLint textureUnitIncrement;
+    // The following value is taken form OpenGL specification and it specifies
+    // the minimal number of texture image units available in a shader. See the
+    // "State Tables" section.
+    const GLuint shaderTextureUnits = 16;
 
-    switch( _type ) {
-    case Type::Pixel:
-        textureUnit = 0;
-        textureUnitIncrement = 1;
-        break;
-    case Type::Vertex:
-        ::glGetIntegerv( GL_MAX_TEXTURE_IMAGE_UNITS, &textureUnit );
-        checkResult( "::glGetIntegerv" );
+    // Shaders of different types use different texture image unit ranges.
+    GLuint textureUnit = shaderTextureUnits * static_cast<GLuint>( _type );
 
-        --textureUnit;
-        textureUnitIncrement = -1;
-        break;
-    default:
-        throwNotImplemented();
-    }
-
-    auto mapUniform = [
-        this,
-        &textureUnit,
-        textureUnitIncrement]( const std::string &identifier )
-    {
+    auto mapUniform = [this, &textureUnit]( const std::string &identifier ) {
         const GLint location =
             ::glGetUniformLocation( _handle, identifier.c_str() );
         checkResult( "::glGetUniformLocation" );
@@ -158,14 +236,14 @@ void ShaderOgl::createSamplersMapping() {
             textureUnit, nullptr, Sampler::getDefault() };
         _samplersMapping.insert( std::make_pair(location, sampler) );
 
-        textureUnit += textureUnitIncrement;
+        ++textureUnit;
     };
 
     std::string identifier(
         getProgramParameter(GL_ACTIVE_UNIFORM_MAX_LENGTH), 0 );
 
     for( GLsizei index = 0; index < activeUniforms; ++index ) {
-        if( types[index] != GL_SAMPLER_2D )
+        if( types[index] != GL_SAMPLER_2D ) // TODO: fix
             continue;
 
         ::glGetActiveUniformName(
@@ -191,6 +269,32 @@ void ShaderOgl::createSamplersMapping() {
     }
 }
 
+void ShaderOgl::createUniformBlocksMapping() {
+    const GLsizei activeUniformBlocks =
+        getProgramParameter( GL_ACTIVE_UNIFORM_BLOCKS );
+
+    // The following value is taken form OpenGL specification and it specifies
+    // the minimal number of uniform blocks available in a shader. See the
+    // "State Tables" section.
+    const GLuint shaderUniformBlocks = 14;
+
+    // Shaders of different types use different binding point ranges.
+    const GLuint initialBindingPoint =
+        shaderUniformBlocks * static_cast<GLuint>( _type );
+
+    for( GLsizei index = 0; index < activeUniformBlocks; ++index ) {
+        const GLuint bindingPoint = initialBindingPoint + index;
+
+        GlslUniformBlock glslUniformBlock;
+        glslUniformBlock.bindingPoint = bindingPoint;
+        glslUniformBlock.buffer = nullptr;
+        _uniformBlocksMapping.insert( {index, glslUniformBlock} );
+
+        ::glUniformBlockBinding( _handle, index, bindingPoint );
+        checkResult( "::glUniformBlockBinding" );
+    }
+}
+
 GLenum ShaderOgl::convertType( Type type ) {
     switch( type ) {
     case Type::Vertex:
@@ -203,88 +307,6 @@ GLenum ShaderOgl::convertType( Type type ) {
         throwInvalidArgument( "'type' is invalid" );
     }
 }
-
-//  Shader::Uniform
-
-Shader::Uniform::Uniform( void *identifier, Shader::Pointer shader )
-    : _identifier( identifier ), _shader( shader )
-{
-}
-
-#define _program std::static_pointer_cast< ShaderOgl >( _shader )->getHandle()
-#define _location reinterpret_cast< GLint >( _identifier )
-
-void Shader::Uniform::setValue( int value ) {
-    ::glProgramUniform1i( _program, _location, value );
-    checkResult( "::glProgramUniform1i" );
-}
-
-void Shader::Uniform::setValue( float value ) {
-    ::glProgramUniform1f( _program, _location, value );
-    checkResult( "::glProgramUniform1f" );
-}
-
-void Shader::Uniform::setValue( const Color &value ) {
-    ::glProgramUniform4f(
-        _program,
-        _location,
-        value.getNormalizedR(),
-        value.getNormalizedG(),
-        value.getNormalizedB(),
-        value.getNormalizedA() );
-    checkResult( "::glProgramUniform4f" );
-}
-
-void Shader::Uniform::setValue( const Vector &value ) {
-    ::glProgramUniform3f(
-        _program, _location, value.getX(), value.getY(), value.getZ() );
-    checkResult( "::glProgramUniform3f" );
-}
-
-void Shader::Uniform::setValue( const Matrix &value ) {
-    const GLsizei count = 1;
-    const GLboolean transpose = true;
-
-    ::glProgramUniformMatrix4fv(
-        _program, _location, count, transpose, value[0] );
-    checkResult( "::glProgramUniformMatrix4fv" );
-}
-
-void Shader::Uniform::setValue( const std::vector<Matrix> &matrices ) {
-    const GLsizei count = matrices.size();
-    const GLboolean transpose = true;
-
-    ::glProgramUniformMatrix4fv(
-        _program, _location, count, transpose, matrices.front()[0] );
-    checkResult( "::glProgramUniformMatrix4fv" );
-}
-
-void Shader::Uniform::setValue( Texture::Pointer texture ) {
-    const auto nativeShader = std::static_pointer_cast< ShaderOgl >( _shader );
-    auto &mappingValue = nativeShader->_samplersMapping[_location];
-
-    mappingValue.texture = texture;
-
-    if( RenderingSystemOgl::getInstance()->getShader(nativeShader->_type) ==
-            nativeShader )
-        bindTexture( texture, mappingValue.textureUnit );
-}
-
-void Shader::Uniform::setValue( Sampler::Pointer sampler ) {
-    const auto nativeShader = std::static_pointer_cast< ShaderOgl >( _shader );
-    auto &mappingValue = nativeShader->_samplersMapping[_location];
-
-    mappingValue.sampler = sampler;
-
-    if( RenderingSystemOgl::getInstance()->getShader(nativeShader->_type) ==
-            nativeShader )
-        bindSampler( sampler, mappingValue.textureUnit );
-}
-
-#undef _program
-#undef _location
-
-// Shader
 
 Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
     RenderingSystemOgl::installOpenGlContext();
