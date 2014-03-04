@@ -46,14 +46,6 @@ void RenderingSystemGlx::endFrameRendering() {
     return;
 }
 
-void RenderingSystemGlx::setColorBufferFormat( ColorBufferFormat ) {
-    throwRuntimeError( "Not implemented" );
-}
-
-void RenderingSystemGlx::setDepthBufferFormat( DepthBufferFormat ) {
-    return;
-}
-
 RenderingSystemGlx* RenderingSystemGlx::getInstance() {
     static const std::unique_ptr<RenderingSystemGlx> instance( new RenderingSystemGlx );
     return instance.get();

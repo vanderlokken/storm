@@ -4,8 +4,7 @@
 
 namespace storm {
 
-class Vector {
-public:
+struct Vector {
     Vector() noexcept;
     Vector( float x, float y, float z ) noexcept;
 
@@ -21,14 +20,6 @@ public:
 
     Vector operator - () const noexcept;
 
-    float getX() const noexcept;
-    float getY() const noexcept;
-    float getZ() const noexcept;
-
-    void setX( float ) noexcept;
-    void setY( float ) noexcept;
-    void setZ( float ) noexcept;
-
     float getLength() const noexcept;
 
     void normalize() noexcept;
@@ -37,12 +28,13 @@ public:
     static float getDotProduct( const Vector&, const Vector& ) noexcept;
     static Vector getCrossProduct( const Vector&, const Vector& ) noexcept;
 
-private:
-    float _x;
-    float _y;
-    float _z;
+    float x;
+    float y;
+    float z;
 };
 
 Vector operator * ( float, const Vector& ) noexcept;
 
 }
+
+#include <storm/vector.inl>

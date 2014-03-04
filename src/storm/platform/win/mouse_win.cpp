@@ -231,8 +231,8 @@ bool MouseWin::isCursorInClientRectangle() noexcept {
     return
         cursorPosition.x >= 0 &&
         cursorPosition.y >= 0 &&
-        cursorPosition.x < windowDimensions.getWidth() &&
-        cursorPosition.y < windowDimensions.getHeight();
+        cursorPosition.x < windowDimensions.width &&
+        cursorPosition.y < windowDimensions.height;
 }
 
 void MouseWin::lockCursor() noexcept {

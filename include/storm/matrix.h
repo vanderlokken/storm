@@ -40,9 +40,13 @@ private:
     float _21, _22, _23, _24;
     float _31, _32, _33, _34;
     float _41, _42, _43, _44;
+
+    friend Vector& operator *= ( Vector&, const Matrix& ) noexcept;
 };
 
-Vector& operator *= ( Vector &vector, const Matrix &matrix ) noexcept;
-Vector operator * ( const Vector &vector, const Matrix &matrix ) noexcept;
+Vector& operator *= ( Vector&, const Matrix& ) noexcept;
+Vector operator * ( const Vector&, const Matrix& ) noexcept;
 
 }
+
+#include <storm/matrix.inl>

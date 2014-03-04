@@ -4,8 +4,7 @@
 
 namespace storm {
 
-class Quaternion {
-public:
+struct Quaternion {
     Quaternion() noexcept;
     Quaternion( float, float, float, float ) noexcept;
 
@@ -21,16 +20,6 @@ public:
     Quaternion operator * ( float ) const noexcept;
     Quaternion operator / ( float ) const noexcept;
 
-    float getX() const noexcept;
-    float getY() const noexcept;
-    float getZ() const noexcept;
-    float getW() const noexcept;
-
-    void setX( float ) noexcept;
-    void setY( float ) noexcept;
-    void setZ( float ) noexcept;
-    void setW( float ) noexcept;
-
     float getLength() const noexcept;
 
     void normalize() noexcept;
@@ -42,13 +31,14 @@ public:
     static Quaternion slerp(
         const Quaternion&, const Quaternion&, float ) noexcept;
 
-private:
-    float _x;
-    float _y;
-    float _z;
-    float _w;
+    float x;
+    float y;
+    float z;
+    float w;
 };
 
 Quaternion operator * ( float, const Quaternion& ) noexcept;
 
 }
+
+#include <storm/quaternion.inl>

@@ -4,31 +4,24 @@
 
 namespace storm {
 
-class Rectangle {
-public:
-    Rectangle() noexcept;
-    Rectangle( int x, int y, unsigned int width, unsigned int height ) noexcept;
+struct Rectangle {
+    Rectangle() noexcept
+        : x( 0 ), y( 0 ), width( 0 ), height( 0 )
+    {
+    }
 
-    int getX() const noexcept;
-    int getY() const noexcept;
+    Rectangle( int x, int y, unsigned int width, unsigned int height ) noexcept
+        : x( x ), y( y ), width( width ), height( height )
+    {
+    }
 
-    void setX( int ) noexcept;
-    void setY( int ) noexcept;
+    int getRight() const noexcept { return x + width; }
+    int getBottom() const noexcept { return y + height; }
 
-    unsigned int getWidth() const noexcept;
-    unsigned int getHeight() const noexcept;
-
-    void setWidth( unsigned int ) noexcept;
-    void setHeight( unsigned int ) noexcept;
-
-    int getRight() const noexcept;
-    int getBottom() const noexcept;
-
-private:
-    int _x;
-    int _y;
-    unsigned int _width;
-    unsigned int _height;
+    int x;
+    int y;
+    unsigned int width;
+    unsigned int height;
 };
 
 }

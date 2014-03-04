@@ -249,24 +249,20 @@ const Rectangle& RenderingSystemOgl::getOutputRectangle() const noexcept {
 
 void RenderingSystemOgl::setClippingRectangle( const Rectangle &rectangle ) {
     ::glScissor(
-        rectangle.getX(),
-        rectangle.getY(),
-        rectangle.getWidth(),
-        rectangle.getHeight() );
-
+        rectangle.x,
+        rectangle.y,
+        rectangle.width,
+        rectangle.height );
     checkResult( "::glScissor" );
-    return;
 }
 
 void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
     ::glViewport(
-        rectangle.getX(),
-        rectangle.getY(),
-        rectangle.getWidth(),
-        rectangle.getHeight() );
-
+        rectangle.x,
+        rectangle.y,
+        rectangle.width,
+        rectangle.height );
     checkResult( "::glViewport" );
-    return;
 }
 
 void RenderingSystemOgl::setRenderingBufferSet(

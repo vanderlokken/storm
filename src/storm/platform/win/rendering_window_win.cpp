@@ -78,8 +78,8 @@ bool RenderingWindowWin::isFullscreen() const noexcept {
 }
 
 void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
-    const unsigned int width = windowDimensions.getWidth();
-    const unsigned int height = windowDimensions.getHeight();
+    const unsigned int width = windowDimensions.width;
+    const unsigned int height = windowDimensions.height;
 
     RECT desktopRectangle = { 0, 0, 0, 0 };
 

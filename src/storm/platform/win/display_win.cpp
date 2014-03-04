@@ -42,13 +42,16 @@ std::vector<Display::Mode> DisplayWin::getSupportedModes() const noexcept {
     mode.dmDriverExtra = 0;
 
     while( ::EnumDisplaySettings(deviceName, modeIndex, &mode) ) {
-        Mode supportedMode(
-            mode.dmPelsWidth,
-            mode.dmPelsHeight,
-            mode.dmDisplayFrequency,
-            mode.dmBitsPerPel );
+        Mode supportedMode;
+
+        supportedMode.width = mode.dmPelsWidth;
+        supportedMode.height = mode.dmPelsHeight;
+        supportedMode.refreshRate = mode.dmDisplayFrequency;
+        supportedMode.colorDepth = mode.dmBitsPerPel;
+
         supportedModes.push_back( supportedMode );
-        modeIndex++;
+
+        ++modeIndex;
     }
     return supportedModes;
 }

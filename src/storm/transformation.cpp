@@ -12,8 +12,7 @@ Matrix createTranslationTransformation( float x, float y, float z ) noexcept {
 }
 
 Matrix createTranslationTransformation( const Vector &vector ) noexcept {
-    return createTranslationTransformation(
-        vector.getX(), vector.getY(), vector.getZ() );
+    return createTranslationTransformation( vector.x, vector.y, vector.z );
 }
 
 Matrix createScalingTransformation( float x, float y, float z ) noexcept {
@@ -24,8 +23,7 @@ Matrix createScalingTransformation( float x, float y, float z ) noexcept {
 }
 
 Matrix createScalingTransformation( const Vector &vector ) noexcept {
-    return createScalingTransformation(
-        vector.getX(), vector.getY(), vector.getZ() );
+    return createScalingTransformation( vector.x, vector.y, vector.z );
 }
 
 Matrix createXRotationTransformation( float angle ) noexcept {

@@ -4,25 +4,19 @@
 
 namespace storm {
 
-class Dimensions {
-public:
-    Dimensions() noexcept;
-    Dimensions( unsigned int width, unsigned int height ) noexcept;
+struct Dimensions {
+    Dimensions() noexcept
+        : width( 0 ), height( 0 )
+    {
+    }
 
-    Dimensions& operator -= ( const Dimensions& ) noexcept;
+    Dimensions( unsigned int width, unsigned int height ) noexcept
+        : width( width ), height( height )
+    {
+    }
 
-    unsigned int getWidth() const noexcept;
-    void setWidth( unsigned int ) noexcept;
-
-    unsigned int getHeight() const noexcept;
-    void setHeight( unsigned int ) noexcept;
-
-    bool operator == ( const Dimensions& ) const noexcept;
-    bool operator != ( const Dimensions& ) const noexcept;
-
-private:
-    unsigned int _width;
-    unsigned int _height;
+    unsigned int width;
+    unsigned int height;
 };
 
 }

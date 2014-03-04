@@ -60,7 +60,7 @@ bool RenderingWindowX11::isFullscreen() const noexcept {
 
 void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
     ::XUnmapWindow( _display, _handle );
-    ::XResizeWindow( _display, _handle, windowDimensions.getWidth(), windowDimensions.getHeight() );
+    ::XResizeWindow( _display, _handle, windowDimensions.width, windowDimensions.height );
     ::XMapWindow( _display, _handle );
     ::XFlush( _display );
 

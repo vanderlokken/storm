@@ -19,9 +19,6 @@ public:
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
-    virtual void setColorBufferFormat( ColorBufferFormat );
-    virtual void setDepthBufferFormat( DepthBufferFormat );
-
 private:
     RenderingSystemGlx();
 

@@ -4,8 +4,7 @@
 
 namespace storm {
 
-class FlatVector {
-public:
+struct FlatVector {
     FlatVector() noexcept;
     FlatVector( float x, float y ) noexcept;
 
@@ -19,12 +18,6 @@ public:
     FlatVector operator * ( float ) const noexcept;
     FlatVector operator / ( float ) const noexcept;
 
-    float getX() const noexcept;
-    float getY() const noexcept;
-
-    void setX( float ) noexcept;
-    void setY( float ) noexcept;
-
     float getLength() const noexcept;
 
     void normalize() noexcept;
@@ -32,9 +25,10 @@ public:
 
     static float getDotProduct( const FlatVector&, const FlatVector& ) noexcept;
 
-private:
-    float _x;
-    float _y;
+    float x;
+    float y;
 };
 
 }
+
+#include <storm/flat_vector.inl>
