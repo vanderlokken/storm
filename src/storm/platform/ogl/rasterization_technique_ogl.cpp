@@ -36,7 +36,8 @@ GLenum RasterizationTechniqueOgl::convertCullMode( CullMode cullMode ) {
     case CullMode::BackFaces:
         return GL_BACK;
     default:
-        throwInvalidArgument( "'cullMode' is invalid" );
+        storm_assert_unreachable( "Unexpected cull mode value" );
+        return 0;
     }
 }
 
@@ -47,7 +48,8 @@ GLenum RasterizationTechniqueOgl::convertFillMode( FillMode fillMode ) {
     case FillMode::Wireframe:
         return GL_LINE;
     default:
-        throwInvalidArgument( "'fillMode' is invalid" );
+        storm_assert_unreachable( "Unexpected fill mode value" );
+        return 0;
     }
 }
 

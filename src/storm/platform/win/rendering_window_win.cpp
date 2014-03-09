@@ -109,7 +109,7 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
 }
 
 void RenderingWindowWin::setFullscreen() {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
 }
 
 HWND RenderingWindowWin::getHandle() const {

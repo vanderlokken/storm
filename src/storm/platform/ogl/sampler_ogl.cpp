@@ -72,7 +72,8 @@ GLenum SamplerOgl::convertMinifyingFilter( MinifyingFilter minifyingFilter ) {
     case MinifyingFilter::Trilinear:
         return GL_LINEAR_MIPMAP_LINEAR;
     default:
-        throwInvalidArgument( "'minifyingFilter' is invalid" );
+        storm_assert_unreachable( "Unexpected minifying filter value" );
+        return 0;
     }
 }
 
@@ -83,7 +84,8 @@ GLenum SamplerOgl::convertMagnifyingFilter( MagnifyingFilter magnifyingFilter ) 
     case MagnifyingFilter::Linear:
         return GL_LINEAR;
     default:
-        throwInvalidArgument( "'magnifyingFilter' is invalid" );
+        storm_assert_unreachable( "Unexpected magnifying filter value" );
+        return 0;
     }
 }
 
@@ -98,7 +100,8 @@ GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
     case WrapMode::WithBorderColor:
         return GL_CLAMP_TO_BORDER;
     default:
-        throwInvalidArgument( "'wrapMode' is invalid" );
+        storm_assert_unreachable( "Unexpected wrap mode value" );
+        return 0;
     }
 }
 

@@ -15,7 +15,7 @@ Mesh::Pointer Mesh::load( const std::string &filename ) {
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
-        throwInvalidArgument( "'stream' is invalid" );
+        throw Exception( "Couldn't open " + filename );
 
     uint32_t attributeCount = 0;
     stream.read( reinterpret_cast<char*>(&attributeCount), sizeof(attributeCount) );

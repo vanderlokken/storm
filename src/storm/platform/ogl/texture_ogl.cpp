@@ -24,7 +24,7 @@ public:
     ScopeTextureBinding( GLenum target, GLuint binding )
         : _target( target )
     {
-        GLenum bindingEnumeration;
+        GLenum bindingEnumeration = 0;
         switch( _target ) {
         case GL_TEXTURE_1D:
             bindingEnumeration = GL_TEXTURE_BINDING_1D;
@@ -54,7 +54,7 @@ public:
             bindingEnumeration = GL_TEXTURE_BINDING_BUFFER;
             break;
         default:
-            storm_assert( false );
+            storm_assert_unreachable( "Unexpected target value" );
         }
 
         ::glGetIntegerv( bindingEnumeration, &_previousBinding );
@@ -78,9 +78,7 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
       _texelDescription( selectTexelDescription(description.format) ),
       _target( selectTarget(description.layout) )
 {
-#ifdef _DEBUG
     validateDescription( description );
-#endif
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
@@ -273,7 +271,7 @@ void TextureOgl::validateDescription( const Description &description ) {
         storm_assert( description.mipLevels == 1 );
         return;
     default:
-        storm_assert( false );
+        storm_assert_unreachable( "Unexpected layout value" );
     }
 }
 
@@ -298,7 +296,8 @@ GLenum TextureOgl::selectTarget( Layout layout ) {
     case Layout::Buffer:
         return GL_TEXTURE_BUFFER;
     default:
-        throwInvalidArgument( "'layout' is invalid" );
+        storm_assert_unreachable( "Unexpected layout value" );
+        return 0;
     }
 }
 
@@ -318,7 +317,8 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
     case Format::DepthUint24StencilUint8:
         return { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE };
     default:
-        throwInvalidArgument( "'format' is invalid" );
+        storm_assert_unreachable( "Unexpected format value" );
+        return { 0 };
     }
 }
 

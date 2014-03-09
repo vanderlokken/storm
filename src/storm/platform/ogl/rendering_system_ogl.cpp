@@ -236,13 +236,13 @@ void RenderingSystemOgl::setBlendingTechnique(
 }
 
 const Rectangle& RenderingSystemOgl::getClippingRectangle() const {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
     static const Rectangle rectangle;
     return rectangle;
 }
 
 const Rectangle& RenderingSystemOgl::getOutputRectangle() const {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
     static const Rectangle rectangle;
     return rectangle;
 }

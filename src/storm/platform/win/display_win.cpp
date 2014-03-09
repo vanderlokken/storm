@@ -61,7 +61,7 @@ const Display::Mode& DisplayWin::getCurrentMode() const {
 }
 
 void DisplayWin::setCurrentMode( const Mode &mode ) {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
 }
 
 DisplayWin* DisplayWin::getInstance() {

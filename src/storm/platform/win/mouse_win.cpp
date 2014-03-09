@@ -165,7 +165,7 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
         processMovement( mouse.lLastX, mouse.lLastY );
 
     if( state & MOUSE_MOVE_ABSOLUTE )
-        throwRuntimeError( "Not implemented" );
+        throwNotImplemented();
 
     return;
 }

@@ -12,7 +12,7 @@ Shader::Pointer Shader::load(
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
-        throwInvalidArgument( "'stream' is invalid" );
+        throw Exception( "Couldn't open " + filename );
 
     std::istreambuf_iterator< char > begin( stream );
     std::istreambuf_iterator< char > end;

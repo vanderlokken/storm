@@ -63,7 +63,8 @@ GLenum MeshOgl::convertTriangleTopology( TriangleTopology triangleTopology ) {
     case TriangleTopology::Strip:
         return GL_TRIANGLE_STRIP;
     default:
-        throwInvalidArgument( "'triangleTopology' is invalid" );
+        storm_assert_unreachable( "Unexpected triangle topology value" );
+        return 0;
     }
 }
 

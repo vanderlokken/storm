@@ -140,7 +140,7 @@ VertexFormatOgl::AttributeFormatDescription
         break;
 
     default:
-        throwInvalidArgument( "'format' is invalid" );
+        storm_assert_unreachable( "Unexpected format value" );
     }
 
     return result;

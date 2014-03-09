@@ -304,7 +304,8 @@ GLenum ShaderOgl::convertType( Type type ) {
     case Type::Geometry:
         return GL_GEOMETRY_SHADER;
     default:
-        throwInvalidArgument( "'type' is invalid" );
+        storm_assert_unreachable( "Unexpected type value" );
+        return 0;
     }
 }
 

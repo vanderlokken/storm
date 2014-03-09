@@ -42,7 +42,8 @@ GLenum BlendingTechniqueOgl::convertOperation( Operation operation ) {
     case Operation::Maximum:
         return GL_MAX;
     default:
-        throwInvalidArgument( "'operation' is invalid" );
+        storm_assert_unreachable( "Unexpected operation value" );
+        return 0;
     }
 }
 
@@ -71,7 +72,8 @@ GLenum BlendingTechniqueOgl::convertFactor( Factor factor ) {
     case Factor::SourceAlphaSaturate:
         return GL_SRC_ALPHA_SATURATE;
     default:
-        throwInvalidArgument( "'factor' is invalid" );
+        storm_assert_unreachable( "Unexpected factor value" );
+        return 0;
     }
 }
 

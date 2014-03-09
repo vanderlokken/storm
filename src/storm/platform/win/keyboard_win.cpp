@@ -176,7 +176,7 @@ Keyboard::Key KeyboardWin::convertKey( USHORT code ) {
     auto searchResult = std::find( codes.cbegin(), codes.cend(), code );
 
     if( searchResult == codes.cend() )
-        throwInvalidArgument( "'code' is invalid" );
+        throwRuntimeError( "'code' is invalid" );
 
     return static_cast< Keyboard::Key >( searchResult - codes.cbegin() );
 }

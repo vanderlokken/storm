@@ -12,7 +12,8 @@ GLenum getResourceUsage( ResourceType resourceType ) {
     case ResourceType::Output:
         return GL_DYNAMIC_DRAW;
     default:
-        throwInvalidArgument( "'resourceType' is invalid" );
+        storm_assert_unreachable( "Unexpected resource type value" );
+        return 0;
     }
 }
 

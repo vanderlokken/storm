@@ -46,9 +46,7 @@ void BufferOgl::getData( size_t offset, size_t size, void *data ) const {
 }
 
 void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
-    if( offset + size > _description.size ) {
-        throwInvalidArgument( "The specified offset and size are not correct" );
-    }
+    storm_assert( offset + size <= _description.size );
 
     ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
     checkResult( "::glBindBuffer" );

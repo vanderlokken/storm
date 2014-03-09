@@ -46,7 +46,8 @@ GLenum OutputTechniqueOgl::convertCondition( Condition condition ) {
     case Condition::NotEqual:
         return GL_NOTEQUAL;
     default:
-        throwInvalidArgument( "'condition' is invalid" );
+        storm_assert_unreachable( "Unexpected condition value" );
+        return 0;
     }
 }
 
@@ -71,7 +72,8 @@ GLenum OutputTechniqueOgl::convertStencilOperation(
     case StencilOperation::Invert:
         return GL_INVERT;
     default:
-        throwInvalidArgument( "'operation' is invalid" );
+        storm_assert_unreachable( "Unexpected operation value" );
+        return 0;
     }
 }
 

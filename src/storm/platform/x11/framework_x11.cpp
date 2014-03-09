@@ -14,8 +14,7 @@ FrameworkX11::FrameworkX11()
 }
 
 void FrameworkX11::run( const Callback &callback ) {
-    if( !callback )
-        throwInvalidArgument( "'callback' is invalid" );
+    storm_assert( callback );
 
     const bool getOnlyExistingAtoms = true;
 

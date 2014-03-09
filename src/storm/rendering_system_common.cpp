@@ -13,7 +13,8 @@ Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) cons
     case Shader::Type::Geometry:
         return _geometryShader;
     default:
-        throwInvalidArgument( "'shaderType' is invalid" );
+        storm_assert_unreachable( "Unexpected shader type value" );
+        return nullptr;
     }
 }
 
@@ -29,7 +30,7 @@ void RenderingSystemCommon::setShader( Shader::Pointer shader ) {
         _geometryShader = shader;
         break;
     default:
-        throwInvalidArgument( "'shader' is invalid" );
+        storm_assert_unreachable( "Unexpected shader type value" );
     }
 }
 
