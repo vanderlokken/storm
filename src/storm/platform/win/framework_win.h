@@ -14,7 +14,7 @@ public:
     virtual void stop();
 
 private:
-    FrameworkWin() noexcept;
+    FrameworkWin();
 };
 
 }

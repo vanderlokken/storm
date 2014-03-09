@@ -4,10 +4,8 @@
 #define STRICT
 #include <windows.h>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
-WNDPROC replaceWindowProcedure( HWND windowHandle, WNDPROC windowProcedure ) noexcept;
+WNDPROC replaceWindowProcedure( HWND windowHandle, WNDPROC windowProcedure );
 
 }

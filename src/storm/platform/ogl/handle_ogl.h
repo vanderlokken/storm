@@ -1,6 +1,5 @@
 #pragma once
 
-#include <storm/noexcept.h>
 #include <storm/noncopyable.h>
 #include <storm/platform/ogl/api_ogl.h>
 
@@ -9,7 +8,7 @@ namespace storm {
 class HandleOgl {
     NONCOPYABLE( HandleOgl );
 public:
-    HandleOgl() noexcept : _handle( 0 ) {
+    HandleOgl() : _handle( 0 ) {
         return;
     }
 
@@ -17,7 +16,7 @@ public:
         return;
     }
 
-    operator GLuint () const noexcept {
+    operator GLuint () const {
         return _handle;
     }
 

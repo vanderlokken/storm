@@ -1,29 +1,27 @@
 #pragma once
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 struct FlatVector {
-    FlatVector() noexcept;
-    FlatVector( float x, float y ) noexcept;
+    FlatVector();
+    FlatVector( float x, float y );
 
-    FlatVector& operator += ( const FlatVector& ) noexcept;
-    FlatVector& operator -= ( const FlatVector& ) noexcept;
-    FlatVector& operator *= ( float ) noexcept;
-    FlatVector& operator /= ( float ) noexcept;
+    FlatVector& operator += ( const FlatVector& );
+    FlatVector& operator -= ( const FlatVector& );
+    FlatVector& operator *= ( float );
+    FlatVector& operator /= ( float );
 
-    FlatVector operator + ( const FlatVector& ) const noexcept;
-    FlatVector operator - ( const FlatVector& ) const noexcept;
-    FlatVector operator * ( float ) const noexcept;
-    FlatVector operator / ( float ) const noexcept;
+    FlatVector operator + ( const FlatVector& ) const;
+    FlatVector operator - ( const FlatVector& ) const;
+    FlatVector operator * ( float ) const;
+    FlatVector operator / ( float ) const;
 
-    float getLength() const noexcept;
+    float getLength() const;
 
-    void normalize() noexcept;
-    FlatVector getNormalized() const noexcept;
+    void normalize();
+    FlatVector getNormalized() const;
 
-    static float getDotProduct( const FlatVector&, const FlatVector& ) noexcept;
+    static float getDotProduct( const FlatVector&, const FlatVector& );
 
     float x;
     float y;

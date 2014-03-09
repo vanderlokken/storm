@@ -4,7 +4,6 @@
 #include <string>
 
 #include <storm/buffer.h>
-#include <storm/noexcept.h>
 #include <storm/vertex_format.h>
 
 namespace storm {
@@ -30,7 +29,7 @@ public:
 
     virtual ~Mesh() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 }

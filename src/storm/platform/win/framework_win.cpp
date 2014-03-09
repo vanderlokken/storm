@@ -10,7 +10,7 @@
 
 namespace storm {
 
-FrameworkWin::FrameworkWin() noexcept {
+FrameworkWin::FrameworkWin() {
     return;
 }
 

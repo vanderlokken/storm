@@ -2,55 +2,53 @@
 
 #include <cstdint>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class Color {
 public:
-    Color() noexcept;
+    Color();
 
     Color(
         unsigned char r,
         unsigned char g,
         unsigned char b,
-        unsigned char a = 255 ) noexcept;
+        unsigned char a = 255 );
 
-    explicit Color( uint32_t argb ) noexcept;
+    explicit Color( uint32_t argb );
 
-    uint32_t get() const noexcept;
+    uint32_t get() const;
 
-    unsigned char getR() const noexcept;
-    unsigned char getG() const noexcept;
-    unsigned char getB() const noexcept;
-    unsigned char getA() const noexcept;
+    unsigned char getR() const;
+    unsigned char getG() const;
+    unsigned char getB() const;
+    unsigned char getA() const;
 
-    void setR( unsigned char ) noexcept;
-    void setG( unsigned char ) noexcept;
-    void setB( unsigned char ) noexcept;
-    void setA( unsigned char ) noexcept;
+    void setR( unsigned char );
+    void setG( unsigned char );
+    void setB( unsigned char );
+    void setA( unsigned char );
 
-    float getNormalizedR() const noexcept;
-    float getNormalizedG() const noexcept;
-    float getNormalizedB() const noexcept;
-    float getNormalizedA() const noexcept;
+    float getNormalizedR() const;
+    float getNormalizedG() const;
+    float getNormalizedB() const;
+    float getNormalizedA() const;
 
-    void setNormalizedR( float ) noexcept;
-    void setNormalizedG( float ) noexcept;
-    void setNormalizedB( float ) noexcept;
-    void setNormalizedA( float ) noexcept;
+    void setNormalizedR( float );
+    void setNormalizedG( float );
+    void setNormalizedB( float );
+    void setNormalizedA( float );
 
     static Color fromNormalized(
         float normalizedR,
         float normalizedG,
         float normalizedB,
-        float normalizedA = 1.0f ) noexcept;
+        float normalizedA = 1.0f );
 
     static const Color Black;
     static const Color White;
 
 private:
-    static unsigned char convertNormalizedValue( float ) noexcept;
+    static unsigned char convertNormalizedValue( float );
 
     uint32_t _value;
 };

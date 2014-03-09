@@ -20,16 +20,16 @@ public:
 
     virtual void setShader( Shader::Pointer );
 
-    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const noexcept;
-    virtual OutputTechnique::Pointer getOutputTechnique() const noexcept;
-    virtual BlendingTechnique::Pointer getBlendingTechnique() const noexcept;
+    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const;
+    virtual OutputTechnique::Pointer getOutputTechnique() const;
+    virtual BlendingTechnique::Pointer getBlendingTechnique() const;
 
     virtual void setRasterizationTechnique( RasterizationTechnique::Pointer );
     virtual void setOutputTechnique( OutputTechnique::Pointer );
     virtual void setBlendingTechnique( BlendingTechnique::Pointer );
 
-    virtual const Rectangle& getClippingRectangle() const noexcept;
-    virtual const Rectangle& getOutputRectangle() const noexcept;
+    virtual const Rectangle& getClippingRectangle() const;
+    virtual const Rectangle& getOutputRectangle() const;
 
     virtual void setClippingRectangle( const Rectangle& );
     virtual void setOutputRectangle( const Rectangle& );

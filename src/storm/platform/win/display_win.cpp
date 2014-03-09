@@ -30,7 +30,7 @@ DisplayWin::DisplayWin() {
     return;
 }
 
-std::vector<Display::Mode> DisplayWin::getSupportedModes() const noexcept {
+std::vector<Display::Mode> DisplayWin::getSupportedModes() const {
     std::vector< Mode > supportedModes;
 
     const wchar_t *deviceName = nullptr;
@@ -56,7 +56,7 @@ std::vector<Display::Mode> DisplayWin::getSupportedModes() const noexcept {
     return supportedModes;
 }
 
-const Display::Mode& DisplayWin::getCurrentMode() const noexcept {
+const Display::Mode& DisplayWin::getCurrentMode() const {
     return _currentMode;
 }
 

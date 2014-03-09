@@ -14,14 +14,14 @@ public:
 
     virtual ~RenderingWindowX11();
 
-    virtual Dimensions getDimensions() const noexcept;
+    virtual Dimensions getDimensions() const;
 
-    virtual bool isFullscreen() const noexcept;
+    virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );
     virtual void setFullscreen();
 
-    Window getHandle() const noexcept;
+    Window getHandle() const;
 
 private:
     RenderingWindowX11();

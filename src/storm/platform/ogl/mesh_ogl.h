@@ -15,10 +15,10 @@ class MeshOgl : public Mesh {
 public:
     MeshOgl( const Description& );
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
-    GLenum getTriangleTopology() const noexcept;
-    const MeshHandleOgl& getHandle() const noexcept;
+    GLenum getTriangleTopology() const;
+    const MeshHandleOgl& getHandle() const;
 
 private:
     static GLenum convertTriangleTopology( TriangleTopology );

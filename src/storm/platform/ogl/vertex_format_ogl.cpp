@@ -10,7 +10,7 @@ VertexFormatOgl::VertexFormatOgl( const Description &description )
 }
 
 const VertexFormat::Description&
-    VertexFormatOgl::getDescription() const noexcept
+    VertexFormatOgl::getDescription() const
 {
     return _description;
 }

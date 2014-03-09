@@ -222,15 +222,15 @@ void TextureOgl::generateMipMap() {
     checkResult( "::glGenerateMipmap" );
 }
 
-const Texture::Description& TextureOgl::getDescription() const noexcept {
+const Texture::Description& TextureOgl::getDescription() const {
     return _description;
 }
 
-const TextureHandleOgl& TextureOgl::getHandle() const noexcept {
+const TextureHandleOgl& TextureOgl::getHandle() const {
     return _texture;
 }
 
-GLenum TextureOgl::getTarget() const noexcept {
+GLenum TextureOgl::getTarget() const {
     return _target;
 }
 

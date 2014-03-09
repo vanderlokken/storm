@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/event_handler.h>
-#include <storm/noexcept.h>
 
 namespace storm {
 
@@ -76,7 +75,7 @@ public:
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& ) = 0;
 
-    virtual bool isKeyPressed( Key ) const noexcept = 0;
+    virtual bool isKeyPressed( Key ) const = 0;
 };
 
 }

@@ -7,7 +7,7 @@ namespace storm {
 class RenderingSystemCommon : public RenderingSystem {
 public:
 
-    virtual Shader::Pointer getShader( Shader::Type ) const noexcept;
+    virtual Shader::Pointer getShader( Shader::Type ) const;
     virtual void setShader( Shader::Pointer );
 
 protected:

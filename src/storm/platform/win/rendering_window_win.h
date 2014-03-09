@@ -15,20 +15,20 @@ public:
 
     virtual ~RenderingWindowWin();
 
-    virtual Dimensions getDimensions() const noexcept;
+    virtual Dimensions getDimensions() const;
 
-    virtual bool isActive() const noexcept;
-    virtual bool isFullscreen() const noexcept;
+    virtual bool isActive() const;
+    virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );
     virtual void setFullscreen();
 
-    HWND getHandle() const noexcept;
+    HWND getHandle() const;
 
 private:
     RenderingWindowWin();
 
-    static LRESULT CALLBACK windowProcedure( HWND, UINT, WPARAM, LPARAM ) noexcept;
+    static LRESULT CALLBACK windowProcedure( HWND, UINT, WPARAM, LPARAM );
 
     HWND _handle;
     Dimensions _dimensions;

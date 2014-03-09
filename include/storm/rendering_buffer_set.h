@@ -25,7 +25,7 @@ public:
 
     virtual ~RenderingBufferSet() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 }

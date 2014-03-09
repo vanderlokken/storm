@@ -22,13 +22,13 @@ public:
     virtual void addEventHandler( const EventHandler<WheelRotationEvent>& );
     virtual void addEventHandler( const EventHandler<MovementEvent>& );
 
-    virtual bool isButtonPressed( Button ) const noexcept;
+    virtual bool isButtonPressed( Button ) const;
 
-    virtual bool getCursorVisibility() const noexcept;
-    virtual void setCursorVisibility( bool ) noexcept;
+    virtual bool getCursorVisibility() const;
+    virtual void setCursorVisibility( bool );
 
-    virtual bool getCursorMovementRestriction() const noexcept;
-    virtual void setCursorMovementRestriction( bool ) noexcept;
+    virtual bool getCursorMovementRestriction() const;
+    virtual void setCursorMovementRestriction( bool );
 
 private:
     MouseWin();
@@ -40,11 +40,11 @@ private:
     void processWheelRotation( short distance );
     void processMovement( int x, int y );
 
-    bool isCursorLockRequired() noexcept;
-    bool isCursorInClientRectangle() noexcept;
+    bool isCursorLockRequired();
+    bool isCursorInClientRectangle();
 
-    void lockCursor() noexcept;
-    void unlockCursor() noexcept;
+    void lockCursor();
+    void unlockCursor();
 
     static const size_t ButtonCount = 5;
     std::vector< bool > _buttonPressed;
@@ -63,9 +63,9 @@ private:
     static LRESULT CALLBACK handleMessage( HWND, UINT, WPARAM, LPARAM );
 
     LRESULT handleInputMessage( WPARAM, LPARAM );
-    LRESULT handleCursorMessage( WPARAM, LPARAM ) noexcept;
-    LRESULT handleActivationMessage( WPARAM, LPARAM ) noexcept;
-    LRESULT handleLeftButtonPressMessage( WPARAM, LPARAM ) noexcept;
+    LRESULT handleCursorMessage( WPARAM, LPARAM );
+    LRESULT handleActivationMessage( WPARAM, LPARAM );
+    LRESULT handleLeftButtonPressMessage( WPARAM, LPARAM );
 };
 
 }

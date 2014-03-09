@@ -50,11 +50,11 @@ RenderingWindowX11::~RenderingWindowX11() {
     return;
 }
 
-Dimensions RenderingWindowX11::getDimensions() const noexcept {
+Dimensions RenderingWindowX11::getDimensions() const {
     return _dimensions;
 }
 
-bool RenderingWindowX11::isFullscreen() const noexcept {
+bool RenderingWindowX11::isFullscreen() const {
     return _fullscreen;
 }
 
@@ -73,7 +73,7 @@ void RenderingWindowX11::setFullscreen() {
     throwRuntimeError( "Not implemented" );
 }
 
-Window RenderingWindowX11::getHandle() const noexcept {
+Window RenderingWindowX11::getHandle() const {
     return _handle;
 }
 

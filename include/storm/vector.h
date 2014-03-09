@@ -1,39 +1,37 @@
 #pragma once
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 struct Vector {
-    Vector() noexcept;
-    Vector( float x, float y, float z ) noexcept;
+    Vector();
+    Vector( float x, float y, float z );
 
-    Vector& operator += ( const Vector& ) noexcept;
-    Vector& operator -= ( const Vector& ) noexcept;
-    Vector& operator *= ( float ) noexcept;
-    Vector& operator /= ( float ) noexcept;
+    Vector& operator += ( const Vector& );
+    Vector& operator -= ( const Vector& );
+    Vector& operator *= ( float );
+    Vector& operator /= ( float );
 
-    Vector operator + ( const Vector& ) const noexcept;
-    Vector operator - ( const Vector& ) const noexcept;
-    Vector operator * ( float ) const noexcept;
-    Vector operator / ( float ) const noexcept;
+    Vector operator + ( const Vector& ) const;
+    Vector operator - ( const Vector& ) const;
+    Vector operator * ( float ) const;
+    Vector operator / ( float ) const;
 
-    Vector operator - () const noexcept;
+    Vector operator - () const;
 
-    float getLength() const noexcept;
+    float getLength() const;
 
-    void normalize() noexcept;
-    Vector getNormalized() const noexcept;
+    void normalize();
+    Vector getNormalized() const;
 
-    static float getDotProduct( const Vector&, const Vector& ) noexcept;
-    static Vector getCrossProduct( const Vector&, const Vector& ) noexcept;
+    static float getDotProduct( const Vector&, const Vector& );
+    static Vector getCrossProduct( const Vector&, const Vector& );
 
     float x;
     float y;
     float z;
 };
 
-Vector operator * ( float, const Vector& ) noexcept;
+Vector operator * ( float, const Vector& );
 
 }
 

@@ -4,7 +4,7 @@
 
 namespace storm {
 
-Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) const noexcept {
+Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) const {
     switch( shaderType ) {
     case Shader::Type::Vertex:
         return _vertexShader;

@@ -65,15 +65,15 @@ RenderingWindowWin::~RenderingWindowWin() {
     return;
 }
 
-Dimensions RenderingWindowWin::getDimensions() const noexcept {
+Dimensions RenderingWindowWin::getDimensions() const {
     return _dimensions;
 }
 
-bool RenderingWindowWin::isActive() const noexcept {
+bool RenderingWindowWin::isActive() const {
     return ::GetForegroundWindow() == _handle;
 }
 
-bool RenderingWindowWin::isFullscreen() const noexcept {
+bool RenderingWindowWin::isFullscreen() const {
     return _fullscreen;
 }
 
@@ -112,12 +112,12 @@ void RenderingWindowWin::setFullscreen() {
     throwRuntimeError( "Not implemented" );
 }
 
-HWND RenderingWindowWin::getHandle() const noexcept {
+HWND RenderingWindowWin::getHandle() const {
     return _handle;
 }
 
 LRESULT CALLBACK RenderingWindowWin::windowProcedure(
-    HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter ) noexcept
+    HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter )
 {
     if( message == WM_DESTROY )
         ::PostQuitMessage( 0 );

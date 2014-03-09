@@ -9,11 +9,11 @@ class BlendingTechniqueOgl : public BlendingTechnique {
 public:
     BlendingTechniqueOgl( const Description& );
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
-    GLenum getOperation() const noexcept;
-    GLenum getSourceFactor() const noexcept;
-    GLenum getDestinationFactor() const noexcept;
+    GLenum getOperation() const;
+    GLenum getSourceFactor() const;
+    GLenum getDestinationFactor() const;
 
 private:
     static GLenum convertOperation( Operation );

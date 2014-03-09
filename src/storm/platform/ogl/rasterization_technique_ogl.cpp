@@ -12,15 +12,15 @@ RasterizationTechniqueOgl::RasterizationTechniqueOgl( const Description &descrip
     return;
 }
 
-const RasterizationTechnique::Description& RasterizationTechniqueOgl::getDescription() const noexcept {
+const RasterizationTechnique::Description& RasterizationTechniqueOgl::getDescription() const {
     return _description;
 }
 
-GLenum RasterizationTechniqueOgl::getCullMode() const noexcept {
+GLenum RasterizationTechniqueOgl::getCullMode() const {
     return _cullMode;
 }
 
-GLenum RasterizationTechniqueOgl::getFillMode() const noexcept {
+GLenum RasterizationTechniqueOgl::getFillMode() const {
     return _fillMode;
 }
 

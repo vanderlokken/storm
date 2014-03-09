@@ -84,12 +84,12 @@ RenderingBufferSetOgl::RenderingBufferSetOgl( const Description &description )
 }
 
 const RenderingBufferSet::Description&
-    RenderingBufferSetOgl::getDescription() const noexcept
+    RenderingBufferSetOgl::getDescription() const
 {
     return _description;
 }
 
-const FramebufferHandleOgl& RenderingBufferSetOgl::getHandle() const noexcept {
+const FramebufferHandleOgl& RenderingBufferSetOgl::getHandle() const {
     return _handle;
 }
 

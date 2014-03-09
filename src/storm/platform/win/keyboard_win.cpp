@@ -52,7 +52,7 @@ void KeyboardWin::addEventHandler( const EventHandler<KeyReleaseEvent> &handler 
     return;
 }
 
-bool KeyboardWin::isKeyPressed( Key key ) const noexcept {
+bool KeyboardWin::isKeyPressed( Key key ) const {
     const size_t keyIndex = static_cast<size_t>( key );
     if( keyIndex < KeyCount )
         return _keyPressed[keyIndex];
@@ -218,7 +218,7 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
     return USE_DEFAULT_PROCESSING;
 }
 
-LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) noexcept {
+LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) {
 
     const BOOL activated = firstParameter;
 

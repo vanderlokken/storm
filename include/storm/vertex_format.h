@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class VertexFormat {
@@ -50,7 +48,7 @@ public:
 
     virtual ~VertexFormat() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 
     virtual size_t getVertexSize() const = 0;
 };

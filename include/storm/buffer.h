@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include <storm/noexcept.h>
 #include <storm/resource_type.h>
 
 namespace storm {
@@ -27,7 +26,7 @@ public:
     virtual void getData( size_t offset, size_t size, void *data ) const = 0;
     virtual void setData( size_t offset, size_t size, const void *data ) = 0;
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 template<class Container> Buffer::Pointer Buffer::create(

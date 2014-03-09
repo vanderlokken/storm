@@ -104,15 +104,15 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
     nativeShader->install();
 }
 
-RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const noexcept {
+RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const {
     return _rasterizationTechnique;
 }
 
-OutputTechnique::Pointer RenderingSystemOgl::getOutputTechnique() const noexcept {
+OutputTechnique::Pointer RenderingSystemOgl::getOutputTechnique() const {
     return _outputTechnique;
 }
 
-BlendingTechnique::Pointer RenderingSystemOgl::getBlendingTechnique() const noexcept {
+BlendingTechnique::Pointer RenderingSystemOgl::getBlendingTechnique() const {
     return _blendingTechnique;
 }
 
@@ -235,13 +235,13 @@ void RenderingSystemOgl::setBlendingTechnique(
     return;
 }
 
-const Rectangle& RenderingSystemOgl::getClippingRectangle() const noexcept {
+const Rectangle& RenderingSystemOgl::getClippingRectangle() const {
     throwRuntimeError( "Not implemented" );
     static const Rectangle rectangle;
     return rectangle;
 }
 
-const Rectangle& RenderingSystemOgl::getOutputRectangle() const noexcept {
+const Rectangle& RenderingSystemOgl::getOutputRectangle() const {
     throwRuntimeError( "Not implemented" );
     static const Rectangle rectangle;
     return rectangle;

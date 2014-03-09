@@ -53,7 +53,7 @@ SamplerOgl::SamplerOgl( const Description &description )
     checkResult( "::glSamplerParameterf" );
 }
 
-const Sampler::Description& SamplerOgl::getDescription() const noexcept {
+const Sampler::Description& SamplerOgl::getDescription() const {
     return _description;
 }
 

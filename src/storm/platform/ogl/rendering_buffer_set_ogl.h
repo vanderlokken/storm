@@ -15,9 +15,9 @@ class RenderingBufferSetOgl : public RenderingBufferSet {
 public:
     RenderingBufferSetOgl( const Description& );
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
-    const FramebufferHandleOgl& getHandle() const noexcept;
+    const FramebufferHandleOgl& getHandle() const;
 
 private:
     Description _description;

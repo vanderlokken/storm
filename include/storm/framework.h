@@ -2,8 +2,6 @@
 
 #include <functional>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class Framework {

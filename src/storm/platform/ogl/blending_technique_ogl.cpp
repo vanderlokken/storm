@@ -13,19 +13,19 @@ BlendingTechniqueOgl::BlendingTechniqueOgl( const Description &description )
     return;
 }
 
-const BlendingTechnique::Description& BlendingTechniqueOgl::getDescription() const noexcept {
+const BlendingTechnique::Description& BlendingTechniqueOgl::getDescription() const {
     return _description;
 }
 
-GLenum BlendingTechniqueOgl::getOperation() const noexcept {
+GLenum BlendingTechniqueOgl::getOperation() const {
     return _operation;
 }
 
-GLenum BlendingTechniqueOgl::getSourceFactor() const noexcept {
+GLenum BlendingTechniqueOgl::getSourceFactor() const {
     return _sourceFactor;
 }
 
-GLenum BlendingTechniqueOgl::getDestinationFactor() const noexcept {
+GLenum BlendingTechniqueOgl::getDestinationFactor() const {
     return _destinationFactor;
 }
 

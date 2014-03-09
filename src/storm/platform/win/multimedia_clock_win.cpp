@@ -43,7 +43,7 @@ MultimediaClockWin::~MultimediaClockWin() {
     return;
 }
 
-void MultimediaClockWin::update() noexcept {
+void MultimediaClockWin::update() {
     DWORD currentSystemTime = _timeGetTime();
 
     if( _systemTime != 0 ) {
@@ -58,11 +58,11 @@ void MultimediaClockWin::update() noexcept {
     return;
 }
 
-Clock::Time MultimediaClockWin::getTime() const noexcept {
+Clock::Time MultimediaClockWin::getTime() const {
     return _time;
 }
 
-Clock::Time MultimediaClockWin::getTimeChange() const noexcept {
+Clock::Time MultimediaClockWin::getTimeChange() const {
     return _timeChange;
 }
 

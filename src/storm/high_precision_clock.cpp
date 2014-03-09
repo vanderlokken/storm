@@ -13,19 +13,19 @@ HighPrecisionClock::HighPrecisionClock()
 {
 }
 
-void HighPrecisionClock::update() noexcept {
+void HighPrecisionClock::update() {
     const auto newTimePoint = high_resolution_clock::now();
     _timeChange = newTimePoint - _timePoint;
     _timePoint = newTimePoint;
 }
 
-Clock::Time HighPrecisionClock::getTime() const noexcept {
+Clock::Time HighPrecisionClock::getTime() const {
     return static_cast<Clock::Time>(
         duration_cast<milliseconds>( _timePoint - _start ).count()
     );
 }
 
-Clock::Time HighPrecisionClock::getTimeChange() const noexcept {
+Clock::Time HighPrecisionClock::getTimeChange() const {
     return static_cast<Clock::Time>(
         duration_cast<milliseconds>( _timeChange ).count()
     );

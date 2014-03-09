@@ -12,13 +12,13 @@ public:
 
     virtual ~ClockPosix() { }
 
-    virtual void update() noexcept;
+    virtual void update();
 
-    virtual Time getTime() const noexcept;
-    virtual Time getTimeChange() const noexcept;
+    virtual Time getTime() const;
+    virtual Time getTimeChange() const;
 
 private:
-    ClockPosix() noexcept;
+    ClockPosix();
 
     uint64_t _systemTime;
     uint64_t _previousSystemTime;

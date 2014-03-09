@@ -44,15 +44,15 @@ MeshOgl::MeshOgl( const Description &description )
     return;
 }
 
-const Mesh::Description& MeshOgl::getDescription() const noexcept {
+const Mesh::Description& MeshOgl::getDescription() const {
     return _description;
 }
 
-GLenum MeshOgl::getTriangleTopology() const noexcept {
+GLenum MeshOgl::getTriangleTopology() const {
     return _triangleTopology;
 }
 
-const MeshHandleOgl& MeshOgl::getHandle() const noexcept {
+const MeshHandleOgl& MeshOgl::getHandle() const {
     return _handle;
 }
 

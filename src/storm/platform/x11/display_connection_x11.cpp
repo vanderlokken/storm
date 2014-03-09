@@ -24,7 +24,7 @@ DisplayConnectionX11::~DisplayConnectionX11() {
     return;
 }
 
-Display* DisplayConnectionX11::getHandle() const noexcept {
+Display* DisplayConnectionX11::getHandle() const {
     return _handle;
 }
 

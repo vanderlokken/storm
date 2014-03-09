@@ -21,11 +21,11 @@ public:
 
     virtual void generateMipMap();
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
-    const TextureHandleOgl& getHandle() const noexcept;
+    const TextureHandleOgl& getHandle() const;
 
-    GLenum getTarget() const noexcept;
+    GLenum getTarget() const;
 
 private:
     static void validateDescription( const Description& );

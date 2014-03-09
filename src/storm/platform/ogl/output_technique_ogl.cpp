@@ -16,13 +16,13 @@ OutputTechniqueOgl::OutputTechniqueOgl(
 }
 
 const OutputTechnique::Description&
-    OutputTechniqueOgl::getDescription() const noexcept
+    OutputTechniqueOgl::getDescription() const
 {
     return _description;
 }
 
 const OutputTechniqueOgl::Description&
-    OutputTechniqueOgl::getNativeDescription() const noexcept
+    OutputTechniqueOgl::getNativeDescription() const
 {
     return _nativeDescription;
 }

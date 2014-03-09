@@ -21,7 +21,7 @@ public:
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& );
     virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& );
 
-    virtual bool isKeyPressed( Key ) const noexcept;
+    virtual bool isKeyPressed( Key ) const;
 
 private:
     KeyboardWin();
@@ -46,7 +46,7 @@ private:
     static LRESULT CALLBACK handleMessage( HWND, UINT, WPARAM, LPARAM );
 
     LRESULT handleInputMessage( WPARAM, LPARAM );
-    LRESULT handleActivationMessage( WPARAM, LPARAM ) noexcept;
+    LRESULT handleActivationMessage( WPARAM, LPARAM );
 };
 
 }

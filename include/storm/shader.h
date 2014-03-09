@@ -26,7 +26,7 @@ public:
 
     virtual ~Shader() { }
 
-    virtual Type getType() const noexcept = 0;
+    virtual Type getType() const = 0;
 
     virtual ValueHandle getValueHandle(
         const std::string &identifier ) const = 0;

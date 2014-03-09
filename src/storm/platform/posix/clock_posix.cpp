@@ -4,7 +4,7 @@
 
 namespace storm {
 
-ClockPosix::ClockPosix() noexcept
+ClockPosix::ClockPosix()
     : _systemTime( 0 ),
       _previousSystemTime( 0 ),
       _initialSystemTime( 0 )
@@ -19,7 +19,7 @@ ClockPosix::ClockPosix() noexcept
     return;
 }
 
-void ClockPosix::update() noexcept {
+void ClockPosix::update() {
     timeval time;
     gettimeofday( &time, nullptr );
 
@@ -31,11 +31,11 @@ void ClockPosix::update() noexcept {
     return;
 }
 
-Clock::Time ClockPosix::getTime() const noexcept {
+Clock::Time ClockPosix::getTime() const {
     return (_systemTime - _initialSystemTime) / MicrosecondsPerMillisecond;
 }
 
-Clock::Time ClockPosix::getTimeChange() const noexcept {
+Clock::Time ClockPosix::getTimeChange() const {
     return (_systemTime - _previousSystemTime) / MicrosecondsPerMillisecond;
 }
 

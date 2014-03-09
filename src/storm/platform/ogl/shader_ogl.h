@@ -19,7 +19,7 @@ class ShaderOgl : public Shader {
 public:
     ShaderOgl( const std::string &sourceCode, Type type );
 
-    virtual Type getType() const noexcept;
+    virtual Type getType() const;
 
     virtual ValueHandle getValueHandle( const std::string &identifier ) const;
 

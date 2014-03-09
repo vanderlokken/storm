@@ -4,17 +4,17 @@
 
 namespace storm {
 
-inline Quaternion::Quaternion() noexcept
+inline Quaternion::Quaternion()
     : x( 0 ), y( 0 ), z( 0 ), w( 0 )
 {
 }
 
-inline Quaternion::Quaternion( float x, float y, float z, float w ) noexcept
+inline Quaternion::Quaternion( float x, float y, float z, float w )
     : x( x ), y( y ), z( z ), w( w )
 {
 }
 
-inline Quaternion& Quaternion::operator += ( const Quaternion &other ) noexcept {
+inline Quaternion& Quaternion::operator += ( const Quaternion &other ) {
     x += other.x;
     y += other.y;
     z += other.z;
@@ -22,7 +22,7 @@ inline Quaternion& Quaternion::operator += ( const Quaternion &other ) noexcept 
     return *this;
 }
 
-inline Quaternion& Quaternion::operator -= ( const Quaternion &other ) noexcept {
+inline Quaternion& Quaternion::operator -= ( const Quaternion &other ) {
     x -= other.x;
     y -= other.y;
     z -= other.z;
@@ -30,12 +30,12 @@ inline Quaternion& Quaternion::operator -= ( const Quaternion &other ) noexcept 
     return *this;
 }
 
-inline Quaternion& Quaternion::operator *= ( const Quaternion &other ) noexcept {
+inline Quaternion& Quaternion::operator *= ( const Quaternion &other ) {
     *this = *this * other;
     return *this;
 }
 
-inline Quaternion& Quaternion::operator *= ( float multiplier ) noexcept {
+inline Quaternion& Quaternion::operator *= ( float multiplier ) {
     x *= multiplier;
     y *= multiplier;
     z *= multiplier;
@@ -43,7 +43,7 @@ inline Quaternion& Quaternion::operator *= ( float multiplier ) noexcept {
     return *this;
 }
 
-inline Quaternion& Quaternion::operator /= ( float divisor ) noexcept {
+inline Quaternion& Quaternion::operator /= ( float divisor ) {
     const float multiplier = 1 / divisor;
     x *= multiplier;
     y *= multiplier;
@@ -52,17 +52,17 @@ inline Quaternion& Quaternion::operator /= ( float divisor ) noexcept {
     return *this;
 }
 
-inline Quaternion Quaternion::operator + ( const Quaternion &other ) const noexcept {
+inline Quaternion Quaternion::operator + ( const Quaternion &other ) const {
     return Quaternion(
         x + other.x, y + other.y, z + other.z, w + other.w );
 }
 
-inline Quaternion Quaternion::operator - ( const Quaternion &other ) const noexcept {
+inline Quaternion Quaternion::operator - ( const Quaternion &other ) const {
     return Quaternion(
         x - other.x, y - other.y, z - other.z, w - other.w );
 }
 
-inline Quaternion Quaternion::operator * ( const Quaternion &other ) const noexcept {
+inline Quaternion Quaternion::operator * ( const Quaternion &other ) const {
     const Vector first( x, y, z );
     const Vector second( other.x, other.y, other.z );
 
@@ -76,32 +76,32 @@ inline Quaternion Quaternion::operator * ( const Quaternion &other ) const noexc
         w * other.w - Vector::getDotProduct(first, second) );
 }
 
-inline Quaternion Quaternion::operator * ( float multiplier ) const noexcept {
+inline Quaternion Quaternion::operator * ( float multiplier ) const {
     return Quaternion(
         x * multiplier, y * multiplier, z * multiplier, w * multiplier );
 }
 
-inline Quaternion Quaternion::operator / ( float divisor ) const noexcept {
+inline Quaternion Quaternion::operator / ( float divisor ) const {
     const float multiplier = 1 / divisor;
     return Quaternion(
         x * multiplier, y * multiplier, z * multiplier, w * multiplier );
 }
 
-inline float Quaternion::getLength() const noexcept {
+inline float Quaternion::getLength() const {
     return sqrt( x * x + y * y + z * z + w * w );
 }
 
-inline void Quaternion::normalize() noexcept {
+inline void Quaternion::normalize() {
     *this /= getLength();
 }
 
-inline Quaternion Quaternion::getNormalized() const noexcept {
+inline Quaternion Quaternion::getNormalized() const {
     Quaternion result( *this );
     result.normalize();
     return result;
 }
 
-inline Matrix Quaternion::toRotationMatrix() const noexcept {
+inline Matrix Quaternion::toRotationMatrix() const {
     const float squaredLength = x * x + y * y + z * z + w * w;
     const float scale = squaredLength ? 2 / squaredLength : 0;
 
@@ -131,7 +131,7 @@ inline Matrix Quaternion::toRotationMatrix() const noexcept {
 }
 
 inline Quaternion Quaternion::fromAxisAngle(
-    const Vector &axis, float angle ) noexcept
+    const Vector &axis, float angle )
 {
     const float sine = sin( angle / 2 );
     return Quaternion(
@@ -142,7 +142,7 @@ inline Quaternion Quaternion::fromAxisAngle(
 }
 
 inline Quaternion Quaternion::slerp(
-    const Quaternion &first, const Quaternion &second, float position ) noexcept
+    const Quaternion &first, const Quaternion &second, float position )
 {
     if( position <= 0 )
         return first;
@@ -175,7 +175,7 @@ inline Quaternion Quaternion::slerp(
 }
 
 inline Quaternion operator * (
-    float multiplier, const Quaternion &quaternion ) noexcept
+    float multiplier, const Quaternion &quaternion )
 {
     return quaternion * multiplier;
 }

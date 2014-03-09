@@ -9,10 +9,10 @@ class RasterizationTechniqueOgl : public RasterizationTechnique {
 public:
     RasterizationTechniqueOgl( const Description& );
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
-    GLenum getCullMode() const noexcept;
-    GLenum getFillMode() const noexcept;
+    GLenum getCullMode() const;
+    GLenum getFillMode() const;
 
 private:
     static GLenum convertCullMode( CullMode );

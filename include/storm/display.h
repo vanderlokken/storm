@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class Display {
@@ -19,9 +17,9 @@ public:
 
     virtual ~Display() { }
 
-    virtual std::vector<Mode> getSupportedModes() const noexcept = 0;
+    virtual std::vector<Mode> getSupportedModes() const = 0;
 
-    virtual const Mode& getCurrentMode() const noexcept = 0;
+    virtual const Mode& getCurrentMode() const = 0;
     virtual void setCurrentMode( const Mode& ) = 0;
 };
 

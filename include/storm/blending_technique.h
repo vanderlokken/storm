@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class BlendingTechnique {
@@ -43,7 +41,7 @@ public:
 
     virtual ~BlendingTechnique() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 }

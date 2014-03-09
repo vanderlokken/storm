@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class OutputTechnique {
@@ -65,7 +63,7 @@ public:
 
     virtual ~OutputTechnique() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 }

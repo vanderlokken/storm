@@ -92,7 +92,7 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
     createUniformBlocksMapping();
 }
 
-Shader::Type ShaderOgl::getType() const noexcept {
+Shader::Type ShaderOgl::getType() const {
     return _type;
 }
 

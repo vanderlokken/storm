@@ -4,14 +4,14 @@
 
 namespace storm {
 
-Matrix createTranslationTransformation( float x, float y, float z ) noexcept;
-Matrix createTranslationTransformation( const Vector &vector ) noexcept;
+Matrix createTranslationTransformation( float x, float y, float z );
+Matrix createTranslationTransformation( const Vector &vector );
 
-Matrix createScalingTransformation( float x, float y, float z ) noexcept;
-Matrix createScalingTransformation( const Vector &vector ) noexcept;
+Matrix createScalingTransformation( float x, float y, float z );
+Matrix createScalingTransformation( const Vector &vector );
 
-Matrix createXRotationTransformation( float angle ) noexcept;
-Matrix createYRotationTransformation( float angle ) noexcept;
-Matrix createZRotationTransformation( float angle ) noexcept;
+Matrix createXRotationTransformation( float angle );
+Matrix createYRotationTransformation( float angle );
+Matrix createZRotationTransformation( float angle );
 
 }

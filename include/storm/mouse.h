@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/event_handler.h>
-#include <storm/noexcept.h>
 
 namespace storm {
 
@@ -40,13 +39,13 @@ public:
     virtual void addEventHandler( const EventHandler<WheelRotationEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<MovementEvent>& ) = 0;
 
-    virtual bool isButtonPressed( Button ) const noexcept = 0;
+    virtual bool isButtonPressed( Button ) const = 0;
 
-    virtual bool getCursorVisibility() const noexcept = 0;
-    virtual void setCursorVisibility( bool ) noexcept = 0;
+    virtual bool getCursorVisibility() const = 0;
+    virtual void setCursorVisibility( bool ) = 0;
 
-    virtual bool getCursorMovementRestriction() const noexcept = 0;
-    virtual void setCursorMovementRestriction( bool ) noexcept = 0;
+    virtual bool getCursorMovementRestriction() const = 0;
+    virtual void setCursorMovementRestriction( bool ) = 0;
 };
 
 }

@@ -4,29 +4,29 @@
 
 namespace storm {
 
-Matrix createTranslationTransformation( float x, float y, float z ) noexcept {
+Matrix createTranslationTransformation( float x, float y, float z ) {
     return Matrix( 1, 0, 0, 0,
                    0, 1, 0, 0,
                    0, 0, 1, 0,
                    x, y, z, 1 );
 }
 
-Matrix createTranslationTransformation( const Vector &vector ) noexcept {
+Matrix createTranslationTransformation( const Vector &vector ) {
     return createTranslationTransformation( vector.x, vector.y, vector.z );
 }
 
-Matrix createScalingTransformation( float x, float y, float z ) noexcept {
+Matrix createScalingTransformation( float x, float y, float z ) {
     return Matrix( x, 0, 0, 0,
                    0, y, 0, 0,
                    0, 0, z, 0,
                    0, 0, 0, 1 );
 }
 
-Matrix createScalingTransformation( const Vector &vector ) noexcept {
+Matrix createScalingTransformation( const Vector &vector ) {
     return createScalingTransformation( vector.x, vector.y, vector.z );
 }
 
-Matrix createXRotationTransformation( float angle ) noexcept {
+Matrix createXRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 
@@ -36,7 +36,7 @@ Matrix createXRotationTransformation( float angle ) noexcept {
                    0,      0,      0,      1 );
 }
 
-Matrix createYRotationTransformation( float angle ) noexcept {
+Matrix createYRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 
@@ -46,7 +46,7 @@ Matrix createYRotationTransformation( float angle ) noexcept {
                         0,      0,      0,      1 );
 }
 
-Matrix createZRotationTransformation( float angle ) noexcept {
+Matrix createZRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 

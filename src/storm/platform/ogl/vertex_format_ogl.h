@@ -9,7 +9,7 @@ class VertexFormatOgl : public VertexFormat {
 public:
     VertexFormatOgl( const Description& );
 
-    virtual const Description& getDescription() const noexcept;
+    virtual const Description& getDescription() const;
 
     size_t getVertexSize() const;
 

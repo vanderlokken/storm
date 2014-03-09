@@ -10,10 +10,10 @@ class HighPrecisionClock : public Clock {
 public:
     HighPrecisionClock();
 
-    virtual void update() noexcept;
+    virtual void update();
 
-    virtual Time getTime() const noexcept;
-    virtual Time getTimeChange() const noexcept;
+    virtual Time getTime() const;
+    virtual Time getTimeChange() const;
 
 private:
     std::chrono::high_resolution_clock::time_point _start;

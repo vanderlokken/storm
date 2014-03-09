@@ -4,7 +4,7 @@
 
 namespace storm {
 
-float Matrix::getDeterminant() const noexcept {
+float Matrix::getDeterminant() const {
     const float _2x2Determinant1 = _33 * _44 - _34 * _43;
     const float _2x2Determinant2 = _32 * _44 - _34 * _42;
     const float _2x2Determinant3 = _32 * _43 - _33 * _42;
@@ -20,7 +20,7 @@ float Matrix::getDeterminant() const noexcept {
     return _11 * _3x3Determinant1 - _12 * _3x3Determinant2 + _13 * _3x3Determinant3 - _14 * _3x3Determinant4;
 }
 
-void Matrix::invert() noexcept {
+void Matrix::invert() {
     const float _2x2Determinant1 = _33 * _44 - _34 * _43;
     const float _2x2Determinant2 = _32 * _44 - _34 * _42;
     const float _2x2Determinant3 = _32 * _43 - _33 * _42;

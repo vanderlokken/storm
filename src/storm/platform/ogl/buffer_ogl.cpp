@@ -66,11 +66,11 @@ void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     return;
 }
 
-const Buffer::Description& BufferOgl::getDescription() const noexcept {
+const Buffer::Description& BufferOgl::getDescription() const {
     return _description;
 }
 
-const BufferHandleOgl& BufferOgl::getHandle() const noexcept {
+const BufferHandleOgl& BufferOgl::getHandle() const {
     return _handle;
 }
 

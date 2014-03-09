@@ -5,31 +5,31 @@
 namespace storm {
 
 struct Quaternion {
-    Quaternion() noexcept;
-    Quaternion( float, float, float, float ) noexcept;
+    Quaternion();
+    Quaternion( float, float, float, float );
 
-    Quaternion& operator += ( const Quaternion& ) noexcept;
-    Quaternion& operator -= ( const Quaternion& ) noexcept;
-    Quaternion& operator *= ( const Quaternion& ) noexcept;
-    Quaternion& operator *= ( float ) noexcept;
-    Quaternion& operator /= ( float ) noexcept;
+    Quaternion& operator += ( const Quaternion& );
+    Quaternion& operator -= ( const Quaternion& );
+    Quaternion& operator *= ( const Quaternion& );
+    Quaternion& operator *= ( float );
+    Quaternion& operator /= ( float );
 
-    Quaternion operator + ( const Quaternion& ) const noexcept;
-    Quaternion operator - ( const Quaternion& ) const noexcept;
-    Quaternion operator * ( const Quaternion& ) const noexcept;
-    Quaternion operator * ( float ) const noexcept;
-    Quaternion operator / ( float ) const noexcept;
+    Quaternion operator + ( const Quaternion& ) const;
+    Quaternion operator - ( const Quaternion& ) const;
+    Quaternion operator * ( const Quaternion& ) const;
+    Quaternion operator * ( float ) const;
+    Quaternion operator / ( float ) const;
 
-    float getLength() const noexcept;
+    float getLength() const;
 
-    void normalize() noexcept;
-    Quaternion getNormalized() const noexcept;
+    void normalize();
+    Quaternion getNormalized() const;
 
-    Matrix toRotationMatrix() const noexcept;
+    Matrix toRotationMatrix() const;
 
-    static Quaternion fromAxisAngle( const Vector&, float ) noexcept;
+    static Quaternion fromAxisAngle( const Vector&, float );
     static Quaternion slerp(
-        const Quaternion&, const Quaternion&, float ) noexcept;
+        const Quaternion&, const Quaternion&, float );
 
     float x;
     float y;
@@ -37,7 +37,7 @@ struct Quaternion {
     float w;
 };
 
-Quaternion operator * ( float, const Quaternion& ) noexcept;
+Quaternion operator * ( float, const Quaternion& );
 
 }
 

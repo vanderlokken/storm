@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class Clock {
@@ -14,10 +12,10 @@ public:
 
     virtual ~Clock() { }
 
-    virtual void update() noexcept = 0;
+    virtual void update() = 0;
 
-    virtual Time getTime() const noexcept = 0;
-    virtual Time getTimeChange() const noexcept = 0;
+    virtual Time getTime() const = 0;
+    virtual Time getTimeChange() const = 0;
 };
 
 }

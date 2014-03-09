@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/dimensions.h>
-#include <storm/noexcept.h>
 #include <storm/matrix.h>
 #include <storm/vector.h>
 
@@ -9,26 +8,26 @@ namespace storm {
 
 class Camera {
 public:
-    const Vector& getPosition() const noexcept;
-    void setPosition( const Vector& ) noexcept;
+    const Vector& getPosition() const;
+    void setPosition( const Vector& );
 
-    const Vector& getTarget() const noexcept;
-    void setTarget( const Vector& ) noexcept;
+    const Vector& getTarget() const;
+    void setTarget( const Vector& );
 
-    float getMinimalDepth() const noexcept;
-    float getMaximalDepth() const noexcept;
+    float getMinimalDepth() const;
+    float getMaximalDepth() const;
 
-    void setMinimalDepth( float ) noexcept;
-    void setMaximalDepth( float ) noexcept;
+    void setMinimalDepth( float );
+    void setMaximalDepth( float );
 
-    const Dimensions& getFrameDimensions() const noexcept;
-    void setFrameDimensions( const Dimensions& ) noexcept;
+    const Dimensions& getFrameDimensions() const;
+    void setFrameDimensions( const Dimensions& );
 
-    Matrix getViewTransformation() const noexcept;
-    virtual Matrix getProjectionTransformation() const noexcept = 0;
+    Matrix getViewTransformation() const;
+    virtual Matrix getProjectionTransformation() const = 0;
 
 protected:
-    Camera() noexcept;
+    Camera();
 
     Dimensions _frameDimensions;
     float _minimalDepth;
@@ -41,12 +40,12 @@ private:
 
 class PerspectiveCamera : public Camera {
 public:
-    PerspectiveCamera() noexcept;
+    PerspectiveCamera();
 
-    float getFieldOfView() const noexcept;
-    void setFieldOfView( float ) noexcept;
+    float getFieldOfView() const;
+    void setFieldOfView( float );
 
-    virtual Matrix getProjectionTransformation() const noexcept;
+    virtual Matrix getProjectionTransformation() const;
 
 private:
     float _fieldOfView;
@@ -54,9 +53,9 @@ private:
 
 class OrthographicCamera : public Camera {
 public:
-    OrthographicCamera() noexcept;
+    OrthographicCamera();
 
-    virtual Matrix getProjectionTransformation() const noexcept;
+    virtual Matrix getProjectionTransformation() const;
 };
 
 }

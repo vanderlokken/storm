@@ -12,7 +12,7 @@ public:
 
     ~DisplayConnectionX11();
 
-    Display* getHandle() const noexcept;
+    Display* getHandle() const;
 
 private:
     DisplayConnectionX11();

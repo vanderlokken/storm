@@ -40,8 +40,8 @@ public:
 
     OutputTechniqueOgl( const OutputTechnique::Description& );
 
-    virtual const OutputTechnique::Description& getDescription() const noexcept;
-    virtual const Description& getNativeDescription() const noexcept;
+    virtual const OutputTechnique::Description& getDescription() const;
+    virtual const Description& getNativeDescription() const;
 
 private:
     static GLenum convertCondition( Condition );

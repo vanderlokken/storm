@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include <storm/noexcept.h>
-
 namespace storm {
 
 class RasterizationTechnique {
@@ -34,7 +32,7 @@ public:
 
     virtual ~RasterizationTechnique() { }
 
-    virtual const Description& getDescription() const noexcept = 0;
+    virtual const Description& getDescription() const = 0;
 };
 
 }

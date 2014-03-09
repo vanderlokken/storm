@@ -57,7 +57,7 @@ void MouseWin::addEventHandler( const EventHandler<MovementEvent> &handler ) {
     return;
 }
 
-bool MouseWin::isButtonPressed( Button button ) const noexcept {
+bool MouseWin::isButtonPressed( Button button ) const {
     const size_t buttonIndex = static_cast<size_t>( button );
     if( buttonIndex <= ButtonCount )
         return _buttonPressed[buttonIndex];
@@ -65,11 +65,11 @@ bool MouseWin::isButtonPressed( Button button ) const noexcept {
         return false;
 }
 
-bool MouseWin::getCursorVisibility() const noexcept{
+bool MouseWin::getCursorVisibility() const{
     return _cursorVisible;
 }
 
-void MouseWin::setCursorVisibility( bool visible ) noexcept {
+void MouseWin::setCursorVisibility( bool visible ) {
     if( visible == _cursorVisible )
         return;
 
@@ -84,11 +84,11 @@ void MouseWin::setCursorVisibility( bool visible ) noexcept {
     return;
 }
 
-bool MouseWin::getCursorMovementRestriction() const noexcept {
+bool MouseWin::getCursorMovementRestriction() const {
     return _cursorMovementRestricted;
 }
 
-void MouseWin::setCursorMovementRestriction( bool restricted ) noexcept {
+void MouseWin::setCursorMovementRestriction( bool restricted ) {
     if( restricted == _cursorMovementRestricted )
         return;
 
@@ -212,11 +212,11 @@ void MouseWin::processMovement( int x, int y ) {
     return;
 }
 
-bool MouseWin::isCursorLockRequired() noexcept {
+bool MouseWin::isCursorLockRequired() {
     return _cursorMovementRestricted && !_cursorLocked;
 }
 
-bool MouseWin::isCursorInClientRectangle() noexcept {
+bool MouseWin::isCursorInClientRectangle() {
     POINT cursorPosition;
 
     ::GetCursorPos( &cursorPosition );
@@ -235,7 +235,7 @@ bool MouseWin::isCursorInClientRectangle() noexcept {
         cursorPosition.y < windowDimensions.height;
 }
 
-void MouseWin::lockCursor() noexcept {
+void MouseWin::lockCursor() {
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
 
     RECT rectangle;
@@ -252,7 +252,7 @@ void MouseWin::lockCursor() noexcept {
     return;
 }
 
-void MouseWin::unlockCursor() noexcept {
+void MouseWin::unlockCursor() {
     ::ClipCursor( nullptr );
 
     _cursorLocked = false;
@@ -304,7 +304,7 @@ LRESULT MouseWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
     return USE_DEFAULT_PROCESSING;
 }
 
-LRESULT MouseWin::handleCursorMessage( WPARAM, LPARAM secondParameter ) noexcept {
+LRESULT MouseWin::handleCursorMessage( WPARAM, LPARAM secondParameter ) {
 
     // The following code makes the cursor invisible when it's required
 
@@ -328,7 +328,7 @@ LRESULT MouseWin::handleCursorMessage( WPARAM, LPARAM secondParameter ) noexcept
     return TRUE;
 }
 
-LRESULT MouseWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) noexcept {
+LRESULT MouseWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) {
 
     const BOOL activated = firstParameter;
 
@@ -345,7 +345,7 @@ LRESULT MouseWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) noexc
     return USE_DEFAULT_PROCESSING;
 }
 
-LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) noexcept {
+LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) {
 
     if( isCursorLockRequired() )
         lockCursor();

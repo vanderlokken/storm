@@ -4,7 +4,7 @@
 
 namespace storm {
 
-inline Matrix::Matrix() noexcept
+inline Matrix::Matrix()
     : _11( 0 ), _12( 0 ), _13( 0 ), _14( 0 ),
       _21( 0 ), _22( 0 ), _23( 0 ), _24( 0 ),
       _31( 0 ), _32( 0 ), _33( 0 ), _34( 0 ),
@@ -16,7 +16,7 @@ inline Matrix::Matrix(
     float element11, float element12, float element13, float element14,
     float element21, float element22, float element23, float element24,
     float element31, float element32, float element33, float element34,
-    float element41, float element42, float element43, float element44 ) noexcept
+    float element41, float element42, float element43, float element44 )
     : _11( element11 ), _12( element12 ), _13( element13 ), _14( element14 ),
       _21( element21 ), _22( element22 ), _23( element23 ), _24( element24 ),
       _31( element31 ), _32( element32 ), _33( element33 ), _34( element34 ),
@@ -32,7 +32,7 @@ inline const float* Matrix::operator [] ( size_t index ) const {
     return &_11 + index * 4;
 }
 
-inline Matrix Matrix::operator * ( const Matrix &matrix ) const noexcept {
+inline Matrix Matrix::operator * ( const Matrix &matrix ) const {
     const float element11 =
         _11 * matrix._11 +
         _12 * matrix._21 +
@@ -136,7 +136,7 @@ inline Matrix Matrix::operator * ( const Matrix &matrix ) const noexcept {
         element41, element42, element43, element44 );
 }
 
-inline Matrix Matrix::operator + ( const Matrix &matrix ) const noexcept {
+inline Matrix Matrix::operator + ( const Matrix &matrix ) const {
     return Matrix(
         _11 + matrix._11, _12 + matrix._12, _13 + matrix._13, _14 + matrix._14,
         _21 + matrix._21, _22 + matrix._22, _23 + matrix._23, _24 + matrix._24,
@@ -144,12 +144,12 @@ inline Matrix Matrix::operator + ( const Matrix &matrix ) const noexcept {
         _41 + matrix._41, _42 + matrix._42, _43 + matrix._43, _44 + matrix._44 );
 }
 
-inline Matrix& Matrix::operator *= ( const Matrix &matrix ) noexcept {
+inline Matrix& Matrix::operator *= ( const Matrix &matrix ) {
     *this = (*this) * matrix;
     return *this;
 }
 
-inline Matrix& Matrix::operator += ( const Matrix &matrix ) noexcept {
+inline Matrix& Matrix::operator += ( const Matrix &matrix ) {
     _11 += matrix._11; _12 += matrix._12; _13 += matrix._13; _14 += matrix._14;
     _21 += matrix._21; _22 += matrix._22; _23 += matrix._23; _24 += matrix._24;
     _31 += matrix._31; _32 += matrix._32; _33 += matrix._33; _34 += matrix._34;
@@ -157,7 +157,7 @@ inline Matrix& Matrix::operator += ( const Matrix &matrix ) noexcept {
     return *this;
 }
 
-inline Matrix Matrix::operator * ( float multiplier ) const noexcept {
+inline Matrix Matrix::operator * ( float multiplier ) const {
     return Matrix(
         _11 * multiplier, _12 * multiplier, _13 * multiplier, _14 * multiplier,
         _21 * multiplier, _22 * multiplier, _23 * multiplier, _24 * multiplier,
@@ -165,13 +165,13 @@ inline Matrix Matrix::operator * ( float multiplier ) const noexcept {
         _41 * multiplier, _42 * multiplier, _43 * multiplier, _44 * multiplier );
 }
 
-inline Matrix Matrix::getInverted() const noexcept {
+inline Matrix Matrix::getInverted() const {
     Matrix result( *this );
     result.invert();
     return result;
 }
 
-inline Vector& operator *= ( Vector &vector, const Matrix &matrix ) noexcept {
+inline Vector& operator *= ( Vector &vector, const Matrix &matrix ) {
     const float x = vector.x;
     const float y = vector.y;
     const float z = vector.z;
@@ -185,7 +185,7 @@ inline Vector& operator *= ( Vector &vector, const Matrix &matrix ) noexcept {
 }
 
 inline Vector operator * (
-    const Vector &vector, const Matrix &matrix ) noexcept
+    const Vector &vector, const Matrix &matrix )
 {
     Vector result( vector );
     result *= matrix;
