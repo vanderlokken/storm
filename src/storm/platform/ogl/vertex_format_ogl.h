@@ -11,8 +11,6 @@ public:
 
     virtual const Description& getDescription() const;
 
-    size_t getVertexSize() const;
-
     void install() const;
 
 private:

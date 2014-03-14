@@ -32,26 +32,29 @@ Mesh::Pointer Mesh::load( const std::string &filename ) {
         attribute.format = static_cast< VertexAttribute::Format >( format );
     }
 
+    uint8_t vertexSize = 0;
     uint32_t vertexDataSize = 0;
+    stream.read( reinterpret_cast<char*>(&vertexSize), sizeof(vertexSize) );
     stream.read( reinterpret_cast<char*>(&vertexDataSize), sizeof(vertexDataSize) );
 
     std::vector< char > vertexData( vertexDataSize );
     stream.read( vertexData.data(), vertexDataSize );
 
+    uint8_t indexSize = 0;
     uint32_t indexDataSize = 0;
+    stream.read( reinterpret_cast<char*>(&indexSize), sizeof(indexSize) );
     stream.read( reinterpret_cast<char*>(&indexDataSize), sizeof(indexDataSize) );
 
     std::vector< char > indexData( indexDataSize );
     stream.read( indexData.data(), indexDataSize );
 
-    VertexFormat::Pointer vertexFormat = VertexFormat::create( {attributes} );
+    VertexFormat::Pointer vertexFormat =
+        VertexFormat::create( {attributes, vertexSize} );
 
     Buffer::Description vertexBufferDescription;
     vertexBufferDescription.size = vertexDataSize;
-    vertexBufferDescription.elementSize = vertexFormat->getVertexSize();
+    vertexBufferDescription.elementSize = vertexSize;
     vertexBufferDescription.resourceType = ResourceType::Static;
-
-    const size_t indexSize = 2;
 
     Buffer::Description indexBufferDescription;
     indexBufferDescription.size = indexDataSize;

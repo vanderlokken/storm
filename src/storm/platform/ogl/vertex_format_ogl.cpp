@@ -15,18 +15,7 @@ const VertexFormat::Description&
     return _description;
 }
 
-size_t VertexFormatOgl::getVertexSize() const {
-    GLsizei vertexSize = 0;
-
-    for( const auto &attribute : _description.attributes )
-        vertexSize += getAttributeFormatDescription( attribute.format ).size;
-
-    return vertexSize;
-}
-
 void VertexFormatOgl::install() const {
-    const size_t vertexSize = getVertexSize();
-
     GLuint index = 0;
     const GLbyte *offset = 0;
 
@@ -39,7 +28,7 @@ void VertexFormatOgl::install() const {
             formatDescription.componentCount,
             formatDescription.componentType,
             formatDescription.componentNormalized,
-            vertexSize /* stride */, offset );
+            _description.size /* stride */, offset );
         checkResult( "::glVertexAttribPointer" );
 
         ::glEnableVertexAttribArray( index++ );

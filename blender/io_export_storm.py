@@ -129,6 +129,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         vertex_data = bytearray()
         index_data = bytearray()
 
+        vertex_count = 0
         index_count = 0
 
         armature = self._context.object.find_armature()
@@ -147,6 +148,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
             for index in polygon.vertices:
 
                 vertex = mesh.vertices[index]
+                vertex_count += 1
 
                 vertex_data += struct.pack(
                     "<fff", vertex.co[0], vertex.co[2], -vertex.co[1])
@@ -187,8 +189,13 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
                 index_data += struct.pack("<H", index_count)
                 index_count += 1
 
+        vertex_size = int(len(vertex_data) / vertex_count)
+        index_size = int(len(index_data) / index_count)
+
+        self._file.write(struct.pack("<B", vertex_size))
         self._file.write(struct.pack("<I", len(vertex_data)))
         self._file.write(vertex_data)
+        self._file.write(struct.pack("<B", index_size))
         self._file.write(struct.pack("<I", len(index_data)))
         self._file.write(index_data)
 

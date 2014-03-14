@@ -42,6 +42,7 @@ public:
 
     struct Description {
         std::vector<Attribute> attributes;
+        size_t size;
     };
 
     static Pointer create( const Description& );
@@ -49,8 +50,6 @@ public:
     virtual ~VertexFormat() { }
 
     virtual const Description& getDescription() const = 0;
-
-    virtual size_t getVertexSize() const = 0;
 };
 
 }

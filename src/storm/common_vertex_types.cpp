@@ -12,7 +12,7 @@ VertexFormat::Pointer PositionedVertex::getFormat() {
         }
     };
     static const VertexFormat::Pointer format =
-        VertexFormat::create( {attributes} );
+        VertexFormat::create( {attributes, sizeof(PositionedVertex)} );
     return format;
 }
 
@@ -28,7 +28,7 @@ VertexFormat::Pointer TexturedVertex::getFormat() {
         }
     };
     static const VertexFormat::Pointer format =
-        VertexFormat::create( {attributes} );
+        VertexFormat::create( {attributes, sizeof(TexturedVertex)} );
     return format;
 }
 
@@ -44,7 +44,7 @@ VertexFormat::Pointer ColoredVertex::getFormat() {
         }
     };
     static const VertexFormat::Pointer format =
-        VertexFormat::create( {attributes} );
+        VertexFormat::create( {attributes, sizeof(ColoredVertex)} );
     return format;
 }
 
@@ -60,7 +60,7 @@ VertexFormat::Pointer OrientedVertex::getFormat() {
         }
     };
     static const VertexFormat::Pointer format =
-        VertexFormat::create( {attributes} );
+        VertexFormat::create( {attributes, sizeof(OrientedVertex)} );
     return format;
 }
 
