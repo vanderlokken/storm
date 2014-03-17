@@ -157,6 +157,14 @@ inline Matrix& Matrix::operator += ( const Matrix &matrix ) {
     return *this;
 }
 
+inline Matrix& Matrix::operator *= ( float multiplier ) {
+    _11 *= multiplier; _12 *= multiplier; _13 *= multiplier; _14 *= multiplier;
+    _21 *= multiplier; _22 *= multiplier; _23 *= multiplier; _24 *= multiplier;
+    _31 *= multiplier; _32 *= multiplier; _33 *= multiplier; _34 *= multiplier;
+    _41 *= multiplier; _42 *= multiplier; _43 *= multiplier; _44 *= multiplier;
+    return *this;
+}
+
 inline Matrix Matrix::operator * ( float multiplier ) const {
     return Matrix(
         _11 * multiplier, _12 * multiplier, _13 * multiplier, _14 * multiplier,

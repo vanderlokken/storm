@@ -25,6 +25,8 @@ public:
     Matrix operator * ( const Matrix& ) const;
     Matrix operator + ( const Matrix& ) const;
 
+    Matrix& operator *= ( float );
+
     Matrix operator * ( float ) const;
 
     float getDeterminant() const;
