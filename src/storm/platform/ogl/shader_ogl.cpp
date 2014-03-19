@@ -43,7 +43,7 @@ void bindSampler( Sampler::Pointer sampler, GLuint textureUnit ) {
     const auto nativeSampler =
         std::static_pointer_cast< SamplerOgl >( sampler );
 
-    storm_assert( nativeSampler );
+    storm_assert( nativeSampler, "Shader texture sampler is not set" );
 
     ::glBindSampler( textureUnit, nativeSampler->getHandle() );
     checkResult( "::glBindSampler" );
@@ -52,7 +52,7 @@ void bindSampler( Sampler::Pointer sampler, GLuint textureUnit ) {
 void bindUniformBuffer( Buffer::Pointer buffer, GLuint bindingPoint ) {
     const auto nativeBuffer = std::static_pointer_cast<BufferOgl>( buffer );
 
-    storm_assert( nativeBuffer );
+    storm_assert( nativeBuffer, "Shader uniform buffer is not set" );
 
     ::glBindBufferBase( GL_UNIFORM_BUFFER, bindingPoint,
         nativeBuffer->getHandle() );
