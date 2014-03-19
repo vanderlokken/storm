@@ -109,7 +109,7 @@ unsigned char Color::convertNormalizedValue( float normalizedValue ) {
     return static_cast< unsigned char >( normalizedValue * 255 );
 }
 
-const Color Color::Black( 0.0f, 0.0f, 0.0f );
-const Color Color::White( 1.0f, 1.0f, 1.0f );
+const Color Color::Black( 0, 0, 0 );
+const Color Color::White( 255, 255, 255 );
 
 }
