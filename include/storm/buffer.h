@@ -26,6 +26,14 @@ public:
     virtual void getData( size_t offset, size_t size, void *data ) const = 0;
     virtual void setData( size_t offset, size_t size, const void *data ) = 0;
 
+    void getData( void *data ) const {
+        getData( 0, getDescription().size, data );
+    }
+
+    void setData( const void *data ) {
+        setData( 0, getDescription().size, data );
+    }
+
     virtual const Description& getDescription() const = 0;
 };
 
