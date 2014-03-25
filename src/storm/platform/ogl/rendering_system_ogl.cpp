@@ -298,11 +298,28 @@ void RenderingSystemOgl::clearColorBuffer( const Color &color ) {
 }
 
 void RenderingSystemOgl::clearDepthBuffer( float depth ) {
+    const bool depthWritingEnabled =
+        _outputTechnique->getDescription().writeDepthValues;
+
+    if( !depthWritingEnabled ) {
+        // Depth buffer writing must be temporarily enabled
+
+        ::glDepthMask( GL_TRUE );
+        checkResult( "::glDepthMask" );
+    }
+
     ::glClearDepth( depth );
     checkResult( "::glClearDepth" );
 
     ::glClear( GL_DEPTH_BUFFER_BIT );
     checkResult( "::glClear" );
+
+    if( !depthWritingEnabled ) {
+        // Restore previous value
+
+        ::glDepthMask( GL_FALSE );
+        checkResult( "::glDepthMask" );
+    }
     return;
 }
 
