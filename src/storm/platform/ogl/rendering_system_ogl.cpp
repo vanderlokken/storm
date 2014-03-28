@@ -45,6 +45,11 @@ void RenderingSystemOgl::initialize() {
 
     ::glBindProgramPipeline( *_programPipeline );
     checkResult( "::glBindProgramPipeline" );
+
+    _primitiveRestartIndex = 0xffff;
+    ::glPrimitiveRestartIndex( _primitiveRestartIndex );
+
+    setBooleanGlState( GL_PRIMITIVE_RESTART, true );
 }
 
 void RenderingSystemOgl::beginFrameRendering() {
@@ -67,6 +72,14 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
     storm_assert(
         indexBufferDescription.elementSize == 2 ||
         indexBufferDescription.elementSize == 4 );
+
+    const GLuint primitiveRestartIndex =
+        (indexBufferDescription.elementSize == 2) ? 0xffff : 0xffffffff;
+
+    if( _primitiveRestartIndex != primitiveRestartIndex ) {
+        _primitiveRestartIndex = primitiveRestartIndex;
+        ::glPrimitiveRestartIndex( _primitiveRestartIndex );
+    }
 
     const GLenum triangleTopology = nativeMesh->getTriangleTopology();
     const GLsizei indexCount =

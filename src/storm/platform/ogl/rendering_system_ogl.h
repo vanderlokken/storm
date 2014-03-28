@@ -59,6 +59,8 @@ private:
     BlendingTechnique::Pointer _blendingTechnique;
 
     RenderingBufferSet::Pointer _renderingBufferSet;
+
+    GLuint _primitiveRestartIndex;
 };
 
 }
