@@ -16,9 +16,11 @@ typedef std::pair<int, int> OpenGlVersion;
 
 struct OpenGlSupportStatus {
     OpenGlVersion version;
+    bool ARB_multi_bind;
     bool ARB_separate_shader_objects;
     bool ARB_texture_storage;
     bool ARB_texture_storage_multisample;
+    bool KHR_debug;
 };
 
 const OpenGlSupportStatus& getOpenGlSupportStatus();

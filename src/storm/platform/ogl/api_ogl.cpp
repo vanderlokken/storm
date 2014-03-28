@@ -1215,6 +1215,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
 
         const std::map< std::string, bool* > extensionSupport = {
             {
+                "GL_ARB_multi_bind",
+                &status.ARB_multi_bind
+            },
+            {
                 "GL_ARB_separate_shader_objects",
                 &status.ARB_separate_shader_objects
             },
@@ -1225,6 +1229,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
             {
                 "GL_ARB_texture_storage_multisample",
                 &status.ARB_texture_storage_multisample
+            },
+            {
+                "GL_KHR_debug",
+                &status.KHR_debug
             }
         };
 
