@@ -21,6 +21,7 @@ public:
     virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& );
     virtual void addEventHandler( const EventHandler<WheelRotationEvent>& );
     virtual void addEventHandler( const EventHandler<MovementEvent>& );
+    virtual void addEventHandler( const EventHandler<CursorMovementEvent>& );
 
     virtual bool isButtonPressed( Button ) const;
 
@@ -30,6 +31,8 @@ public:
     virtual bool getCursorMovementRestriction() const;
     virtual void setCursorMovementRestriction( bool );
 
+    virtual CursorPosition getCursorPosition() const;
+
 private:
     MouseWin();
 
@@ -38,7 +41,8 @@ private:
     void processButtonPress( Button );
     void processButtonRelease( Button );
     void processWheelRotation( short distance );
-    void processMovement( int x, int y );
+    void processMovement( int deltaX, int deltaY );
+    void processCursorMovement( int x, int y );
 
     bool isCursorLockRequired();
     bool isCursorInClientRectangle();
@@ -57,6 +61,7 @@ private:
     EventHandlerVector< ButtonReleaseEvent > _buttonReleaseEventHandlers;
     EventHandlerVector< WheelRotationEvent > _wheelRotationEventHandlers;
     EventHandlerVector< MovementEvent > _movementEventHandlers;
+    EventHandlerVector< CursorMovementEvent > _cursorMovementEventHandlers;
 
     WNDPROC _originalWindowProcedure;
 
@@ -66,6 +71,7 @@ private:
     LRESULT handleCursorMessage( WPARAM, LPARAM );
     LRESULT handleActivationMessage( WPARAM, LPARAM );
     LRESULT handleLeftButtonPressMessage( WPARAM, LPARAM );
+    LRESULT handleCursorMovementMessage( WPARAM, LPARAM );
 };
 
 }

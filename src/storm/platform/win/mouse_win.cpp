@@ -1,5 +1,7 @@
 #include <storm/platform/win/mouse_win.h>
 
+#include <windowsx.h>
+
 #include <storm/platform/win/input_win.h>
 #include <storm/platform/win/rendering_window_win.h>
 #include <storm/platform/win/window_procedure_win.h>
@@ -57,6 +59,11 @@ void MouseWin::addEventHandler( const EventHandler<MovementEvent> &handler ) {
     return;
 }
 
+void MouseWin::addEventHandler( const EventHandler<CursorMovementEvent> &handler ) {
+    _cursorMovementEventHandlers.addEventHandler( handler );
+    return;
+}
+
 bool MouseWin::isButtonPressed( Button button ) const {
     const size_t buttonIndex = static_cast<size_t>( button );
     if( buttonIndex <= ButtonCount )
@@ -100,6 +107,13 @@ void MouseWin::setCursorMovementRestriction( bool restricted ) {
 
     _cursorMovementRestricted = restricted;
     return;
+}
+
+Mouse::CursorPosition MouseWin::getCursorPosition() const {
+    POINT point = {};
+    ::GetCursorPos( &point );
+    ::ScreenToClient( RenderingWindowWin::getInstance()->getHandle(), &point );
+    return { point.x, point.y };
 }
 
 void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
@@ -206,9 +220,32 @@ void MouseWin::processWheelRotation( short distance ) {
     return;
 }
 
-void MouseWin::processMovement( int x, int y ) {
-    MovementEvent event = { x, y };
+void MouseWin::processMovement( int deltaX, int deltaY ) {
+    MovementEvent event = { deltaX, deltaY };
     _movementEventHandlers( event );
+    return;
+}
+
+void MouseWin::processCursorMovement( int x, int y ) {
+    POINT position = { x, y };
+    ::ClientToScreen(
+        RenderingWindowWin::getInstance()->getHandle(), &position );
+
+    MOUSEMOVEPOINT currentPosition = { position.x, position.y };
+    MOUSEMOVEPOINT previousPositions[2] = { currentPosition, currentPosition };
+
+    const int pointsToRetrieve = 2;
+    const DWORD resolution = GMMP_USE_DISPLAY_POINTS;
+
+    ::GetMouseMovePointsEx( sizeof(MOUSEMOVEPOINT),
+        &currentPosition, previousPositions, pointsToRetrieve, resolution );
+
+    CursorMovementEvent event = {
+        x,
+        y,
+        currentPosition.x - previousPositions[1].x,
+        currentPosition.y - previousPositions[1].y };
+    _cursorMovementEventHandlers( event );
     return;
 }
 
@@ -284,6 +321,10 @@ LRESULT CALLBACK MouseWin::handleMessage(
     case WM_LBUTTONDOWN:
         result = mouse->handleLeftButtonPressMessage( firstParameter, secondParameter );
         break;
+
+    case WM_MOUSEMOVE:
+        result = mouse->handleCursorMovementMessage( firstParameter, secondParameter );
+        break;
     }
 
     if( result != USE_DEFAULT_PROCESSING )
@@ -349,6 +390,14 @@ LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) {
 
     if( isCursorLockRequired() )
         lockCursor();
+
+    return USE_DEFAULT_PROCESSING;
+}
+
+LRESULT MouseWin::handleCursorMovementMessage( WPARAM, LPARAM secondParameter ) {
+    processCursorMovement(
+        GET_X_LPARAM(secondParameter),
+        GET_Y_LPARAM(secondParameter) );
 
     return USE_DEFAULT_PROCESSING;
 }

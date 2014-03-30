@@ -25,7 +25,22 @@ public:
         int distance;
     };
 
+    // MovementEvent respresents raw mouse movement events. It's parameters are
+    // unaffected by system mouse sensitivity settings.
+
     struct MovementEvent {
+        int deltaX;
+        int deltaY;
+    };
+
+    struct CursorMovementEvent {
+        int x;
+        int y;
+        int deltaX;
+        int deltaY;
+    };
+
+    struct CursorPosition {
         int x;
         int y;
     };
@@ -38,6 +53,7 @@ public:
     virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<WheelRotationEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<MovementEvent>& ) = 0;
+    virtual void addEventHandler( const EventHandler<CursorMovementEvent>& ) = 0;
 
     virtual bool isButtonPressed( Button ) const = 0;
 
@@ -46,6 +62,8 @@ public:
 
     virtual bool getCursorMovementRestriction() const = 0;
     virtual void setCursorMovementRestriction( bool ) = 0;
+
+    virtual CursorPosition getCursorPosition() const = 0;
 };
 
 }
