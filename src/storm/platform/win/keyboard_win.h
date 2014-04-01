@@ -21,6 +21,8 @@ public:
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& );
     virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& );
 
+    virtual void addEventHandler( const EventHandler<CharacterInputEvent>& );
+
     virtual bool isKeyPressed( Key ) const;
 
 private:
@@ -34,18 +36,21 @@ private:
 
     static Key convertKey( USHORT code );
 
-    static const size_t KeyCount = 50;
+    static const size_t KeyCount = 54;
     std::vector< bool > _keyPressed;
 
     EventHandlerVector< KeyPressEvent > _keyPressEventHandlers;
     EventHandlerVector< KeyRepeatEvent > _keyRepeatEventHandlers;
     EventHandlerVector< KeyReleaseEvent > _keyReleaseEventHandlers;
 
+    EventHandlerVector< CharacterInputEvent > _characterInputEventHandlers;
+
     WNDPROC _originalWindowProcedure;
 
     static LRESULT CALLBACK handleMessage( HWND, UINT, WPARAM, LPARAM );
 
     LRESULT handleInputMessage( WPARAM, LPARAM );
+    LRESULT handleCharacterInputMessage( WPARAM, LPARAM );
     LRESULT handleActivationMessage( WPARAM, LPARAM );
 };
 

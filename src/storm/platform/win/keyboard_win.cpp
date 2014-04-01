@@ -52,6 +52,11 @@ void KeyboardWin::addEventHandler( const EventHandler<KeyReleaseEvent> &handler 
     return;
 }
 
+void KeyboardWin::addEventHandler( const EventHandler<CharacterInputEvent> &handler ) {
+    _characterInputEventHandlers.addEventHandler( handler );
+    return;
+}
+
 bool KeyboardWin::isKeyPressed( Key key ) const {
     const size_t keyIndex = static_cast<size_t>( key );
     if( keyIndex < KeyCount )
@@ -170,7 +175,11 @@ Keyboard::Key KeyboardWin::convertKey( USHORT code ) {
         'X',        // X
         'Y',        // Y
         'Z',        // Z
-        VK_SPACE    // Space
+        VK_SPACE,   // Space
+        VK_LEFT,    // Left
+        VK_RIGHT,   // Right
+        VK_UP,      // Up
+        VK_DOWN     // Down
     };
 
     auto searchResult = std::find( codes.cbegin(), codes.cend(), code );
@@ -195,6 +204,17 @@ LRESULT CALLBACK KeyboardWin::handleMessage(
         result = keyboard->handleInputMessage( firstParameter, secondParameter );
         break;
 
+    case WM_CHAR:
+        result = keyboard->handleCharacterInputMessage( firstParameter, secondParameter );
+        break;
+
+    case WM_KEYDOWN:
+        // By default VK_DELETE doesn't produce appropriate WM_CHAR message so
+        // it's necessary to do this. 127 is an ASCII code of "delete" character
+        if( firstParameter == VK_DELETE )
+            ::SendMessage( windowHandle, WM_CHAR, 127, secondParameter );
+        break;
+
     case WM_ACTIVATEAPP:
         result = keyboard->handleActivationMessage( firstParameter, secondParameter );
         break;
@@ -214,6 +234,13 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
 
     if( inputData.header.dwType == RIM_TYPEKEYBOARD )
         processKeyboardInputEvent( inputData.data.keyboard );
+
+    return USE_DEFAULT_PROCESSING;
+}
+
+LRESULT KeyboardWin::handleCharacterInputMessage( WPARAM firstParameter, LPARAM ) {
+    CharacterInputEvent event = { firstParameter };
+    _characterInputEventHandlers( event );
 
     return USE_DEFAULT_PROCESSING;
 }

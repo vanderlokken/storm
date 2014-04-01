@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include <storm/event_handler.h>
 
 namespace storm {
@@ -56,7 +58,11 @@ public:
         X,
         Y,
         Z,
-        Space
+        Space,
+        Left,
+        Right,
+        Up,
+        Down
     };
 
     struct KeyEvent {
@@ -67,6 +73,10 @@ public:
     struct KeyRepeatEvent : public KeyEvent { };
     struct KeyReleaseEvent : public KeyEvent { };
 
+    struct CharacterInputEvent {
+        uint32_t code;
+    };
+
     static Keyboard* getInstance();
 
     virtual ~Keyboard() { }
@@ -74,6 +84,8 @@ public:
     virtual void addEventHandler( const EventHandler<KeyPressEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& ) = 0;
     virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& ) = 0;
+
+    virtual void addEventHandler( const EventHandler<CharacterInputEvent>& ) = 0;
 
     virtual bool isKeyPressed( Key ) const = 0;
 };
