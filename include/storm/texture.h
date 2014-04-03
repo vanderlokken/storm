@@ -86,23 +86,31 @@ public:
 
     virtual ~Texture() { }
 
-    virtual void getTexels( const Region &region, void *texels ) const = 0;
+    virtual void getTexels( unsigned int mipLevel, void *texels ) const = 0;
+     inline void setTexels( unsigned int mipLevel, const void *texels );
     virtual void setTexels( const Region &region, const void *texels ) = 0;
 
-    void setBaseLevelTexels( const void *texels ) {
-        const Description &description = getDescription();
-
-        Region region = { 0 };
-        region.width = description.width;
-        region.height = description.height;
-        region.depth = description.depth;
-
-        setTexels( region, texels );
-    }
+    // Note: there's no "getTexels" method overload with a "region" parameter
+    // since OpenGL doesn't have an appropriate function.
 
     virtual void generateMipMap() = 0;
 
     virtual const Description& getDescription() const = 0;
 };
+
+inline void Texture::setTexels( unsigned int mipLevel, const void *texels ) {
+    const Description &description = getDescription();
+
+    Region region = { 0 };
+    region.width = description.width >> mipLevel;
+    region.height = description.height >> mipLevel;
+    region.depth = description.depth >> mipLevel;
+
+    if( !region.width ) region.width = 1;
+    if( !region.height ) region.height = 1;
+    if( !region.depth ) region.depth = 1;
+
+    setTexels( region, texels );
+}
 
 }

@@ -144,12 +144,16 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
         throwNotImplemented();
 }
 
-void TextureOgl::getTexels( const Region &region, void *texels ) const {
+void TextureOgl::getTexels( unsigned int mipLevel, void *texels ) const {
     storm_assert(
         _description.layout != Layout::Separate2dMsaa &&
         _description.layout != Layout::Layered2dMsaa );
 
-    throwNotImplemented();
+    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+
+    ::glGetTexImage( _target, mipLevel,
+        _texelDescription.format, _texelDescription.type, texels );
+    checkResult( "::glGetTexImage" );
 }
 
 void TextureOgl::setTexels( const Region &region, const void *texels ) {

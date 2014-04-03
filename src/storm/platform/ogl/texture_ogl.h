@@ -16,7 +16,7 @@ class TextureOgl : public Texture {
 public:
     TextureOgl( const Description&, const void *texels = nullptr );
 
-    virtual void getTexels( const Region &region, void *texels ) const;
+    virtual void getTexels( unsigned int mipLevel, void *texels ) const;
     virtual void setTexels( const Region &region, const void *texels );
 
     virtual void generateMipMap();
