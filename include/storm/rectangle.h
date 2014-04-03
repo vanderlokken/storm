@@ -16,6 +16,10 @@ struct Rectangle {
     int getRight() const { return x + width; }
     int getBottom() const { return y + height; }
 
+    bool contains( int x_, int y_ ) const {
+        return x <= x_ && y <= y_ && getRight() >= x_ && getBottom() >= y_;
+    }
+
     int x;
     int y;
     unsigned int width;
