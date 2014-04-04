@@ -19,9 +19,10 @@ MeshHandleOgl::~MeshHandleOgl() {
     return;
 }
 
-MeshOgl::MeshOgl( const Description &description )
-    : _description( description ),
-      _triangleTopology( convertTriangleTopology(description.triangleTopology) )
+MeshOgl::MeshOgl( const Description &description ) :
+    _description( description ),
+    _primitiveTopology(
+        convertPrimitiveTopology(description.primitiveTopology) )
 {
     ::glBindVertexArray( _handle );
     checkResult( "::glBindVertexArray" );
@@ -48,22 +49,30 @@ const Mesh::Description& MeshOgl::getDescription() const {
     return _description;
 }
 
-GLenum MeshOgl::getTriangleTopology() const {
-    return _triangleTopology;
+GLenum MeshOgl::getPrimitiveTopology() const {
+    return _primitiveTopology;
 }
 
 const MeshHandleOgl& MeshOgl::getHandle() const {
     return _handle;
 }
 
-GLenum MeshOgl::convertTriangleTopology( TriangleTopology triangleTopology ) {
-    switch( triangleTopology ) {
-    case TriangleTopology::List:
+GLenum MeshOgl::convertPrimitiveTopology(
+    PrimitiveTopology primitiveTopology )
+{
+    switch( primitiveTopology ) {
+    case PrimitiveTopology::PointList:
+        return GL_POINTS;
+    case PrimitiveTopology::LineList:
+        return GL_LINES;
+    case PrimitiveTopology::LineStrip:
+        return GL_LINE_STRIP;
+    case PrimitiveTopology::TriangleList:
         return GL_TRIANGLES;
-    case TriangleTopology::Strip:
+    case PrimitiveTopology::TriangleStrip:
         return GL_TRIANGLE_STRIP;
     default:
-        storm_assert_unreachable( "Unexpected triangle topology value" );
+        storm_assert_unreachable( "Unexpected primitive topology value" );
         return 0;
     }
 }

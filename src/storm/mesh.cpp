@@ -65,7 +65,7 @@ Mesh::Pointer Mesh::load( const std::string &filename ) {
     meshDescription.vertexFormat = vertexFormat;
     meshDescription.vertexBuffer = Buffer::create( vertexBufferDescription, vertexData.data() );
     meshDescription.indexBuffer = Buffer::create( indexBufferDescription, indexData.data() );
-    meshDescription.triangleTopology = TriangleTopology::List;
+    meshDescription.primitiveTopology = PrimitiveTopology::TriangleList;
 
     return create( meshDescription );
 }

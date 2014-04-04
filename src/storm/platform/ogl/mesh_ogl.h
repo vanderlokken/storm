@@ -17,14 +17,14 @@ public:
 
     virtual const Description& getDescription() const;
 
-    GLenum getTriangleTopology() const;
+    GLenum getPrimitiveTopology() const;
     const MeshHandleOgl& getHandle() const;
 
 private:
-    static GLenum convertTriangleTopology( TriangleTopology );
+    static GLenum convertPrimitiveTopology( PrimitiveTopology );
 
     Description _description;
-    GLenum _triangleTopology;
+    GLenum _primitiveTopology;
     MeshHandleOgl _handle;
 };
 

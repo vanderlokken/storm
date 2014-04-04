@@ -81,14 +81,14 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
         ::glPrimitiveRestartIndex( _primitiveRestartIndex );
     }
 
-    const GLenum triangleTopology = nativeMesh->getTriangleTopology();
+    const GLenum primitiveTopology = nativeMesh->getPrimitiveTopology();
     const GLsizei indexCount =
         indexBufferDescription.size / indexBufferDescription.elementSize;
     const GLenum indexFormat = (indexBufferDescription.elementSize == 2) ?
         GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
 
-    ::glDrawElements( triangleTopology, indexCount, indexFormat, indexOffset );
+    ::glDrawElements( primitiveTopology, indexCount, indexFormat, indexOffset );
     checkResult( "::glDrawElements" );
     return;
 }
