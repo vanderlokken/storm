@@ -21,6 +21,7 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/camera.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/clock.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/color.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/color.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/common_vertex_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/dimensions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/display.h

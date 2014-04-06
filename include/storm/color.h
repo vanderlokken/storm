@@ -4,19 +4,33 @@
 
 namespace storm {
 
-class Color {
-public:
+struct Color {
     Color();
-
     Color(
+        float r,
+        float g,
+        float b,
+        float a = 1.0f );
+
+    static const Color Black;
+    static const Color White;
+
+    float r;
+    float g;
+    float b;
+    float a;
+};
+
+class CompressedColor {
+public:
+    CompressedColor();
+    CompressedColor(
         unsigned char r,
         unsigned char g,
         unsigned char b,
         unsigned char a = 255 );
-
-    explicit Color( uint32_t argb );
-
-    uint32_t get() const;
+    explicit CompressedColor( Color );
+    explicit CompressedColor( uint32_t );
 
     unsigned char getR() const;
     unsigned char getG() const;
@@ -38,19 +52,14 @@ public:
     void setNormalizedB( float );
     void setNormalizedA( float );
 
-    static Color fromNormalized(
-        float normalizedR,
-        float normalizedG,
-        float normalizedB,
-        float normalizedA = 1.0f );
+    static const CompressedColor Black;
+    static const CompressedColor White;
 
-    static const Color Black;
-    static const Color White;
+    operator Color() const;
 
-private:
-    static unsigned char convertNormalizedValue( float );
-
-    uint32_t _value;
+    uint32_t value;
 };
 
 }
+
+#include <storm/color.inl>

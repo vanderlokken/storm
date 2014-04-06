@@ -36,13 +36,8 @@ SamplerOgl::SamplerOgl( const Description &description )
     setParameter( GL_TEXTURE_WRAP_R,
         convertWrapMode(description.wrapModes[2]) );
 
-    const float color[] = {
-        description.borderColor.getNormalizedR(),
-        description.borderColor.getNormalizedG(),
-        description.borderColor.getNormalizedB(),
-        description.borderColor.getNormalizedA()
-    };
-    ::glSamplerParameterfv( _handle, GL_TEXTURE_BORDER_COLOR, color );
+    ::glSamplerParameterfv(
+        _handle, GL_TEXTURE_BORDER_COLOR, &description.borderColor.r );
     checkResult( "::glSamplerParameterfv" );
 
     // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt

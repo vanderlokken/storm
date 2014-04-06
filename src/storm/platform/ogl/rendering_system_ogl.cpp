@@ -297,12 +297,7 @@ void RenderingSystemOgl::setRenderingBufferSet(
 }
 
 void RenderingSystemOgl::clearColorBuffer( const Color &color ) {
-    const GLclampf r = color.getNormalizedR();
-    const GLclampf g = color.getNormalizedG();
-    const GLclampf b = color.getNormalizedB();
-    const GLclampf a = color.getNormalizedA();
-
-    ::glClearColor( r, g, b, a );
+    ::glClearColor( color.r, color.g, color.b, color.a );
     checkResult( "::glClearColor" );
 
     ::glClear( GL_COLOR_BUFFER_BIT );

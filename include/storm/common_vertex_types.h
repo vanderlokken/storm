@@ -22,7 +22,7 @@ struct TexturedVertex {
 
 struct ColoredVertex {
     Vector position;
-    Color color;
+    CompressedColor color;
 
     static VertexFormat::Pointer getFormat();
 };
