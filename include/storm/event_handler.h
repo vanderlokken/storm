@@ -7,10 +7,7 @@ namespace storm {
 
 template< class EventType > class EventHandler {
 public:
-    EventHandler( void (*handler)(const EventType&) )
-        : _handler( handler ), _registration( getPermanentRegistration() ) { }
-
-    EventHandler( const std::function<void (const EventType&)> &handler )
+    template< class Handler > EventHandler( Handler handler )
         : _handler( handler ), _registration( getPermanentRegistration() ) { }
 
     template< class HandlerClass > EventHandler(
