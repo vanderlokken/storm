@@ -58,11 +58,11 @@ public:
         X,
         Y,
         Z,
+        LeftShift, RightShift,
+        LeftControl, RightControl,
         Space,
-        Left,
-        Right,
-        Up,
-        Down
+        Left, Right, Up, Down,
+        Delete
     };
 
     struct KeyEvent {

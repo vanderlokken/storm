@@ -34,9 +34,9 @@ private:
     void processKeyRepeat( Key );
     void processKeyRelease( Key );
 
-    static Key convertKey( USHORT code );
+    static Key convertKey( USHORT code, bool isLeft );
 
-    static const size_t KeyCount = 54;
+    static const size_t KeyCount = 59;
     std::vector< bool > _keyPressed;
 
     EventHandlerVector< KeyPressEvent > _keyPressEventHandlers;
