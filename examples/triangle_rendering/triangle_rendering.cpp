@@ -45,7 +45,8 @@ private:
         meshDescription.vertexBuffer = storm::Buffer::create( vertices );
         meshDescription.indexBuffer = storm::Buffer::create( indices );
         meshDescription.vertexFormat = storm::PositionedVertex::getFormat();
-        meshDescription.triangleTopology = storm::Mesh::TriangleTopology::Strip;
+        meshDescription.primitiveTopology =
+            storm::Mesh::PrimitiveTopology::TriangleStrip;
 
         _mesh = storm::Mesh::create( meshDescription );
     }
