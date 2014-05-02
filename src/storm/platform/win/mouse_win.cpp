@@ -325,6 +325,10 @@ LRESULT CALLBACK MouseWin::handleMessage(
     case WM_MOUSEMOVE:
         result = mouse->handleCursorMovementMessage( firstParameter, secondParameter );
         break;
+
+    case WM_SYSCOMMAND:
+        result = mouse->handleSystemCommandMessage( firstParameter, secondParameter );
+        break;
     }
 
     if( result != USE_DEFAULT_PROCESSING )
@@ -395,9 +399,19 @@ LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) {
 }
 
 LRESULT MouseWin::handleCursorMovementMessage( WPARAM, LPARAM secondParameter ) {
-    processCursorMovement(
-        GET_X_LPARAM(secondParameter),
-        GET_Y_LPARAM(secondParameter) );
+    if( !isCursorLockRequired() )
+        processCursorMovement(
+            GET_X_LPARAM(secondParameter),
+            GET_Y_LPARAM(secondParameter) );
+
+    return USE_DEFAULT_PROCESSING;
+}
+
+LRESULT MouseWin::handleSystemCommandMessage( WPARAM firstParameter, LPARAM ) {
+    // By default pressing the Alt or F10 key causes the WM_ACTIVATEAPP message
+    // to be sent with the HTCAPTION parameter which is undesired.
+    if( firstParameter == SC_KEYMENU )
+        return 0;
 
     return USE_DEFAULT_PROCESSING;
 }

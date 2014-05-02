@@ -72,6 +72,7 @@ private:
     LRESULT handleActivationMessage( WPARAM, LPARAM );
     LRESULT handleLeftButtonPressMessage( WPARAM, LPARAM );
     LRESULT handleCursorMovementMessage( WPARAM, LPARAM );
+    LRESULT handleSystemCommandMessage( WPARAM, LPARAM );
 };
 
 }
