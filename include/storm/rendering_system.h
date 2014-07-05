@@ -1,5 +1,6 @@
 #pragma once
 
+#include <storm/backbuffer.h>
 #include <storm/blending_technique.h>
 #include <storm/color.h>
 #include <storm/mesh.h>
@@ -39,11 +40,14 @@ public:
     virtual void setClippingRectangle( const Rectangle& ) = 0;
     virtual void setOutputRectangle( const Rectangle& ) = 0;
 
+    virtual RenderingBufferSet::Pointer getRenderingBufferSet() const = 0;
     virtual void setRenderingBufferSet( RenderingBufferSet::Pointer ) = 0;
 
     virtual void clearColorBuffer( const Color &color = Color::Black ) = 0;
     virtual void clearDepthBuffer( float depth = 1.0f ) = 0;
     virtual void clearStencilBuffer( unsigned int stencil = 0 ) = 0;
+
+    virtual Backbuffer::Pointer getBackbuffer() const = 0;
 };
 
 }

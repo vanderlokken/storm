@@ -17,23 +17,17 @@ FramebufferHandleOgl::~FramebufferHandleOgl() {
     ::glDeleteFramebuffers( 1, &_handle );
 }
 
-class ScopeFramebufferBinding {
-public:
-    ScopeFramebufferBinding( GLuint binding ) {
-        ::glGetIntegerv( GL_FRAMEBUFFER_BINDING, &_previousBinding );
-        checkResult( "::glGetIntegerv" );
+ScopeFramebufferBinding::ScopeFramebufferBinding( GLuint binding ) {
+    ::glGetIntegerv( GL_FRAMEBUFFER_BINDING, &_previousBinding );
+    checkResult( "::glGetIntegerv" );
 
-        ::glBindFramebuffer( GL_FRAMEBUFFER, binding );
-        checkResult( "::glBindFramebuffer" );
-    }
+    ::glBindFramebuffer( GL_FRAMEBUFFER, binding );
+    checkResult( "::glBindFramebuffer" );
+}
 
-    ~ScopeFramebufferBinding() {
-        ::glBindFramebuffer( GL_FRAMEBUFFER, _previousBinding );
-    }
-
-private:
-    GLint _previousBinding;
-};
+ScopeFramebufferBinding::~ScopeFramebufferBinding() {
+    ::glBindFramebuffer( GL_FRAMEBUFFER, _previousBinding );
+}
 
 RenderingBufferSetOgl::RenderingBufferSetOgl( const Description &description )
     : _description( description )

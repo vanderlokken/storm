@@ -16,6 +16,7 @@ if(MSVC)
 endif()
 
 set(storm_includes
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/backbuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/blending_technique.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/buffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/camera.h
@@ -80,6 +81,8 @@ set(storm_common_sources
 set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.cpp

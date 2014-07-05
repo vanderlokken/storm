@@ -34,11 +34,14 @@ public:
     virtual void setClippingRectangle( const Rectangle& );
     virtual void setOutputRectangle( const Rectangle& );
 
+    virtual RenderingBufferSet::Pointer getRenderingBufferSet() const;
     virtual void setRenderingBufferSet( RenderingBufferSet::Pointer );
 
     virtual void clearColorBuffer( const Color &color = Color::Black );
     virtual void clearDepthBuffer( float depth = 1.0f );
     virtual void clearStencilBuffer( unsigned int stencil = 0 );
+
+    virtual Backbuffer::Pointer getBackbuffer() const;
 
     // This method should be called to prevent situations when OpenGL API is
     // being accessed with no context being installed.
@@ -59,6 +62,8 @@ private:
     BlendingTechnique::Pointer _blendingTechnique;
 
     RenderingBufferSet::Pointer _renderingBufferSet;
+
+    Backbuffer::Pointer _backbuffer;
 
     GLuint _primitiveRestartIndex;
 };

@@ -2,6 +2,7 @@
 
 #include <storm/platform/ogl/api_ogl.h>
 
+#include <storm/platform/ogl/backbuffer_ogl.h>
 #include <storm/platform/ogl/blending_technique_ogl.h>
 #include <storm/platform/ogl/buffer_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
@@ -33,7 +34,7 @@ void RenderingSystemOgl::initialize() {
             !supportStatus.ARB_texture_storage_multisample )
         {
             throw SystemRequirementsNotMet(
-                "Video driver doesn't support required OpenGL extension" );
+                "Video driver doesn't support required OpenGL extensions" );
         }
     }
 
@@ -45,6 +46,8 @@ void RenderingSystemOgl::initialize() {
 
     ::glBindProgramPipeline( *_programPipeline );
     checkResult( "::glBindProgramPipeline" );
+
+    _backbuffer.reset( new BackbufferOgl );
 
     _primitiveRestartIndex = 0xffff;
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
@@ -278,6 +281,10 @@ void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
     checkResult( "::glViewport" );
 }
 
+RenderingBufferSet::Pointer RenderingSystemOgl::getRenderingBufferSet() const {
+    return _renderingBufferSet;
+}
+
 void RenderingSystemOgl::setRenderingBufferSet(
     RenderingBufferSet::Pointer renderingBufferSet )
 {
@@ -338,6 +345,10 @@ void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
     ::glClear( GL_STENCIL_BUFFER_BIT );
     checkResult( "::glClear" );
     return;
+}
+
+Backbuffer::Pointer RenderingSystemOgl::getBackbuffer() const {
+    return _backbuffer;
 }
 
 void RenderingSystemOgl::installOpenGlContext() {

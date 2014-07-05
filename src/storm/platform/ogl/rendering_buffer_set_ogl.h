@@ -11,6 +11,15 @@ public:
     ~FramebufferHandleOgl();
 };
 
+class ScopeFramebufferBinding {
+public:
+    ScopeFramebufferBinding( GLuint binding );
+    ~ScopeFramebufferBinding();
+
+private:
+    GLint _previousBinding;
+};
+
 class RenderingBufferSetOgl : public RenderingBufferSet {
 public:
     RenderingBufferSetOgl( const Description& );
