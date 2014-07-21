@@ -1,12 +1,10 @@
 #include <storm/platform/win/keyboard_win.h>
 
-#include <algorithm>
-#include <array>
+#include <map>
 
 #include <storm/platform/win/input_win.h>
 #include <storm/platform/win/rendering_window_win.h>
 #include <storm/platform/win/window_procedure_win.h>
-#include <storm/throw_exception.h>
 
 // The following definitions were taken from MSDN
 // See http://msdn.microsoft.com/en-us/library/ff543477%28v=VS.85%29.aspx
@@ -66,17 +64,82 @@ bool KeyboardWin::isKeyPressed( Key key ) const {
 }
 
 void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
-    Key key;
+    static const std::map< USHORT, Key > codes = {
+        { VK_ESCAPE,   Key::Escape },
+        { VK_F1,       Key::F1 },
+        { VK_F2,       Key::F2 },
+        { VK_F3,       Key::F3 },
+        { VK_F4,       Key::F4 },
+        { VK_F5,       Key::F5 },
+        { VK_F6,       Key::F6 },
+        { VK_F7,       Key::F7 },
+        { VK_F8,       Key::F8 },
+        { VK_F9,       Key::F9 },
+        { VK_F10,      Key::F10 },
+        { VK_F11,      Key::F11 },
+        { VK_F12,      Key::F12 },
+        { VK_NUMPAD0,  Key::Digit0 },
+        { VK_NUMPAD1,  Key::Digit1 },
+        { VK_NUMPAD2,  Key::Digit2 },
+        { VK_NUMPAD3,  Key::Digit3 },
+        { VK_NUMPAD4,  Key::Digit4 },
+        { VK_NUMPAD5,  Key::Digit5 },
+        { VK_NUMPAD6,  Key::Digit6 },
+        { VK_NUMPAD7,  Key::Digit7 },
+        { VK_NUMPAD8,  Key::Digit8 },
+        { VK_NUMPAD9,  Key::Digit9 },
+        { 'A',         Key::A },
+        { 'B',         Key::B },
+        { 'C',         Key::C },
+        { 'D',         Key::D },
+        { 'E',         Key::E },
+        { 'F',         Key::F },
+        { 'G',         Key::G },
+        { 'H',         Key::H },
+        { 'I',         Key::I },
+        { 'J',         Key::J },
+        { 'K',         Key::K },
+        { 'L',         Key::L },
+        { 'M',         Key::M },
+        { 'N',         Key::N },
+        { 'O',         Key::O },
+        { 'P',         Key::P },
+        { 'Q',         Key::Q },
+        { 'R',         Key::R },
+        { 'S',         Key::S },
+        { 'T',         Key::T },
+        { 'U',         Key::U },
+        { 'V',         Key::V },
+        { 'W',         Key::W },
+        { 'X',         Key::X },
+        { 'Y',         Key::Y },
+        { 'Z',         Key::Z },
+        { VK_LSHIFT,   Key::LeftShift },
+        { VK_RSHIFT,   Key::RightShift },
+        { VK_LCONTROL, Key::LeftControl },
+        { VK_RCONTROL, Key::RightControl },
+        { VK_SPACE,    Key::Space },
+        { VK_LEFT,     Key::Left },
+        { VK_RIGHT,    Key::Right },
+        { VK_UP,       Key::Up },
+        { VK_DOWN,     Key::Down },
+        { VK_DELETE,   Key::Delete }
+    };
 
-    try {
-        const bool isLeft = (keyboard.Flags & RI_KEY_E0) != 0;
-        key = convertKey( keyboard.VKey, isLeft );
+    const bool isLeft = (keyboard.Flags & RI_KEY_E0) != 0;
 
-    } catch( storm::Exception& ) {
-        // Unknown keys are silently ignored
-        return;
-    }
+    USHORT code = keyboard.VKey;
+    if( code == VK_SHIFT )
+        code = isLeft ? VK_LSHIFT : VK_RSHIFT;
+    else if( code == VK_CONTROL )
+        code = isLeft ? VK_LCONTROL : VK_RCONTROL;
 
+    auto iterator = codes.find( code );
+
+    if( iterator == codes.end() )
+        return; // Ignore unknown keys
+
+    const Key key = iterator->second;
     const size_t keyIndex = static_cast<size_t>( key );
 
     if( keyboard.Message == WM_KEYDOWN && _keyPressed[keyIndex] == false )
@@ -123,86 +186,6 @@ void KeyboardWin::processKeyRelease( Key key ) {
     KeyReleaseEvent event; event.key = key;
     _keyReleaseEventHandlers( event );
     return;
-}
-
-Keyboard::Key KeyboardWin::convertKey( USHORT code, bool isLeft ) {
-    switch( code ) {
-        case VK_SHIFT:
-            code = isLeft ? VK_LSHIFT : VK_RSHIFT;
-            break;
-        case VK_CONTROL:
-            code = isLeft ? VK_LCONTROL : VK_RCONTROL;
-            break;
-    }
-
-    static const std::array< USHORT, KeyCount > codes = {
-        VK_ESCAPE,   // Escape
-        VK_F1,       // F1
-        VK_F2,       // F2
-        VK_F3,       // F3
-        VK_F4,       // F4
-        VK_F5,       // F5
-        VK_F6,       // F6
-        VK_F7,       // F7
-        VK_F8,       // F8
-        VK_F9,       // F9
-        VK_F10,      // F10
-        VK_F11,      // F11
-        VK_F12,      // F12
-        VK_NUMPAD0,  // Digit0
-        VK_NUMPAD1,  // Digit1
-        VK_NUMPAD2,  // Digit2
-        VK_NUMPAD3,  // Digit3
-        VK_NUMPAD4,  // Digit4
-        VK_NUMPAD5,  // Digit5
-        VK_NUMPAD6,  // Digit6
-        VK_NUMPAD7,  // Digit7
-        VK_NUMPAD8,  // Digit8
-        VK_NUMPAD9,  // Digit9
-        'A',         // A
-        'B',         // B
-        'C',         // C
-        'D',         // D
-        'E',         // E
-        'F',         // F
-        'G',         // G
-        'H',         // H
-        'I',         // I
-        'J',         // J
-        'K',         // K
-        'L',         // L
-        'M',         // M
-        'N',         // N
-        'O',         // O
-        'P',         // P
-        'Q',         // Q
-        'R',         // R
-        'S',         // S
-        'T',         // T
-        'U',         // U
-        'V',         // V
-        'W',         // W
-        'X',         // X
-        'Y',         // Y
-        'Z',         // Z
-        VK_LSHIFT,   // LeftShift
-        VK_RSHIFT,   // RightShift
-        VK_LCONTROL, // LeftControl
-        VK_RCONTROL, // RightControl
-        VK_SPACE,    // Space
-        VK_LEFT,     // Left
-        VK_RIGHT,    // Right
-        VK_UP,       // Up
-        VK_DOWN,     // Down
-        VK_DELETE    // Delete
-    };
-
-    auto searchResult = std::find( codes.cbegin(), codes.cend(), code );
-
-    if( searchResult == codes.cend() )
-        throwRuntimeError( "'code' is invalid" );
-
-    return static_cast< Keyboard::Key >( searchResult - codes.cbegin() );
 }
 
 const LRESULT USE_DEFAULT_PROCESSING = ~0U;

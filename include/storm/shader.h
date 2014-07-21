@@ -4,6 +4,7 @@
 #include <string>
 
 #include <storm/buffer.h>
+#include <storm/exception.h>
 #include <storm/sampler.h>
 #include <storm/texture.h>
 
@@ -47,5 +48,8 @@ public:
         setValue( getValueHandle(identifier), texture );
     }
 };
+
+class ShaderCompilationError : public Exception {};
+class ShaderValueLookupError : public Exception {};
 
 }

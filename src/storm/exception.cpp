@@ -25,9 +25,9 @@ const char* Exception::what() const {
     return _message.c_str();
 }
 
-SystemRequirementsNotMet::SystemRequirementsNotMet(
-    const std::string &description ) : Exception( description )
-{
+Exception& Exception::operator << ( const std::string &message ) {
+    _message += message;
+    return *this;
 }
 
 }

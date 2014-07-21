@@ -33,8 +33,8 @@ void RenderingSystemOgl::initialize() {
             !supportStatus.ARB_texture_storage ||
             !supportStatus.ARB_texture_storage_multisample )
         {
-            throw SystemRequirementsNotMet(
-                "Video driver doesn't support required OpenGL extensions" );
+            throw SystemRequirementsNotMet() <<
+                "Video driver doesn't support required OpenGL extensions";
         }
     }
 
@@ -64,6 +64,8 @@ void RenderingSystemOgl::endFrameRendering() {
 }
 
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
+    storm_assert( mesh );
+
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
 
     ::glBindVertexArray( nativeMesh->getHandle() );
@@ -97,6 +99,8 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
 }
 
 void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
+    storm_assert( shader );
+
     const Shader::Type shaderType = shader->getType();
 
     if( getShader(shaderType) == shader )
@@ -135,6 +139,7 @@ BlendingTechnique::Pointer RenderingSystemOgl::getBlendingTechnique() const {
 void RenderingSystemOgl::setRasterizationTechnique(
     RasterizationTechnique::Pointer technique )
 {
+    storm_assert( technique );
     if( _rasterizationTechnique == technique ) return;
 
     auto nativeTechnique = std::static_pointer_cast< RasterizationTechniqueOgl >( technique );
@@ -170,6 +175,7 @@ void RenderingSystemOgl::setRasterizationTechnique(
 void RenderingSystemOgl::setOutputTechnique(
     OutputTechnique::Pointer technique )
 {
+    storm_assert( technique );
     if( _outputTechnique == technique ) return;
 
     auto nativeTechnique =
@@ -228,6 +234,7 @@ void RenderingSystemOgl::setOutputTechnique(
 void RenderingSystemOgl::setBlendingTechnique(
     BlendingTechnique::Pointer technique )
 {
+    storm_assert( technique );
     if( _blendingTechnique == technique ) return;
 
     auto nativeTechnique = std::static_pointer_cast< BlendingTechniqueOgl >( technique );

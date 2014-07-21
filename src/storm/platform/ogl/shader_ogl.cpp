@@ -85,7 +85,7 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
         ::glGetProgramInfoLog( _handle, log.size(), nullptr, &log[0] );
         checkResult( "::glGetProgramInfoLog" );
 
-        throwRuntimeError( "Shader compilation failed:\n" + log );
+        throw ShaderCompilationError() << "Shader compilation failed:\n" << log;
     }
 
     createSamplersMapping();
@@ -118,7 +118,7 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
     checkResult( "::glGetUniformBlockIndex" );
 
     if( blockIndex == GL_INVALID_INDEX )
-        throwRuntimeError( "Invalid uniform identifier" );
+        throw ShaderValueLookupError() << "Invalid uniform identifier";
 
     const auto valueHandle = std::make_shared<ValueHandleImplementation>();
     valueHandle->shader = this;
