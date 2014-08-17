@@ -1,6 +1,6 @@
 #pragma once
 
-#include <storm/event_handler.h>
+#include <functional>
 
 namespace storm {
 
@@ -14,30 +14,9 @@ public:
         SideSecond
     };
 
-    struct ButtonEvent {
-        Button button;
-    };
-
-    struct ButtonPressEvent : public ButtonEvent { };
-    struct ButtonReleaseEvent : public ButtonEvent { };
-
-    struct WheelRotationEvent {
-        int distance;
-    };
-
-    // MovementEvent respresents raw mouse movement events. It's parameters are
-    // unaffected by system mouse sensitivity settings.
-
-    struct MovementEvent {
-        int deltaX;
-        int deltaY;
-    };
-
-    struct CursorMovementEvent {
+    struct Movement {
         int x;
         int y;
-        int deltaX;
-        int deltaY;
     };
 
     struct CursorPosition {
@@ -45,15 +24,20 @@ public:
         int y;
     };
 
+    struct Observer {
+        std::function<void(Button)> onButtonPress;
+        std::function<void(Button)> onButtonRelease;
+        std::function<void(int)> onWheelRotation;
+        std::function<void(Movement)> onMovement;
+        std::function<void(Movement, CursorPosition)> onCursorMovement;
+    };
+
     static Mouse* getInstance();
 
-    virtual ~Mouse() { }
+    virtual ~Mouse() {}
 
-    virtual void addEventHandler( const EventHandler<ButtonPressEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<WheelRotationEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<MovementEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<CursorMovementEvent>& ) = 0;
+    virtual void addObserver( const Observer* ) = 0;
+    virtual void removeObserver( const Observer* ) = 0;
 
     virtual bool isButtonPressed( Button ) const = 0;
 
@@ -64,6 +48,19 @@ public:
     virtual void setCursorMovementRestriction( bool ) = 0;
 
     virtual CursorPosition getCursorPosition() const = 0;
+};
+
+struct ScopedMouseObserver : Mouse::Observer {
+    ScopedMouseObserver() {
+        Mouse::getInstance()->addObserver( this );
+    }
+    ~ScopedMouseObserver() {
+        Mouse::getInstance()->removeObserver( this );
+    }
+    ScopedMouseObserver( const ScopedMouseObserver& ) = delete;
+    ScopedMouseObserver( const ScopedMouseObserver&& ) = delete;
+    ScopedMouseObserver& operator = ( const ScopedMouseObserver& ) = delete;
+    ScopedMouseObserver& operator = ( const ScopedMouseObserver&& ) = delete;
 };
 
 }

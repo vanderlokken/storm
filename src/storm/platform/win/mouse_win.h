@@ -4,9 +4,10 @@
 #define STRICT
 #include <windows.h>
 
-#include <storm/event_handler_vector.h>
 #include <storm/mouse.h>
 #include <storm/noncopyable.h>
+
+#include <vector>
 
 namespace storm {
 
@@ -17,11 +18,8 @@ public:
 
     virtual ~MouseWin();
 
-    virtual void addEventHandler( const EventHandler<ButtonPressEvent>& );
-    virtual void addEventHandler( const EventHandler<ButtonReleaseEvent>& );
-    virtual void addEventHandler( const EventHandler<WheelRotationEvent>& );
-    virtual void addEventHandler( const EventHandler<MovementEvent>& );
-    virtual void addEventHandler( const EventHandler<CursorMovementEvent>& );
+    virtual void addObserver( const Observer* );
+    virtual void removeObserver( const Observer* );
 
     virtual bool isButtonPressed( Button ) const;
 
@@ -41,8 +39,8 @@ private:
     void processButtonPress( Button );
     void processButtonRelease( Button );
     void processWheelRotation( short distance );
-    void processMovement( int deltaX, int deltaY );
-    void processCursorMovement( int x, int y );
+    void processMovement( Movement );
+    void processCursorMovement( CursorPosition );
 
     bool isCursorLockRequired();
     bool isCursorInClientRectangle();
@@ -57,11 +55,7 @@ private:
     bool _cursorMovementRestricted;
     bool _cursorLocked;
 
-    EventHandlerVector< ButtonPressEvent > _buttonPressEventHandlers;
-    EventHandlerVector< ButtonReleaseEvent > _buttonReleaseEventHandlers;
-    EventHandlerVector< WheelRotationEvent > _wheelRotationEventHandlers;
-    EventHandlerVector< MovementEvent > _movementEventHandlers;
-    EventHandlerVector< CursorMovementEvent > _cursorMovementEventHandlers;
+    std::vector< const Observer* > _observers;
 
     WNDPROC _originalWindowProcedure;
 

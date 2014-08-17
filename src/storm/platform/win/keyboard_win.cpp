@@ -1,6 +1,8 @@
 #include <storm/platform/win/keyboard_win.h>
 
+#include <algorithm>
 #include <map>
+#include <memory>
 
 #include <storm/platform/win/input_win.h>
 #include <storm/platform/win/rendering_window_win.h>
@@ -35,24 +37,24 @@ KeyboardWin::~KeyboardWin() {
     return;
 }
 
-void KeyboardWin::addEventHandler( const EventHandler<KeyPressEvent> &handler ) {
-    _keyPressEventHandlers.addEventHandler( handler );
-    return;
+void KeyboardWin::addObserver( const Observer *observer ) {
+    const bool existing = std::find(
+        _observers.begin(),
+        _observers.end(),
+        observer ) != _observers.end();
+
+    if( !existing )
+        _observers.push_back( observer );
 }
 
-void KeyboardWin::addEventHandler( const EventHandler<KeyRepeatEvent> &handler ) {
-    _keyRepeatEventHandlers.addEventHandler( handler );
-    return;
-}
+void KeyboardWin::removeObserver( const Observer *observer ) {
+    const auto iterator = std::find(
+        _observers.begin(),
+        _observers.end(),
+        observer );
 
-void KeyboardWin::addEventHandler( const EventHandler<KeyReleaseEvent> &handler ) {
-    _keyReleaseEventHandlers.addEventHandler( handler );
-    return;
-}
-
-void KeyboardWin::addEventHandler( const EventHandler<CharacterInputEvent> &handler ) {
-    _characterInputEventHandlers.addEventHandler( handler );
-    return;
+    if( iterator != _observers.end() )
+        _observers.erase( iterator );
 }
 
 bool KeyboardWin::isKeyPressed( Key key ) const {
@@ -158,15 +160,15 @@ void KeyboardWin::processKeyPress( Key key ) {
     const size_t keyIndex = static_cast<size_t>( key );
     _keyPressed[keyIndex] = true;
 
-    KeyPressEvent event; event.key = key;
-    _keyPressEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onKeyPress )
+            observer->onKeyPress( key );
 }
 
 void KeyboardWin::processKeyRepeat( Key key ) {
-    KeyRepeatEvent event; event.key = key;
-    _keyRepeatEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onKeyRepeat )
+            observer->onKeyRepeat( key );
 }
 
 void KeyboardWin::processKeyRelease( Key key ) {
@@ -183,9 +185,9 @@ void KeyboardWin::processKeyRelease( Key key ) {
 
     _keyPressed[keyIndex] = false;
 
-    KeyReleaseEvent event; event.key = key;
-    _keyReleaseEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onKeyRelease )
+            observer->onKeyRelease( key );
 }
 
 const LRESULT USE_DEFAULT_PROCESSING = ~0U;
@@ -237,8 +239,9 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
 }
 
 LRESULT KeyboardWin::handleCharacterInputMessage( WPARAM firstParameter, LPARAM ) {
-    CharacterInputEvent event = { firstParameter };
-    _characterInputEventHandlers( event );
+    for( const Observer *observer : _observers )
+        if( observer->onCharacterInput )
+            observer->onCharacterInput( firstParameter );
 
     return USE_DEFAULT_PROCESSING;
 }

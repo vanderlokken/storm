@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include <storm/event_handler.h>
+#include <functional>
 
 namespace storm {
 
@@ -65,29 +64,38 @@ public:
         Delete
     };
 
-    struct KeyEvent {
-        Key key;
-    };
+    typedef uint32_t CharacterCode;
 
-    struct KeyPressEvent : public KeyEvent { };
-    struct KeyRepeatEvent : public KeyEvent { };
-    struct KeyReleaseEvent : public KeyEvent { };
-
-    struct CharacterInputEvent {
-        uint32_t code;
+    struct Observer {
+        std::function<void(Key)> onKeyPress;
+        std::function<void(Key)> onKeyRelease;
+        std::function<void(Key)> onKeyRepeat;
+        std::function<void(CharacterCode)> onCharacterInput;
     };
 
     static Keyboard* getInstance();
 
-    virtual ~Keyboard() { }
+    virtual ~Keyboard() {}
 
-    virtual void addEventHandler( const EventHandler<KeyPressEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& ) = 0;
-    virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& ) = 0;
-
-    virtual void addEventHandler( const EventHandler<CharacterInputEvent>& ) = 0;
+    virtual void addObserver( const Observer* ) = 0;
+    virtual void removeObserver( const Observer* ) = 0;
 
     virtual bool isKeyPressed( Key ) const = 0;
+};
+
+struct ScopedKeyboardObserver : Keyboard::Observer {
+    ScopedKeyboardObserver() {
+        Keyboard::getInstance()->addObserver( this );
+    }
+    ~ScopedKeyboardObserver() {
+        Keyboard::getInstance()->removeObserver( this );
+    }
+    ScopedKeyboardObserver( const ScopedKeyboardObserver& ) = delete;
+    ScopedKeyboardObserver( const ScopedKeyboardObserver&& ) = delete;
+    ScopedKeyboardObserver&
+        operator = ( const ScopedKeyboardObserver& ) = delete;
+    ScopedKeyboardObserver&
+        operator = ( const ScopedKeyboardObserver&& ) = delete;
 };
 
 }

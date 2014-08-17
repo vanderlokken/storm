@@ -1,5 +1,8 @@
 #include <storm/platform/win/mouse_win.h>
 
+#include <algorithm>
+#include <memory>
+
 #include <windowsx.h>
 
 #include <storm/platform/win/input_win.h>
@@ -39,29 +42,24 @@ MouseWin::~MouseWin() {
     return;
 }
 
-void MouseWin::addEventHandler( const EventHandler<ButtonPressEvent> &handler ) {
-    _buttonPressEventHandlers.addEventHandler( handler );
-    return;
+void MouseWin::addObserver( const Observer *observer ) {
+    const bool existing = std::find(
+        _observers.begin(),
+        _observers.end(),
+        observer ) != _observers.end();
+
+    if( !existing )
+        _observers.push_back( observer );
 }
 
-void MouseWin::addEventHandler( const EventHandler<ButtonReleaseEvent> &handler ) {
-    _buttonReleaseEventHandlers.addEventHandler( handler );
-    return;
-}
+void MouseWin::removeObserver( const Observer *observer ) {
+    const auto iterator = std::find(
+        _observers.begin(),
+        _observers.end(),
+        observer );
 
-void MouseWin::addEventHandler( const EventHandler<WheelRotationEvent> &handler ) {
-    _wheelRotationEventHandlers.addEventHandler( handler );
-    return;
-}
-
-void MouseWin::addEventHandler( const EventHandler<MovementEvent> &handler ) {
-    _movementEventHandlers.addEventHandler( handler );
-    return;
-}
-
-void MouseWin::addEventHandler( const EventHandler<CursorMovementEvent> &handler ) {
-    _cursorMovementEventHandlers.addEventHandler( handler );
-    return;
+    if( iterator != _observers.end() )
+        _observers.erase( iterator );
 }
 
 bool MouseWin::isButtonPressed( Button button ) const {
@@ -176,7 +174,7 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
     // A movement event
 
     if( !(state & MOUSE_MOVE_ABSOLUTE) )
-        processMovement( mouse.lLastX, mouse.lLastY );
+        processMovement( {mouse.lLastX, mouse.lLastY} );
 
     if( state & MOUSE_MOVE_ABSOLUTE )
         throwNotImplemented();
@@ -188,10 +186,9 @@ void MouseWin::processButtonPress( Button button ) {
     const size_t buttonIndex = static_cast<size_t>( button );
     _buttonPressed[buttonIndex] = true;
 
-    ButtonPressEvent event;
-    event.button = button;
-    _buttonPressEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onButtonPress )
+            observer->onButtonPress( button );
 }
 
 void MouseWin::processButtonRelease( Button button ) {
@@ -208,30 +205,29 @@ void MouseWin::processButtonRelease( Button button ) {
 
     _buttonPressed[buttonIndex] = false;
 
-    ButtonReleaseEvent event;
-    event.button = button;
-    _buttonReleaseEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onButtonRelease )
+            observer->onButtonRelease( button );
 }
 
 void MouseWin::processWheelRotation( short distance ) {
-    WheelRotationEvent event = { distance };
-    _wheelRotationEventHandlers( event );
-    return;
+    for( const Observer *observer : _observers )
+        if( observer->onWheelRotation )
+            observer->onWheelRotation( distance );
 }
 
-void MouseWin::processMovement( int deltaX, int deltaY ) {
-    MovementEvent event = { deltaX, deltaY };
-    _movementEventHandlers( event );
-    return;
+void MouseWin::processMovement( Movement movement ) {
+    for( const Observer *observer : _observers )
+        if( observer->onMovement )
+            observer->onMovement( movement );
 }
 
-void MouseWin::processCursorMovement( int x, int y ) {
-    POINT position = { x, y };
+void MouseWin::processCursorMovement( CursorPosition cursorPosition ) {
+    POINT point = { cursorPosition.x, cursorPosition.y };
     ::ClientToScreen(
-        RenderingWindowWin::getInstance()->getHandle(), &position );
+        RenderingWindowWin::getInstance()->getHandle(), &point );
 
-    MOUSEMOVEPOINT currentPosition = { position.x, position.y };
+    MOUSEMOVEPOINT currentPosition = { point.x, point.y };
     MOUSEMOVEPOINT previousPositions[2] = { currentPosition, currentPosition };
 
     const int pointsToRetrieve = 2;
@@ -240,13 +236,14 @@ void MouseWin::processCursorMovement( int x, int y ) {
     ::GetMouseMovePointsEx( sizeof(MOUSEMOVEPOINT),
         &currentPosition, previousPositions, pointsToRetrieve, resolution );
 
-    CursorMovementEvent event = {
-        x,
-        y,
+    Movement movement = {
         currentPosition.x - previousPositions[1].x,
-        currentPosition.y - previousPositions[1].y };
-    _cursorMovementEventHandlers( event );
-    return;
+        currentPosition.y - previousPositions[1].y
+    };
+
+    for( const Observer *observer : _observers )
+        if( observer->onCursorMovement )
+            observer->onCursorMovement( movement, cursorPosition );
 }
 
 bool MouseWin::isCursorLockRequired() {
@@ -399,10 +396,13 @@ LRESULT MouseWin::handleLeftButtonPressMessage( WPARAM, LPARAM ) {
 }
 
 LRESULT MouseWin::handleCursorMovementMessage( WPARAM, LPARAM secondParameter ) {
-    if( !isCursorLockRequired() )
-        processCursorMovement(
+    if( !isCursorLockRequired() ) {
+        const CursorPosition cursorPosition = {
             GET_X_LPARAM(secondParameter),
-            GET_Y_LPARAM(secondParameter) );
+            GET_Y_LPARAM(secondParameter)
+        };
+        processCursorMovement( cursorPosition );
+    }
 
     return USE_DEFAULT_PROCESSING;
 }

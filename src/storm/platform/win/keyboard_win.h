@@ -4,9 +4,10 @@
 #define STRICT
 #include <windows.h>
 
-#include <storm/event_handler_vector.h>
 #include <storm/keyboard.h>
 #include <storm/noncopyable.h>
+
+#include <vector>
 
 namespace storm {
 
@@ -17,11 +18,8 @@ public:
 
     virtual ~KeyboardWin();
 
-    virtual void addEventHandler( const EventHandler<KeyPressEvent>& );
-    virtual void addEventHandler( const EventHandler<KeyRepeatEvent>& );
-    virtual void addEventHandler( const EventHandler<KeyReleaseEvent>& );
-
-    virtual void addEventHandler( const EventHandler<CharacterInputEvent>& );
+    virtual void addObserver( const Observer* );
+    virtual void removeObserver( const Observer* );
 
     virtual bool isKeyPressed( Key ) const;
 
@@ -37,11 +35,7 @@ private:
     static const size_t KeyCount = 59;
     std::vector< bool > _keyPressed;
 
-    EventHandlerVector< KeyPressEvent > _keyPressEventHandlers;
-    EventHandlerVector< KeyRepeatEvent > _keyRepeatEventHandlers;
-    EventHandlerVector< KeyReleaseEvent > _keyReleaseEventHandlers;
-
-    EventHandlerVector< CharacterInputEvent > _characterInputEventHandlers;
+    std::vector< const Observer* > _observers;
 
     WNDPROC _originalWindowProcedure;
 
