@@ -6,6 +6,7 @@
 
 #include <storm/keyboard.h>
 #include <storm/noncopyable.h>
+#include <storm/observer_list.h>
 
 #include <vector>
 
@@ -35,7 +36,7 @@ private:
     static const size_t KeyCount = 59;
     std::vector< bool > _keyPressed;
 
-    std::vector< const Observer* > _observers;
+    ObserverList< Observer > _observers;
 
     WNDPROC _originalWindowProcedure;
 

@@ -13,8 +13,13 @@ public:
     virtual void run( const Callback &callback );
     virtual void stop();
 
+    virtual void processInputEvents();
+
 private:
     FrameworkWin();
+
+    bool _running;
+    bool _eventsProcessed;
 };
 
 }

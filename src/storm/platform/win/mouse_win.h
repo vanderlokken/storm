@@ -6,6 +6,7 @@
 
 #include <storm/mouse.h>
 #include <storm/noncopyable.h>
+#include <storm/observer_list.h>
 
 #include <vector>
 
@@ -55,7 +56,7 @@ private:
     bool _cursorMovementRestricted;
     bool _cursorLocked;
 
-    std::vector< const Observer* > _observers;
+    ObserverList< Observer > _observers;
 
     WNDPROC _originalWindowProcedure;
 

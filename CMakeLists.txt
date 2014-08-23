@@ -26,7 +26,6 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/common_vertex_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/dimensions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/display.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/event_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.inl
@@ -61,13 +60,13 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/event_handler_vector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/noncopyable.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/observer_list.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/output_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rasterization_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rendering_system_common.cpp

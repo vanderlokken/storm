@@ -10,39 +10,43 @@
 
 namespace storm {
 
-FrameworkWin::FrameworkWin() {
-    return;
+FrameworkWin::FrameworkWin() :
+    _running( true ), _eventsProcessed( false )
+{
 }
 
 void FrameworkWin::run( const Callback &callback ) {
     storm_assert( callback );
 
-    bool processing = true;
-
-    while( processing ) {
-
-        MSG message;
-
-        while( ::PeekMessage(&message, 0, 0, 0, PM_REMOVE) ) {
-            if( message.message == WM_QUIT ) {
-                processing = false;
-            }
-            ::TranslateMessage( &message );
-            ::DispatchMessage( &message );
-        }
-
-        if( !processing )
-            break;
+    while( _running ) {
+        _eventsProcessed = false;
 
         callback();
-    }
 
-    return;
+        if( !_eventsProcessed )
+            processInputEvents();
+    }
 }
 
 void FrameworkWin::stop() {
     ::PostQuitMessage( 0 );
-    return;
+}
+
+void FrameworkWin::processInputEvents() {
+    if( _eventsProcessed )
+        return;
+
+    MSG message;
+
+    while( ::PeekMessage(&message, 0, 0, 0, PM_REMOVE) ) {
+        if( message.message == WM_QUIT ) {
+            _running = false;
+        }
+        ::TranslateMessage( &message );
+        ::DispatchMessage( &message );
+    }
+
+    _eventsProcessed = true;
 }
 
 FrameworkWin* FrameworkWin::getInstance() {

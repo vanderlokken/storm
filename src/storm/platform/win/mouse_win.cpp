@@ -1,6 +1,5 @@
 #include <storm/platform/win/mouse_win.h>
 
-#include <algorithm>
 #include <memory>
 
 #include <windowsx.h>
@@ -43,23 +42,11 @@ MouseWin::~MouseWin() {
 }
 
 void MouseWin::addObserver( const Observer *observer ) {
-    const bool existing = std::find(
-        _observers.begin(),
-        _observers.end(),
-        observer ) != _observers.end();
-
-    if( !existing )
-        _observers.push_back( observer );
+    _observers.add( observer );
 }
 
 void MouseWin::removeObserver( const Observer *observer ) {
-    const auto iterator = std::find(
-        _observers.begin(),
-        _observers.end(),
-        observer );
-
-    if( iterator != _observers.end() )
-        _observers.erase( iterator );
+    _observers.remove( observer );
 }
 
 bool MouseWin::isButtonPressed( Button button ) const {
@@ -186,9 +173,10 @@ void MouseWin::processButtonPress( Button button ) {
     const size_t buttonIndex = static_cast<size_t>( button );
     _buttonPressed[buttonIndex] = true;
 
-    for( const Observer *observer : _observers )
-        if( observer->onButtonPress )
-            observer->onButtonPress( button );
+    _observers.forEach([=]( const Observer &observer ) {
+        if( observer.onButtonPress )
+            observer.onButtonPress( button );
+    });
 }
 
 void MouseWin::processButtonRelease( Button button ) {
@@ -205,21 +193,24 @@ void MouseWin::processButtonRelease( Button button ) {
 
     _buttonPressed[buttonIndex] = false;
 
-    for( const Observer *observer : _observers )
-        if( observer->onButtonRelease )
-            observer->onButtonRelease( button );
+    _observers.forEach([=]( const Observer &observer ) {
+        if( observer.onButtonRelease )
+            observer.onButtonRelease( button );
+    });
 }
 
 void MouseWin::processWheelRotation( short distance ) {
-    for( const Observer *observer : _observers )
-        if( observer->onWheelRotation )
-            observer->onWheelRotation( distance );
+    _observers.forEach([=]( const Observer &observer ) {
+        if( observer.onWheelRotation )
+            observer.onWheelRotation( distance );
+    });
 }
 
 void MouseWin::processMovement( Movement movement ) {
-    for( const Observer *observer : _observers )
-        if( observer->onMovement )
-            observer->onMovement( movement );
+    _observers.forEach([=]( const Observer &observer ) {
+        if( observer.onMovement )
+            observer.onMovement( movement );
+    });
 }
 
 void MouseWin::processCursorMovement( CursorPosition cursorPosition ) {
@@ -236,14 +227,15 @@ void MouseWin::processCursorMovement( CursorPosition cursorPosition ) {
     ::GetMouseMovePointsEx( sizeof(MOUSEMOVEPOINT),
         &currentPosition, previousPositions, pointsToRetrieve, resolution );
 
-    Movement movement = {
+    const Movement movement = {
         currentPosition.x - previousPositions[1].x,
         currentPosition.y - previousPositions[1].y
     };
 
-    for( const Observer *observer : _observers )
-        if( observer->onCursorMovement )
-            observer->onCursorMovement( movement, cursorPosition );
+    _observers.forEach([=]( const Observer &observer ) {
+        if( observer.onCursorMovement )
+            observer.onCursorMovement( movement, cursorPosition );
+    });
 }
 
 bool MouseWin::isCursorLockRequired() {

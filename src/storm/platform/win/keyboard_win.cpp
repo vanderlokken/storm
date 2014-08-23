@@ -1,6 +1,5 @@
 #include <storm/platform/win/keyboard_win.h>
 
-#include <algorithm>
 #include <map>
 #include <memory>
 
@@ -38,23 +37,11 @@ KeyboardWin::~KeyboardWin() {
 }
 
 void KeyboardWin::addObserver( const Observer *observer ) {
-    const bool existing = std::find(
-        _observers.begin(),
-        _observers.end(),
-        observer ) != _observers.end();
-
-    if( !existing )
-        _observers.push_back( observer );
+    _observers.add( observer );
 }
 
 void KeyboardWin::removeObserver( const Observer *observer ) {
-    const auto iterator = std::find(
-        _observers.begin(),
-        _observers.end(),
-        observer );
-
-    if( iterator != _observers.end() )
-        _observers.erase( iterator );
+    _observers.remove( observer );
 }
 
 bool KeyboardWin::isKeyPressed( Key key ) const {
@@ -160,15 +147,17 @@ void KeyboardWin::processKeyPress( Key key ) {
     const size_t keyIndex = static_cast<size_t>( key );
     _keyPressed[keyIndex] = true;
 
-    for( const Observer *observer : _observers )
-        if( observer->onKeyPress )
-            observer->onKeyPress( key );
+    _observers.forEach([=]( const Observer &observer) {
+        if( observer.onKeyPress )
+            observer.onKeyPress( key );
+    });
 }
 
 void KeyboardWin::processKeyRepeat( Key key ) {
-    for( const Observer *observer : _observers )
-        if( observer->onKeyRepeat )
-            observer->onKeyRepeat( key );
+    _observers.forEach([=]( const Observer &observer) {
+        if( observer.onKeyRepeat )
+            observer.onKeyRepeat( key );
+    });
 }
 
 void KeyboardWin::processKeyRelease( Key key ) {
@@ -185,9 +174,10 @@ void KeyboardWin::processKeyRelease( Key key ) {
 
     _keyPressed[keyIndex] = false;
 
-    for( const Observer *observer : _observers )
-        if( observer->onKeyRelease )
-            observer->onKeyRelease( key );
+    _observers.forEach([=]( const Observer &observer) {
+        if( observer.onKeyRelease )
+            observer.onKeyRelease( key );
+    });
 }
 
 const LRESULT USE_DEFAULT_PROCESSING = ~0U;
@@ -239,9 +229,10 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
 }
 
 LRESULT KeyboardWin::handleCharacterInputMessage( WPARAM firstParameter, LPARAM ) {
-    for( const Observer *observer : _observers )
-        if( observer->onCharacterInput )
-            observer->onCharacterInput( firstParameter );
+    _observers.forEach([=]( const Observer &observer) {
+        if( observer.onCharacterInput )
+            observer.onCharacterInput( firstParameter );
+    });
 
     return USE_DEFAULT_PROCESSING;
 }
