@@ -119,8 +119,10 @@ HWND RenderingWindowWin::getHandle() const {
 LRESULT CALLBACK RenderingWindowWin::windowProcedure(
     HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter )
 {
-    if( message == WM_DESTROY )
+    if( message == WM_CLOSE ) {
         ::PostQuitMessage( 0 );
+        return 0;
+    }
 
     return ::DefWindowProc( windowHandle, message, firstParameter, secondParameter );
 }
