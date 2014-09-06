@@ -32,16 +32,16 @@ inline CompressedColor::CompressedColor(
     unsigned char g,
     unsigned char b,
     unsigned char a ) :
-        value( (a << 24) | (r << 16) | (g << 8) | (b << 0) )
+        value( (a << 24) | (b << 16) | (g << 8) | (r << 0) )
 {
 }
 
 inline CompressedColor::CompressedColor( Color color ) :
     value(
         (fromNormalized(color.a) << 24) |
-        (fromNormalized(color.r) << 16) |
+        (fromNormalized(color.b) << 16) |
         (fromNormalized(color.g) <<  8) |
-        (fromNormalized(color.b) <<  0) )
+        (fromNormalized(color.r) <<  0) )
 {
 }
 
@@ -51,7 +51,7 @@ inline CompressedColor::CompressedColor( uint32_t value ) :
 }
 
 inline unsigned char CompressedColor::getR() const {
-    return static_cast<unsigned char>( value >> 16 );
+    return static_cast<unsigned char>( value >> 0 );
 }
 
 inline unsigned char CompressedColor::getG() const {
@@ -59,7 +59,7 @@ inline unsigned char CompressedColor::getG() const {
 }
 
 inline unsigned char CompressedColor::getB() const {
-    return static_cast<unsigned char>( value >> 0 );
+    return static_cast<unsigned char>( value >> 16 );
 }
 
 inline unsigned char CompressedColor::getA() const {
@@ -67,7 +67,7 @@ inline unsigned char CompressedColor::getA() const {
 }
 
 inline void CompressedColor::setR( unsigned char r ) {
-    value = (value & 0xFF00FFFF) | (static_cast<uint32_t>(r) << 16);
+    value = (value & 0xFFFFFF00) | (static_cast<uint32_t>(r) << 0);
 }
 
 inline void CompressedColor::setG( unsigned char g ) {
@@ -75,7 +75,7 @@ inline void CompressedColor::setG( unsigned char g ) {
 }
 
 inline void CompressedColor::setB( unsigned char b ) {
-    value = (value & 0xFFFFFF00) | (static_cast<uint32_t>(b) << 0);
+    value = (value & 0xFF00FFFF) | (static_cast<uint32_t>(b) << 16);
 }
 
 inline void CompressedColor::setA( unsigned char a ) {
