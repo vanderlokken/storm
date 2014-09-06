@@ -155,10 +155,8 @@ inline Quaternion Quaternion::slerp(
         first.z * second.z +
         first.w * second.w;
 
-    const float absConsine = fabs( cosine );
-
     float firstScale, secondScale;
-    if( 1 - absConsine > 1e-6f ) {
+    if( 1 - fabs(cosine) > 1e-6f ) {
         const float angle = acos( cosine );
         const float sine = sin( angle );
         firstScale = sin( (1 - position) * angle ) / sine;

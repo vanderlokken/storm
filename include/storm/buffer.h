@@ -19,7 +19,7 @@ public:
     static Pointer create( const Description&, const void *data = nullptr );
 
     template<class Container>
-        static Pointer create( const Container &vertices );
+        static Pointer create( const Container &container );
 
     virtual ~Buffer() { }
 

@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <storm/math.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
@@ -92,6 +93,8 @@ void PerspectiveCamera::setFieldOfView( float fieldOfView ) {
 }
 
 Matrix PerspectiveCamera::getProjectionTransformation() const {
+    storm_assert( _frameDimensions.width && _frameDimensions.height );
+
     const float frameWidth = static_cast< float >( _frameDimensions.width );
     const float frameHeight = static_cast< float >( _frameDimensions.height );
     const float aspectRatio = frameWidth / frameHeight;
