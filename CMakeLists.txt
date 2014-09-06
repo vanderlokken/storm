@@ -141,4 +141,5 @@ add_library(storm STATIC
 
 if(storm_build_examples)
     add_subdirectory(examples/triangle_rendering)
+    add_subdirectory(examples/advanced_rendering)
 endif()
