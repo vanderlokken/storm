@@ -1,6 +1,3 @@
-#include <array>
-#include <cstdint>
-
 #include <storm/camera.h>
 #include <storm/clock.h>
 #include <storm/exception.h>

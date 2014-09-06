@@ -1,5 +1,8 @@
 #include "resources.h"
 
+#include <array>
+#include <cstdint>
+
 #include <storm/color.h>
 #include <storm/common_vertex_types.h>
 
