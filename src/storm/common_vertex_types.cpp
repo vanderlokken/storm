@@ -64,4 +64,24 @@ VertexFormat::Pointer OrientedVertex::getFormat() {
     return format;
 }
 
+VertexFormat::Pointer OrientedTexturedVertex::getFormat() {
+    static const std::vector<VertexAttribute> attributes = {
+        {
+            VertexAttribute::Semantics::Position,
+            VertexAttribute::Format::Vector3Float
+        },
+        {
+            VertexAttribute::Semantics::Normal,
+            VertexAttribute::Format::Vector3Float
+        },
+        {
+            VertexAttribute::Semantics::TextureCoordinates,
+            VertexAttribute::Format::Vector2Float
+        }
+    };
+    static const VertexFormat::Pointer format =
+        VertexFormat::create( {attributes, sizeof(OrientedTexturedVertex)} );
+    return format;
+}
+
 }

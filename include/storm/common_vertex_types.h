@@ -34,4 +34,12 @@ struct OrientedVertex {
     static VertexFormat::Pointer getFormat();
 };
 
+struct OrientedTexturedVertex {
+    Vector position;
+    Vector normal;
+    FlatVector textureCoordinates;
+
+    static VertexFormat::Pointer getFormat();
+};
+
 }
