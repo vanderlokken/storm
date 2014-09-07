@@ -10,6 +10,6 @@ endif()
 
 add_custom_command(
     TARGET storm_triangle_rendering POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/vertex_shader.glsl" $<TARGET_FILE_DIR:storm_triangle_rendering>
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/pixel_shader.glsl" $<TARGET_FILE_DIR:storm_triangle_rendering>
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/vertex_shader.glsl" "${CMAKE_CURRENT_BINARY_DIR}/vertex_shader.glsl"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/pixel_shader.glsl" "${CMAKE_CURRENT_BINARY_DIR}/pixel_shader.glsl"
 )
