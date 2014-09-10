@@ -91,11 +91,8 @@ struct ScopedKeyboardObserver : Keyboard::Observer {
         Keyboard::getInstance()->removeObserver( this );
     }
     ScopedKeyboardObserver( const ScopedKeyboardObserver& ) = delete;
-    ScopedKeyboardObserver( ScopedKeyboardObserver&& ) = delete;
     ScopedKeyboardObserver&
         operator = ( const ScopedKeyboardObserver& ) = delete;
-    ScopedKeyboardObserver&
-        operator = ( ScopedKeyboardObserver&& ) = delete;
 };
 
 }

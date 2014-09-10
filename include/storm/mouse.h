@@ -58,9 +58,7 @@ struct ScopedMouseObserver : Mouse::Observer {
         Mouse::getInstance()->removeObserver( this );
     }
     ScopedMouseObserver( const ScopedMouseObserver& ) = delete;
-    ScopedMouseObserver( ScopedMouseObserver&& ) = delete;
     ScopedMouseObserver& operator = ( const ScopedMouseObserver& ) = delete;
-    ScopedMouseObserver& operator = ( ScopedMouseObserver&& ) = delete;
 };
 
 }
