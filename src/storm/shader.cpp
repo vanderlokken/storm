@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include <storm/throw_exception.h>
+#include <storm/exception.h>
 
 namespace storm {
 
@@ -12,7 +12,7 @@ Shader::Pointer Shader::load(
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
-        throw Exception( "Couldn't open " + filename );
+        throw ResourceLoadingError() << "Couldn't open " + filename;
 
     std::istreambuf_iterator< char > begin( stream );
     std::istreambuf_iterator< char > end;

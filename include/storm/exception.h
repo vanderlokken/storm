@@ -23,5 +23,6 @@ private:
 };
 
 class SystemRequirementsNotMet : public Exception {};
+class ResourceLoadingError : public Exception {};
 
 }

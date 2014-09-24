@@ -5,7 +5,7 @@
 #include <numeric>
 #include <vector>
 
-#include <storm/throw_exception.h>
+#include <storm/exception.h>
 
 namespace storm {
 
@@ -15,7 +15,7 @@ Mesh::Pointer Mesh::load( const std::string &filename ) {
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
-        throw Exception( "Couldn't open " + filename );
+        throw ResourceLoadingError() << "Couldn't open " + filename;
 
     uint32_t attributeCount = 0;
     stream.read( reinterpret_cast<char*>(&attributeCount), sizeof(attributeCount) );
