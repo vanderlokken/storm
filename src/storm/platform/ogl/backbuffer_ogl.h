@@ -1,7 +1,7 @@
 #pragma once
 
 #include <storm/backbuffer.h>
-#include <storm/platform/ogl/rendering_buffer_set_ogl.h>
+#include <storm/platform/ogl/framebuffer_ogl.h>
 
 namespace storm {
 

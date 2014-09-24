@@ -1,4 +1,4 @@
-#include <storm/platform/ogl/rendering_buffer_set_ogl.h>
+#include <storm/platform/ogl/framebuffer_ogl.h>
 
 #include <numeric>
 
@@ -29,14 +29,31 @@ ScopeFramebufferBinding::~ScopeFramebufferBinding() {
     ::glBindFramebuffer( GL_FRAMEBUFFER, _previousBinding );
 }
 
-RenderingBufferSetOgl::RenderingBufferSetOgl( const Description &description )
-    : _description( description )
+FramebufferOgl::FramebufferOgl( const Description &description ) :
+    _description( description )
 {
     ScopeFramebufferBinding scopeFramebufferBinding( _handle );
 
-    auto attachBuffer = []( GLenum attachment​, const Buffer &buffer ) {
+    size_t colorAttachmentsNumber = 0;
+
+    for( const auto &buffer : description.buffers ) {
         const auto nativeTexture =
             std::static_pointer_cast<TextureOgl>( buffer.texture );
+
+        GLenum attachment​;
+        switch( nativeTexture->getDescription().format ) {
+        case Texture::Format::DepthUint16:
+        case Texture::Format::DepthUint24:
+        case Texture::Format::DepthUint32:
+            attachment​ = GL_DEPTH_ATTACHMENT;
+            break;
+        case Texture::Format::DepthUint24StencilUint8:
+            attachment​ = GL_DEPTH_STENCIL_ATTACHMENT;
+            break;
+        default:
+            attachment​ = GL_COLOR_ATTACHMENT0 + (colorAttachmentsNumber++);
+            break;
+        }
 
         switch( nativeTexture->getDescription().layout ) {
         case Texture::Layout::Separate1d:
@@ -57,42 +74,30 @@ RenderingBufferSetOgl::RenderingBufferSetOgl( const Description &description )
         default:
             throwNotImplemented();
         }
-    };
-
-    GLenum colorAttachment = GL_COLOR_ATTACHMENT0;
-
-    for( const auto &buffer : description.colorBuffers )
-        attachBuffer( colorAttachment++, buffer );
-
-    // TODO: stencil attachment
-    attachBuffer( GL_DEPTH_ATTACHMENT, description.depthStencilBuffer );
+    }
 
     storm_assert(
         ::glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE );
 
-    std::vector<GLenum> buffers( description.colorBuffers.size() );
+    std::vector<GLenum> buffers( colorAttachmentsNumber );
     std::iota( buffers.begin(), buffers.end(), GL_COLOR_ATTACHMENT0 );
 
     ::glDrawBuffers( buffers.size(), buffers.data() );
     checkResult( "::glDrawBuffers​" );
 }
 
-const RenderingBufferSet::Description&
-    RenderingBufferSetOgl::getDescription() const
-{
+const Framebuffer::Description& FramebufferOgl::getDescription() const {
     return _description;
 }
 
-const FramebufferHandleOgl& RenderingBufferSetOgl::getHandle() const {
+const FramebufferHandleOgl& FramebufferOgl::getHandle() const {
     return _handle;
 }
 
-RenderingBufferSet::Pointer RenderingBufferSet::create(
-    const Description &description )
-{
+Framebuffer::Pointer Framebuffer::create( const Description &description ) {
     RenderingSystemOgl::installOpenGlContext();
 
-    return std::make_shared< RenderingBufferSetOgl >( description );
+    return std::make_shared< FramebufferOgl >( description );
 }
 
 }

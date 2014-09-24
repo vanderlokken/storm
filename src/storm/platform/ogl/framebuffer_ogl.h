@@ -1,7 +1,7 @@
 #pragma once
 
+#include <storm/framebuffer.h>
 #include <storm/platform/ogl/handle_ogl.h>
-#include <storm/rendering_buffer_set.h>
 
 namespace storm {
 
@@ -20,9 +20,9 @@ private:
     GLint _previousBinding;
 };
 
-class RenderingBufferSetOgl : public RenderingBufferSet {
+class FramebufferOgl : public Framebuffer {
 public:
-    RenderingBufferSetOgl( const Description& );
+    FramebufferOgl( const Description& );
 
     virtual const Description& getDescription() const;
 

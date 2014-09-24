@@ -2,13 +2,14 @@
 
 #include <vector>
 
+#include <storm/dimensions.h>
 #include <storm/texture.h>
 
 namespace storm {
 
-class RenderingBufferSet {
+class Framebuffer {
 public:
-    typedef std::shared_ptr<RenderingBufferSet> Pointer;
+    typedef std::shared_ptr<Framebuffer> Pointer;
 
     struct Buffer {
         Texture::Pointer texture;
@@ -17,13 +18,15 @@ public:
     };
 
     struct Description {
-        std::vector<Buffer> colorBuffers;
-        Buffer depthStencilBuffer;
+        std::vector<Buffer> buffers;
     };
 
     static Pointer create( const Description& );
 
-    virtual ~RenderingBufferSet() { }
+    static Pointer create( Dimensions dimensions, unsigned int texelSamples,
+        const std::vector<Texture::Format> &bufferFormats );
+
+    virtual ~Framebuffer() { }
 
     virtual const Description& getDescription() const = 0;
 };

@@ -6,10 +6,10 @@
 #include <storm/platform/ogl/blending_technique_ogl.h>
 #include <storm/platform/ogl/buffer_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/framebuffer_ogl.h>
 #include <storm/platform/ogl/mesh_ogl.h>
 #include <storm/platform/ogl/output_technique_ogl.h>
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
-#include <storm/platform/ogl/rendering_buffer_set_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 
 namespace storm {
@@ -288,26 +288,24 @@ void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
     checkResult( "::glViewport" );
 }
 
-RenderingBufferSet::Pointer RenderingSystemOgl::getRenderingBufferSet() const {
-    return _renderingBufferSet;
+Framebuffer::Pointer RenderingSystemOgl::getFramebuffer() const {
+    return _framebuffer;
 }
 
-void RenderingSystemOgl::setRenderingBufferSet(
-    RenderingBufferSet::Pointer renderingBufferSet )
-{
-    if( _renderingBufferSet == renderingBufferSet )
+void RenderingSystemOgl::setFramebuffer( Framebuffer::Pointer framebuffer ) {
+    if( _framebuffer == framebuffer )
         return;
 
-    auto nativeBufferSet =
-        std::static_pointer_cast< RenderingBufferSetOgl >( renderingBufferSet );
+    auto nativeFramebuffer =
+        std::static_pointer_cast< FramebufferOgl >( framebuffer );
 
     const GLint framebufferHandle =
-        nativeBufferSet ? nativeBufferSet->getHandle() : 0;
+        nativeFramebuffer ? nativeFramebuffer->getHandle() : 0;
 
     ::glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
     checkResult( "::glBindFramebuffer" );
 
-    _renderingBufferSet = renderingBufferSet;
+    _framebuffer = framebuffer;
 }
 
 void RenderingSystemOgl::clearColorBuffer( const Color &color ) {

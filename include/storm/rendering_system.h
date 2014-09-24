@@ -3,11 +3,11 @@
 #include <storm/backbuffer.h>
 #include <storm/blending_technique.h>
 #include <storm/color.h>
+#include <storm/framebuffer.h>
 #include <storm/mesh.h>
 #include <storm/output_technique.h>
 #include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
-#include <storm/rendering_buffer_set.h>
 #include <storm/shader.h>
 
 namespace storm {
@@ -40,8 +40,8 @@ public:
     virtual void setClippingRectangle( const Rectangle& ) = 0;
     virtual void setOutputRectangle( const Rectangle& ) = 0;
 
-    virtual RenderingBufferSet::Pointer getRenderingBufferSet() const = 0;
-    virtual void setRenderingBufferSet( RenderingBufferSet::Pointer ) = 0;
+    virtual Framebuffer::Pointer getFramebuffer() const = 0;
+    virtual void setFramebuffer( Framebuffer::Pointer ) = 0;
 
     virtual void clearColorBuffer( const Color &color = Color::Black ) = 0;
     virtual void clearDepthBuffer( float depth = 1.0f ) = 0;

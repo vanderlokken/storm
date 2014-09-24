@@ -34,8 +34,8 @@ public:
     virtual void setClippingRectangle( const Rectangle& );
     virtual void setOutputRectangle( const Rectangle& );
 
-    virtual RenderingBufferSet::Pointer getRenderingBufferSet() const;
-    virtual void setRenderingBufferSet( RenderingBufferSet::Pointer );
+    virtual Framebuffer::Pointer getFramebuffer() const;
+    virtual void setFramebuffer( Framebuffer::Pointer );
 
     virtual void clearColorBuffer( const Color &color = Color::Black );
     virtual void clearDepthBuffer( float depth = 1.0f );
@@ -61,8 +61,7 @@ private:
     OutputTechnique::Pointer _outputTechnique;
     BlendingTechnique::Pointer _blendingTechnique;
 
-    RenderingBufferSet::Pointer _renderingBufferSet;
-
+    Framebuffer::Pointer _framebuffer;
     Backbuffer::Pointer _backbuffer;
 
     GLuint _primitiveRestartIndex;

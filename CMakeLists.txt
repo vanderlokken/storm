@@ -29,6 +29,7 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/framebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/framework.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/keyboard.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/math.h
@@ -41,7 +42,6 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/quaternion.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rasterization_technique.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rectangle.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rendering_buffer_set.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rendering_system.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rendering_window.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/resource_type.h
@@ -61,6 +61,7 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
@@ -87,6 +88,8 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/check_result_ogl.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/handle_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.h
@@ -94,8 +97,6 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/output_technique_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rasterization_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rasterization_technique_ogl.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_buffer_set_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_buffer_set_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_system_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_system_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/resource_type_ogl.cpp
@@ -140,6 +141,6 @@ add_library(storm STATIC
 )
 
 if(storm_build_examples)
-    add_subdirectory(examples/triangle_rendering)
     add_subdirectory(examples/advanced_rendering)
+    add_subdirectory(examples/triangle_rendering)
 endif()

@@ -20,7 +20,7 @@ public:
         _texture = createCheckboardPatternTexture();
         _sampler = createCheckboardPatternSampler();
 
-        installRenderingBufferSet();
+        installFramebuffer();
         installShaders();
         installCamera();
     }
@@ -58,33 +58,17 @@ public:
     }
 
 private:
-    void installRenderingBufferSet() {
-        storm::Texture::Description textureDescription;
-        textureDescription.layout = storm::Texture::Layout::Separate2d;
-        textureDescription.width = _frameDimensions.width;
-        textureDescription.height = _frameDimensions.height;
-        textureDescription.depth = 1;
-        textureDescription.mipLevels = 1;
-        textureDescription.texelSamples = 1;
-        textureDescription.resourceType = storm::ResourceType::Dynamic;
+    void installFramebuffer() {
+        storm::Framebuffer::Pointer framebuffer = storm::Framebuffer::create(
+            _frameDimensions, /*texelSamples = */ 1, {
+                storm::Texture::Format::ArgbUint8,
+                storm::Texture::Format::DepthUint24
+            });
 
-        textureDescription.format = storm::Texture::Format::ArgbUint8;
-        _colorBufferTexture = storm::Texture::create( textureDescription );
+        storm::RenderingSystem::getInstance()->setFramebuffer( framebuffer );
 
-        textureDescription.format = storm::Texture::Format::DepthUint24;
-        _depthBufferTexture = storm::Texture::create( textureDescription );
-
-        storm::RenderingBufferSet::Description description;
-        description.colorBuffers.resize( 1 );
-        description.colorBuffers.back().texture = _colorBufferTexture;
-        description.colorBuffers.back().mipLevel = 0;
-        description.colorBuffers.back().layer = 0;
-        description.depthStencilBuffer.texture = _depthBufferTexture;
-        description.depthStencilBuffer.mipLevel = 0;
-        description.depthStencilBuffer.layer = 0;
-
-        storm::RenderingSystem::getInstance()->setRenderingBufferSet(
-            storm::RenderingBufferSet::create(description) );
+        _colorBufferTexture =
+            framebuffer->getDescription().buffers[0].texture;
     }
 
     void installShaders() {
@@ -125,7 +109,6 @@ private:
     storm::Dimensions _frameDimensions;
 
     storm::Texture::Pointer _colorBufferTexture;
-    storm::Texture::Pointer _depthBufferTexture;
 
     storm::Mesh::Pointer _mesh;
     storm::Texture::Pointer _texture;

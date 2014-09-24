@@ -20,7 +20,7 @@ storm::Texture::Pointer createCheckboardPatternTexture() {
     const storm::CompressedColor texels[4] = {
         storm::CompressedColor(250, 250, 250),
         storm::CompressedColor(180, 180, 250),
-        storm::CompressedColor(180, 180, 250),
+        storm::CompressedColor(180, 180, 80),
         storm::CompressedColor(250, 250, 250)
     };
 
