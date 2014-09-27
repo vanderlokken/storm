@@ -34,7 +34,7 @@ storm::Sampler::Pointer createCheckboardPatternSampler() {
     storm::Sampler::Description description;
     description.minifyingFilter = storm::Sampler::MinifyingFilter::Nearest;
     description.magnifyingFilter = storm::Sampler::MagnifyingFilter::Nearest;
-    description.maximalAnisotropyDegree = 0;
+    description.maximalAnisotropyDegree = 1;
     description.wrapModes = {
         storm::Sampler::WrapMode::Repeated,
         storm::Sampler::WrapMode::Repeated,
