@@ -21,9 +21,15 @@ Exception::Exception( const std::string &description )
 {
 }
 
-const char* Exception::what() const {
-    return _message.c_str();
-}
+#ifndef _MSC_VER
+    const char* Exception::what() const noexcept( true ) {
+        return _message.c_str();
+    }
+#else
+    const char* Exception::what() const {
+        return _message.c_str();
+    }
+#endif
 
 Exception& Exception::operator << ( const std::string &message ) {
     _message += message;

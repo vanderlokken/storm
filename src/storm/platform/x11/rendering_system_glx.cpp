@@ -6,44 +6,61 @@
 
 namespace storm {
 
-RenderingSystemGlx::RenderingSystemGlx()
-    : _display( DisplayConnectionX11::getInstance()->getHandle() ),
-      _window( RenderingWindowX11::getInstance()->getHandle() )
+RenderingSystemGlx::RenderingSystemGlx() :
+    _display( DisplayConnectionX11::getInstance()->getHandle() ),
+    _window( RenderingWindowX11::getInstance()->getHandle() )
 {
-    int visualAttributes[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+    auto address = ::glXGetProcAddressARB(
+        reinterpret_cast<const unsigned char*>( "glXCreateContextAttribsARB") );
+    const PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB =
+        reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( address );
 
-    XVisualInfo *visualInformation = ::glXChooseVisual(
-        _display, DefaultScreen(_display), visualAttributes );
+    if( !glXCreateContextAttribsARB )
+        throw SystemRequirementsNotMet() <<
+            "The 'GLX_ARB_create_context' extension is not supported.";
 
-    if( !visualInformation ) {
-        throwRuntimeError( "::glXChooseVisual has failed" );
-    }
+    const int *frameBufferAttributes = nullptr; // Use default values
+
+    int configNumber = 0;
+    const GLXFBConfig *frameBufferConfigs = ::glXChooseFBConfig(
+        _display, /*screen = */ 0, frameBufferAttributes, &configNumber);
+
+    if( !configNumber )
+        throwRuntimeError( "::glXChooseFBConfig has failed" );
 
     const GLXContext shareListContext = 0;
     const bool useDirectRendering = true;
 
-    _context = ::glXCreateContext(
-        _display, visualInformation, shareListContext, useDirectRendering );
+    const int contextAttributes[] = {
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+#ifndef NDEBUG
+        GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
+#endif
+        0
+    };
+
+    _context = glXCreateContextAttribsARB( _display, *frameBufferConfigs,
+        shareListContext, useDirectRendering, contextAttributes );
+
+    if( !_context )
+        throwRuntimeError( "::glXCreateContextAttribsARB has failed" );
 
     ::glXMakeCurrent( _display, _window, _context );
 
     initialize();
-    return;
 }
 
 RenderingSystemGlx::~RenderingSystemGlx() {
     ::glXMakeCurrent( _display, None, 0 );
     ::glXDestroyContext( _display, _context );
-    return;
 }
 
-void RenderingSystemGlx::beginFrameRendering() {
-    return;
-}
+void RenderingSystemGlx::beginFrameRendering() {}
 
 void RenderingSystemGlx::endFrameRendering() {
     ::glXSwapBuffers( _display, _window );
-    return;
 }
 
 RenderingSystemGlx* RenderingSystemGlx::getInstance() {

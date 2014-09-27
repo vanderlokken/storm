@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy(VERSION 2.8.12.2)
+cmake_policy(VERSION 2.8.7)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not allowed; please specify standalone build directory.")
@@ -13,6 +13,8 @@ include_directories(include src)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR-")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
 set(storm_includes
@@ -78,6 +80,9 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
 )
 
+file(DOWNLOAD "http://www.opengl.org/registry/api/GL/glcorearb.h"
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/glcorearb.h)
+
 set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.h
@@ -90,6 +95,7 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/check_result_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/glcorearb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/handle_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.h
@@ -111,33 +117,48 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/vertex_format_ogl.h
 )
 
-set(storm_win_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/check_result.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.h
-)
+if(WIN32)
+    set(storm_platform_sources
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/check_result.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.h
+    )
+elseif(UNIX)
+    set(storm_platform_sources
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.h
+    )
+endif()
 
 add_library(storm STATIC
     ${storm_includes}
     ${storm_common_sources}
     ${storm_ogl_sources}
-    ${storm_win_sources}
+    ${storm_platform_sources}
 )
 
 if(storm_build_examples)

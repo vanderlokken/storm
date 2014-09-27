@@ -1,8 +1,11 @@
 #include <array>
+#include <iostream>
 
 #include <storm/storm.h>
 
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 
 class Demo {
 public:
@@ -56,16 +59,35 @@ private:
     storm::Shader::Pointer _pixelShader;
 };
 
+void demoMain() {
+    Demo demo;
+
+    storm::Framework *framework = storm::Framework::getInstance();
+    framework->run( [&demo]() {
+        demo.render();
+    });
+}
+
+#ifdef _WIN32
+
 int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
     try {
-        Demo demo;
-
-        storm::Framework *framework = storm::Framework::getInstance();
-        framework->run( [&demo]() {
-            demo.render();
-        });
-
+        demoMain();
     } catch( storm::Exception &exception ) {
         ::MessageBoxA( 0, exception.what(), "storm", MB_ICONERROR );
     }
 }
+
+#else
+
+int main() {
+    try {
+        demoMain();
+    } catch( storm::Exception &exception ) {
+        std::cerr << exception.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+#endif

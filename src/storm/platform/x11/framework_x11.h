@@ -15,6 +15,8 @@ public:
     virtual void run( const Callback &callback );
     virtual void stop();
 
+    virtual void processInputEvents() {}
+
 private:
     FrameworkX11();
 

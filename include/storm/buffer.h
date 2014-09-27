@@ -41,8 +41,9 @@ template<class Container> Buffer::Pointer Buffer::create(
     const Container &container )
 {
     Description description;
-    description.size = sizeof( Container::value_type ) * container.size();
-    description.elementSize = sizeof( Container::value_type );
+    description.size =
+        sizeof( typename Container::value_type ) * container.size();
+    description.elementSize = sizeof( typename Container::value_type );
     description.resourceType = ResourceType::Static;
 
     return create( description, container.data() );

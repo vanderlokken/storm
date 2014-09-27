@@ -40,18 +40,18 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         const auto nativeTexture =
             std::static_pointer_cast<TextureOgl>( buffer.texture );
 
-        GLenum attachment​;
+        GLenum attachment;
         switch( nativeTexture->getDescription().format ) {
         case Texture::Format::DepthUint16:
         case Texture::Format::DepthUint24:
         case Texture::Format::DepthUint32:
-            attachment​ = GL_DEPTH_ATTACHMENT;
+            attachment = GL_DEPTH_ATTACHMENT;
             break;
         case Texture::Format::DepthUint24StencilUint8:
-            attachment​ = GL_DEPTH_STENCIL_ATTACHMENT;
+            attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             break;
         default:
-            attachment​ = GL_COLOR_ATTACHMENT0 + (colorAttachmentsNumber++);
+            attachment = GL_COLOR_ATTACHMENT0 + (colorAttachmentsNumber++);
             break;
         }
 
@@ -59,7 +59,7 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         case Texture::Layout::Separate1d:
         case Texture::Layout::Separate2d:
         case Texture::Layout::Separate2dMsaa:
-            ::glFramebufferTexture( GL_FRAMEBUFFER, attachment​,
+            ::glFramebufferTexture( GL_FRAMEBUFFER, attachment,
                 nativeTexture->getHandle(), buffer.mipLevel );
             checkResult( "::glFramebufferTexture" );
             break;
@@ -67,7 +67,7 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         case Texture::Layout::Layered2d:
         case Texture::Layout::Layered2dMsaa:
         case Texture::Layout::Separate3d:
-            ::glFramebufferTextureLayer( GL_FRAMEBUFFER, attachment​,
+            ::glFramebufferTextureLayer( GL_FRAMEBUFFER, attachment,
                 nativeTexture->getHandle(), buffer.mipLevel, buffer.layer );
             checkResult( "::glFramebufferTextureLayer" );
             break;

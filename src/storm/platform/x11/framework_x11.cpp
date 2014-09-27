@@ -7,8 +7,8 @@
 
 namespace storm {
 
-FrameworkX11::FrameworkX11()
-    : _display( DisplayConnectionX11::getInstance()->getHandle() )
+FrameworkX11::FrameworkX11() :
+    _display( DisplayConnectionX11::getInstance()->getHandle() )
 {
     return;
 }

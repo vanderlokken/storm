@@ -35,7 +35,7 @@ void Matrix::invert() {
 
     const float _4x4Determinant = _11 * _3x3Determinant1 - _12 * _3x3Determinant2 + _13 * _3x3Determinant3 - _14 * _3x3Determinant4;
 
-    if( abs(_4x4Determinant) < 1e-14 )
+    if( fabs(_4x4Determinant) < 1e-14 )
         return;
 
     const float _3x3Determinant5 = _12 * _2x2Determinant1 - _13 * _2x2Determinant2 + _14 * _2x2Determinant3;

@@ -6,22 +6,18 @@
 
 namespace storm {
 
-DisplayConnectionX11::DisplayConnectionX11()
-    : _handle( nullptr )
+DisplayConnectionX11::DisplayConnectionX11() :
+    _handle( nullptr )
 {
-    char *displayName = nullptr;
-
+    const char *displayName = nullptr;
     _handle = ::XOpenDisplay( displayName );
 
-    if( !_handle ) {
+    if( !_handle )
         throwRuntimeError( "::XOpenDisplay has failed" );
-    }
-    return;
 }
 
 DisplayConnectionX11::~DisplayConnectionX11() {
     ::XCloseDisplay( _handle );
-    return;
 }
 
 Display* DisplayConnectionX11::getHandle() const {

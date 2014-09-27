@@ -16,6 +16,7 @@ public:
 
     virtual Dimensions getDimensions() const;
 
+    virtual bool isActive() const;
     virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );

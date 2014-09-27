@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <storm/camera.h>
 #include <storm/clock.h>
 #include <storm/exception.h>
@@ -7,7 +9,9 @@
 #include <storm/rendering_system.h>
 #include <storm/rendering_window.h>
 
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 
 #include "resources.h"
 
@@ -119,17 +123,36 @@ private:
     float _meshRotationAngle;
 };
 
+void demoMain() {
+    Demo demo;
+
+    storm::Framework *framework = storm::Framework::getInstance();
+    framework->run( [&demo]() {
+        demo.update();
+        demo.render();
+    });
+}
+
+#ifdef _WIN32
+
 int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
     try {
-        Demo demo;
-
-        storm::Framework *framework = storm::Framework::getInstance();
-        framework->run( [&demo]() {
-            demo.update();
-            demo.render();
-        });
-
+        demoMain();
     } catch( storm::Exception &exception ) {
         ::MessageBoxA( 0, exception.what(), "storm", MB_ICONERROR );
     }
 }
+
+#else
+
+int main() {
+    try {
+        demoMain();
+    } catch( storm::Exception &exception ) {
+        std::cerr << exception.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+#endif

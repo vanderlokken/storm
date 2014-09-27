@@ -14,7 +14,11 @@ public:
 
     explicit Exception( const std::string &description );
 
+#ifndef _MSC_VER
+    virtual const char* what() const noexcept( true );
+#else
     virtual const char* what() const;
+#endif
 
     Exception& operator << ( const std::string &message );
 

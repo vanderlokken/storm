@@ -54,6 +54,10 @@ Dimensions RenderingWindowX11::getDimensions() const {
     return _dimensions;
 }
 
+bool RenderingWindowX11::isActive() const {
+    throwNotImplemented();
+}
+
 bool RenderingWindowX11::isFullscreen() const {
     return _fullscreen;
 }
@@ -70,7 +74,7 @@ void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
 }
 
 void RenderingWindowX11::setFullscreen() {
-    throwRuntimeError( "Not implemented" );
+    throwNotImplemented();
 }
 
 Window RenderingWindowX11::getHandle() const {

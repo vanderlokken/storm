@@ -82,21 +82,21 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
-    const unsigned int levels​Maximum = getMipLevelsMaximum( _description );
-    const unsigned int levels​ = (_description.mipLevels == CompleteMipMap) ?
-        levels​Maximum : _description.mipLevels;
-    storm_assert( levels​ <= levels​Maximum );
+    const unsigned int levelsMaximum = getMipLevelsMaximum( _description );
+    const unsigned int levels = (_description.mipLevels == CompleteMipMap) ?
+        levelsMaximum : _description.mipLevels;
+    storm_assert( levels <= levelsMaximum );
 
     switch( _description.layout ) {
     case Layout::Separate1d:
         ::glTexStorage1D(
-            _target, levels​, _texelDescription.internalFormat,
+            _target, levels, _texelDescription.internalFormat,
             description.width );
         checkResult( "::glTexStorage1D" );
         break;
     case Layout::Separate2d:
         ::glTexStorage2D(
-            _target, levels​, _texelDescription.internalFormat,
+            _target, levels, _texelDescription.internalFormat,
             description.width,
             description.height );
         checkResult( "::glTexStorage2D" );
@@ -104,7 +104,7 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
     case Layout::Separate3d:
     case Layout::Layered2d:
         ::glTexStorage3D(
-            _target, levels​, _texelDescription.internalFormat,
+            _target, levels, _texelDescription.internalFormat,
             description.width,
             description.height,
             description.depth );
@@ -112,7 +112,7 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
         break;
     case Layout::Layered1d:
         ::glTexStorage2D(
-            _target, levels​, _texelDescription.internalFormat,
+            _target, levels, _texelDescription.internalFormat,
             description.width,
             description.depth );
         checkResult( "::glTexStorage2D" );
