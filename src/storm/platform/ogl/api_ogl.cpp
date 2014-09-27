@@ -4,6 +4,7 @@
 #include <string>
 
 #include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/texture_storage_ogl.h>
 
 #ifdef __linux__
 // To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
@@ -1213,6 +1214,19 @@ void loadOpenGlApi() {
     ::glGetNamedStringARB = reinterpret_cast<PFNGLGETNAMEDSTRINGARBPROC>( load("glGetNamedStringARB") );
     ::glGetNamedStringivARB = reinterpret_cast<PFNGLGETNAMEDSTRINGIVARBPROC>( load("glGetNamedStringivARB") );
     ::glTexPageCommitmentARB = reinterpret_cast<PFNGLTEXPAGECOMMITMENTARBPROC>( load("glTexPageCommitmentARB") );
+
+    const OpenGlSupportStatus supportStatus = getOpenGlSupportStatus();
+
+    if( !supportStatus.ARB_texture_storage ) {
+        ::glTexStorage1D = &storm::glTexStorage1D;
+        ::glTexStorage2D = &storm::glTexStorage2D;
+        ::glTexStorage3D = &storm::glTexStorage3D;
+    }
+
+    if( !supportStatus.ARB_texture_storage_multisample ) {
+        ::glTexStorage2DMultisample = &storm::glTexStorage2DMultisample;
+        ::glTexStorage3DMultisample = &storm::glTexStorage3DMultisample;
+    }
 }
 
 const OpenGlSupportStatus& getOpenGlSupportStatus() {

@@ -29,12 +29,9 @@ void RenderingSystemOgl::initialize() {
     const OpenGlSupportStatus &supportStatus = getOpenGlSupportStatus();
 
     if( supportStatus.version < OpenGlVersion(4, 3) ) {
-        if( !supportStatus.ARB_separate_shader_objects ||
-            !supportStatus.ARB_texture_storage ||
-            !supportStatus.ARB_texture_storage_multisample )
-        {
-            throw SystemRequirementsNotMet() <<
-                "Video driver doesn't support required OpenGL extensions";
+        if( !supportStatus.ARB_separate_shader_objects ) {
+            throw SystemRequirementsNotMet() << "Video driver doesn't support "
+                "required 'ARB_separate_shader_objects' OpenGL extension.";
         }
     }
 
