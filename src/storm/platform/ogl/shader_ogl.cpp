@@ -113,7 +113,7 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
         return valueHandle;
     }
 
-    const GLint blockIndex =
+    const GLuint blockIndex =
         ::glGetUniformBlockIndex( _handle, identifier.c_str() );
     checkResult( "::glGetUniformBlockIndex" );
 

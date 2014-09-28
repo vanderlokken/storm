@@ -327,7 +327,7 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
 }
 
 unsigned int TextureOgl::getMipLevelsMaximum( const Description &description ) {
-    unsigned int dimensionsMaximum = 1;
+    unsigned int dimensionsMaximum;
 
     switch( description.layout ) {
     case Layout::Separate1d:
@@ -344,6 +344,10 @@ unsigned int TextureOgl::getMipLevelsMaximum( const Description &description ) {
         break;
     case Layout::CubeMap:
         throwNotImplemented();
+        break;
+    default:
+        dimensionsMaximum = 1;
+        break;
     }
 
     return static_cast<unsigned int>( log2(dimensionsMaximum) ) + 1;
