@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <X11/Xutil.h>
+
 #include <storm/platform/x11/display_connection_x11.h>
 #include <storm/throw_exception.h>
 
@@ -70,7 +72,17 @@ void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
 
     _dimensions = windowDimensions;
     _fullscreen = false;
-    return;
+
+    // Try to forbid resizing.
+    if( XSizeHints *sizeHints = ::XAllocSizeHints() ) {
+        sizeHints->flags = PMinSize | PMaxSize;
+        sizeHints->min_width = sizeHints->max_width =
+            static_cast<int>( windowDimensions.width );
+        sizeHints->min_height = sizeHints->max_height =
+            static_cast<int>( windowDimensions.height );
+        ::XSetWMNormalHints( _display, _handle, sizeHints );
+        ::XFree( sizeHints );
+    }
 }
 
 void RenderingWindowX11::setFullscreen() {
