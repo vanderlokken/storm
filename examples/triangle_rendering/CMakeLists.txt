@@ -1,4 +1,4 @@
-add_executable(storm_triangle_rendering
+add_executable(storm_triangle_rendering WIN32
     triangle_rendering.cpp
 )
 

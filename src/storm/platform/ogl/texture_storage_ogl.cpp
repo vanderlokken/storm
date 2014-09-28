@@ -120,8 +120,8 @@ PixelDescription getCompatiblePixelDescription( GLenum internalFormat ) {
 
 }
 
-void glTexStorage1D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width )
+void APIENTRY glTexStorage1D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width )
 {
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
@@ -135,8 +135,8 @@ void glTexStorage1D( GLenum target, GLsizei levels, GLenum internalFormat,
     }
 }
 
-void glTexStorage2D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width, GLsizei height )
+void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width, GLsizei height )
 {
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
@@ -152,8 +152,8 @@ void glTexStorage2D( GLenum target, GLsizei levels, GLenum internalFormat,
     }
 }
 
-void glTexStorage3D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width, GLsizei height, GLsizei depth )
+void APIENTRY glTexStorage3D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth )
 {
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
@@ -170,7 +170,7 @@ void glTexStorage3D( GLenum target, GLsizei levels, GLenum internalFormat,
     }
 }
 
-void glTexStorage2DMultisample( GLenum target,
+void APIENTRY glTexStorage2DMultisample( GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,
@@ -181,7 +181,7 @@ void glTexStorage2DMultisample( GLenum target,
         target, samples, internalFormat, width, height, fixedSampleLocations );
 }
 
-void glTexStorage3DMultisample( GLenum target,
+void APIENTRY glTexStorage3DMultisample( GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,

@@ -63,8 +63,10 @@ public:
 
 private:
     void installFramebuffer() {
+        const unsigned int texelSamples = 1;
+
         storm::Framebuffer::Pointer framebuffer = storm::Framebuffer::create(
-            _frameDimensions, /*texelSamples = */ 1, {
+            _frameDimensions, texelSamples, {
                 storm::Texture::Format::ArgbUint8,
                 storm::Texture::Format::DepthUint24
             });

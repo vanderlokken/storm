@@ -7,23 +7,23 @@
 
 namespace storm {
 
-void glTexStorage1D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width );
+void APIENTRY glTexStorage1D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width );
 
-void glTexStorage2D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width, GLsizei height );
+void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width, GLsizei height );
 
-void glTexStorage3D( GLenum target, GLsizei levels, GLenum internalFormat,
-    GLsizei width, GLsizei height, GLsizei depth );
+void APIENTRY glTexStorage3D( GLenum target, GLsizei levels,
+    GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth );
 
-void glTexStorage2DMultisample( GLenum target,
+void APIENTRY glTexStorage2DMultisample( GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,
     GLsizei height,
     GLboolean fixedSampleLocations );
 
-void glTexStorage3DMultisample( GLenum target,
+void APIENTRY glTexStorage3DMultisample( GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,

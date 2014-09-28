@@ -1,4 +1,4 @@
-add_executable(storm_advanced_rendering
+add_executable(storm_advanced_rendering WIN32
     resources.cpp
     resources.h
     advanced_rendering.cpp

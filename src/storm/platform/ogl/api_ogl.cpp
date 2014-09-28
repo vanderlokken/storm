@@ -15,9 +15,9 @@
 
 namespace {
 
-typedef void (*openGlFunction)();
-
 #ifdef _WIN32
+
+typedef int (APIENTRY *openGlFunction)();
 
 openGlFunction load( const char *functionName ) {
     static const HMODULE library = ::GetModuleHandle( L"opengl32.dll" );
@@ -26,6 +26,8 @@ openGlFunction load( const char *functionName ) {
 }
 
 #elif __linux__
+
+typedef void (*openGlFunction)();
 
 openGlFunction load( const char *functionName ) {
     return ::glXGetProcAddress(
