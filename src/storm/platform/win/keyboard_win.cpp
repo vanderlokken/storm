@@ -19,165 +19,151 @@
 
 namespace storm {
 
-KeyboardWin::KeyboardWin()
-    : _keyPressed( KeyCount, false ),
-      _originalWindowProcedure( nullptr )
-{
+KeyboardWin::KeyboardWin() : _originalWindowProcedure( nullptr ) {
     registerInputDevice( HID_USAGE_PAGE_GENERIC, HID_USAGE_GENERIC_KEYBOARD );
 
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
-    _originalWindowProcedure = replaceWindowProcedure( windowHandle, &KeyboardWin::handleMessage );
-    return;
+    _originalWindowProcedure = replaceWindowProcedure(
+        windowHandle, &KeyboardWin::handleMessage );
 }
 
 KeyboardWin::~KeyboardWin() {
     const HWND windowHandle = RenderingWindowWin::getInstance()->getHandle();
     replaceWindowProcedure( windowHandle, _originalWindowProcedure );
-    return;
 }
 
-void KeyboardWin::addObserver( const Observer *observer ) {
-    _observers.add( observer );
-}
+void KeyboardWin::onEvent( const RAWKEYBOARD &keyboard ) {
+    typedef std::pair<USHORT, bool> KeyCode;
 
-void KeyboardWin::removeObserver( const Observer *observer ) {
-    _observers.remove( observer );
-}
-
-bool KeyboardWin::isKeyPressed( Key key ) const {
-    const size_t keyIndex = static_cast<size_t>( key );
-    if( keyIndex < KeyCount )
-        return _keyPressed[keyIndex];
-    else
-        return false;
-}
-
-void KeyboardWin::processKeyboardInputEvent( const RAWKEYBOARD &keyboard ) {
-    static const std::map< USHORT, Key > codes = {
-        { VK_ESCAPE,   Key::Escape },
-        { VK_F1,       Key::F1 },
-        { VK_F2,       Key::F2 },
-        { VK_F3,       Key::F3 },
-        { VK_F4,       Key::F4 },
-        { VK_F5,       Key::F5 },
-        { VK_F6,       Key::F6 },
-        { VK_F7,       Key::F7 },
-        { VK_F8,       Key::F8 },
-        { VK_F9,       Key::F9 },
-        { VK_F10,      Key::F10 },
-        { VK_F11,      Key::F11 },
-        { VK_F12,      Key::F12 },
-        { VK_NUMPAD0,  Key::Digit0 },
-        { VK_NUMPAD1,  Key::Digit1 },
-        { VK_NUMPAD2,  Key::Digit2 },
-        { VK_NUMPAD3,  Key::Digit3 },
-        { VK_NUMPAD4,  Key::Digit4 },
-        { VK_NUMPAD5,  Key::Digit5 },
-        { VK_NUMPAD6,  Key::Digit6 },
-        { VK_NUMPAD7,  Key::Digit7 },
-        { VK_NUMPAD8,  Key::Digit8 },
-        { VK_NUMPAD9,  Key::Digit9 },
-        { 'A',         Key::A },
-        { 'B',         Key::B },
-        { 'C',         Key::C },
-        { 'D',         Key::D },
-        { 'E',         Key::E },
-        { 'F',         Key::F },
-        { 'G',         Key::G },
-        { 'H',         Key::H },
-        { 'I',         Key::I },
-        { 'J',         Key::J },
-        { 'K',         Key::K },
-        { 'L',         Key::L },
-        { 'M',         Key::M },
-        { 'N',         Key::N },
-        { 'O',         Key::O },
-        { 'P',         Key::P },
-        { 'Q',         Key::Q },
-        { 'R',         Key::R },
-        { 'S',         Key::S },
-        { 'T',         Key::T },
-        { 'U',         Key::U },
-        { 'V',         Key::V },
-        { 'W',         Key::W },
-        { 'X',         Key::X },
-        { 'Y',         Key::Y },
-        { 'Z',         Key::Z },
-        { VK_LSHIFT,   Key::LeftShift },
-        { VK_RSHIFT,   Key::RightShift },
-        { VK_LCONTROL, Key::LeftControl },
-        { VK_RCONTROL, Key::RightControl },
-        { VK_SPACE,    Key::Space },
-        { VK_LEFT,     Key::Left },
-        { VK_RIGHT,    Key::Right },
-        { VK_UP,       Key::Up },
-        { VK_DOWN,     Key::Down },
-        { VK_DELETE,   Key::Delete }
+    // The following integer constants and respective Key values are taken from
+    // http://msdn.microsoft.com/en-us/library/ms894073.aspx
+    static const std::map<KeyCode, Key> keyCodes = {
+        // Functional keys
+        {{1, false}, Key::Escape},
+        {{59, false}, Key::F1},
+        {{60, false}, Key::F2},
+        {{61, false}, Key::F3},
+        {{62, false}, Key::F4},
+        {{63, false}, Key::F5},
+        {{64, false}, Key::F6},
+        {{65, false}, Key::F7},
+        {{66, false}, Key::F8},
+        {{67, false}, Key::F9},
+        {{68, false}, Key::F10},
+        {{87, false}, Key::F11},
+        {{88, false}, Key::F12},
+        // Digits
+        {{11, false}, Key::Digit0},
+        {{2, false}, Key::Digit1},
+        {{3, false}, Key::Digit2},
+        {{4, false}, Key::Digit3},
+        {{5, false}, Key::Digit4},
+        {{6, false}, Key::Digit5},
+        {{7, false}, Key::Digit6},
+        {{8, false}, Key::Digit7},
+        {{9, false}, Key::Digit8},
+        {{10, false}, Key::Digit9},
+        // Letters
+        {{30, false}, Key::A},
+        {{48, false}, Key::B},
+        {{46, false}, Key::C},
+        {{32, false}, Key::D},
+        {{18, false}, Key::E},
+        {{33, false}, Key::F},
+        {{34, false}, Key::G},
+        {{35, false}, Key::H},
+        {{23, false}, Key::I},
+        {{36, false}, Key::J},
+        {{37, false}, Key::K},
+        {{38, false}, Key::L},
+        {{50, false}, Key::M},
+        {{49, false}, Key::N},
+        {{24, false}, Key::O},
+        {{25, false}, Key::P},
+        {{16, false}, Key::Q},
+        {{19, false}, Key::R},
+        {{31, false}, Key::S},
+        {{20, false}, Key::T},
+        {{22, false}, Key::U},
+        {{47, false}, Key::V},
+        {{17, false}, Key::W},
+        {{45, false}, Key::X},
+        {{21, false}, Key::Y},
+        {{44, false}, Key::Z},
+        // Symbols
+        {{41, false}, Key::Tilde},
+        {{12, false}, Key::Minus},
+        {{13, false}, Key::Plus},
+        {{26, false}, Key::LeftBracket},
+        {{27, false}, Key::RightBracket},
+        {{39, false}, Key::Colon},
+        {{51, false}, Key::Comma},
+        {{52, false}, Key::Period},
+        {{53, false}, Key::Slash},
+        {{43, false}, Key::Backslash},
+        {{40, false}, Key::Apostrophe},
+        // Editing keys
+        {{28, false}, Key::Enter},
+        {{57, false}, Key::Space},
+        {{15, false}, Key::Tab},
+        {{14, false}, Key::Backspace},
+        {{83, true}, Key::Delete},
+        {{82, true}, Key::Insert},
+        // Navigation keys
+        {{75, true}, Key::Left},
+        {{77, true}, Key::Right},
+        {{72, true}, Key::Up},
+        {{80, true}, Key::Down},
+        {{71, true}, Key::Home},
+        {{79, true}, Key::End},
+        {{73, true}, Key::PageUp},
+        {{81, true}, Key::PageDown},
+        // Modifier keys
+        {{42, false}, Key::LeftShift},
+        {{54, false}, Key::RightShift},
+        {{29, false}, Key::LeftControl},
+        {{29, true}, Key::RightControl},
+        {{56, false}, Key::LeftAlter},
+        {{56, true}, Key::RightAlter},
+        // Keypad keys
+        {{69, false}, Key::NumLock},
+        {{82, false}, Key::Keypad0},
+        {{79, false}, Key::Keypad1},
+        {{80, false}, Key::Keypad2},
+        {{81, false}, Key::Keypad3},
+        {{75, false}, Key::Keypad4},
+        {{76, false}, Key::Keypad5},
+        {{77, false}, Key::Keypad6},
+        {{71, false}, Key::Keypad7},
+        {{72, false}, Key::Keypad8},
+        {{73, false}, Key::Keypad9},
+        {{53, true}, Key::KeypadSlash},
+        {{55, false}, Key::KeypadAsterisk},
+        {{74, false}, Key::KeypadMinus},
+        {{78, false}, Key::KeypadPlus},
+        {{28, true}, Key::KeypadEnter},
+        {{83, false}, Key::KeypadDelete},
+        // Utility keys
+        {{58, false}, Key::CapsLock},
+        {{70, false}, Key::ScrollLock},
+        {{55, true}, Key::PrintScreen},
+        {{84, false}, Key::PrintScreen}, // When Alt is pressed
+        // TODO: detect Key::Pause
+        {{91, true}, Key::LeftCommand},
+        {{92, true}, Key::RightCommand},
+        {{93, true}, Key::Menu}
     };
 
-    const bool isLeft = (keyboard.Flags & RI_KEY_E0) != 0;
+    const bool isReleased = (keyboard.Flags & RI_KEY_BREAK) != 0;
+    const bool isExtended = (keyboard.Flags & RI_KEY_E0) != 0;
 
-    USHORT code = keyboard.VKey;
-    if( code == VK_SHIFT )
-        code = isLeft ? VK_LSHIFT : VK_RSHIFT;
-    else if( code == VK_CONTROL )
-        code = isLeft ? VK_LCONTROL : VK_RCONTROL;
-
-    auto iterator = codes.find( code );
-
-    if( iterator == codes.end() )
-        return; // Ignore unknown keys
-
-    const Key key = iterator->second;
-    const size_t keyIndex = static_cast<size_t>( key );
-
-    if( keyboard.Message == WM_KEYDOWN && _keyPressed[keyIndex] == false )
-        processKeyPress( key );
-
-    if( keyboard.Message == WM_KEYDOWN && _keyPressed[keyIndex] == true )
-        processKeyRepeat( key );
-
-    if( keyboard.Message == WM_KEYUP )
-        processKeyRelease( key );
-
-    return;
-}
-
-void KeyboardWin::processKeyPress( Key key ) {
-    const size_t keyIndex = static_cast<size_t>( key );
-    _keyPressed[keyIndex] = true;
-
-    _observers.forEach([=]( const Observer &observer) {
-        if( observer.onKeyPress )
-            observer.onKeyPress( key );
-    });
-}
-
-void KeyboardWin::processKeyRepeat( Key key ) {
-    _observers.forEach([=]( const Observer &observer) {
-        if( observer.onKeyRepeat )
-            observer.onKeyRepeat( key );
-    });
-}
-
-void KeyboardWin::processKeyRelease( Key key ) {
-
-    // There might be some situations when key release events shouldn't be received
-
-    // For example a user can press some key while the rendering window is not
-    // active and then activate the rendering window and release the pressed key
-
-    const size_t keyIndex = static_cast<size_t>( key );
-
-    if( !_keyPressed[keyIndex] )
-        return;
-
-    _keyPressed[keyIndex] = false;
-
-    _observers.forEach([=]( const Observer &observer) {
-        if( observer.onKeyRelease )
-            observer.onKeyRelease( key );
-    });
+    const auto iterator = keyCodes.find( {keyboard.MakeCode, isExtended} );
+    if( iterator != keyCodes.end() ) {
+        if( !isReleased )
+            onKeyPress( iterator->second );
+        else
+            onKeyRelease( iterator->second );
+    }
 }
 
 const LRESULT USE_DEFAULT_PROCESSING = ~0U;
@@ -223,27 +209,21 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
     const RAWINPUT inputData = receiveInputData( inputHandle );
 
     if( inputData.header.dwType == RIM_TYPEKEYBOARD )
-        processKeyboardInputEvent( inputData.data.keyboard );
+        onEvent( inputData.data.keyboard );
 
     return USE_DEFAULT_PROCESSING;
 }
 
 LRESULT KeyboardWin::handleCharacterInputMessage( WPARAM firstParameter, LPARAM ) {
-    _observers.forEach([=]( const Observer &observer) {
-        if( observer.onCharacterInput )
-            observer.onCharacterInput( firstParameter );
-    });
-
+    onCharacterInput( firstParameter );
     return USE_DEFAULT_PROCESSING;
 }
 
 LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) {
-
     const BOOL activated = firstParameter;
 
     if( !activated )
-        for( size_t keyIndex = 0; keyIndex < KeyCount; ++keyIndex )
-            if( _keyPressed[keyIndex] ) processKeyRelease( static_cast<Key>(keyIndex) );
+        onInputFocusLost();
 
     return USE_DEFAULT_PROCESSING;
 }

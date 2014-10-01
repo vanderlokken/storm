@@ -8,6 +8,7 @@ namespace storm {
 class Keyboard {
 public:
     enum class Key {
+        // Functional keys
         Escape,
         F1,
         F2,
@@ -21,6 +22,7 @@ public:
         F10,
         F11,
         F12,
+        // Digits
         Digit0,
         Digit1,
         Digit2,
@@ -31,6 +33,7 @@ public:
         Digit7,
         Digit8,
         Digit9,
+        // Letters
         A,
         B,
         C,
@@ -57,11 +60,58 @@ public:
         X,
         Y,
         Z,
+        // Symbols
+        Tilde,
+        Minus,
+        Plus,
+        LeftBracket,
+        RightBracket,
+        Colon,
+        Comma,
+        Period,
+        Slash,
+        Backslash,
+        Apostrophe,
+        // Editing keys
+        Enter,
+        Space,
+        Tab,
+        Backspace,
+        Delete,
+        Insert,
+        // Navigation keys
+        Left, Right, Up, Down,
+        Home, End,
+        PageUp, PageDown,
+        // Modifier keys
         LeftShift, RightShift,
         LeftControl, RightControl,
-        Space,
-        Left, Right, Up, Down,
-        Delete
+        LeftAlter, RightAlter,
+        // Keypad keys
+        NumLock,
+        Keypad0,
+        Keypad1,
+        Keypad2,
+        Keypad3,
+        Keypad4,
+        Keypad5,
+        Keypad6,
+        Keypad7,
+        Keypad8,
+        Keypad9,
+        KeypadSlash,
+        KeypadAsterisk,
+        KeypadMinus,
+        KeypadPlus,
+        KeypadEnter,
+        KeypadDelete,
+        // Utility keys
+        CapsLock,
+        ScrollLock,
+        PrintScreen,
+        Pause,
+        LeftCommand, RightCommand,
+        Menu
     };
 
     typedef uint32_t CharacterCode;

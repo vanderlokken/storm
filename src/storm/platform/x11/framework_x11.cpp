@@ -34,6 +34,10 @@ void FrameworkX11::run( const Callback &callback ) {
             XEvent event;
             ::XNextEvent( _display, &event );
 
+            auto eventCallbackIterator = _eventCallbacks.find( event.type );
+            if( eventCallbackIterator != _eventCallbacks.end() )
+                eventCallbackIterator->second( event );
+
             if( event.type == ClientMessage &&
                     event.xclient.data.l[0] == windowDestructionAtom ) {
                 processing = false;
@@ -52,6 +56,18 @@ void FrameworkX11::stop() {
     throwRuntimeError( "Not implemented" );
     // XSendEvent
     return;
+}
+
+void FrameworkX11::setEventCallback(
+    int eventType, const EventCallback &eventCallback )
+{
+    _eventCallbacks[eventType] = eventCallback;
+}
+
+void FrameworkX11::removeEventCallback(
+    int eventType )
+{
+    _eventCallbacks.erase( eventType );
 }
 
 FrameworkX11* FrameworkX11::getInstance() {

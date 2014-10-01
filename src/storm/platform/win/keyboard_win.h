@@ -4,39 +4,20 @@
 #define STRICT
 #include <windows.h>
 
-#include <storm/keyboard.h>
-#include <storm/noncopyable.h>
-#include <storm/observer_list.h>
-
-#include <vector>
+#include <storm/keyboard_common.h>
 
 namespace storm {
 
-class KeyboardWin : public Keyboard {
-    NONCOPYABLE( KeyboardWin );
+class KeyboardWin : public KeyboardCommon {
 public:
     static KeyboardWin* getInstance();
 
     virtual ~KeyboardWin();
 
-    virtual void addObserver( const Observer* );
-    virtual void removeObserver( const Observer* );
-
-    virtual bool isKeyPressed( Key ) const;
-
 private:
     KeyboardWin();
 
-    void processKeyboardInputEvent( const RAWKEYBOARD& );
-
-    void processKeyPress( Key );
-    void processKeyRepeat( Key );
-    void processKeyRelease( Key );
-
-    static const size_t KeyCount = 59;
-    std::vector< bool > _keyPressed;
-
-    ObserverList< Observer > _observers;
+    void onEvent( const RAWKEYBOARD& );
 
     WNDPROC _originalWindowProcedure;
 

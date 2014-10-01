@@ -66,6 +66,8 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/noncopyable.h
@@ -149,6 +151,8 @@ elseif(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.cpp
