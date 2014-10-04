@@ -7,7 +7,6 @@
 #include <storm/platform/win/input_win.h>
 #include <storm/platform/win/rendering_window_win.h>
 #include <storm/platform/win/window_procedure_win.h>
-#include <storm/throw_exception.h>
 
 // The following definitions were taken from MSDN
 // See http://msdn.microsoft.com/en-us/library/ff543477%28v=VS.85%29.aspx
@@ -102,7 +101,6 @@ Mouse::CursorPosition MouseWin::getCursorPosition() const {
 }
 
 void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
-    const USHORT state = mouse.usFlags;
     const USHORT stateChanges = mouse.usButtonFlags;
 
     if( isCursorLockRequired() )
@@ -160,13 +158,8 @@ void MouseWin::processMouseInputEvent( const RAWMOUSE &mouse ) {
 
     // A movement event
 
-    if( !(state & MOUSE_MOVE_ABSOLUTE) )
+    if( !(mouse.usFlags & MOUSE_MOVE_ABSOLUTE) && (mouse.lLastX || mouse.lLastY) )
         processMovement( {mouse.lLastX, mouse.lLastY} );
-
-    if( state & MOUSE_MOVE_ABSOLUTE )
-        throwNotImplemented();
-
-    return;
 }
 
 void MouseWin::processButtonPress( Button button ) {
