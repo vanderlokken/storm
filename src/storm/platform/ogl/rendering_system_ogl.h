@@ -61,6 +61,9 @@ private:
     OutputTechnique::Pointer _outputTechnique;
     BlendingTechnique::Pointer _blendingTechnique;
 
+    Rectangle _clippingRectangle;
+    Rectangle _outputRectangle;
+
     Framebuffer::Pointer _framebuffer;
     Backbuffer::Pointer _backbuffer;
 

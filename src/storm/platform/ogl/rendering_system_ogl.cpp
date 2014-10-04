@@ -12,6 +12,8 @@
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 
+#include <storm/rendering_window.h>
+
 namespace storm {
 
 ProgramPipelineHandleOgl::ProgramPipelineHandleOgl() {
@@ -38,6 +40,11 @@ void RenderingSystemOgl::initialize() {
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
+
+    const Dimensions dimensions =
+        RenderingWindow::getInstance()->getDimensions();
+    _clippingRectangle.width = _outputRectangle.width = dimensions.width;
+    _clippingRectangle.height = _outputRectangle.height = dimensions.height;
 
     _programPipeline.reset( new ProgramPipelineHandleOgl );
 
@@ -256,15 +263,11 @@ void RenderingSystemOgl::setBlendingTechnique(
 }
 
 const Rectangle& RenderingSystemOgl::getClippingRectangle() const {
-    throwNotImplemented();
-    static const Rectangle rectangle;
-    return rectangle;
+    return _clippingRectangle;
 }
 
 const Rectangle& RenderingSystemOgl::getOutputRectangle() const {
-    throwNotImplemented();
-    static const Rectangle rectangle;
-    return rectangle;
+    return _outputRectangle;
 }
 
 void RenderingSystemOgl::setClippingRectangle( const Rectangle &rectangle ) {
@@ -274,6 +277,7 @@ void RenderingSystemOgl::setClippingRectangle( const Rectangle &rectangle ) {
         rectangle.width,
         rectangle.height );
     checkResult( "::glScissor" );
+    _clippingRectangle = rectangle;
 }
 
 void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
@@ -283,6 +287,7 @@ void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
         rectangle.width,
         rectangle.height );
     checkResult( "::glViewport" );
+    _outputRectangle = rectangle;
 }
 
 Framebuffer::Pointer RenderingSystemOgl::getFramebuffer() const {
