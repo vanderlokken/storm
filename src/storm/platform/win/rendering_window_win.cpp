@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <storm/event_loop.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
@@ -120,7 +121,7 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
     HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter )
 {
     if( message == WM_CLOSE ) {
-        ::PostQuitMessage( 0 );
+        EventLoop::getInstance()->stop();
         return 0;
     }
 

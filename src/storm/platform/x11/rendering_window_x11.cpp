@@ -4,7 +4,7 @@
 
 #include <X11/Xutil.h>
 
-#include <storm/platform/x11/framework_x11.h>
+#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
@@ -32,17 +32,18 @@ RenderingWindowX11::RenderingWindowX11( Display *display ) :
 
     Atom windowDestructionAtom = ::XInternAtom(
         _display, "WM_DELETE_WINDOW", getOnlyExistingAtoms );
-
-    if( windowDestructionAtom == None ) {
+    if( windowDestructionAtom == None )
         throwRuntimeError( "::XInternAtom has failed" );
-    }
 
-    const Status result = ::XSetWMProtocols( _display, _handle, &windowDestructionAtom, 1 );
-
-    if( result == 0 ) {
+    const Status result = ::XSetWMProtocols(
+        _display, _handle, &windowDestructionAtom, 1 );
+    if( !result )
         throwRuntimeError( "::XSetWMProtocols has failed" );
-    }
-    return;
+
+    _eventListener.onEvent[ClientMessage] = [=]( const XEvent &event ) {
+        if( event.xclient.data.l[0] == windowDestructionAtom )
+            EventLoop::getInstance()->stop();
+    };
 }
 
 RenderingWindowX11::~RenderingWindowX11() {
@@ -96,7 +97,7 @@ Window RenderingWindowX11::getHandle() const {
 
 RenderingWindowX11* RenderingWindowX11::getInstance() {
     static const std::unique_ptr<RenderingWindowX11> instance(
-        new RenderingWindowX11(FrameworkX11::getInstance()->getDisplayHandle()) );
+        new RenderingWindowX11(getDisplayHandleX11()) );
     return instance.get();
 }
 

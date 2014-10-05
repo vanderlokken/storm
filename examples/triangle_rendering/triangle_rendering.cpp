@@ -62,8 +62,8 @@ private:
 void demoMain() {
     Demo demo;
 
-    storm::Framework *framework = storm::Framework::getInstance();
-    framework->run( [&demo]() {
+    storm::EventLoop *eventLoop = storm::EventLoop::getInstance();
+    eventLoop->run( [&demo]() {
         demo.render();
     });
 }

@@ -3,6 +3,7 @@
 #include <X11/Xlib.h>
 
 #include <storm/noncopyable.h>
+#include <storm/platform/x11/event_loop_x11.h>
 #include <storm/rendering_window.h>
 
 namespace storm {
@@ -31,6 +32,8 @@ private:
 
     Dimensions _dimensions;
     bool _fullscreen;
+
+    EventLoopX11::Listener _eventListener;
 };
 
 }

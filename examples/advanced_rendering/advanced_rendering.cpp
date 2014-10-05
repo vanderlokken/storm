@@ -2,8 +2,8 @@
 
 #include <storm/camera.h>
 #include <storm/clock.h>
+#include <storm/event_loop.h>
 #include <storm/exception.h>
-#include <storm/framework.h>
 #include <storm/matrix.h>
 #include <storm/quaternion.h>
 #include <storm/rendering_system.h>
@@ -128,8 +128,8 @@ private:
 void demoMain() {
     Demo demo;
 
-    storm::Framework *framework = storm::Framework::getInstance();
-    framework->run( [&demo]() {
+    storm::EventLoop *eventLoop = storm::EventLoop::getInstance();
+    eventLoop->run( [&demo]() {
         demo.update();
         demo.render();
     });

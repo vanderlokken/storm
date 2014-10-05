@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 
-#include <storm/platform/x11/framework_x11.h>
+#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/platform/x11/rendering_window_x11.h>
 #include <storm/throw_exception.h>
 
@@ -24,38 +24,34 @@ KeyboardX11::KeyboardX11( Display *display, Window window ) {
     // Note: in X11 there's no specific event for a key repetition. Alternating
     // 'KeyPress' and 'KeyRelease' events are used instead.
 
-    FrameworkX11::getInstance()->setEventCallback(
-        KeyPress, [this]( const XEvent &event ) {
-            onEvent( event );
+    _eventListener.onEvent[KeyPress] = [=]( const XEvent &event ) {
+        onKeyEvent( event );
+        // TODO: character input
+    };
 
-            // TODO: character input
-        });
-
-    FrameworkX11::getInstance()->setEventCallback(
-        KeyRelease, [this, display]( const XEvent &event ) {
-            // Ignore fake KeyRelease events generated during key repetition.
-            ::XSync( display, /*discardQueuedEvents = */ false );
-            if( ::XEventsQueued(display, QueuedAlready) ) {
-                XEvent nextEvent;
-                ::XPeekEvent( display, &nextEvent );
-                if( nextEvent.type == KeyPress &&
-                    nextEvent.xkey.time == event.xkey.time &&
-                    nextEvent.xkey.keycode == event.xkey.keycode )
-                {
-                    return;
-                }
+    _eventListener.onEvent[KeyRelease] = [=]( const XEvent &event ) {
+        // Ignore fake KeyRelease events generated during key repetition.
+        ::XSync( display, /*discardQueuedEvents = */ false );
+        if( ::XEventsQueued(display, QueuedAlready) ) {
+            XEvent nextEvent;
+            ::XPeekEvent( display, &nextEvent );
+            if( nextEvent.type == KeyPress &&
+                nextEvent.xkey.time == event.xkey.time &&
+                nextEvent.xkey.keycode == event.xkey.keycode )
+            {
+                return;
             }
+        }
 
-            onEvent( event );
-        });
+        onKeyEvent( event );
+    };
 
-    FrameworkX11::getInstance()->setEventCallback(
-        FocusOut, [this]( const XEvent& ) {
-            onInputFocusLost();
-        });
+    _eventListener.onEvent[FocusOut] = [=]( const XEvent& ) {
+        onInputFocusLost();
+    };
 }
 
-void KeyboardX11::onEvent( const XEvent &event ) {
+void KeyboardX11::onKeyEvent( const XEvent &event ) {
     // The following integer constants and respective Key values are taken from
     // the default 'xmodmap -pke' command output.
     static const std::map<unsigned int, Key> keyCodes = {
@@ -185,9 +181,8 @@ void KeyboardX11::onEvent( const XEvent &event ) {
 
 Keyboard* Keyboard::getInstance() {
     const auto create = [] {
-        Display *display = FrameworkX11::getInstance()->getDisplayHandle();
         Window window = RenderingWindowX11::getInstance()->getHandle();
-        return new KeyboardX11( display, window );
+        return new KeyboardX11( getDisplayHandleX11(), window );
     };
     static const std::unique_ptr<KeyboardX11> instance( create() );
     return instance.get();

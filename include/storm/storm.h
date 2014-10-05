@@ -5,8 +5,8 @@
 #include <storm/camera.h>
 #include <storm/clock.h>
 #include <storm/common_vertex_types.h>
+#include <storm/event_loop.h>
 #include <storm/exception.h>
-#include <storm/framework.h>
 #include <storm/keyboard.h>
 #include <storm/math.h>
 #include <storm/mesh.h>

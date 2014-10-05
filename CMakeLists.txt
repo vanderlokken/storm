@@ -28,11 +28,11 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/common_vertex_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/dimensions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/display.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/event_loop.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/framebuffer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/framework.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/keyboard.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/math.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/matrix.h
@@ -62,6 +62,7 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/event_loop_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.cpp
@@ -126,8 +127,8 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/check_result.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/framework_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.cpp
@@ -147,8 +148,10 @@ elseif(UNIX)
     set(storm_platform_sources
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/framework_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
