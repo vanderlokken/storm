@@ -4,15 +4,13 @@
 
 #include <X11/Xutil.h>
 
-#include <storm/platform/x11/display_connection_x11.h>
+#include <storm/platform/x11/framework_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-RenderingWindowX11::RenderingWindowX11()
-    : _handle( None ),
-      _display( DisplayConnectionX11::getInstance()->getHandle() ),
-      _fullscreen( false )
+RenderingWindowX11::RenderingWindowX11( Display *display ) :
+    _handle( None ), _display( display ), _fullscreen( false )
 {
     const Window parentWindow = XRootWindow( _display, DefaultScreen(_display) );
     const int x = 0;
@@ -49,7 +47,6 @@ RenderingWindowX11::RenderingWindowX11()
 
 RenderingWindowX11::~RenderingWindowX11() {
     ::XDestroyWindow( _display, _handle );
-    return;
 }
 
 Dimensions RenderingWindowX11::getDimensions() const {
@@ -57,7 +54,11 @@ Dimensions RenderingWindowX11::getDimensions() const {
 }
 
 bool RenderingWindowX11::isActive() const {
-    throwNotImplemented();
+    Window activeWindow = None;
+    int focusState = 0;
+
+    ::XGetInputFocus( _display, &activeWindow, &focusState );
+    return activeWindow == _handle;
 }
 
 bool RenderingWindowX11::isFullscreen() const {
@@ -94,7 +95,8 @@ Window RenderingWindowX11::getHandle() const {
 }
 
 RenderingWindowX11* RenderingWindowX11::getInstance() {
-    static const std::unique_ptr<RenderingWindowX11> instance( new RenderingWindowX11 );
+    static const std::unique_ptr<RenderingWindowX11> instance(
+        new RenderingWindowX11(FrameworkX11::getInstance()->getDisplayHandle()) );
     return instance.get();
 }
 

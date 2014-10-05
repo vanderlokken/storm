@@ -1,14 +1,13 @@
 #include <storm/platform/x11/rendering_system_glx.h>
 
-#include <storm/platform/x11/display_connection_x11.h>
+#include <storm/platform/x11/framework_x11.h>
 #include <storm/platform/x11/rendering_window_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-RenderingSystemGlx::RenderingSystemGlx() :
-    _display( DisplayConnectionX11::getInstance()->getHandle() ),
-    _window( RenderingWindowX11::getInstance()->getHandle() )
+RenderingSystemGlx::RenderingSystemGlx( Display *display, Window window ) :
+    _display( display ), _window( window )
 {
     auto address = ::glXGetProcAddressARB(
         reinterpret_cast<const unsigned char*>( "glXCreateContextAttribsARB") );
@@ -64,7 +63,12 @@ void RenderingSystemGlx::endFrameRendering() {
 }
 
 RenderingSystemGlx* RenderingSystemGlx::getInstance() {
-    static const std::unique_ptr<RenderingSystemGlx> instance( new RenderingSystemGlx );
+    const auto create = [] {
+        Display *display = FrameworkX11::getInstance()->getDisplayHandle();
+        Window window = RenderingWindowX11::getInstance()->getHandle();
+        return new RenderingSystemGlx( display, window );
+    };
+    static const std::unique_ptr<RenderingSystemGlx> instance( create() );
     return instance.get();
 }
 

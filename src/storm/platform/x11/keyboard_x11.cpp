@@ -3,17 +3,13 @@
 #include <map>
 #include <memory>
 
-#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/platform/x11/framework_x11.h>
 #include <storm/platform/x11/rendering_window_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-KeyboardX11::KeyboardX11() {
-    Display *display = DisplayConnectionX11::getInstance()->getHandle();
-    Window window = RenderingWindowX11::getInstance()->getHandle();
-
+KeyboardX11::KeyboardX11( Display *display, Window window ) {
     XWindowAttributes windowAttributes = {};
 
     if( !::XGetWindowAttributes(display, window, &windowAttributes) )
@@ -188,7 +184,12 @@ void KeyboardX11::onEvent( const XEvent &event ) {
 }
 
 Keyboard* Keyboard::getInstance() {
-    static const std::unique_ptr<KeyboardX11> instance( new KeyboardX11 );
+    const auto create = [] {
+        Display *display = FrameworkX11::getInstance()->getDisplayHandle();
+        Window window = RenderingWindowX11::getInstance()->getHandle();
+        return new KeyboardX11( display, window );
+    };
+    static const std::unique_ptr<KeyboardX11> instance( create() );
     return instance.get();
 }
 

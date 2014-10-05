@@ -2,15 +2,19 @@
 
 #include <memory>
 
-#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
 FrameworkX11::FrameworkX11() :
-    _display( DisplayConnectionX11::getInstance()->getHandle() )
+    _display( ::XOpenDisplay(/* displayName = */ nullptr) )
 {
-    return;
+    if( !_display )
+        throwRuntimeError( "::XOpenDisplay has failed" );
+}
+
+FrameworkX11::~FrameworkX11() {
+    ::XCloseDisplay( _display );
 }
 
 void FrameworkX11::run( const Callback &callback ) {
@@ -56,6 +60,10 @@ void FrameworkX11::stop() {
     throwRuntimeError( "Not implemented" );
     // XSendEvent
     return;
+}
+
+Display* FrameworkX11::getDisplayHandle() {
+    return _display;
 }
 
 void FrameworkX11::setEventCallback(

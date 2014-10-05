@@ -8,7 +8,7 @@ namespace storm {
 
 class KeyboardX11 : public KeyboardCommon {
 public:
-    KeyboardX11();
+    KeyboardX11( Display *display, Window window );
 
 private:
     void onEvent( const XEvent &event );

@@ -12,7 +12,8 @@ class RenderingWindowX11 : public RenderingWindow {
 public:
     static RenderingWindowX11* getInstance();
 
-    virtual ~RenderingWindowX11();
+    RenderingWindowX11( Display *display );
+    ~RenderingWindowX11();
 
     virtual Dimensions getDimensions() const;
 
@@ -25,8 +26,6 @@ public:
     Window getHandle() const;
 
 private:
-    RenderingWindowX11();
-
     Window _handle;
     Display *_display;
 

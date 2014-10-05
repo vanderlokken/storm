@@ -17,14 +17,13 @@ class RenderingSystemGlx : public RenderingSystemOgl {
 public:
     static RenderingSystemGlx* getInstance();
 
-    virtual ~RenderingSystemGlx();
+    RenderingSystemGlx( Display *display, Window window );
+    ~RenderingSystemGlx();
 
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
 private:
-    RenderingSystemGlx();
-
     Display *_display;
     Window _window;
 
