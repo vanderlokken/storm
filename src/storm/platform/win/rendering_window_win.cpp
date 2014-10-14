@@ -58,12 +58,21 @@ RenderingWindowWin::RenderingWindowWin()
     if( !_handle )
         throwRuntimeError( "::CreateWindow has failed" );
 
-    return;
+    ::SetWindowLongPtr(
+        _handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this) );
 }
 
 RenderingWindowWin::~RenderingWindowWin() {
     ::DestroyWindow( _handle );
     return;
+}
+
+void RenderingWindowWin::addObserver( const Observer *observer ) {
+    _observers.add( observer );
+}
+
+void RenderingWindowWin::removeObserver( const Observer *observer ) {
+    _observers.remove( observer );
 }
 
 Dimensions RenderingWindowWin::getDimensions() const {
@@ -120,9 +129,36 @@ HWND RenderingWindowWin::getHandle() const {
 LRESULT CALLBACK RenderingWindowWin::windowProcedure(
     HWND windowHandle, UINT message, WPARAM firstParameter, LPARAM secondParameter )
 {
-    if( message == WM_CLOSE ) {
-        EventLoop::getInstance()->stop();
-        return 0;
+    // It's not possible to safely call the 'getInstance' method here since some
+    // messages are sent during the construction of an instance.
+    RenderingWindowWin *instance = reinterpret_cast<RenderingWindowWin*>(
+        ::GetWindowLongPtr(windowHandle, GWLP_USERDATA) );
+
+    if( instance ) {
+        ObserverList<Observer> &observers = instance->_observers;
+
+        switch( message ) {
+        case WM_ACTIVATE:
+            if( firstParameter == WA_ACTIVE ||
+                firstParameter == WA_CLICKACTIVE )
+                observers.notify( &Observer::onFocusIn );
+            else if( LOWORD(firstParameter) == WA_INACTIVE )
+                observers.notify( &Observer::onFocusOut );
+            break;
+
+        case WM_SIZE:
+            if( firstParameter == SIZE_MINIMIZED )
+                observers.notify( &Observer::onFolding );
+            else if( firstParameter == SIZE_RESTORED )
+                observers.notify( &Observer::onUnfolding );
+            break;
+
+        case WM_CLOSE:
+            observers.notify( &Observer::onShutdown );
+
+            EventLoop::getInstance()->stop();
+            return 0;
+        }
     }
 
     return ::DefWindowProc( windowHandle, message, firstParameter, secondParameter );

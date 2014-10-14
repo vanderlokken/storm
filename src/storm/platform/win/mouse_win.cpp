@@ -166,10 +166,7 @@ void MouseWin::processButtonPress( Button button ) {
     const size_t buttonIndex = static_cast<size_t>( button );
     _buttonPressed[buttonIndex] = true;
 
-    _observers.forEach([=]( const Observer &observer ) {
-        if( observer.onButtonPress )
-            observer.onButtonPress( button );
-    });
+    _observers.notify( &Observer::onButtonPress, button );
 }
 
 void MouseWin::processButtonRelease( Button button ) {
@@ -186,24 +183,15 @@ void MouseWin::processButtonRelease( Button button ) {
 
     _buttonPressed[buttonIndex] = false;
 
-    _observers.forEach([=]( const Observer &observer ) {
-        if( observer.onButtonRelease )
-            observer.onButtonRelease( button );
-    });
+    _observers.notify( &Observer::onButtonRelease, button );
 }
 
 void MouseWin::processWheelRotation( short distance ) {
-    _observers.forEach([=]( const Observer &observer ) {
-        if( observer.onWheelRotation )
-            observer.onWheelRotation( distance );
-    });
+    _observers.notify( &Observer::onWheelRotation, distance );
 }
 
 void MouseWin::processMovement( Movement movement ) {
-    _observers.forEach([=]( const Observer &observer ) {
-        if( observer.onMovement )
-            observer.onMovement( movement );
-    });
+    _observers.notify( &Observer::onMovement, movement );
 }
 
 void MouseWin::processCursorMovement( CursorPosition cursorPosition ) {
@@ -225,10 +213,7 @@ void MouseWin::processCursorMovement( CursorPosition cursorPosition ) {
         currentPosition.y - previousPositions[1].y
     };
 
-    _observers.forEach([=]( const Observer &observer ) {
-        if( observer.onCursorMovement )
-            observer.onCursorMovement( movement, cursorPosition );
-    });
+    _observers.notify( &Observer::onCursorMovement, movement, cursorPosition );
 }
 
 bool MouseWin::isCursorLockRequired() {

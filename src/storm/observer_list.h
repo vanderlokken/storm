@@ -37,6 +37,13 @@ public:
         }
     }
 
+    template<class ObserverCallback, class... Args>
+    void notify(ObserverCallback observerCallback, const Args&... args) {
+        for( const Observer *observer : _observers )
+            if( observer && observer->*observerCallback )
+                (observer->*observerCallback)( args... );
+    }
+
     template<class Callback>
     void forEach( const Callback &callback ) {
         for( const Observer *observer : _observers )

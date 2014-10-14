@@ -28,15 +28,9 @@ void KeyboardCommon::onKeyPress( Key key ) {
     if( _keyStates[keyIndex] == KeyState::Released ) {
         _keyStates[keyIndex] = KeyState::Pressed;
 
-        _observers.forEach([&]( const Observer &observer) {
-            if( observer.onKeyPress )
-                observer.onKeyPress( key );
-        });
+        _observers.notify( &Observer::onKeyPress, key );
     } else {
-        _observers.forEach([&]( const Observer &observer) {
-            if( observer.onKeyRepeat )
-                observer.onKeyRepeat( key );
-        });
+        _observers.notify( &Observer::onKeyRepeat, key );
     }
 }
 
@@ -51,18 +45,12 @@ void KeyboardCommon::onKeyRelease( Key key ) {
     if( _keyStates[keyIndex] == KeyState::Pressed ) {
         _keyStates[keyIndex] = KeyState::Released;
 
-        _observers.forEach([=]( const Observer &observer) {
-            if( observer.onKeyRelease )
-                observer.onKeyRelease( key );
-        });
+        _observers.notify( &Observer::onKeyRelease, key );
     }
 }
 
 void KeyboardCommon::onCharacterInput( CharacterCode code ) {
-    _observers.forEach([=]( const Observer &observer) {
-        if( observer.onCharacterInput )
-            observer.onCharacterInput( code );
-    });
+    _observers.notify( &Observer::onCharacterInput, code );
 }
 
 void KeyboardCommon::onInputFocusLost() {

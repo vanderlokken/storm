@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include <storm/noncopyable.h>
+#include <storm/observer_list.h>
 #include <storm/rendering_window.h>
 
 namespace storm {
@@ -14,6 +15,9 @@ public:
     static RenderingWindowWin* getInstance();
 
     virtual ~RenderingWindowWin();
+
+    virtual void addObserver( const Observer* );
+    virtual void removeObserver( const Observer* );
 
     virtual Dimensions getDimensions() const;
 
@@ -31,8 +35,11 @@ private:
     static LRESULT CALLBACK windowProcedure( HWND, UINT, WPARAM, LPARAM );
 
     HWND _handle;
+
     Dimensions _dimensions;
     bool _fullscreen;
+
+    ObserverList<Observer> _observers;
 };
 
 }
