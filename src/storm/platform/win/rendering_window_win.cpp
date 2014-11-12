@@ -7,6 +7,20 @@
 
 namespace storm {
 
+namespace {
+
+void addWindowStyle( HWND handle, DWORD style ) {
+    ::SetWindowLongPtr( handle, GWL_STYLE,
+        ::GetWindowLongPtr(handle, GWL_STYLE) | style );
+}
+
+void removeWindowStyle( HWND handle, DWORD style ) {
+    ::SetWindowLongPtr( handle, GWL_STYLE,
+        ::GetWindowLongPtr(handle, GWL_STYLE) & ~style );
+}
+
+}
+
 RenderingWindowWin::RenderingWindowWin()
     : _handle( 0 ),
       _fullscreen( false )
@@ -88,6 +102,8 @@ bool RenderingWindowWin::isFullscreen() const {
 }
 
 void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
+    addWindowStyle( _handle, WS_CAPTION );
+
     const unsigned int width = windowDimensions.width;
     const unsigned int height = windowDimensions.height;
 
@@ -115,11 +131,19 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
 
     _fullscreen = false;
     _dimensions = windowDimensions;
-    return;
 }
 
 void RenderingWindowWin::setFullscreen() {
-    throwNotImplemented();
+    removeWindowStyle( _handle, WS_CAPTION );
+
+    const unsigned int width = ::GetSystemMetrics( SM_CXSCREEN );
+    const unsigned int height = ::GetSystemMetrics( SM_CYSCREEN );
+    const BOOL repaint = FALSE;
+
+    ::MoveWindow( _handle, 0, 0, width, height, repaint );
+
+    _fullscreen = true;
+    _dimensions = { width, height };
 }
 
 HWND RenderingWindowWin::getHandle() const {
