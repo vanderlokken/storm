@@ -11,8 +11,6 @@ public:
     // The 'ObserverList' class allows to add or remove elements during the
     // iteration process.
 
-    // TODO: use the 'compress' method.
-
     ObserverList() : _compressed( true ) {}
 
     void add( const Observer *observer ) {
@@ -42,6 +40,7 @@ public:
         for( const Observer *observer : _observers )
             if( observer && observer->*observerCallback )
                 (observer->*observerCallback)( args... );
+        compress();
     }
 
     template<class Callback>
@@ -49,6 +48,7 @@ public:
         for( const Observer *observer : _observers )
             if( observer )
                 callback( *observer );
+        compress();
     }
 
 private:
