@@ -1,5 +1,6 @@
 #pragma once
 
+#include <istream>
 #include <memory>
 #include <string>
 
@@ -23,6 +24,7 @@ public:
     typedef std::shared_ptr<void> ValueHandle;
 
     static Shader::Pointer create( const std::string &sourceCode, Type type );
+    static Shader::Pointer load( std::istream &stream, Type type );
     static Shader::Pointer load( const std::string &filename, Type type );
 
     virtual ~Shader() { }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <istream>
 #include <memory>
 #include <string>
 
@@ -28,6 +29,7 @@ public:
     };
 
     static Pointer create( const Description& );
+    static Pointer load( std::istream &stream );
     static Pointer load( const std::string &filename );
 
     virtual ~Mesh() { }
