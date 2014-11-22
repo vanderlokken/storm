@@ -1,6 +1,7 @@
 #include <storm/platform/ogl/shader_ogl.h>
 
 #include <numeric>
+#include <set>
 
 #include <storm/platform/ogl/buffer_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
@@ -57,6 +58,41 @@ void bindUniformBuffer( Buffer::Pointer buffer, GLuint bindingPoint ) {
     ::glBindBufferBase( GL_UNIFORM_BUFFER, bindingPoint,
         nativeBuffer->getHandle() );
     checkResult( "::glBindBufferBase" );
+}
+
+bool isSupportedSamplerType( GLenum uniformType ) {
+    static const std::set<GLenum> supportedTypes = {
+        GL_SAMPLER_1D,
+        GL_SAMPLER_2D,
+        GL_SAMPLER_3D,
+        GL_SAMPLER_CUBE,
+        GL_SAMPLER_1D_SHADOW,
+        GL_SAMPLER_2D_SHADOW,
+        GL_SAMPLER_1D_ARRAY,
+        GL_SAMPLER_2D_ARRAY,
+        GL_SAMPLER_1D_ARRAY_SHADOW,
+        GL_SAMPLER_2D_ARRAY_SHADOW,
+        GL_SAMPLER_2D_MULTISAMPLE,
+        GL_SAMPLER_2D_MULTISAMPLE_ARRAY,
+        GL_SAMPLER_CUBE_SHADOW,
+        GL_INT_SAMPLER_1D,
+        GL_INT_SAMPLER_2D,
+        GL_INT_SAMPLER_3D,
+        GL_INT_SAMPLER_CUBE,
+        GL_INT_SAMPLER_1D_ARRAY,
+        GL_INT_SAMPLER_2D_ARRAY,
+        GL_INT_SAMPLER_2D_MULTISAMPLE,
+        GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY,
+        GL_UNSIGNED_INT_SAMPLER_1D,
+        GL_UNSIGNED_INT_SAMPLER_2D,
+        GL_UNSIGNED_INT_SAMPLER_3D,
+        GL_UNSIGNED_INT_SAMPLER_CUBE,
+        GL_UNSIGNED_INT_SAMPLER_1D_ARRAY,
+        GL_UNSIGNED_INT_SAMPLER_2D_ARRAY,
+        GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE,
+        GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY
+    };
+    return supportedTypes.count( uniformType ) != 0;
 }
 
 } // namespace
@@ -243,7 +279,7 @@ void ShaderOgl::createSamplersMapping() {
         getProgramParameter(GL_ACTIVE_UNIFORM_MAX_LENGTH), 0 );
 
     for( GLsizei index = 0; index < activeUniforms; ++index ) {
-        if( types[index] != GL_SAMPLER_2D ) // TODO: fix
+        if( !isSupportedSamplerType(types[index]) )
             continue;
 
         ::glGetActiveUniformName(
