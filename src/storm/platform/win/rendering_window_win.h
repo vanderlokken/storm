@@ -1,10 +1,8 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include <storm/noncopyable.h>
 #include <storm/observer_list.h>
+#include <storm/platform/win/api_win.h>
 #include <storm/rendering_window.h>
 
 namespace storm {

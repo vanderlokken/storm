@@ -124,7 +124,7 @@ set(storm_ogl_sources
 
 if(WIN32)
     set(storm_platform_sources
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/check_result.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/api_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.cpp

@@ -1,10 +1,6 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#define NOMINMAX
-#include <windows.h>
-
+#include <storm/platform/win/api_win.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
 namespace storm {

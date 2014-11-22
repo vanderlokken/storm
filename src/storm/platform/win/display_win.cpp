@@ -2,10 +2,7 @@
 
 #include <memory>
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#include <windows.h>
-
+#include <storm/platform/win/api_win.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
@@ -13,25 +10,21 @@ namespace storm {
 DisplayWin::DisplayWin() {
     const wchar_t *deviceName = nullptr;
 
-    DEVMODE mode;
+    DEVMODE mode = {};
     mode.dmSize = sizeof( mode );
     mode.dmDriverExtra = 0;
 
-    const BOOL result = ::EnumDisplaySettings(
+    ::EnumDisplaySettings(
         deviceName, ENUM_CURRENT_SETTINGS, &mode );
-    if( !result ) {
-        throwRuntimeError( "::EnumDisplaySettings has failed" );
-    }
 
     _currentMode.width = mode.dmPelsWidth;
     _currentMode.height = mode.dmPelsHeight;
     _currentMode.refreshRate = mode.dmDisplayFrequency;
     _currentMode.colorDepth = mode.dmBitsPerPel;
-    return;
 }
 
 std::vector<Display::Mode> DisplayWin::getSupportedModes() const {
-    std::vector< Mode > supportedModes;
+    std::vector<Mode> supportedModes;
 
     const wchar_t *deviceName = nullptr;
 

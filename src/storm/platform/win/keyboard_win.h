@@ -1,10 +1,7 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#include <windows.h>
-
 #include <storm/keyboard_common.h>
+#include <storm/platform/win/api_win.h>
 
 namespace storm {
 

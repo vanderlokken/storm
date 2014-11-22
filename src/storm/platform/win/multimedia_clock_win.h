@@ -1,11 +1,9 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#include <windows.h>
-#include <mmsystem.h>
-
 #include <storm/clock.h>
+#include <storm/platform/win/api_win.h>
+
+#include <mmsystem.h>
 
 namespace storm {
 
