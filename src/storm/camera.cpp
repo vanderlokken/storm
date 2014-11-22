@@ -1,14 +1,18 @@
+#define _USE_MATH_DEFINES
 #include <storm/camera.h>
 
 #include <cmath>
 
-#include <storm/math.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-Camera::Camera()
-    : _minimalDepth( 0.1f ), _maximalDepth( 1000.0f ), _target( 0, 0, 1 ) { }
+Camera::Camera() :
+    _minimalDepth( 0.1f ),
+    _maximalDepth( 1000.0f ),
+    _target( 0, 0, 1 )
+{
+}
 
 const Vector& Camera::getPosition() const {
     return _position;
@@ -16,7 +20,6 @@ const Vector& Camera::getPosition() const {
 
 void Camera::setPosition( const Vector &position ) {
     _position = position;
-    return;
 }
 
 const Vector& Camera::getTarget() const {
@@ -25,7 +28,6 @@ const Vector& Camera::getTarget() const {
 
 void Camera::setTarget( const Vector &target ) {
     _target = target;
-    return;
 }
 
 float Camera::getMinimalDepth() const {
@@ -41,7 +43,6 @@ void Camera::setMinimalDepth( float depth ) {
 
     if( _maximalDepth < _minimalDepth )
         _maximalDepth = _minimalDepth;
-    return;
 }
 
 void Camera::setMaximalDepth( float depth ) {
@@ -49,7 +50,6 @@ void Camera::setMaximalDepth( float depth ) {
 
     if( _minimalDepth > _maximalDepth )
         _minimalDepth = _maximalDepth;
-    return;
 }
 
 const Dimensions& Camera::getFrameDimensions() const {
@@ -58,7 +58,6 @@ const Dimensions& Camera::getFrameDimensions() const {
 
 void Camera::setFrameDimensions( const Dimensions &frameDimensions ) {
     _frameDimensions = frameDimensions;
-    return;
 }
 
 Matrix Camera::getViewTransformation() const {
@@ -81,7 +80,10 @@ Matrix Camera::getViewTransformation() const {
         -Vector::getDotProduct( zAxis, _position ), 1 );
 }
 
-PerspectiveCamera::PerspectiveCamera() : _fieldOfView( Pi / 2 ) { }
+PerspectiveCamera::PerspectiveCamera() :
+    _fieldOfView( static_cast<float>(M_PI / 2) )
+{
+}
 
 float PerspectiveCamera::getFieldOfView() const {
     return _fieldOfView;
@@ -89,23 +91,23 @@ float PerspectiveCamera::getFieldOfView() const {
 
 void PerspectiveCamera::setFieldOfView( float fieldOfView ) {
     _fieldOfView = fieldOfView;
-    return;
 }
 
 Matrix PerspectiveCamera::getProjectionTransformation() const {
     storm_assert( _frameDimensions.width && _frameDimensions.height );
 
-    const float frameWidth = static_cast< float >( _frameDimensions.width );
-    const float frameHeight = static_cast< float >( _frameDimensions.height );
-    const float aspectRatio = frameWidth / frameHeight;
+    const float aspectRatio =
+         _frameDimensions.width / static_cast<float>( _frameDimensions.height );
     const float depthRange = _maximalDepth - _minimalDepth;
+
+    const float scale = static_cast<float>( tan((M_PI - _fieldOfView) / 2) );
 
     Matrix result;
 
-    result[0][0] = tan( Pi / 2 - _fieldOfView / 2 );
-    result[1][1] = tan( Pi / 2 - _fieldOfView / 2 ) * aspectRatio;
+    result[0][0] = scale;
+    result[1][1] = scale * aspectRatio;
     result[2][2] = _maximalDepth / depthRange;
-    result[2][3] = 1;
+    result[2][3] = 1.0f;
     result[3][2] = -_minimalDepth * _maximalDepth / depthRange;
 
     return result;
@@ -114,17 +116,15 @@ Matrix PerspectiveCamera::getProjectionTransformation() const {
 OrthographicCamera::OrthographicCamera() { }
 
 Matrix OrthographicCamera::getProjectionTransformation() const {
-    const float frameWidth = static_cast< float >( _frameDimensions.width );
-    const float frameHeight = static_cast< float >( _frameDimensions.height );
     const float depthRange = _maximalDepth - _minimalDepth;
 
     Matrix result;
 
-    result[0][0] =  2 / frameWidth;
-    result[1][1] =  2 / frameHeight;
-    result[2][2] =  1 / depthRange;
+    result[0][0] =  2.0f / _frameDimensions.width;
+    result[1][1] =  2.0f / _frameDimensions.height;
+    result[2][2] =  1.0f / depthRange;
     result[3][2] = -_minimalDepth / depthRange;
-    result[3][3] =  1;
+    result[3][3] =  1.0f;
 
     return result;
 }

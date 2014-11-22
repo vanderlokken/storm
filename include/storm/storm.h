@@ -14,7 +14,6 @@
 #include <storm/flat_vector.h>
 #include <storm/framebuffer.h>
 #include <storm/keyboard.h>
-#include <storm/math.h>
 #include <storm/matrix.h>
 #include <storm/mesh.h>
 #include <storm/mouse.h>
