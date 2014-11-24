@@ -30,6 +30,8 @@ public:
 
     Window getHandle() const;
 
+    void addEventMask( unsigned long eventMask );
+
 private:
     void installShutdownHandler();
     void installFocusHandlers();

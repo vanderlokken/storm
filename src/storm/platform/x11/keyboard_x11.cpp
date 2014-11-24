@@ -4,22 +4,15 @@
 #include <memory>
 
 #include <storm/platform/x11/display_connection_x11.h>
-#include <storm/platform/x11/rendering_window_x11.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-KeyboardX11::KeyboardX11( Display *display, Window window ) {
-    XWindowAttributes windowAttributes = {};
+KeyboardX11::KeyboardX11( RenderingWindowX11 *renderingWindow ) {
+    renderingWindow->addEventMask(
+        KeyPressMask | KeyReleaseMask | FocusChangeMask );
 
-    if( !::XGetWindowAttributes(display, window, &windowAttributes) )
-        throwRuntimeError( "::XGetWindowAttributes has failed" );
-
-    windowAttributes.your_event_mask |=
-        KeyPressMask | KeyReleaseMask | FocusChangeMask;
-
-    if( !::XSelectInput(display, window, windowAttributes.your_event_mask) )
-        throwRuntimeError( "::XSelectInput has failed" );
+    Display *display = getDisplayHandleX11();
 
     // Note: in X11 there's no specific event for a key repetition. Alternating
     // 'KeyPress' and 'KeyRelease' events are used instead.
@@ -180,11 +173,8 @@ void KeyboardX11::onKeyEvent( const XEvent &event ) {
 }
 
 Keyboard* Keyboard::getInstance() {
-    const auto create = [] {
-        Window window = RenderingWindowX11::getInstance()->getHandle();
-        return new KeyboardX11( getDisplayHandleX11(), window );
-    };
-    static const std::unique_ptr<KeyboardX11> instance( create() );
+    static const std::unique_ptr<KeyboardX11> instance(
+        new KeyboardX11(RenderingWindowX11::getInstance()) );
     return instance.get();
 }
 

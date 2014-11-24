@@ -31,10 +31,7 @@ RenderingWindowX11::RenderingWindowX11( Display *display ) :
     if( _handle == None )
         throwRuntimeError( "::XCreateSimpleWindow has failed" );
 
-    const long eventMask = FocusChangeMask | PropertyChangeMask;
-
-    if( !::XSelectInput(_display, _handle, eventMask) )
-        throwRuntimeError( "::XSelectInput has failed" );
+    addEventMask( FocusChangeMask | PropertyChangeMask );
 
     installShutdownHandler();
     installFocusHandlers();
@@ -97,6 +94,18 @@ void RenderingWindowX11::setFullscreen() {
 
 Window RenderingWindowX11::getHandle() const {
     return _handle;
+}
+
+void RenderingWindowX11::addEventMask( unsigned long eventMask ) {
+    XWindowAttributes windowAttributes = {};
+
+    if( !::XGetWindowAttributes(_display, _handle, &windowAttributes) )
+        throwRuntimeError( "::XGetWindowAttributes has failed" );
+
+    windowAttributes.your_event_mask |= eventMask;
+
+    if( !::XSelectInput(_display, _handle, windowAttributes.your_event_mask) )
+        throwRuntimeError( "::XSelectInput has failed" );
 }
 
 void RenderingWindowX11::installShutdownHandler() {
