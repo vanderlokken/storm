@@ -24,46 +24,51 @@ typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hSha
 
 namespace storm {
 
-RenderingSystemWgl::RenderingSystemWgl()
-    : _renderingWindowHandle( RenderingWindowWin::getInstance()->getHandle() ),
-      _deviceContextHandle( ::GetDC(_renderingWindowHandle) ),
-      _renderingContextHandle( 0 )
+DeviceContextHandle::DeviceContextHandle( HWND windowHandle ) :
+    _windowHandle( windowHandle ),
+    _handle( ::GetDC(windowHandle) )
 {
-    if( !_deviceContextHandle )
+    if( !_handle )
         throwRuntimeError( "::GetDC has failed" );
+}
 
-    PIXELFORMATDESCRIPTOR pixelFormatDescriptor;
-    pixelFormatDescriptor.nSize = sizeof( pixelFormatDescriptor );
-    pixelFormatDescriptor.nVersion = 1;
-    pixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
-        PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
-    pixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
-    pixelFormatDescriptor.cColorBits = 24;
-    pixelFormatDescriptor.cAlphaBits = 0;
-    pixelFormatDescriptor.cAccumBits = 0;
-    pixelFormatDescriptor.cDepthBits = 0;
-    pixelFormatDescriptor.cStencilBits = 0;
-    pixelFormatDescriptor.cAuxBuffers = 0;
-    pixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
+DeviceContextHandle::~DeviceContextHandle() {
+    ::ReleaseDC( _windowHandle, _handle );
+}
 
-    const int pixelFormat =
-        ::ChoosePixelFormat( _deviceContextHandle, &pixelFormatDescriptor );
-    if( !pixelFormat )
-        throwRuntimeError( "::ChoosePixelFormat has failed" );
+RenderingContextHandle::RenderingContextHandle( HGLRC handle ) :
+    _handle( handle )
+{
+}
 
-    if( !::SetPixelFormat(
-            _deviceContextHandle, pixelFormat, &pixelFormatDescriptor) )
-        throwRuntimeError( "::SetPixelFormat has failed" );
+RenderingContextHandle::~RenderingContextHandle() {
+    ::wglDeleteContext( _handle );
+}
 
-    HGLRC compatibilityContext = ::wglCreateContext( _deviceContextHandle );
+void RenderingContextHandle::install( HDC deviceContextHandle ) const {
+    if( !::wglMakeCurrent(deviceContextHandle, _handle) )
+        throwRuntimeError( "::wglMakeCurrent has failed" );
+}
+
+RenderingSystemWgl::RenderingSystemWgl( HWND windowHandle ) :
+    _deviceContextHandle( windowHandle )
+{
+    selectPixelFormat();
+
+    RenderingContextHandle compatibilityContext(
+        ::wglCreateContext(_deviceContextHandle) );
     if( !compatibilityContext )
         throwRuntimeError( "::wglCreateContext has failed" );
 
-    ::wglMakeCurrent( _deviceContextHandle, compatibilityContext );
+    compatibilityContext.install( _deviceContextHandle );
 
     const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
         reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
             ::wglGetProcAddress("wglCreateContextAttribsARB") );
+
+    if( !wglCreateContextAttribsARB )
+        throw SystemRequirementsNotMet() <<
+            "The 'WGL_ARB_create_context' extension is not supported";
 
     const int openGl_3_3_ContextAttributes[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -75,25 +80,15 @@ RenderingSystemWgl::RenderingSystemWgl()
         0
     };
 
-    _renderingContextHandle = wglCreateContextAttribsARB(
-        _deviceContextHandle, 0, openGl_3_3_ContextAttributes );
-
-    ::wglDeleteContext( compatibilityContext );
-
+    _renderingContextHandle.reset( new RenderingContextHandle(
+        wglCreateContextAttribsARB(
+            _deviceContextHandle, 0, openGl_3_3_ContextAttributes)) );
     if( !_renderingContextHandle )
-        throwRuntimeError( "::wglCreateContextAttribsARB has failed" );
+        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
 
-    if( !::wglMakeCurrent(_deviceContextHandle, _renderingContextHandle) )
-        throwRuntimeError( "::wglMakeCurrent has failed" );
+    _renderingContextHandle->install( _deviceContextHandle );
 
     initialize();
-    return;
-}
-
-RenderingSystemWgl::~RenderingSystemWgl() {
-    ::wglDeleteContext( _renderingContextHandle );
-    ::ReleaseDC( _renderingWindowHandle, _deviceContextHandle );
-    return;
 }
 
 void RenderingSystemWgl::endFrameRendering() {
@@ -103,8 +98,29 @@ void RenderingSystemWgl::endFrameRendering() {
         throwRuntimeError( "::SwapBuffers has failed" );
 }
 
+void RenderingSystemWgl::selectPixelFormat() {
+    PIXELFORMATDESCRIPTOR pixelFormatDescriptor = {};
+    pixelFormatDescriptor.nSize = sizeof( pixelFormatDescriptor );
+    pixelFormatDescriptor.nVersion = 1;
+    pixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
+        PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
+    pixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
+    pixelFormatDescriptor.cColorBits = 24;
+    pixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
+
+    const int pixelFormat =
+        ::ChoosePixelFormat( _deviceContextHandle, &pixelFormatDescriptor );
+    if( !pixelFormat )
+        throwRuntimeError( "::ChoosePixelFormat has failed" );
+
+    if( !::SetPixelFormat(
+            _deviceContextHandle, pixelFormat, &pixelFormatDescriptor) )
+        throwRuntimeError( "::SetPixelFormat has failed" );
+}
+
 RenderingSystemWgl* RenderingSystemWgl::getInstance() {
-    static const std::unique_ptr<RenderingSystemWgl> instance( new RenderingSystemWgl );
+    static const std::unique_ptr<RenderingSystemWgl> instance(
+        new RenderingSystemWgl(RenderingWindowWin::getInstance()->getHandle()) );
     return instance.get();
 }
 
