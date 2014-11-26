@@ -164,10 +164,11 @@ void RenderingWindowX11::installStateChangeHandlers() {
             const long offset = 0;
             const long length = 2; // The number of 32-bit fields
             const Bool shouldDelete = false;
+            const Atom type = windowStateAtom;
 
             // Returned values
-            Atom format;
-            int type;
+            Atom actualType;
+            int actualFormat;
             unsigned long itemNumber;
             unsigned long remainingBytes;
 
@@ -183,9 +184,9 @@ void RenderingWindowX11::installStateChangeHandlers() {
                 offset,
                 length,
                 shouldDelete,
-                windowStateAtom,
-                &format,
-                &type,
+                type,
+                &actualType,
+                &actualFormat,
                 &itemNumber,
                 &remainingBytes,
                 reinterpret_cast<unsigned char**>(&state) );
