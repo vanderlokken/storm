@@ -29,7 +29,7 @@ public:
         std::map<EventType, Callback> onEvent;
     };
 
-    EventLoopX11( Display *display );
+    explicit EventLoopX11( Display *display );
     static EventLoopX11* getInstance();
 
     virtual void processEvents();

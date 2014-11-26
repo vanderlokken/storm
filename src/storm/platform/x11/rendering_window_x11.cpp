@@ -10,6 +10,14 @@
 
 namespace storm {
 
+namespace{
+// The following values are taken from the "Extended Window Manager Hints"
+// document. See http://standards.freedesktop.org/wm-spec/wm-spec-latest.html
+const long _NET_WM_STATE_REMOVE = 0;
+const long _NET_WM_STATE_ADD = 1;
+const long _NET_WM_STATE_TOGGLE = 2;
+}
+
 RenderingWindowX11::RenderingWindowX11( Display *display ) :
     _handle( None ), _display( display ), _fullscreen( false )
 {
@@ -51,7 +59,12 @@ void RenderingWindowX11::removeObserver( const Observer *observer ) {
 }
 
 Dimensions RenderingWindowX11::getDimensions() const {
-    return _dimensions;
+    XWindowAttributes windowAttributes = {};
+    ::XGetWindowAttributes( _display, _handle, &windowAttributes );
+    return {
+        static_cast<unsigned int>(windowAttributes.width),
+        static_cast<unsigned int>(windowAttributes.height)
+    };
 }
 
 bool RenderingWindowX11::isActive() const {
@@ -67,29 +80,24 @@ bool RenderingWindowX11::isFullscreen() const {
 }
 
 void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
-    ::XUnmapWindow( _display, _handle );
-    ::XResizeWindow( _display, _handle,
-        windowDimensions.width, windowDimensions.height );
+    setDimensionsConstraint( &windowDimensions );
+    setFullscreen( false );
+
+    ::XResizeWindow(
+        _display, _handle, windowDimensions.width, windowDimensions.height );
+
     ::XMapWindow( _display, _handle );
-    ::XFlush( _display );
 
-    _dimensions = windowDimensions;
     _fullscreen = false;
-
-    // Try to forbid resizing.
-    if( XSizeHints *sizeHints = ::XAllocSizeHints() ) {
-        sizeHints->flags = PMinSize | PMaxSize;
-        sizeHints->min_width = sizeHints->max_width =
-            static_cast<int>( windowDimensions.width );
-        sizeHints->min_height = sizeHints->max_height =
-            static_cast<int>( windowDimensions.height );
-        ::XSetWMNormalHints( _display, _handle, sizeHints );
-        ::XFree( sizeHints );
-    }
 }
 
 void RenderingWindowX11::setFullscreen() {
-    throwNotImplemented();
+    setDimensionsConstraint( nullptr );
+    setFullscreen( true );
+
+    ::XMapWindow( _display, _handle );
+
+    _fullscreen = true;
 }
 
 Window RenderingWindowX11::getHandle() const {
@@ -191,6 +199,46 @@ void RenderingWindowX11::installStateChangeHandlers() {
             }
         }
     };
+}
+
+void RenderingWindowX11::setFullscreen( bool fullscreen ) {
+    static Atom windowStateAtom = ::XInternAtom(
+        _display, "_NET_WM_STATE", /*onlyExisting = */ false );
+    static Atom windowStateFullscreenAtom = ::XInternAtom(
+        _display, "_NET_WM_STATE_FULLSCREEN", /*onlyExisting = */ false );
+
+    XEvent event = {};
+    event.xclient.type = ClientMessage;
+    event.xclient.display = _display;
+    event.xclient.window = _handle;
+    event.xclient.message_type = windowStateAtom;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] =
+        (fullscreen ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+    event.xclient.data.l[1] = windowStateFullscreenAtom;
+
+    ::XSendEvent(
+        _display,
+        ::XRootWindow(_display, ::XDefaultScreen(_display)),
+        /*propagate = */ false,
+        /*eventMask = */ SubstructureNotifyMask | SubstructureRedirectMask,
+        &event );
+}
+
+void RenderingWindowX11::setDimensionsConstraint(
+    const Dimensions *dimensions )
+{
+    if( XSizeHints *sizeHints = ::XAllocSizeHints() ) {
+        if( dimensions ) {
+            sizeHints->flags = PMinSize | PMaxSize;
+            sizeHints->min_width = sizeHints->max_width =
+                static_cast<int>( dimensions->width );
+            sizeHints->min_height = sizeHints->max_height =
+                static_cast<int>( dimensions->height );
+        }
+        ::XSetWMNormalHints( _display, _handle, sizeHints );
+        ::XFree( sizeHints );
+    }
 }
 
 RenderingWindowX11* RenderingWindowX11::getInstance() {

@@ -14,7 +14,7 @@ class RenderingWindowX11 : public RenderingWindow {
 public:
     static RenderingWindowX11* getInstance();
 
-    RenderingWindowX11( Display *display );
+    explicit RenderingWindowX11( Display *display );
     ~RenderingWindowX11();
 
     virtual void addObserver( const Observer* );
@@ -37,10 +37,12 @@ private:
     void installFocusHandlers();
     void installStateChangeHandlers();
 
+    void setFullscreen( bool );
+    void setDimensionsConstraint( const Dimensions *dimensions );
+
     Window _handle;
     Display *_display;
 
-    Dimensions _dimensions;
     bool _fullscreen;
 
     EventLoopX11::Listener _eventListener;
