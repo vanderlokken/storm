@@ -18,6 +18,9 @@ void EventLoopX11::processEvents() {
         XEvent event;
         ::XNextEvent( _display, &event );
 
+        if( ::XFilterEvent(&event, /* window = */ None) )
+            continue;
+
         _listeners.forEach( [&event]( const Listener &listener ) {
             const auto iterator = listener.onEvent.find( event.type );
             if( iterator != listener.onEvent.end() )

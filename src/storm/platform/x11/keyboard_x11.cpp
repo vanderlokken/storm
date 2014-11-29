@@ -1,5 +1,6 @@
 #include <storm/platform/x11/keyboard_x11.h>
 
+#include <locale>
 #include <map>
 #include <memory>
 
@@ -8,21 +9,115 @@
 
 namespace storm {
 
-KeyboardX11::KeyboardX11( RenderingWindowX11 *renderingWindow ) {
-    renderingWindow->addEventMask(
+CharacterConversionDescriptor::CharacterConversionDescriptor(
+    const char *fromEncoding, const char *toEncoding )
+{
+    _descriptor = iconv_open( toEncoding, fromEncoding );
+    if( _descriptor == reinterpret_cast<iconv_t>(-1) )
+        throwRuntimeError( "iconv_open has failed" );
+}
+
+CharacterConversionDescriptor::~CharacterConversionDescriptor() {
+    iconv_close( _descriptor );
+}
+
+InputMethodHandleX11::InputMethodHandleX11( Display *display ) {
+    _handle = ::XOpenIM(
+        display,
+        /* resourceDatabase = */ 0,
+        /* resourceName = */ nullptr,
+        /* resourceClass = */ nullptr );
+    if( !_handle )
+        throwRuntimeError( "::XOpenIM has failed" );
+}
+
+InputMethodHandleX11::~InputMethodHandleX11() {
+    ::XCloseIM( _handle );
+}
+
+InputContextHandleX11::InputContextHandleX11(
+    XIM inputMethod, XIMStyle inputStyle, Window window )
+{
+    _handle = ::XCreateIC( inputMethod,
+        XNInputStyle, inputStyle, XNClientWindow, window, nullptr );
+    if( !_handle )
+        throwRuntimeError( "::XCreateIC has failed" );
+}
+
+InputContextHandleX11::~InputContextHandleX11() {
+    ::XDestroyIC( _handle );
+}
+
+KeyboardX11::KeyboardX11( RenderingWindowX11 *renderingWindow ) :
+    _utf32ConversionDescriptor( "UTF-8", "UTF-32" ),
+    _inputMethodHandle( getDisplayHandleX11() ),
+    _inputContextHandle( _inputMethodHandle,
+        XIMPreeditNothing | XIMStatusNothing, renderingWindow->getHandle() )
+{
+    setlocale( LC_ALL, "en_US.UTF-8" );
+    ::XSetLocaleModifiers( "" );
+
+    unsigned long inputContextEventMask = 0;
+    ::XGetICValues(
+        _inputContextHandle, XNFilterEvents, &inputContextEventMask, nullptr );
+
+    renderingWindow->addEventMask( inputContextEventMask |
         KeyPressMask | KeyReleaseMask | FocusChangeMask );
 
-    Display *display = getDisplayHandleX11();
+    if( renderingWindow->isActive() )
+        ::XSetICFocus( _inputContextHandle );
 
     // Note: in X11 there's no specific event for a key repetition. Alternating
     // 'KeyPress' and 'KeyRelease' events are used instead.
 
     _eventListener.onEvent[KeyPress] = [=]( const XEvent &event ) {
         onKeyEvent( event );
-        // TODO: character input
+
+        std::vector<char> buffer( 16 );
+        while( true ) {
+            // For some reason 'Xutf8LookupString' requires non-const pointer to
+            // an 'XKeyPressedEvent' value. Thus we need to make a temporary
+            // copy.
+            XKeyPressedEvent keyEvent = event.xkey;
+            Status status;
+
+            const int result = ::Xutf8LookupString( _inputContextHandle,
+                &keyEvent, buffer.data(), buffer.size(), nullptr, &status );
+
+            if( status == XBufferOverflow && static_cast<unsigned int>(result) >
+                buffer.size() )
+            {
+                buffer.resize( result );
+            } else if( status == XLookupNone ) {
+                return;
+            } else {
+                break;
+            }
+        }
+
+        std::vector<CharacterCode> characters( buffer.size() );
+
+        char *sourceData = buffer.data();
+        char *convertedData = reinterpret_cast<char*>( characters.data() );
+        size_t sourceSize = buffer.size();
+        size_t convertedSize = characters.size() * sizeof( CharacterCode );
+
+        iconv( _utf32ConversionDescriptor,
+            &sourceData,
+            &sourceSize,
+            &convertedData,
+            &convertedSize );
+
+        for( CharacterCode characterCode : characters )
+            if( characterCode )
+                onCharacterInput( characterCode );
+            else
+                break;
     };
 
     _eventListener.onEvent[KeyRelease] = [=]( const XEvent &event ) {
+        Display *display = getDisplayHandleX11();
+
         // Ignore fake KeyRelease events generated during key repetition.
         ::XSync( display, /*discardQueuedEvents = */ false );
         if( ::XEventsQueued(display, QueuedAlready) ) {
@@ -39,7 +134,12 @@ KeyboardX11::KeyboardX11( RenderingWindowX11 *renderingWindow ) {
         onKeyEvent( event );
     };
 
+    _eventListener.onEvent[FocusIn] = [=]( const XEvent& ) {
+        ::XSetICFocus( _inputContextHandle );
+    };
+
     _eventListener.onEvent[FocusOut] = [=]( const XEvent& ) {
+        ::XUnsetICFocus( _inputContextHandle );
         onInputFocusLost();
     };
 }
