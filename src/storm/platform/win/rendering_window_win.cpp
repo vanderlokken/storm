@@ -19,11 +19,16 @@ void removeWindowStyle( HWND handle, DWORD style ) {
         ::GetWindowLongPtr(handle, GWL_STYLE) & ~style );
 }
 
+void restoreDisplayMode() {
+    ::ChangeDisplaySettings( /*mode = */ nullptr, 0 );
 }
 
-RenderingWindowWin::RenderingWindowWin()
-    : _handle( 0 ),
-      _fullscreen( false )
+}
+
+RenderingWindowWin::RenderingWindowWin() :
+    _handle( 0 ),
+    _fullscreen( false ),
+    _fullscreenMode( FullscreenMode() )
 {
     const HINSTANCE instance = ::GetModuleHandle( 0 );
 
@@ -78,7 +83,6 @@ RenderingWindowWin::RenderingWindowWin()
 
 RenderingWindowWin::~RenderingWindowWin() {
     ::DestroyWindow( _handle );
-    return;
 }
 
 void RenderingWindowWin::addObserver( const Observer *observer ) {
@@ -102,6 +106,8 @@ bool RenderingWindowWin::isFullscreen() const {
 }
 
 void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
+    restoreDisplayMode();
+
     addWindowStyle( _handle, WS_CAPTION );
 
     const unsigned int width = windowDimensions.width;
@@ -125,24 +131,42 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
     const int resultY = windowRectangle.top;
     const int resultWidth = windowRectangle.right - windowRectangle.left;
     const int resultHeight = windowRectangle.bottom - windowRectangle.top;
-    const BOOL repaint = FALSE;
 
-    ::MoveWindow( _handle, resultX, resultY, resultWidth, resultHeight, repaint );
+    ::SetWindowPos( _handle, HWND_TOP,
+        resultX, resultY, resultWidth, resultHeight, SWP_FRAMECHANGED );
 
     _fullscreen = false;
     _dimensions = windowDimensions;
 }
 
-void RenderingWindowWin::setFullscreen() {
+void RenderingWindowWin::setFullscreen( FullscreenMode fullscreenMode ) {
+    if( fullscreenMode.custom ) {
+        DEVMODE displayMode = {};
+        displayMode.dmSize = sizeof( displayMode );
+        displayMode.dmPelsWidth = fullscreenMode.mode.width;
+        displayMode.dmPelsHeight = fullscreenMode.mode.height;
+        displayMode.dmDisplayFrequency = fullscreenMode.mode.refreshRate;
+        displayMode.dmFields =
+            DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
+
+        if( ::ChangeDisplaySettings(&displayMode, CDS_FULLSCREEN) !=
+            DISP_CHANGE_SUCCESSFUL )
+        {
+            fullscreenMode = {};
+            restoreDisplayMode();
+        }
+    } else
+        restoreDisplayMode();
+
     removeWindowStyle( _handle, WS_CAPTION );
 
     const unsigned int width = ::GetSystemMetrics( SM_CXSCREEN );
     const unsigned int height = ::GetSystemMetrics( SM_CYSCREEN );
-    const BOOL repaint = FALSE;
 
-    ::MoveWindow( _handle, 0, 0, width, height, repaint );
+    ::SetWindowPos( _handle, HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED );
 
     _fullscreen = true;
+    _fullscreenMode = fullscreenMode;
     _dimensions = { width, height };
 }
 
@@ -162,12 +186,25 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
         ObserverList<Observer> &observers = instance->_observers;
 
         switch( message ) {
-        case WM_ACTIVATE:
-            if( firstParameter == WA_ACTIVE ||
-                firstParameter == WA_CLICKACTIVE )
-                observers.notify( &Observer::onFocusIn );
-            else if( LOWORD(firstParameter) == WA_INACTIVE )
-                observers.notify( &Observer::onFocusOut );
+        case WM_ACTIVATE: {
+                const bool active = LOWORD( firstParameter ) != WA_INACTIVE;
+
+                if( instance->_fullscreen &&
+                    instance->_fullscreenMode.custom )
+                {
+                    if( active ) {
+                        instance->setFullscreen( instance->_fullscreenMode );
+                    } else {
+                        ::CloseWindow( instance->_handle );
+                        restoreDisplayMode();
+                    }
+                }
+
+                if( active )
+                    observers.notify( &Observer::onFocusIn );
+                else
+                    observers.notify( &Observer::onFocusOut );
+            }
             break;
 
         case WM_SIZE:
@@ -175,6 +212,10 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
                 observers.notify( &Observer::onFolding );
             else if( firstParameter == SIZE_RESTORED )
                 observers.notify( &Observer::onUnfolding );
+            break;
+
+        case WM_DISPLAYCHANGE:
+            // TODO: fix fullscreen rendering window behaviour on display mode changes.
             break;
 
         case WM_CLOSE:

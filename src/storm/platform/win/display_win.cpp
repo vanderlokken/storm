@@ -2,25 +2,18 @@
 
 #include <memory>
 
-#include <storm/platform/win/api_win.h>
-#include <storm/throw_exception.h>
-
 namespace storm {
 
-DisplayWin::DisplayWin() {
+Display::Mode DisplayWin::getDefaultMode() const {
     const wchar_t *deviceName = nullptr;
 
     DEVMODE mode = {};
     mode.dmSize = sizeof( mode );
-    mode.dmDriverExtra = 0;
 
     ::EnumDisplaySettings(
-        deviceName, ENUM_CURRENT_SETTINGS, &mode );
+        deviceName, ENUM_REGISTRY_SETTINGS, &mode );
 
-    _currentMode.width = mode.dmPelsWidth;
-    _currentMode.height = mode.dmPelsHeight;
-    _currentMode.refreshRate = mode.dmDisplayFrequency;
-    _currentMode.colorDepth = mode.dmBitsPerPel;
+    return convertMode( mode );
 }
 
 std::vector<Display::Mode> DisplayWin::getSupportedModes() const {
@@ -30,40 +23,28 @@ std::vector<Display::Mode> DisplayWin::getSupportedModes() const {
 
     DWORD modeIndex = 0;
 
-    DEVMODE mode;
+    DEVMODE mode = {};
     mode.dmSize = sizeof( mode );
-    mode.dmDriverExtra = 0;
 
     while( ::EnumDisplaySettings(deviceName, modeIndex, &mode) ) {
-        Mode supportedMode;
-
-        supportedMode.width = mode.dmPelsWidth;
-        supportedMode.height = mode.dmPelsHeight;
-        supportedMode.refreshRate = mode.dmDisplayFrequency;
-        supportedMode.colorDepth = mode.dmBitsPerPel;
-
-        supportedModes.push_back( supportedMode );
-
+        if( mode.dmBitsPerPel == 32 )
+            supportedModes.push_back( convertMode(mode) );
         ++modeIndex;
     }
     return supportedModes;
 }
 
-const Display::Mode& DisplayWin::getCurrentMode() const {
-    return _currentMode;
-}
-
-void DisplayWin::setCurrentMode( const Mode &mode ) {
-    throwNotImplemented();
-}
-
-DisplayWin* DisplayWin::getInstance() {
-    static const std::unique_ptr<DisplayWin> instance( new DisplayWin );
-    return instance.get();
+Display::Mode DisplayWin::convertMode( const DEVMODE &mode ) {
+    return {
+        mode.dmPelsWidth,
+        mode.dmPelsHeight,
+        mode.dmDisplayFrequency
+    };
 }
 
 Display* Display::getInstance() {
-    return DisplayWin::getInstance();
+    static const std::unique_ptr<DisplayWin> instance( new DisplayWin );
+    return instance.get();
 }
 
 }

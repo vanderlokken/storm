@@ -3,6 +3,7 @@
 #include <functional>
 
 #include <storm/dimensions.h>
+#include <storm/display.h>
 
 namespace storm {
 
@@ -14,6 +15,11 @@ public:
         std::function<void()> onFocusOut;
         std::function<void()> onFolding;
         std::function<void()> onUnfolding;
+    };
+
+    struct FullscreenMode {
+        bool custom;
+        Display::Mode mode;
     };
 
     static RenderingWindow* getInstance();
@@ -29,7 +35,13 @@ public:
     virtual bool isFullscreen() const = 0;
 
     virtual void setWindowed( Dimensions windowDimensions ) = 0;
-    virtual void setFullscreen() = 0;
+    // With default arguments sets so-called 'windowed fullscreen' mode which
+    // doesn't change display mode. When custom display mode is specified, every
+    // time the rendering window receives focus, sets custom display mode,
+    // and every time the rendering window loses focus, restores default display
+    // mode. When specified custom diplay mode is not supported falls back to
+    // the windowed fullscreen mode.
+    virtual void setFullscreen( FullscreenMode fullscreenMode = {} ) = 0;
 };
 
 struct ScopedRenderingWindowObserver : RenderingWindow::Observer {

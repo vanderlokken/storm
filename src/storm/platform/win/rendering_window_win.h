@@ -23,7 +23,7 @@ public:
     virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );
-    virtual void setFullscreen();
+    virtual void setFullscreen( FullscreenMode fullscreenMode );
 
     HWND getHandle() const;
 
@@ -36,6 +36,7 @@ private:
 
     Dimensions _dimensions;
     bool _fullscreen;
+    FullscreenMode _fullscreenMode;
 
     ObserverList<Observer> _observers;
 };

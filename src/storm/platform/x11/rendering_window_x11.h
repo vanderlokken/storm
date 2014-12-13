@@ -26,7 +26,7 @@ public:
     virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );
-    virtual void setFullscreen();
+    virtual void setFullscreen( FullscreenMode fullscreenMode );
 
     Window getHandle() const;
 

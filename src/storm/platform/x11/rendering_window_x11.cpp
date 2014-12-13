@@ -91,7 +91,10 @@ void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
     _fullscreen = false;
 }
 
-void RenderingWindowX11::setFullscreen() {
+void RenderingWindowX11::setFullscreen( FullscreenMode fullscreenMode ) {
+    if( fullscreenMode.custom )
+        throwNotImplemented();
+
     setDimensionsConstraint( nullptr );
     setFullscreen( true );
 

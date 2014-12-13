@@ -1,22 +1,17 @@
 #pragma once
 
 #include <storm/display.h>
+#include <storm/platform/win/api_win.h>
 
 namespace storm {
 
 class DisplayWin : public Display {
 public:
-    static DisplayWin* getInstance();
-
+    virtual Mode getDefaultMode() const;
     virtual std::vector<Mode> getSupportedModes() const;
 
-    virtual const Mode& getCurrentMode() const;
-    virtual void setCurrentMode( const Mode& );
-
 private:
-    DisplayWin();
-
-    Mode _currentMode;
+    static Mode convertMode( const DEVMODE& );
 };
 
 }

@@ -7,20 +7,17 @@ namespace storm {
 class Display {
 public:
     struct Mode {
-        int width;
-        int height;
-        int refreshRate;
-        int colorDepth;
+        unsigned int width;
+        unsigned int height;
+        unsigned int refreshRate;
     };
 
     static Display* getInstance();
 
-    virtual ~Display() { }
+    virtual ~Display() {}
 
+    virtual Mode getDefaultMode() const = 0;
     virtual std::vector<Mode> getSupportedModes() const = 0;
-
-    virtual const Mode& getCurrentMode() const = 0;
-    virtual void setCurrentMode( const Mode& ) = 0;
 };
 
 }
