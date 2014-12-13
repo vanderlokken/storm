@@ -6,7 +6,7 @@
 
 namespace storm {
 
-EventLoopX11::EventLoopX11( Display *display ) :
+EventLoopX11::EventLoopX11( XDisplay *display ) :
     _display( display )
 {
 }

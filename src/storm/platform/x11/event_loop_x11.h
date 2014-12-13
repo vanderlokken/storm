@@ -7,6 +7,7 @@
 #include <storm/event_loop_common.h>
 #include <storm/noncopyable.h>
 #include <storm/observer_list.h>
+#include <storm/platform/x11/display_connection_x11.h>
 
 namespace storm {
 
@@ -29,7 +30,7 @@ public:
         std::map<EventType, Callback> onEvent;
     };
 
-    explicit EventLoopX11( Display *display );
+    explicit EventLoopX11( XDisplay *display );
     static EventLoopX11* getInstance();
 
     virtual void processEvents();
@@ -38,7 +39,7 @@ private:
     void addListener( const Listener* );
     void removeListener( const Listener* );
 
-    Display *_display;
+    XDisplay *_display;
 
     ObserverList<Listener> _listeners;
 };

@@ -6,6 +6,7 @@
 
 #include <storm/keyboard_common.h>
 #include <storm/noncopyable.h>
+#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/platform/x11/event_loop_x11.h>
 #include <storm/platform/x11/rendering_window_x11.h>
 
@@ -28,7 +29,7 @@ private:
 class InputMethodHandleX11 {
     NONCOPYABLE( InputMethodHandleX11 );
 public:
-    explicit InputMethodHandleX11( Display *display );
+    explicit InputMethodHandleX11( XDisplay *display );
     ~InputMethodHandleX11();
 
     operator XIM () const {

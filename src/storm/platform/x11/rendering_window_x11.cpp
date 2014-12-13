@@ -18,7 +18,7 @@ const long _NET_WM_STATE_ADD = 1;
 const long _NET_WM_STATE_TOGGLE = 2;
 }
 
-RenderingWindowX11::RenderingWindowX11( Display *display ) :
+RenderingWindowX11::RenderingWindowX11( XDisplay *display ) :
     _handle( None ), _display( display ), _fullscreen( false )
 {
     const int defaultScreen = ::XDefaultScreen( _display );

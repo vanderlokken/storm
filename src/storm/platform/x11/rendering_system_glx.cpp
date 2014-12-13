@@ -6,7 +6,7 @@
 
 namespace storm {
 
-RenderingSystemGlx::RenderingSystemGlx( Display *display, Window window ) :
+RenderingSystemGlx::RenderingSystemGlx( XDisplay *display, Window window ) :
     _display( display ), _window( window )
 {
     auto address = ::glXGetProcAddressARB(

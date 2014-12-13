@@ -18,12 +18,12 @@ struct DisplayX11 {
         ::XCloseDisplay( handle );
     }
 
-    Display *handle;
+    XDisplay *handle;
 };
 
 }
 
-Display* getDisplayHandleX11() {
+XDisplay* getDisplayHandleX11() {
     static const DisplayX11 display;
     return display.handle;
 }

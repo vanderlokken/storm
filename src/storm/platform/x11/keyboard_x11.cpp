@@ -21,7 +21,7 @@ CharacterConversionDescriptor::~CharacterConversionDescriptor() {
     iconv_close( _descriptor );
 }
 
-InputMethodHandleX11::InputMethodHandleX11( Display *display ) {
+InputMethodHandleX11::InputMethodHandleX11( XDisplay *display ) {
     _handle = ::XOpenIM(
         display,
         /* resourceDatabase = */ 0,
@@ -116,7 +116,7 @@ KeyboardX11::KeyboardX11( RenderingWindowX11 *renderingWindow ) :
     };
 
     _eventListener.onEvent[KeyRelease] = [=]( const XEvent &event ) {
-        Display *display = getDisplayHandleX11();
+        XDisplay *display = getDisplayHandleX11();
 
         // Ignore fake KeyRelease events generated during key repetition.
         ::XSync( display, /*discardQueuedEvents = */ false );

@@ -3,6 +3,7 @@
 #include <storm/noncopyable.h>
 #include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
+#include <storm/platform/x11/display_connection_x11.h>
 
 // To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
 #define __gl_h_
@@ -17,14 +18,14 @@ class RenderingSystemGlx : public RenderingSystemOgl {
 public:
     static RenderingSystemGlx* getInstance();
 
-    RenderingSystemGlx( Display *display, Window window );
+    RenderingSystemGlx( XDisplay *display, Window window );
     ~RenderingSystemGlx();
 
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
 private:
-    Display *_display;
+    XDisplay *_display;
     Window _window;
 
     GLXContext _context;

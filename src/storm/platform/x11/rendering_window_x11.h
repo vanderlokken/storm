@@ -4,6 +4,7 @@
 
 #include <storm/noncopyable.h>
 #include <storm/observer_list.h>
+#include <storm/platform/x11/display_connection_x11.h>
 #include <storm/platform/x11/event_loop_x11.h>
 #include <storm/rendering_window.h>
 
@@ -14,7 +15,7 @@ class RenderingWindowX11 : public RenderingWindow {
 public:
     static RenderingWindowX11* getInstance();
 
-    explicit RenderingWindowX11( Display *display );
+    explicit RenderingWindowX11( XDisplay *display );
     ~RenderingWindowX11();
 
     virtual void addObserver( const Observer* );
@@ -41,7 +42,7 @@ private:
     void setDimensionsConstraint( const Dimensions *dimensions );
 
     Window _handle;
-    Display *_display;
+    XDisplay *_display;
 
     bool _fullscreen;
 

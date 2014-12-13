@@ -2,8 +2,11 @@
 
 #include <X11/Xlib.h>
 
+// Use an alias to avoid name clashes with storm::Display.
+typedef Display XDisplay;
+
 namespace storm {
 
-Display* getDisplayHandleX11();
+XDisplay* getDisplayHandleX11();
 
 }
