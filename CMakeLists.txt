@@ -147,6 +147,8 @@ elseif(UNIX)
     set(storm_platform_sources
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.cpp
