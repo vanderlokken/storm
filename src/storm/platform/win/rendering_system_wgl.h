@@ -42,6 +42,9 @@ public:
 
     virtual void endFrameRendering();
 
+    virtual bool isVsyncEnabled() const;
+    virtual void setVsyncEnabled( bool enabled );
+
 private:
     explicit RenderingSystemWgl( HWND windowHandle );
 

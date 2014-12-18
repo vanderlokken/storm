@@ -62,6 +62,19 @@ void RenderingSystemGlx::endFrameRendering() {
     ::glXSwapBuffers( _display, _window );
 }
 
+bool RenderingSystemGlx::isVsyncEnabled() const {
+    unsigned int interval = 0;
+    ::glXQueryDrawable(
+        ::glXGetCurrentDisplay(),
+        ::glXGetCurrentDrawable(),
+        GLX_SWAP_INTERVAL_EXT, &interval );
+    return interval != 0;
+}
+
+void RenderingSystemGlx::setVsyncEnabled( bool ) {
+    // TODO: implement
+}
+
 RenderingSystemGlx* RenderingSystemGlx::getInstance() {
     const auto create = [] {
         Window window = RenderingWindowX11::getInstance()->getHandle();

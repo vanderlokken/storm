@@ -24,6 +24,9 @@ public:
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
+    virtual bool isVsyncEnabled() const;
+    virtual void setVsyncEnabled( bool enabled );
+
 private:
     XDisplay *_display;
     Window _window;

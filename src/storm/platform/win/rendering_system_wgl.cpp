@@ -5,6 +5,15 @@
 #include <storm/throw_exception.h>
 
 // ----------------------------------------------------------------------------
+//  WGL_EXT_swap_control extension
+// ----------------------------------------------------------------------------
+
+typedef BOOL (APIENTRYP PFNWGLSWAPINTERVALEXTPROC) (int interval);
+typedef int (APIENTRYP PFNWGLGETSWAPINTERVALEXTPROC) ();
+
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
 //  WGL_ARB_create_context extension
 // ----------------------------------------------------------------------------
 
@@ -23,6 +32,23 @@ typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hSha
 // ----------------------------------------------------------------------------
 
 namespace storm {
+
+namespace {
+
+template<class FuntionPointer>
+FuntionPointer loadWglExtensionFunction(
+    const std::string &functionName, const std::string &extensionName )
+{
+    const FuntionPointer function = reinterpret_cast<FuntionPointer>(
+        ::wglGetProcAddress(functionName.c_str()) );
+    if( function )
+        return function;
+    else
+        throw SystemRequirementsNotMet() <<
+            "The '" + extensionName + "' extension is not supported";
+}
+
+} // namespace
 
 DeviceContextHandle::DeviceContextHandle( HWND windowHandle ) :
     _windowHandle( windowHandle ),
@@ -63,12 +89,8 @@ RenderingSystemWgl::RenderingSystemWgl( HWND windowHandle ) :
     compatibilityContext.install( _deviceContextHandle );
 
     const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
-        reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
-            ::wglGetProcAddress("wglCreateContextAttribsARB") );
-
-    if( !wglCreateContextAttribsARB )
-        throw SystemRequirementsNotMet() <<
-            "The 'WGL_ARB_create_context' extension is not supported";
+        loadWglExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
+            "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
 
     const int openGl_3_3_ContextAttributes[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -96,6 +118,20 @@ void RenderingSystemWgl::endFrameRendering() {
 
     if( !::SwapBuffers(_deviceContextHandle) )
         throwRuntimeError( "::SwapBuffers has failed" );
+}
+
+bool RenderingSystemWgl::isVsyncEnabled() const {
+    static const PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT =
+        loadWglExtensionFunction<PFNWGLGETSWAPINTERVALEXTPROC>(
+            "wglGetSwapIntervalEXT", "WGL_EXT_swap_control" );
+    return wglGetSwapIntervalEXT() != 0;
+}
+
+void RenderingSystemWgl::setVsyncEnabled( bool enabled ) {
+    static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
+        loadWglExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
+            "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
+    wglSwapIntervalEXT( enabled ? 1 : 0 );
 }
 
 void RenderingSystemWgl::selectPixelFormat() {

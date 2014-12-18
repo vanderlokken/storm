@@ -37,6 +37,8 @@ void RenderingSystemOgl::initialize() {
         }
     }
 
+    setVsyncEnabled( true );
+
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );

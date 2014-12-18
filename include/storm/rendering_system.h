@@ -21,6 +21,11 @@ public:
     virtual void beginFrameRendering() = 0;
     virtual void endFrameRendering() = 0;
 
+    // By default V-sync is enabled unless video driver overrides application
+    // settings.
+    virtual bool isVsyncEnabled() const = 0;
+    virtual void setVsyncEnabled( bool enabled ) = 0;
+
     virtual void renderMesh( Mesh::Pointer ) = 0;
 
     virtual Shader::Pointer getShader( Shader::Type ) const = 0;
