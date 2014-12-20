@@ -37,7 +37,6 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         return context.object and context.object.type == "MESH"
 
     def execute(self, context):
-
         self._context = context
 
         with open(self.filepath, "wb") as output_file:
@@ -77,8 +76,21 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
         bpy.ops.object.mode_set(mode="OBJECT")
 
-    def _export_attributes(self):
+    @property
+    def _vertex_groups_bones_mapping(self):
+        mapping = {}
 
+        armature = self._context.object.find_armature()
+        bones_names = [
+            bone.name for bone in armature.pose.bones] if armature else []
+
+        for vertex_group in self._context.object.vertex_groups:
+            mapping[vertex_group.index] = (bones_names.index(vertex_group.name)
+                if vertex_group.name in bones_names else None)
+
+        return mapping
+
+    def _export_attributes(self):
         attributes_export = [
             self.export_normals,
             self.export_blending_indices,
@@ -122,79 +134,71 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
             write_attribute(SemanticsBlendingWeights, Format3Float)
 
     def _export_mesh(self):
-
         mesh = self._context.object.to_mesh(
             scene=self._context.scene, apply_modifiers=True, settings="RENDER")
 
-        vertex_data = bytearray()
-        index_data = bytearray()
+        vertex_groups_bones_mapping = self._vertex_groups_bones_mapping
 
-        vertex_count = 0
-        index_count = 0
+        convert_coordinates = lambda vector: (vector[0], vector[2], -vector[1])
 
-        armature = self._context.object.find_armature()
-        bones_names = [
-            bone.name for bone in armature.pose.bones] if armature else []
-
-        def bone_index_by_vertex_group_index(index):
-            name = self._context.object.vertex_groups[index].name
-            return bones_names.index(name) if name in bones_names else None
-
+        polygon_vertex_pairs = []
         for polygon in mesh.polygons:
-
             if polygon.hide:
                 continue
-
             for index in polygon.vertices:
+                polygon_vertex_pairs.append((polygon, mesh.vertices[index]))
 
-                vertex = mesh.vertices[index]
-                vertex_count += 1
+        vertex_data = bytearray()
+
+        for polygon, vertex in polygon_vertex_pairs:
+            vertex_data += struct.pack("<fff", *convert_coordinates(vertex.co))
+
+            if self.export_normals:
+                vertex_data += struct.pack("<fff", *convert_coordinates(
+                    vertex.normal if polygon.use_smooth else polygon.normal))
+
+            if self.export_blending_indices:
+                indices = [vertex_groups_bones_mapping[group.group] for
+                    group in vertex.groups]
+                indices = [index for index in indices if index is not None]
+
+                while len(indices) < 4:
+                    indices.append(0)
 
                 vertex_data += struct.pack(
-                    "<fff", vertex.co[0], vertex.co[2], -vertex.co[1])
+                    "<BBBB", indices[0], indices[1], indices[2], indices[3])
 
-                if self.export_normals:
-                    normal =\
-                        vertex.normal if polygon.use_smooth else polygon.normal
-                    vertex_data += struct.pack(
-                        "<fff", normal[0], normal[2], -normal[1])
+            if self.export_blending_weights:
+                weights = [group.weight for group in vertex.groups if
+                    vertex_groups_bones_mapping[group.group] is not None]
 
-                if self.export_blending_indices:
-                    indices = [
-                        bone_index_by_vertex_group_index(group.group) for
-                        group in vertex.groups]
-                    indices = [index for index in indices if index is not None]
+                while len(weights) < 3:
+                    weights.append(0)
 
-                    while len(indices) < 4:
-                        indices.append(0)
+                weights = [weight / (sum(weights) or 1) for weight in weights]
 
-                    vertex_data += struct.pack(
-                        "<BBBB", indices[0], indices[1], indices[2], indices[3])
+                vertex_data += struct.pack(
+                    "<fff", weights[0], weights[1], weights[2])
 
-                if self.export_blending_weights:
-                    weights = [
-                        group.weight for group in vertex.groups if
-                            bone_index_by_vertex_group_index(group.group) is not
-                            None]
+        vertex_number = len(polygon_vertex_pairs)
 
-                    while len(weights) < 3:
-                        weights.append(0)
-
-                    weights = [
-                        weight / (sum(weights) or 1) for weight in weights]
-
-                    vertex_data += struct.pack(
-                        "<fff", weights[0], weights[1], weights[2])
-
-                index_data += struct.pack("<H", index_count)
-                index_count += 1
-
-        vertex_size = int(len(vertex_data) / vertex_count)
-        index_size = int(len(index_data) / index_count)
+        vertex_size = int(len(vertex_data) / vertex_number)
 
         self._file.write(struct.pack("<B", vertex_size))
         self._file.write(struct.pack("<I", len(vertex_data)))
         self._file.write(vertex_data)
+
+        index_data = bytearray()
+
+        if vertex_number <= (2 ** 16 - 1):
+            index_data += struct.pack(
+                "<{0}H".format(vertex_number), *range(vertex_number))
+        else:
+            index_data += struct.pack(
+                "<{0}I".format(vertex_number), *range(vertex_number))
+
+        index_size = int(len(index_data) / vertex_number)
+
         self._file.write(struct.pack("<B", index_size))
         self._file.write(struct.pack("<I", len(index_data)))
         self._file.write(index_data)
