@@ -77,7 +77,11 @@ inline Vector Vector::operator - () const {
 }
 
 inline float Vector::getLength() const {
-    return std::sqrt( x * x + y * y + z * z );
+    return std::sqrt( getSquaredLength() );
+}
+
+inline float Vector::getSquaredLength() const {
+    return x * x + y * y + z * z;
 }
 
 inline void Vector::normalize() {

@@ -19,6 +19,7 @@ struct Vector {
     Vector operator - () const;
 
     float getLength() const;
+    float getSquaredLength() const;
 
     void normalize();
     Vector getNormalized() const;

@@ -28,6 +28,7 @@ struct Quaternion {
     Matrix toRotationMatrix() const;
 
     static Quaternion fromAxisAngle( const Vector&, float );
+    static Quaternion fromAxes( const Vector&, const Vector& );
     static Quaternion slerp(
         const Quaternion&, const Quaternion&, float );
 

@@ -141,6 +141,16 @@ inline Quaternion Quaternion::fromAxisAngle(
         cos(angle / 2) );
 }
 
+inline Quaternion Quaternion::fromAxes( const Vector &from, const Vector &to ) {
+    const Vector crossProduct = Vector::getCrossProduct( from, to );
+    const float dotProduct = Vector::getDotProduct( from, to );
+    return Quaternion(
+        crossProduct.x,
+        crossProduct.y,
+        crossProduct.z,
+        sqrt(from.getSquaredLength() * to.getSquaredLength()) + dotProduct );
+}
+
 inline Quaternion Quaternion::slerp(
     const Quaternion &first, const Quaternion &second, float position )
 {
