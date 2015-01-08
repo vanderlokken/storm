@@ -26,11 +26,13 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     filename_ext = ".smesh"
 
     export_normals = bpy.props.BoolProperty(
-        name="Export Normals")
+        name="Export normals")
+    export_texture_coordinates = bpy.props.BoolProperty(
+        name="Export texture coordinates")
     export_blending_indices = bpy.props.BoolProperty(
-        name="Export Blending Indices")
+        name="Export blending indices")
     export_blending_weights = bpy.props.BoolProperty(
-        name="Export Blending Weights")
+        name="Export blending weights")
 
     @classmethod
     def poll(cls, context):
@@ -93,6 +95,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     def _export_attributes(self):
         attributes_export = [
             self.export_normals,
+            self.export_texture_coordinates,
             self.export_blending_indices,
             self.export_blending_weights]
 
@@ -128,6 +131,8 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         write_attribute(SemanticsPosition, Format3Float)
         if self.export_normals:
             write_attribute(SemanticsNormal, Format3Float)
+        if self.export_texture_coordinates:
+            write_attribute(SemanticsTextureCoordinates, Format2Float)
         if self.export_blending_indices:
             write_attribute(SemanticsBlendingIndices, Format4Uint8)
         if self.export_blending_weights:
@@ -141,21 +146,30 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
         convert_coordinates = lambda vector: (vector[0], vector[2], -vector[1])
 
-        polygon_vertex_pairs = []
+        polygon_loop_pairs = []
         for polygon in mesh.polygons:
             if polygon.hide:
                 continue
-            for index in polygon.vertices:
-                polygon_vertex_pairs.append((polygon, mesh.vertices[index]))
+            for loop_index in polygon.loop_indices:
+                polygon_loop_pairs.append((polygon, mesh.loops[loop_index]))
 
         vertex_data = bytearray()
 
-        for polygon, vertex in polygon_vertex_pairs:
+        for polygon, loop in polygon_loop_pairs:
+            vertex = mesh.vertices[loop.vertex_index]
+
             vertex_data += struct.pack("<fff", *convert_coordinates(vertex.co))
 
             if self.export_normals:
                 vertex_data += struct.pack("<fff", *convert_coordinates(
                     vertex.normal if polygon.use_smooth else polygon.normal))
+
+            if self.export_texture_coordinates:
+                if mesh.uv_layers:
+                    vertex_data += struct.pack(
+                        "<ff", *mesh.uv_layers[0].data[loop.index].uv)
+                else:
+                    vertex_data += struct.pack("<ff", 0, 0)
 
             if self.export_blending_indices:
                 indices = [vertex_groups_bones_mapping[group.group] for
@@ -180,7 +194,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
                 vertex_data += struct.pack(
                     "<fff", weights[0], weights[1], weights[2])
 
-        vertex_number = len(polygon_vertex_pairs)
+        vertex_number = len(polygon_loop_pairs)
 
         vertex_size = int(len(vertex_data) / vertex_number)
 
