@@ -360,6 +360,42 @@ Backbuffer::Pointer RenderingSystemOgl::getBackbuffer() const {
     return _backbuffer;
 }
 
+std::string RenderingSystemOgl::getDebugMessageLog() const {
+    std::string log;
+
+    auto getIntegerParameter = []( GLenum parameter ) {
+        GLint parameterValue = 0;
+        ::glGetIntegerv( parameter, &parameterValue );
+        checkResult( "::glGetIntegerv" );
+        return parameterValue;
+    };
+
+    if( getOpenGlSupportStatus().KHR_debug ) {
+        GLint messageCount = getIntegerParameter( GL_DEBUG_LOGGED_MESSAGES );
+        while( messageCount-- ) {
+            std::string message(
+                getIntegerParameter(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH), 0 );
+
+            ::glGetDebugMessageLog(
+                /* messageCount = */ 1,
+                message.size(),
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                &message[0] );
+            checkResult( "::glGetDebugMessageLog" );
+
+            // Remove null character.
+            message.erase( message.size() - 1 );
+
+            log += message + '\n';
+        }
+    }
+    return log;
+}
+
 void RenderingSystemOgl::installOpenGlContext() {
     // OpenGL context is installed when the rendering system is being created
     RenderingSystem::getInstance();

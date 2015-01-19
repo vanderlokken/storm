@@ -43,6 +43,8 @@ public:
 
     virtual Backbuffer::Pointer getBackbuffer() const;
 
+    virtual std::string getDebugMessageLog() const;
+
     // This method should be called to prevent situations when OpenGL API is
     // being accessed with no context being installed.
     static void installOpenGlContext();

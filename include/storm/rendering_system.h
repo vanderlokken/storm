@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <storm/backbuffer.h>
 #include <storm/blending_technique.h>
 #include <storm/color.h>
@@ -53,6 +55,8 @@ public:
     virtual void clearStencilBuffer( unsigned int stencil = 0 ) = 0;
 
     virtual Backbuffer::Pointer getBackbuffer() const = 0;
+
+    virtual std::string getDebugMessageLog() const = 0;
 };
 
 }
