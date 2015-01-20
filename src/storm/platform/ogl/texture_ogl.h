@@ -18,6 +18,8 @@ public:
 
     virtual void getTexels( unsigned int mipLevel, void *texels ) const;
     virtual void setTexels( const Region &region, const void *texels );
+    virtual void setTexelsCompressed(
+        const Region &region, const void *texels );
 
     virtual void generateMipMap();
 
@@ -36,6 +38,7 @@ private:
         GLenum internalFormat;
         GLenum format;
         GLenum type;
+        bool compressed;
     };
 
     static TexelDescription selectTexelDescription( Format );

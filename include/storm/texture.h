@@ -18,7 +18,13 @@ public:
         DepthUint16,
         DepthUint24,
         DepthUint32,
-        DepthUint24StencilUint8
+        DepthUint24StencilUint8,
+        // DXT-compressed texture formats. Requirements: "layout" must be
+        // "Layout::Separate2d".
+        RgbDxt1,
+        ArgbDxt1,
+        ArgbDxt3,
+        ArgbDxt5
     };
 
     enum class Layout {
@@ -86,6 +92,10 @@ public:
 
     virtual ~Texture() { }
 
+    // Requirements for DXT-compressed textures: "texels" buffer size must be
+    // at least ceil( width / 4 ) * ceil( height / 4 ) * blockSize;
+    // "region.x", "region.y", "region.width" and "region.height" must be
+    // multiples of four unless the specified region describes entire mip-level.
     virtual void getTexels( unsigned int mipLevel, void *texels ) const = 0;
      inline void setTexels( unsigned int mipLevel, const void *texels );
     virtual void setTexels( const Region &region, const void *texels ) = 0;

@@ -2,9 +2,21 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
+
+// ----------------------------------------------------------------------------
+//  EXT_texture_compression_s3tc extension
+// ----------------------------------------------------------------------------
+
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+
+// ----------------------------------------------------------------------------
 
 namespace storm {
 
@@ -151,9 +163,14 @@ void TextureOgl::getTexels( unsigned int mipLevel, void *texels ) const {
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
-    ::glGetTexImage( _target, mipLevel,
-        _texelDescription.format, _texelDescription.type, texels );
-    checkResult( "::glGetTexImage" );
+    if( !_texelDescription.compressed ) {
+        ::glGetTexImage( _target, mipLevel,
+            _texelDescription.format, _texelDescription.type, texels );
+        checkResult( "::glGetTexImage" );
+    } else {
+        ::glGetCompressedTexImage( _target, mipLevel, texels );
+        checkResult( "::glGetCompressedTexImage" );
+    }
 }
 
 void TextureOgl::setTexels( const Region &region, const void *texels ) {
@@ -162,6 +179,11 @@ void TextureOgl::setTexels( const Region &region, const void *texels ) {
         _description.layout != Layout::Layered2dMsaa );
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
+
+    if( _texelDescription.compressed ) {
+        setTexelsCompressed( region, texels );
+        return;
+    }
 
     switch( _description.layout ) {
     case Layout::Separate1d:
@@ -212,6 +234,57 @@ void TextureOgl::setTexels( const Region &region, const void *texels ) {
     default:
         throwNotImplemented();
     }
+}
+
+void TextureOgl::setTexelsCompressed(
+    const Region &region, const void *texels )
+{
+    storm_assert( _description.layout == Layout::Separate2d );
+
+    struct BlockDescription {
+        GLsizei width;
+        GLsizei height;
+        GLsizei size;
+    };
+
+    static const std::map<Format, BlockDescription> formatBlockDescriptions = {
+        {Format::RgbDxt1, {4, 4, 8}},
+        {Format::ArgbDxt1, {4, 4, 8}},
+        {Format::ArgbDxt3, {4, 4, 16}},
+        {Format::ArgbDxt5, {4, 4, 16}}
+    };
+
+    const BlockDescription &block =
+        formatBlockDescriptions.at( _description.format );
+
+    const unsigned int mipLevelWidth =
+        std::max( _description.width >> region.mipLevel, 1u );
+    const unsigned int mipLevelHeight =
+        std::max( _description.height >> region.mipLevel, 1u );
+
+    storm_assert( (region.x % block.width) == 0 );
+    storm_assert( (region.y % block.height) == 0 );
+    storm_assert( (region.width % block.width) == 0 ||
+        region.x + region.width == mipLevelWidth );
+    storm_assert( (region.height % block.height) == 0 ||
+        region.y + region.height == mipLevelHeight );
+
+    const GLsizei dataSize =
+        static_cast<GLsizei>( ceil(1.0f * region.width / block.width) ) *
+        static_cast<GLsizei>( ceil(1.0f * region.height / block.height) ) *
+        block.size;
+
+    ::glCompressedTexSubImage2D(
+        _target,
+        region.mipLevel,
+        region.x,
+        region.y,
+        region.width,
+        region.height,
+        _texelDescription.internalFormat,
+        dataSize,
+        texels );
+    checkResult( "::glCompressedTexSubImage2D" );
 }
 
 void TextureOgl::generateMipMap() {
@@ -277,6 +350,14 @@ void TextureOgl::validateDescription( const Description &description ) {
     default:
         storm_assert_unreachable( "Unexpected layout value" );
     }
+
+    if( description.format == Format::RgbDxt1 ||
+        description.format == Format::ArgbDxt1 ||
+        description.format == Format::ArgbDxt3 ||
+        description.format == Format::ArgbDxt5 )
+    {
+        storm_assert( description.layout == Layout::Separate2d );
+    }
 }
 
 GLenum TextureOgl::selectTarget( Layout layout ) {
@@ -309,17 +390,25 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
 {
     switch( format ) {
     case Format::RgbUint8:
-        return { GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE };
+        return { GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE, false };
     case Format::ArgbUint8:
-        return { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE };
+        return { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint16:
-        return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+        return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint24:
-        return { GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+        return { GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint32:
-        return { GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE };
+        return { GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint24StencilUint8:
-        return { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE };
+        return { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE, false };
+    case Format::RgbDxt1:
+        return { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_RGB, 0, true };
+    case Format::ArgbDxt1:
+        return { GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_RGBA, 0, true };
+    case Format::ArgbDxt3:
+        return { GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_RGBA, 0, true };
+    case Format::ArgbDxt5:
+        return { GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, 0, true };
     default:
         storm_assert_unreachable( "Unexpected format value" );
         return { 0 };

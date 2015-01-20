@@ -5,6 +5,17 @@
 
 #include <storm/platform/ogl/check_result_ogl.h>
 
+// ----------------------------------------------------------------------------
+//  EXT_texture_compression_s3tc extension
+// ----------------------------------------------------------------------------
+
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+
+// ----------------------------------------------------------------------------
+
 namespace storm {
 
 namespace {
@@ -89,7 +100,12 @@ PixelDescription getCompatiblePixelDescription( GLenum internalFormat ) {
         {GL_DEPTH_COMPONENT32F, {GL_DEPTH_COMPONENT, GL_FLOAT}},
         {GL_DEPTH24_STENCIL8, {GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8}},
         {GL_DEPTH32F_STENCIL8, {GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV}},
-        {GL_STENCIL_INDEX8, {GL_STENCIL_INDEX, GL_UNSIGNED_BYTE}}
+        {GL_STENCIL_INDEX8, {GL_STENCIL_INDEX, GL_UNSIGNED_BYTE}},
+
+        {GL_COMPRESSED_RGB_S3TC_DXT1_EXT, {GL_RGB, GL_UNSIGNED_BYTE}},
+        {GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
+        {GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
+        {GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}}
     };
     storm_assert( mapping.count(internalFormat) );
     return mapping.at( internalFormat );
@@ -110,14 +126,6 @@ PixelDescription getCompatiblePixelDescription( GLenum internalFormat ) {
 // GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM
 // GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT
 // GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT
-// GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-// GL_COMPRESSED_SRGB_S3TC_DXT1_EXT
-// GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-// GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-// GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-// GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-// GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-// GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
 
 }
 
