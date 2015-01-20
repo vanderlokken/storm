@@ -1,6 +1,8 @@
 #pragma once
 
+#include <istream>
 #include <memory>
+#include <string>
 
 #include <storm/resource_type.h>
 
@@ -11,6 +13,11 @@ namespace storm {
 class Texture {
 public:
     typedef std::shared_ptr<Texture> Pointer;
+
+    enum class FileFormat {
+        Dds,
+        DdsStrict
+    };
 
     enum class Format {
         RgbUint8,
@@ -89,6 +96,8 @@ public:
     };
 
     static Pointer create( const Description&, const void *texels = nullptr );
+    static Pointer load( std::istream &stream, FileFormat fileFormat );
+    static Pointer load( const std::string &filename, FileFormat fileFormat );
 
     virtual ~Texture() { }
 

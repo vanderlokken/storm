@@ -57,6 +57,7 @@ set(storm_includes
 )
 
 set(storm_common_sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/binary_input_stream.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/blending_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
@@ -78,6 +79,7 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rendering_system_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/sampler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/shader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/throw_exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
 )
