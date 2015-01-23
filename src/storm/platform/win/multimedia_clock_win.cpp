@@ -1,18 +1,16 @@
 #include <storm/platform/win/multimedia_clock_win.h>
 
-#include <memory>
-
+#include <storm/clock.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-MultimediaClockWin::MultimediaClockWin()
-    : _time( 0 ),
-      _timeChange( 0 ),
-      _systemTime( 0 ),
-      _timeBeginPeriod( nullptr ),
-      _timeEndPeriod( nullptr ),
-      _timeGetTime( nullptr )
+MultimediaClockWin::MultimediaClockWin() :
+    _applicationTime( 0 ),
+    _systemTime( 0 ),
+    _timeBeginPeriod( nullptr ),
+    _timeEndPeriod( nullptr ),
+    _timeGetTime( nullptr )
 {
     const HMODULE library = ::LoadLibrary( L"winmm.dll" );
     if( !library ) {
@@ -35,44 +33,32 @@ MultimediaClockWin::MultimediaClockWin()
     if( result != TIMERR_NOERROR ) {
         throwRuntimeError( "::timeBeginPeriod has failed" );
     }
-    return;
+
+    _systemTime = _timeGetTime();
 }
 
 MultimediaClockWin::~MultimediaClockWin() {
     _timeEndPeriod( Period );
-    return;
 }
 
-void MultimediaClockWin::update() {
-    DWORD currentSystemTime = _timeGetTime();
+DWORD MultimediaClockWin::now() {
+    const DWORD systemTime = _timeGetTime();
 
-    if( _systemTime != 0 ) {
-        if( currentSystemTime >= _systemTime ) {
-            _timeChange = currentSystemTime - _systemTime;
-        } else {
-            _timeChange = ( 0xFFFFFFFF - _systemTime ) + currentSystemTime;
-        }
-        _time += _timeChange;
-    }
-    _systemTime = currentSystemTime;
-    return;
+    if( systemTime >= _systemTime )
+        _applicationTime += systemTime - _systemTime;
+    else
+        _applicationTime += (0xFFFFFFFF - _systemTime) + systemTime;
+
+    _systemTime = systemTime;
+
+    return _applicationTime;
 }
 
-Clock::Time MultimediaClockWin::getTime() const {
-    return _time;
+namespace internal {
+high_resolution_clock::time_point high_resolution_clock::now() {
+    static MultimediaClockWin clock;
+    return time_point( duration(clock.now()) );
 }
-
-Clock::Time MultimediaClockWin::getTimeChange() const {
-    return _timeChange;
-}
-
-MultimediaClockWin* MultimediaClockWin::getInstance() {
-    static const std::unique_ptr<MultimediaClockWin> instance( new MultimediaClockWin );
-    return instance.get();
-}
-
-Clock* Clock::getInstance() {
-    return MultimediaClockWin::getInstance();
-}
+} // namespace internal
 
 }

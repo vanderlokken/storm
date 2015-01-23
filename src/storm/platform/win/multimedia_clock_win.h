@@ -1,29 +1,20 @@
 #pragma once
 
-#include <storm/clock.h>
 #include <storm/platform/win/api_win.h>
 
 #include <mmsystem.h>
 
 namespace storm {
 
-class MultimediaClockWin : public Clock {
+class MultimediaClockWin {
 public:
-    static MultimediaClockWin* getInstance();
+    MultimediaClockWin();
+    ~MultimediaClockWin();
 
-    virtual ~MultimediaClockWin();
-
-    virtual void update();
-
-    virtual Time getTime() const;
-    virtual Time getTimeChange() const;
+    DWORD now();
 
 private:
-    MultimediaClockWin();
-
-    Time _time;
-    Time _timeChange;
-
+    DWORD _applicationTime;
     DWORD _systemTime;
 
     typedef MMRESULT (WINAPI *TimeBeginPeriodPointer)( UINT );

@@ -30,12 +30,12 @@ public:
     }
 
     void update() {
-        storm::Clock *clock = storm::Clock::getInstance();
-
-        clock->update();
+        const storm::Clock::TimePoint timePoint = storm::Clock::now();
+        const storm::Clock::TimeDelta timeDelta = timePoint - _timePoint;
+        _timePoint = timePoint;
 
         const float rotationSpeed = 0.001f;
-        _meshRotationAngle += clock->getTimeChange() * rotationSpeed;
+        _meshRotationAngle += timeDelta.count() * rotationSpeed;
 
         const storm::Quaternion rotationQuaternion =
             storm::Quaternion::fromAxisAngle( {0, 1, 0}, _meshRotationAngle ) *
@@ -121,6 +121,8 @@ private:
     storm::Sampler::Pointer _sampler;
 
     storm::Buffer::Pointer _constantBuffer;
+
+    storm::Clock::TimePoint _timePoint;
 
     float _meshRotationAngle;
 };

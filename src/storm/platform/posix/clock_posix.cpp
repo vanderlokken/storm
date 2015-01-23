@@ -1,51 +1,26 @@
-#include <storm/platform/posix/clock_posix.h>
+#include <storm/clock.h>
 
-#include <memory>
+#include <sys/time.h>
 
 namespace storm {
 
-ClockPosix::ClockPosix()
-    : _systemTime( 0 ),
-      _previousSystemTime( 0 ),
-      _initialSystemTime( 0 )
-{
+namespace {
+std::chrono::microseconds getSystemTime() {
     timeval time;
     gettimeofday( &time, nullptr );
 
-    _initialSystemTime = time.tv_sec * MicrosecondsPerSecond + time.tv_usec;
-
-    _systemTime = _initialSystemTime;
-    _previousSystemTime = _initialSystemTime;
-    return;
+    return std::chrono::seconds( time.tv_sec ) +
+        std::chrono::microseconds( time.tv_usec );
 }
+} // namespace
 
-void ClockPosix::update() {
-    timeval time;
-    gettimeofday( &time, nullptr );
-
-    uint64_t newSystemTime = time.tv_sec * MicrosecondsPerSecond + time.tv_usec;
-
-    _previousSystemTime = _systemTime;
-    if( newSystemTime - _systemTime >= MicrosecondsPerMillisecond )
-        _systemTime = newSystemTime;
-    return;
+namespace internal {
+high_resolution_clock::time_point high_resolution_clock::now() {
+    static const std::chrono::microseconds initialSystemTime = getSystemTime();
+    const std::chrono::microseconds systemTime = getSystemTime();
+    return time_point(
+        std::chrono::duration_cast<duration>(systemTime - initialSystemTime) );
 }
-
-Clock::Time ClockPosix::getTime() const {
-    return (_systemTime - _initialSystemTime) / MicrosecondsPerMillisecond;
-}
-
-Clock::Time ClockPosix::getTimeChange() const {
-    return (_systemTime - _previousSystemTime) / MicrosecondsPerMillisecond;
-}
-
-ClockPosix* ClockPosix::getInstance() {
-    static const std::unique_ptr<ClockPosix> instance( new ClockPosix );
-    return instance.get();
-}
-
-Clock* Clock::getInstance() {
-    return ClockPosix::getInstance();
-}
+} // namespace internal
 
 }

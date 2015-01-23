@@ -65,8 +65,6 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/event_loop_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/high_precision_clock.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
@@ -148,7 +146,6 @@ if(WIN32)
 elseif(UNIX)
     set(storm_platform_sources
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
