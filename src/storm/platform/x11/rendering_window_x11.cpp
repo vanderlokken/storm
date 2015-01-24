@@ -80,7 +80,7 @@ bool RenderingWindowX11::isFullscreen() const {
 }
 
 void RenderingWindowX11::setWindowed( Dimensions windowDimensions ) {
-    setDimensionsConstraint( &windowDimensions );
+    setDimensionsConstraint( windowDimensions );
     setFullscreen( false );
 
     ::XResizeWindow(
@@ -95,7 +95,7 @@ void RenderingWindowX11::setFullscreen( FullscreenMode fullscreenMode ) {
     if( fullscreenMode.custom )
         throwNotImplemented();
 
-    setDimensionsConstraint( nullptr );
+    setDimensionsConstraint( {0, 0} );
     setFullscreen( true );
 
     ::XMapWindow( _display, _handle );
@@ -229,16 +229,14 @@ void RenderingWindowX11::setFullscreen( bool fullscreen ) {
         &event );
 }
 
-void RenderingWindowX11::setDimensionsConstraint(
-    const Dimensions *dimensions )
-{
+void RenderingWindowX11::setDimensionsConstraint( Dimensions dimensions ) {
     if( XSizeHints *sizeHints = ::XAllocSizeHints() ) {
-        if( dimensions ) {
+        if( dimensions.width && dimensions.height ) {
             sizeHints->flags = PMinSize | PMaxSize;
             sizeHints->min_width = sizeHints->max_width =
-                static_cast<int>( dimensions->width );
+                static_cast<int>( dimensions.width );
             sizeHints->min_height = sizeHints->max_height =
-                static_cast<int>( dimensions->height );
+                static_cast<int>( dimensions.height );
         }
         ::XSetWMNormalHints( _display, _handle, sizeHints );
         ::XFree( sizeHints );

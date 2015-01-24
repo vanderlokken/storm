@@ -38,8 +38,8 @@ private:
     void installFocusHandlers();
     void installStateChangeHandlers();
 
-    void setFullscreen( bool );
-    void setDimensionsConstraint( const Dimensions *dimensions );
+    void setFullscreen( bool fullscreen );
+    void setDimensionsConstraint( Dimensions dimensions );
 
     Window _handle;
     XDisplay *_display;

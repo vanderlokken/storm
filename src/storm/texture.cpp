@@ -5,6 +5,7 @@
 
 #include <storm/binary_input_stream.h>
 #include <storm/exception.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
@@ -195,6 +196,8 @@ Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
             static_cast<size_t>(ceil(description.width / 4.0f)) *
             static_cast<size_t>(ceil(description.height / 4.0f)) * 16 );
         break;
+    default:
+        throwNotImplemented();
     }
 
     stream.read( texels.data(), texels.size() );
