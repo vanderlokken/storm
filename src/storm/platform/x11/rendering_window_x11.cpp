@@ -23,7 +23,7 @@ RenderingWindowX11::RenderingWindowX11( XDisplay *display ) :
 {
     const int defaultScreen = ::XDefaultScreen( _display );
 
-    const Window parentWindow = ::XRootWindow( _display, defaultScreen );
+    const Window parentWindow = ::XDefaultRootWindow( _display );
     const int x = 0;
     const int y = 0;
     const unsigned int width = 1;
@@ -223,7 +223,7 @@ void RenderingWindowX11::setFullscreen( bool fullscreen ) {
 
     ::XSendEvent(
         _display,
-        ::XRootWindow(_display, ::XDefaultScreen(_display)),
+        ::XDefaultRootWindow(_display ),
         /*propagate = */ false,
         /*eventMask = */ SubstructureNotifyMask | SubstructureRedirectMask,
         &event );
