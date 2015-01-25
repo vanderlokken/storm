@@ -13,5 +13,6 @@ System requirements (Linux):
 * GCC 4.8
 * OpenGL 3.3
 * libX11
+* libXi
 * libXrandr
 * libGL

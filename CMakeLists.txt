@@ -152,8 +152,12 @@ elseif(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/input_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/input_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/mouse_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/mouse_x11.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.cpp
