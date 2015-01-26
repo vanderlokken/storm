@@ -124,6 +124,7 @@ set(storm_ogl_sources
 if(WIN32)
     set(storm_platform_sources
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/api_win.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/clock_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.cpp
@@ -134,8 +135,6 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/multimedia_clock_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
