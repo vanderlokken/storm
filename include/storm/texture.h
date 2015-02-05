@@ -22,6 +22,8 @@ public:
     enum class Format {
         RgbUint8,
         ArgbUint8,
+        SrgbUint8,
+        AsrgbUint8,
         DepthUint16,
         DepthUint24,
         DepthUint32,
@@ -31,7 +33,11 @@ public:
         RgbDxt1,
         ArgbDxt1,
         ArgbDxt3,
-        ArgbDxt5
+        ArgbDxt5,
+        SrgbDxt1,
+        AsrgbDxt1,
+        AsrgbDxt3,
+        AsrgbDxt5
     };
 
     enum class Layout {

@@ -76,11 +76,11 @@ Texture::Format selectTextureFormat( const DdsPixelFormat &ddsPixelFormat ) {
     if( ddsPixelFormat.flags & DdsPixelFormatFlags::FourCC ) {
         switch( ddsPixelFormat.fourCC ) {
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24):
-            return Texture::Format::ArgbDxt1;
+            return Texture::Format::AsrgbDxt1;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24):
-            return Texture::Format::ArgbDxt3;
+            return Texture::Format::AsrgbDxt3;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24):
-            return Texture::Format::ArgbDxt5;
+            return Texture::Format::AsrgbDxt5;
         }
     }
 
@@ -185,13 +185,13 @@ Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
 
     std::vector<char> texels;
     switch( description.format ) {
-    case Texture::Format::ArgbDxt1:
+    case Texture::Format::AsrgbDxt1:
         texels.resize(
             static_cast<size_t>(ceil(description.width / 4.0f)) *
             static_cast<size_t>(ceil(description.height / 4.0f)) * 8 );
         break;
-    case Texture::Format::ArgbDxt3:
-    case Texture::Format::ArgbDxt5:
+    case Texture::Format::AsrgbDxt3:
+    case Texture::Format::AsrgbDxt5:
         texels.resize(
             static_cast<size_t>(ceil(description.width / 4.0f)) *
             static_cast<size_t>(ceil(description.height / 4.0f)) * 16 );

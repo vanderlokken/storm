@@ -7,16 +7,17 @@
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
-// ----------------------------------------------------------------------------
 //  EXT_texture_compression_s3tc extension
-// ----------------------------------------------------------------------------
-
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 
-// ----------------------------------------------------------------------------
+// EXT_texture_sRGB
+#define GL_COMPRESSED_SRGB_S3TC_DXT1_EXT  0x8C4C
+#define GL_COMPRESSED_SRGBA_S3TC_DXT1_EXT 0x8C4D
+#define GL_COMPRESSED_SRGBA_S3TC_DXT3_EXT 0x8C4E
+#define GL_COMPRESSED_SRGBA_S3TC_DXT5_EXT 0x8C4F
 
 namespace storm {
 
@@ -251,7 +252,11 @@ void TextureOgl::setTexelsCompressed(
         {Format::RgbDxt1, {4, 4, 8}},
         {Format::ArgbDxt1, {4, 4, 8}},
         {Format::ArgbDxt3, {4, 4, 16}},
-        {Format::ArgbDxt5, {4, 4, 16}}
+        {Format::ArgbDxt5, {4, 4, 16}},
+        {Format::SrgbDxt1, {4, 4, 8}},
+        {Format::AsrgbDxt1, {4, 4, 8}},
+        {Format::AsrgbDxt3, {4, 4, 16}},
+        {Format::AsrgbDxt5, {4, 4, 16}}
     };
 
     const BlockDescription &block =
@@ -354,7 +359,11 @@ void TextureOgl::validateDescription( const Description &description ) {
     if( description.format == Format::RgbDxt1 ||
         description.format == Format::ArgbDxt1 ||
         description.format == Format::ArgbDxt3 ||
-        description.format == Format::ArgbDxt5 )
+        description.format == Format::ArgbDxt5 ||
+        description.format == Format::SrgbDxt1 ||
+        description.format == Format::AsrgbDxt1 ||
+        description.format == Format::AsrgbDxt3 ||
+        description.format == Format::AsrgbDxt5 )
     {
         storm_assert( description.layout == Layout::Separate2d );
     }
@@ -393,6 +402,10 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
         return { GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE, false };
     case Format::ArgbUint8:
         return { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, false };
+    case Format::SrgbUint8:
+        return { GL_SRGB8_ALPHA8, GL_RGB, GL_UNSIGNED_BYTE, false };
+    case Format::AsrgbUint8:
+        return { GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint16:
         return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint24:
@@ -409,6 +422,14 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
         return { GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_RGBA, 0, true };
     case Format::ArgbDxt5:
         return { GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, 0, true };
+    case Format::SrgbDxt1:
+        return { GL_COMPRESSED_SRGB_S3TC_DXT1_EXT, GL_RGB, 0, true };
+    case Format::AsrgbDxt1:
+        return { GL_COMPRESSED_SRGBA_S3TC_DXT1_EXT, GL_RGBA, 0, true };
+    case Format::AsrgbDxt3:
+        return { GL_COMPRESSED_SRGBA_S3TC_DXT3_EXT, GL_RGBA, 0, true };
+    case Format::AsrgbDxt5:
+        return { GL_COMPRESSED_SRGBA_S3TC_DXT5_EXT, GL_RGBA, 0, true };
     default:
         storm_assert_unreachable( "Unexpected format value" );
         return { 0 };
