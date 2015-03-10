@@ -4,29 +4,36 @@
 
 namespace storm {
 
-BlendingTechniqueOgl::BlendingTechniqueOgl( const Description &description )
-    : _description( description ),
-      _operation( convertOperation(description.operation) ),
-      _sourceFactor( convertFactor(description.sourceFactor) ),
-      _destinationFactor( convertFactor(description.destinationFactor) )
+BlendingTechniqueOgl::BlendingTechniqueOgl( const Description &description ) :
+    _description( description )
 {
-    return;
+    _colorEquation.operation =
+        convertOperation( description.colorEquation.operation );
+    _colorEquation.sourceFactor =
+        convertFactor( description.colorEquation.sourceFactor );
+    _colorEquation.destinationFactor =
+        convertFactor( description.colorEquation.destinationFactor );
+
+    _alphaEquation.operation =
+        convertOperation( description.alphaEquation.operation );
+    _alphaEquation.sourceFactor =
+        convertFactor( description.alphaEquation.sourceFactor );
+    _alphaEquation.destinationFactor =
+        convertFactor( description.alphaEquation.destinationFactor );
 }
 
 const BlendingTechnique::Description& BlendingTechniqueOgl::getDescription() const {
     return _description;
 }
 
-GLenum BlendingTechniqueOgl::getOperation() const {
-    return _operation;
+BlendingTechniqueOgl::EquationOgl
+BlendingTechniqueOgl::getColorEquation() const {
+    return _colorEquation;
 }
 
-GLenum BlendingTechniqueOgl::getSourceFactor() const {
-    return _sourceFactor;
-}
-
-GLenum BlendingTechniqueOgl::getDestinationFactor() const {
-    return _destinationFactor;
+BlendingTechniqueOgl::EquationOgl
+BlendingTechniqueOgl::getAlphaEquation() const {
+    return _alphaEquation;
 }
 
 GLenum BlendingTechniqueOgl::convertOperation( Operation operation ) {

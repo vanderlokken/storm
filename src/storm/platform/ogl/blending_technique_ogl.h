@@ -7,22 +7,26 @@ namespace storm {
 
 class BlendingTechniqueOgl : public BlendingTechnique {
 public:
+    struct EquationOgl {
+        GLenum operation;
+        GLenum sourceFactor;
+        GLenum destinationFactor;
+    };
+
     BlendingTechniqueOgl( const Description& );
 
     virtual const Description& getDescription() const;
 
-    GLenum getOperation() const;
-    GLenum getSourceFactor() const;
-    GLenum getDestinationFactor() const;
+    EquationOgl getColorEquation() const;
+    EquationOgl getAlphaEquation() const;
 
 private:
     static GLenum convertOperation( Operation );
     static GLenum convertFactor( Factor );
 
     Description _description;
-    GLenum _operation;
-    GLenum _sourceFactor;
-    GLenum _destinationFactor;
+    EquationOgl _colorEquation;
+    EquationOgl _alphaEquation;
 };
 
 }
