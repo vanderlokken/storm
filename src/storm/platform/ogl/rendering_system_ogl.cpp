@@ -249,19 +249,25 @@ void RenderingSystemOgl::setBlendingTechnique(
     setBooleanGlState( GL_BLEND, blendingEnabled );
 
     if( blendingEnabled ) {
-        GLenum operation = nativeTechnique->getOperation();
-        GLenum sourceFactor = nativeTechnique->getSourceFactor();
-        GLenum destinationFactor = nativeTechnique->getDestinationFactor();
+        const BlendingTechniqueOgl::EquationOgl colorEquation =
+            nativeTechnique->getColorEquation();
+        const BlendingTechniqueOgl::EquationOgl alphaEquation =
+            nativeTechnique->getAlphaEquation();
 
-        ::glBlendEquation( operation );
-        checkResult( "::glBlendEquation" );
+        ::glBlendEquationSeparate(
+            colorEquation.operation,
+            alphaEquation.operation );
+        checkResult( "::glBlendEquationSeparate" );
 
-        ::glBlendFunc( sourceFactor, destinationFactor );
-        checkResult( "::glBlendFunc" );
+        ::glBlendFuncSeparate(
+            colorEquation.sourceFactor,
+            colorEquation.destinationFactor,
+            alphaEquation.sourceFactor,
+            alphaEquation.destinationFactor );
+        checkResult( "::glBlendFuncSeparate" );
     }
 
     _blendingTechnique = technique;
-    return;
 }
 
 const Rectangle& RenderingSystemOgl::getClippingRectangle() const {
