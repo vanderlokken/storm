@@ -45,6 +45,7 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         case Texture::Format::DepthUint16:
         case Texture::Format::DepthUint24:
         case Texture::Format::DepthUint32:
+        case Texture::Format::DepthFloat32:
             attachment = GL_DEPTH_ATTACHMENT;
             break;
         case Texture::Format::DepthUint24StencilUint8:

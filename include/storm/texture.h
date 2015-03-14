@@ -24,10 +24,22 @@ public:
         ArgbUint8,
         SrgbUint8,
         AsrgbUint8,
+        // 16-bit floating point formats.
+        RedFloat16,
+        RgFloat16,
+        RgbFloat16,
+        RgbaFloat16,
+        // 32-bit floating point formats.
+        RedFloat32,
+        RgFloat32,
+        RgbFloat32,
+        RgbaFloat32,
+        // Depth texture formats.
         DepthUint16,
         DepthUint24,
         DepthUint32,
         DepthUint24StencilUint8,
+        DepthFloat32,
         // DXT-compressed texture formats. Requirements: "layout" must be
         // "Layout::Separate2d".
         RgbDxt1,

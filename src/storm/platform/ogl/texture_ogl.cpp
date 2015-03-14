@@ -406,6 +406,22 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
         return { GL_SRGB8_ALPHA8, GL_RGB, GL_UNSIGNED_BYTE, false };
     case Format::AsrgbUint8:
         return { GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, false };
+    case Format::RedFloat16:
+        return { GL_R16F, GL_RED, GL_HALF_FLOAT, false };
+    case Format::RgFloat16:
+        return { GL_RG16F, GL_RG, GL_HALF_FLOAT, false };
+    case Format::RgbFloat16:
+        return { GL_RGB16F, GL_RGB, GL_HALF_FLOAT, false };
+    case Format::RgbaFloat16:
+        return { GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, false };
+    case Format::RedFloat32:
+        return { GL_R32F, GL_RED, GL_FLOAT, false };
+    case Format::RgFloat32:
+        return { GL_RG32F, GL_RG, GL_FLOAT, false };
+    case Format::RgbFloat32:
+        return { GL_RGB32F, GL_RGB, GL_FLOAT, false };
+    case Format::RgbaFloat32:
+        return { GL_RGBA32F, GL_RGBA, GL_FLOAT, false };
     case Format::DepthUint16:
         return { GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint24:
@@ -414,6 +430,8 @@ TextureOgl::TexelDescription TextureOgl::selectTexelDescription( Format format )
         return { GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, false };
     case Format::DepthUint24StencilUint8:
         return { GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE, false };
+    case Format::DepthFloat32:
+        return { GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, false };
     case Format::RgbDxt1:
         return { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_RGB, 0, true };
     case Format::ArgbDxt1:
