@@ -1262,6 +1262,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
                 &status.ARB_texture_storage_multisample
             },
             {
+                "GL_ARB_timer_query",
+                &status.ARB_timer_query
+            },
+            {
                 "GL_KHR_debug",
                 &status.KHR_debug
             }

@@ -41,6 +41,7 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/output_technique.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/quaternion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/quaternion.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/query.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rasterization_technique.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rectangle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/rendering_system.h
@@ -103,6 +104,8 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/output_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/output_technique_ogl.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/query_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/query_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rasterization_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rasterization_technique_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_system_ogl.cpp
