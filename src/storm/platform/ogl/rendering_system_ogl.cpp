@@ -245,15 +245,23 @@ void RenderingSystemOgl::setBlendingTechnique(
 
     auto nativeTechnique = std::static_pointer_cast< BlendingTechniqueOgl >( technique );
 
-    const bool blendingEnabled = static_cast< bool >( nativeTechnique );
+    const BlendingTechniqueOgl::EquationOgl colorEquation =
+        nativeTechnique->getColorEquation();
+    const BlendingTechniqueOgl::EquationOgl alphaEquation =
+        nativeTechnique->getAlphaEquation();
+
+    const bool blendingDisabled =
+        colorEquation.operation == GL_FUNC_ADD &&
+        alphaEquation.operation == GL_FUNC_ADD &&
+        colorEquation.sourceFactor == GL_ONE &&
+        alphaEquation.sourceFactor == GL_ONE &&
+        colorEquation.destinationFactor == GL_ZERO &&
+        alphaEquation.destinationFactor == GL_ZERO;
+    const bool blendingEnabled = !blendingDisabled;
+
     setBooleanGlState( GL_BLEND, blendingEnabled );
 
     if( blendingEnabled ) {
-        const BlendingTechniqueOgl::EquationOgl colorEquation =
-            nativeTechnique->getColorEquation();
-        const BlendingTechniqueOgl::EquationOgl alphaEquation =
-            nativeTechnique->getAlphaEquation();
-
         ::glBlendEquationSeparate(
             colorEquation.operation,
             alphaEquation.operation );

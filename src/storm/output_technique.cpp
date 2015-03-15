@@ -27,4 +27,21 @@ OutputTechnique::Pointer OutputTechnique::getDefault() {
     return technique;
 }
 
+OutputTechnique::Pointer OutputTechnique::getDefaultWithoutDepthOutput() {
+    Description description = getDefault()->getDescription();
+    description.writeDepthValues = false;
+
+    static const OutputTechnique::Pointer technique = create( description );
+    return technique;
+}
+
+OutputTechnique::Pointer OutputTechnique::getDefaultWithoutDepthInputOutput() {
+    Description description = getDefault()->getDescription();
+    description.depthTest.enabled = false;
+    description.writeDepthValues = false;
+
+    static const OutputTechnique::Pointer technique = create( description );
+    return technique;
+}
+
 }

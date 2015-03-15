@@ -29,6 +29,7 @@ public:
 
     static RasterizationTechnique::Pointer create( const Description& );
     static RasterizationTechnique::Pointer getDefault();
+    static RasterizationTechnique::Pointer getDefaultWithoutCulling();
 
     virtual ~RasterizationTechnique() { }
 

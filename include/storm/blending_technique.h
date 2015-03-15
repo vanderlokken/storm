@@ -65,8 +65,12 @@ public:
         Equation alphaEquation;
     };
 
+    // Note: to disable blending use BlendingTechnique::getDefaultOverriding
+
     static BlendingTechnique::Pointer create( const Description& );
     static BlendingTechnique::Pointer getDefault();
+    static BlendingTechnique::Pointer getDefaultAdditive();
+    static BlendingTechnique::Pointer getDefaultOverriding();
 
     virtual ~BlendingTechnique() { }
 

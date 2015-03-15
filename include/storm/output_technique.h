@@ -60,6 +60,8 @@ public:
 
     static OutputTechnique::Pointer create( const Description& );
     static OutputTechnique::Pointer getDefault();
+    static OutputTechnique::Pointer getDefaultWithoutDepthOutput();
+    static OutputTechnique::Pointer getDefaultWithoutDepthInputOutput();
 
     virtual ~OutputTechnique() { }
 
