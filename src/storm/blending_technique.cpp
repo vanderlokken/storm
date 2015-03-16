@@ -15,7 +15,7 @@ BlendingTechnique::Pointer BlendingTechnique::getDefault() {
 
 BlendingTechnique::Pointer BlendingTechnique::getDefaultAdditive() {
     Description description = getDefault()->getDescription();
-    description.colorEquation.sourceFactor = Factor::One;
+    description.colorEquation.sourceFactor = Factor::SourceAlpha;
     description.colorEquation.destinationFactor = Factor::One;
     description.alphaEquation = description.colorEquation;
 
