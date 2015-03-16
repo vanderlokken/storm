@@ -1,23 +1,69 @@
-#include <iostream>
-
 #include <storm/camera.h>
 #include <storm/clock.h>
-#include <storm/event_loop.h>
 #include <storm/exception.h>
 #include <storm/matrix.h>
 #include <storm/quaternion.h>
 #include <storm/rendering_system.h>
 #include <storm/rendering_window.h>
 
-#ifdef _WIN32
-    #include <windows.h>
-#endif
-
+#include "../example_base.h"
 #include "resources.h"
 
-class Demo {
+const char *vertexShaderSource = R"(
+#version 330 core
+
+layout(row_major) uniform transformations {
+    mat4 viewProjection;
+    mat4 world;
+} Transformations;
+
+layout(location = 0) in vec4 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
+layout(location = 2) in vec2 vertexTextureCoordinates;
+
+out vec4 position;
+out vec3 normal;
+out vec2 textureCoordinates;
+
+void main() {
+    position = vertexPosition * Transformations.world;
+    normal = vertexNormal * mat3( Transformations.world );
+    textureCoordinates = vertexTextureCoordinates;
+
+    gl_Position = position * Transformations.viewProjection;
+}
+)";
+
+const char *pixelShaderSource = R"(
+#version 330 core
+
+uniform sampler2D colorTexture;
+
+in vec4 position;
+in vec3 normal;
+in vec2 textureCoordinates;
+
+out vec4 color;
+
+const float ambientBrightness = 0.6;
+const float lightBrightness = 0.6;
+const vec3 lightPosition = vec3( 20, 20, 20 );
+
+const float textureRepetitionsNumber = 3;
+
+void main() {
+    vec3 directionToLight = normalize( lightPosition - position.xyz );
+    float brightness = ambientBrightness +
+        lightBrightness * clamp( dot(normal, directionToLight), 0, 1 );
+
+    color = brightness * texture(
+        colorTexture, textureCoordinates * textureRepetitionsNumber );
+}
+)";
+
+class Example : public ExampleBase {
 public:
-    Demo() : _frameDimensions( 640, 480 ), _meshRotationAngle( 0 ) {
+    Example() : _frameDimensions( 640, 480 ), _meshRotationAngle( 0 ) {
         storm::RenderingWindow::getInstance()->setWindowed( _frameDimensions );
 
         _mesh = createTexturedCubeMesh();
@@ -29,7 +75,7 @@ public:
         installCamera();
     }
 
-    void update() {
+    virtual void update() {
         const storm::Clock::TimePoint timePoint = storm::Clock::now();
         const storm::Clock::TimeDelta timeDelta = timePoint - _timePoint;
         _timePoint = timePoint;
@@ -45,7 +91,7 @@ public:
         _constantBuffer->setData( &_transformations );
     }
 
-    void render() const {
+    virtual void render() {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
 
@@ -78,10 +124,10 @@ private:
     }
 
     void installShaders() {
-        const storm::Shader::Pointer vertexShader = storm::Shader::load(
-            "vertex_shader.glsl", storm::Shader::Type::Vertex );
-        const storm::Shader::Pointer pixelShader = storm::Shader::load(
-            "pixel_shader.glsl", storm::Shader::Type::Pixel );
+        const storm::Shader::Pointer vertexShader = storm::Shader::create(
+            vertexShaderSource, storm::Shader::Type::Vertex );
+        const storm::Shader::Pointer pixelShader = storm::Shader::create(
+            pixelShaderSource, storm::Shader::Type::Pixel );
 
         _constantBuffer = storm::Buffer::create(
             {sizeof(Transformations), 1, storm::ResourceType::Dynamic} );
@@ -127,36 +173,6 @@ private:
     float _meshRotationAngle;
 };
 
-void demoMain() {
-    Demo demo;
-
-    storm::EventLoop *eventLoop = storm::EventLoop::getInstance();
-    eventLoop->run( [&demo]() {
-        demo.update();
-        demo.render();
-    });
+std::unique_ptr<ExampleBase> createExample() {
+    return std::unique_ptr<ExampleBase>( new Example );
 }
-
-#ifdef _WIN32
-
-int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
-    try {
-        demoMain();
-    } catch( storm::Exception &exception ) {
-        ::MessageBoxA( 0, exception.what(), "storm", MB_ICONERROR );
-    }
-}
-
-#else
-
-int main() {
-    try {
-        demoMain();
-    } catch( storm::Exception &exception ) {
-        std::cerr << exception.what() << std::endl;
-        return 1;
-    }
-    return 0;
-}
-
-#endif

@@ -1,28 +1,43 @@
 #include <array>
-#include <iostream>
 
 #include <storm/storm.h>
 
-#ifdef _WIN32
-    #include <windows.h>
-#endif
+#include "../example_base.h"
 
-class Demo {
+const char *vertexShaderSource = R"(
+#version 330 core
+layout(location = 0) in vec4 position;
+void main() {
+    gl_Position = position;
+}
+)";
+
+const char *pixelShaderSource = R"(
+#version 330 core
+out vec4 color;
+void main() {
+    color = vec4( 1.0 );
+}
+)";
+
+class Example : public ExampleBase {
 public:
-    Demo() {
+    Example() {
         storm::RenderingWindow *renderingWindow =
             storm::RenderingWindow::getInstance();
         renderingWindow->setWindowed( {640, 480} );
 
-        _vertexShader = storm::Shader::load(
-            "vertex_shader.glsl", storm::Shader::Type::Vertex );
-        _pixelShader = storm::Shader::load(
-            "pixel_shader.glsl", storm::Shader::Type::Pixel );
+        _vertexShader = storm::Shader::create(
+            vertexShaderSource, storm::Shader::Type::Vertex );
+        _pixelShader = storm::Shader::create(
+            pixelShaderSource, storm::Shader::Type::Pixel );
 
         createMesh();
     }
 
-    void render() const {
+    virtual void update() {}
+
+    virtual void render() {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
 
@@ -59,35 +74,6 @@ private:
     storm::Shader::Pointer _pixelShader;
 };
 
-void demoMain() {
-    Demo demo;
-
-    storm::EventLoop *eventLoop = storm::EventLoop::getInstance();
-    eventLoop->run( [&demo]() {
-        demo.render();
-    });
+std::unique_ptr<ExampleBase> createExample() {
+    return std::unique_ptr<ExampleBase>( new Example );
 }
-
-#ifdef _WIN32
-
-int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
-    try {
-        demoMain();
-    } catch( storm::Exception &exception ) {
-        ::MessageBoxA( 0, exception.what(), "storm", MB_ICONERROR );
-    }
-}
-
-#else
-
-int main() {
-    try {
-        demoMain();
-    } catch( storm::Exception &exception ) {
-        std::cerr << exception.what() << std::endl;
-        return 1;
-    }
-    return 0;
-}
-
-#endif
