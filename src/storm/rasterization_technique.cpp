@@ -7,6 +7,7 @@ RasterizationTechnique::Pointer RasterizationTechnique::getDefault() {
     description.cullMode = CullMode::BackFaces;
     description.fillMode = FillMode::Solid;
     description.rectangleClippingEnabled = false;
+    description.depthClippingEnabled = true;
     description.depthBias = 0;
     description.slopeScaleDepthBias = 0;
 
@@ -19,6 +20,16 @@ RasterizationTechnique::Pointer
 RasterizationTechnique::getDefaultWithoutCulling() {
     Description description = getDefault()->getDescription();
     description.cullMode = CullMode::Nothing;
+
+    static const RasterizationTechnique::Pointer technique =
+        create( description );
+    return technique;
+}
+
+RasterizationTechnique::Pointer
+RasterizationTechnique::getDefaultWithoutDepthClipping() {
+    Description description = getDefault()->getDescription();
+    description.depthClippingEnabled = false;
 
     static const RasterizationTechnique::Pointer technique =
         create( description );

@@ -23,6 +23,7 @@ public:
         CullMode cullMode;
         FillMode fillMode;
         bool rectangleClippingEnabled;
+        bool depthClippingEnabled;
         int depthBias;
         float slopeScaleDepthBias;
     };
@@ -30,6 +31,7 @@ public:
     static RasterizationTechnique::Pointer create( const Description& );
     static RasterizationTechnique::Pointer getDefault();
     static RasterizationTechnique::Pointer getDefaultWithoutCulling();
+    static RasterizationTechnique::Pointer getDefaultWithoutDepthClipping();
 
     virtual ~RasterizationTechnique() { }
 

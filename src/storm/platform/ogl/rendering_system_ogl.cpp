@@ -170,6 +170,7 @@ void RenderingSystemOgl::setRasterizationTechnique(
     const auto &description = nativeTechnique->getDescription();
 
     setBooleanGlState( GL_SCISSOR_TEST, description.rectangleClippingEnabled );
+    setBooleanGlState( GL_DEPTH_CLAMP, !description.depthClippingEnabled );
 
     ::glPolygonOffset( description.slopeScaleDepthBias, description.depthBias );
     checkResult( "::glPolygonOffset" );
