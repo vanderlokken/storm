@@ -15,4 +15,13 @@ Sampler::Pointer Sampler::getDefault() {
     return sampler;
 }
 
+Sampler::Pointer Sampler::getDefaultWithTiling() {
+    Description description = getDefault()->getDescription();
+    description.wrapModes = {
+        WrapMode::Repeated, WrapMode::Repeated, WrapMode::Repeated };
+
+    static const Sampler::Pointer sampler = create( description );
+    return sampler;
+}
+
 }

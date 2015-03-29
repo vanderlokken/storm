@@ -40,6 +40,7 @@ public:
 
     static Sampler::Pointer create( const Description& );
     static Sampler::Pointer getDefault();
+    static Sampler::Pointer getDefaultWithTiling();
 
     virtual ~Sampler() { }
 
