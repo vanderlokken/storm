@@ -41,6 +41,7 @@ public:
     static Sampler::Pointer create( const Description& );
     static Sampler::Pointer getDefault();
     static Sampler::Pointer getDefaultWithTiling();
+    static Sampler::Pointer getDefaultWithNearestFilters();
 
     virtual ~Sampler() { }
 

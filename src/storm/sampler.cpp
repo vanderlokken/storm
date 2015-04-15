@@ -24,4 +24,13 @@ Sampler::Pointer Sampler::getDefaultWithTiling() {
     return sampler;
 }
 
+Sampler::Pointer Sampler::getDefaultWithNearestFilters() {
+    Description description = getDefault()->getDescription();
+    description.minifyingFilter = MinifyingFilter::Nearest;
+    description.magnifyingFilter = MagnifyingFilter::Nearest;
+
+    static const Sampler::Pointer sampler = create( description );
+    return sampler;
+}
+
 }
