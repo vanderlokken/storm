@@ -100,7 +100,8 @@ public:
     };
 
     // To create a texture with all possible mipmap levels specify this constant
-    // as a value for "mipLevels".
+    // as a value for "mipLevels". After texture creation the "mipLevels" value
+    // will contain an actual number of created mipmap levels.
     static const unsigned int CompleteMipMap = ~0u;
 
     struct Region {

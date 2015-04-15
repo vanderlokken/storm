@@ -100,6 +100,9 @@ TextureOgl::TextureOgl( const Description &description, const void *texels )
         levelsMaximum : _description.mipLevels;
     storm_assert( levels <= levelsMaximum );
 
+    if( _description.mipLevels == CompleteMipMap )
+        _description.mipLevels = levels;
+
     switch( _description.layout ) {
     case Layout::Separate1d:
         ::glTexStorage1D(
@@ -297,6 +300,8 @@ void TextureOgl::generateMipMap() {
         _description.layout != Layout::Separate2dMsaa &&
         _description.layout != Layout::Layered2dMsaa &&
         _description.layout != Layout::Buffer );
+
+    ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
     ::glGenerateMipmap( _target );
     checkResult( "::glGenerateMipmap" );
