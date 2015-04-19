@@ -14,78 +14,65 @@ class Texture {
 public:
     typedef std::shared_ptr<Texture> Pointer;
 
-    enum class FileFormat {
-        Dds,
-        DdsStrict
+    enum class Layout {
+        // One-dimensional texture.
+        Separate1d,
+        // Two-dimensional texture.
+        Separate2d,
+        // Three-dimensional texture.
+        Separate3d,
+        // Layered one-dimensional texture.
+        Layered1d,
+        // Layered two-dimensional texture.
+        Layered2d,
+        // Cube map texture.
+        CubeMap,
+        // Two-dimensional texture which supports multisampling. Textures of
+        // this type do not support mipmapping. Also it's not possible to
+        // retrieve or assign texel values for Separate2dMsaa textures. The only
+        // way to change contents of a Separate2dMsaa texture is to use it as a
+        // rendering target.
+        Separate2dMsaa,
+        // Layered two-dimensional texture which supports multisampling.
+        Layered2dMsaa
     };
 
     enum class Format {
+        // 8-bit unsigned integer formats.
         RgbUint8,
-        ArgbUint8,
+        RgbaUint8,
         SrgbUint8,
-        AsrgbUint8,
+        SrgbaUint8,
+
         // 16-bit floating point formats.
         RedFloat16,
         RgFloat16,
         RgbFloat16,
         RgbaFloat16,
+
         // 32-bit floating point formats.
         RedFloat32,
         RgFloat32,
         RgbFloat32,
         RgbaFloat32,
+
         // Depth texture formats.
         DepthUint16,
         DepthUint24,
         DepthUint32,
         DepthUint24StencilUint8,
         DepthFloat32,
-        // DXT-compressed texture formats. Requirements: "layout" must be
-        // "Layout::Separate2d".
-        RgbDxt1,
-        ArgbDxt1,
-        ArgbDxt3,
-        ArgbDxt5,
-        SrgbDxt1,
-        AsrgbDxt1,
-        AsrgbDxt3,
-        AsrgbDxt5
-    };
 
-    enum class Layout {
-        // One-dimensional texture. Requirements: "height", "depth" and
-        // "texelSamples" must be 1.
-        Separate1d,
-        // Two-dimensional texture. Requirements: "depth" and "texelSamples"
-        // must be 1.
-        Separate2d,
-        // Two-dimensional texture which supports multisampling. Textures of
-        // this type do not support mipmapping. Also it's not possible to
-        // retrieve or assign texel values for Separate2dMsaa textures
-        // (an attempt to call "getTexels" or "setTexels" will fail). The only
-        // way to change contents of a Separate2dMsaa texture is to use it as
-        // rendering target. Requirements: "depth" and "mipLevels" must be 1,
-        // "resourceType" must be "ResourceType::Dynamic".
-        Separate2dMsaa,
-        // Three-dimensional texture. Requirements: "texelSamples" must be 1.
-        Separate3d,
-        // Layered one-dimensional texture. Requirements: "height" and
-        // "texelSamples" must be 1.
-        Layered1d,
-        // Layered two-dimensional texture. Requirements: "texelSamples" must be
-        // 1.
-        Layered2d,
-        // Layered two-dimensional texture which supports multisampling.
-        // Textures of this type have the same restrictions as Separate2dMsaa
-        // textures. Requirements: "mipLevels" must be 1, "resourceType" must be
-        // "ResourceType::Dynamic".
-        Layered2dMsaa,
-        // TBD
-        CubeMap,
-        // One-dimensional buffer texture. Textures of this type do not support
-        // mipmapping. Requirements: "height", "depth", "mipLevels" and
-        // "texelSamples" must be 1.
-        Buffer
+        // DXT-compressed texture formats.
+        // Can be used only with "Separate2d" and "CubeMap" texture layouts.
+        RgbDxt1,
+        RgbaDxt1,
+        RgbaDxt3,
+        RgbaDxt5,
+        SrgbDxt1,
+        SrgbaDxt1,
+        SrgbaDxt3,
+        SrgbaDxt5
     };
 
     struct Description {
@@ -95,16 +82,129 @@ public:
         unsigned int height;
         unsigned int depth;
         unsigned int mipLevels;
+        unsigned int layers;
         unsigned int texelSamples;
         ResourceType resourceType;
     };
 
-    // To create a texture with all possible mipmap levels specify this constant
-    // as a value for "mipLevels". After texture creation the "mipLevels" value
-    // will contain an actual number of created mipmap levels.
+    struct Separate1dDescription {
+        Format format;
+        unsigned int width;
+        unsigned int mipLevels;
+        ResourceType resourceType;
+    };
+
+    struct Separate2dDescription {
+        Format format;
+        unsigned int width;
+        unsigned int height;
+        unsigned int mipLevels;
+        ResourceType resourceType;
+    };
+
+    struct Separate3dDescription {
+        Format format;
+        unsigned int width;
+        unsigned int height;
+        unsigned int depth;
+        unsigned int mipLevels;
+        ResourceType resourceType;
+    };
+
+    struct Layered1dDescription {
+        Format format;
+        unsigned int width;
+        unsigned int mipLevels;
+        unsigned int layers;
+        ResourceType resourceType;
+    };
+
+    struct Layered2dDescription {
+        Format format;
+        unsigned int width;
+        unsigned int height;
+        unsigned int mipLevels;
+        unsigned int layers;
+        ResourceType resourceType;
+    };
+
+    struct CubeMapDescription {
+        Format format;
+        unsigned int dimension;
+        unsigned int mipLevels;
+        ResourceType resourceType;
+    };
+
+    struct Separate2dMsaaDescription {
+        Format format;
+        unsigned int width;
+        unsigned int height;
+        unsigned int texelSamples;
+    };
+
+    struct Layered2dMsaaDescription {
+        Format format;
+        unsigned int width;
+        unsigned int height;
+        unsigned int layers;
+        unsigned int texelSamples;
+    };
+
+    // To create a texture with all possible mipmap levels specify this
+    // constant as a value for "mipLevels". After texture creation the
+    // "Description::mipLevels" value will contain an actual number of
+    // created mipmap levels.
     static const unsigned int CompleteMipMap = ~0u;
 
-    struct Region {
+    static Pointer create( const Separate1dDescription &description );
+    static Pointer create( const Separate2dDescription &description );
+    static Pointer create( const Separate3dDescription &description );
+
+    static Pointer create( const Layered1dDescription &description );
+    static Pointer create( const Layered2dDescription &description );
+
+    static Pointer create( const CubeMapDescription &description );
+
+    static Pointer create( const Separate2dMsaaDescription &description );
+    static Pointer create( const Layered2dMsaaDescription &description );
+
+    enum class FileFormat {
+        DdsStrict,
+        Dds
+    };
+
+    static Pointer load( std::istream &stream, FileFormat fileFormat );
+    static Pointer load( const std::string &filename, FileFormat fileFormat );
+
+    virtual ~Texture() {}
+
+    // The following structure defines cube map face order. To use specific
+    // cube map face as a rendering target assign corresponding value to the
+    // "Framebuffer::Buffer::layer".
+    struct CubeMapFace {
+        static const unsigned int PositiveX = 0;
+        static const unsigned int NegativeX = 1;
+        static const unsigned int PositiveY = 2;
+        static const unsigned int NegativeY = 3;
+        static const unsigned int PositiveZ = 4;
+        static const unsigned int NegativeZ = 5;
+    };
+
+    struct Separate1dRegion {
+        unsigned int mipLevel;
+        unsigned int x;
+        unsigned int width;
+    };
+
+    struct Separate2dRegion {
+        unsigned int mipLevel;
+        unsigned int x;
+        unsigned int y;
+        unsigned int width;
+        unsigned int height;
+    };
+
+    struct Separate3dRegion {
         unsigned int mipLevel;
         unsigned int x;
         unsigned int y;
@@ -114,41 +214,73 @@ public:
         unsigned int depth;
     };
 
-    static Pointer create( const Description&, const void *texels = nullptr );
-    static Pointer load( std::istream &stream, FileFormat fileFormat );
-    static Pointer load( const std::string &filename, FileFormat fileFormat );
+    struct Layered1dRegion {
+        unsigned int mipLevel;
+        unsigned int layer;
+        unsigned int x;
+        unsigned int width;
+    };
 
-    virtual ~Texture() { }
+    struct Layered2dRegion {
+        unsigned int mipLevel;
+        unsigned int layer;
+        unsigned int x;
+        unsigned int y;
+        unsigned int width;
+        unsigned int height;
+    };
 
-    // Requirements for DXT-compressed textures: "texels" buffer size must be
-    // at least ceil( width / 4 ) * ceil( height / 4 ) * blockSize;
-    // "region.x", "region.y", "region.width" and "region.height" must be
-    // multiples of four unless the specified region describes entire mip-level.
-    virtual void getTexels( unsigned int mipLevel, void *texels ) const = 0;
-     inline void setTexels( unsigned int mipLevel, const void *texels );
-    virtual void setTexels( const Region &region, const void *texels ) = 0;
+    struct CubeMapRegion {
+        unsigned int mipLevel;
+        unsigned int face;
+        unsigned int x;
+        unsigned int y;
+        unsigned int width;
+        unsigned int height;
+    };
 
     // Note: there's no "getTexels" method overload with a "region" parameter
-    // since OpenGL doesn't have an appropriate function.
+    // since OpenGL doesn't support an appropriate operation.
+
+    virtual void getTexels(
+        unsigned int mipLevel, unsigned int size, void *texels ) const = 0;
+
+    // Requirements for DXT-compressed textures:
+    // 1. "texels" buffer size must be greater or equal to
+    //    ceil( width / 4 ) * ceil( height / 4 ) * blockSize.
+    // 2. "region.x", "region.y", "region.width" and "region.height" must be
+    //    multiples of four unless the specified region describes an entire
+    //    mip-level.
+
+    virtual void setTexels(
+        const Separate1dRegion &region, const void *texels ) = 0;
+
+    virtual void setTexels(
+        const Separate2dRegion &region, const void *texels ) = 0;
+
+    virtual void setTexels(
+        const Separate3dRegion &region, const void *texels ) = 0;
+
+    virtual void setTexels(
+        const Layered1dRegion &region, const void *texels ) = 0;
+
+    virtual void setTexels(
+        const Layered2dRegion &region, const void *texels ) = 0;
+
+    virtual void setTexels(
+        const CubeMapRegion &region, const void *texels ) = 0;
 
     virtual void generateMipMap() = 0;
 
     virtual const Description& getDescription() const = 0;
+
+    struct MipLevelDimensions {
+        unsigned int width;
+        unsigned int height;
+        unsigned int depth;
+    };
+
+    MipLevelDimensions getMipLevelDimensions( unsigned int mipLevel ) const;
 };
-
-inline void Texture::setTexels( unsigned int mipLevel, const void *texels ) {
-    const Description &description = getDescription();
-
-    Region region = { 0 };
-    region.width = description.width >> mipLevel;
-    region.height = description.height >> mipLevel;
-    region.depth = description.depth >> mipLevel;
-
-    if( !region.width ) region.width = 1;
-    if( !region.height ) region.height = 1;
-    if( !region.depth ) region.depth = 1;
-
-    setTexels( region, texels );
-}
 
 }

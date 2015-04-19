@@ -7,15 +7,22 @@
 #include <storm/common_vertex_types.h>
 
 storm::Texture::Pointer createCheckboardPatternTexture() {
-    storm::Texture::Description description;
-    description.layout = storm::Texture::Layout::Separate2d;
-    description.format = storm::Texture::Format::ArgbUint8;
+    storm::Texture::Separate2dDescription description;
+    description.format = storm::Texture::Format::RgbaUint8;
     description.width = 2;
     description.height = 2;
-    description.depth = 1;
     description.mipLevels = 1;
-    description.texelSamples = 1;
     description.resourceType = storm::ResourceType::Static;
+
+    const storm::Texture::Pointer texture =
+        storm::Texture::create( description );
+
+    storm::Texture::Separate2dRegion region;
+    region.mipLevel = 0;
+    region.x = 0;
+    region.y = 0;
+    region.width = description.width;
+    region.height = description.height;
 
     const storm::CompressedColor texels[4] = {
         storm::CompressedColor(250, 250, 250),
@@ -24,9 +31,8 @@ storm::Texture::Pointer createCheckboardPatternTexture() {
         storm::CompressedColor(250, 250, 250)
     };
 
-    const storm::Texture::Pointer texture =
-        storm::Texture::create( description );
-    texture->setTexels( 0, texels );
+    texture->setTexels( region, texels );
+
     return texture;
 }
 

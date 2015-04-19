@@ -12,14 +12,14 @@ namespace storm {
 namespace {
 
 struct DdsPixelFormat {
-  uint32_t size;
-  uint32_t flags;
-  uint32_t fourCC;
-  uint32_t rgbBitCount;
-  uint32_t rBitMask;
-  uint32_t gBitMask;
-  uint32_t bBitMask;
-  uint32_t aBitMask;
+    uint32_t size;
+    uint32_t flags;
+    uint32_t fourCC;
+    uint32_t rgbBitCount;
+    uint32_t rBitMask;
+    uint32_t gBitMask;
+    uint32_t bBitMask;
+    uint32_t aBitMask;
 };
 
 struct DdsHeader {
@@ -70,24 +70,36 @@ struct DdsPixelFormatFlags {
     static const uint32_t Rgb = 1 << 6;
     static const uint32_t Yuv = 1 << 9;
     static const uint32_t Luminiance = 1 << 17;
+
+    static const uint32_t Rgba = Alpha | Rgb;
 };
 
 Texture::Format selectTextureFormat( const DdsPixelFormat &ddsPixelFormat ) {
     if( ddsPixelFormat.flags & DdsPixelFormatFlags::FourCC ) {
         switch( ddsPixelFormat.fourCC ) {
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24):
-            return Texture::Format::AsrgbDxt1;
+            return Texture::Format::SrgbaDxt1;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24):
-            return Texture::Format::AsrgbDxt3;
+            return Texture::Format::SrgbaDxt3;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24):
-            return Texture::Format::AsrgbDxt5;
+            return Texture::Format::SrgbaDxt5;
         }
+    }
+
+    if( (ddsPixelFormat.flags & DdsPixelFormatFlags::Rgba) &&
+        ddsPixelFormat.rgbBitCount == 32 &&
+        ddsPixelFormat.rBitMask == 0x000000ff &&
+        ddsPixelFormat.gBitMask == 0x0000ff00 &&
+        ddsPixelFormat.bBitMask == 0x00ff0000 &&
+        ddsPixelFormat.aBitMask == 0xff000000 )
+    {
+        return Texture::Format::SrgbaUint8;
     }
 
     throw ResourceLoadingError() << "Unsupported DDS texture";
 }
 
-Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
+DdsHeader parseDdsHeader( BinaryInputStream &stream, bool strict ) {
     const uint32_t formatId = stream.read<uint32_t>();
 
     DdsHeader ddsHeader;
@@ -143,6 +155,8 @@ Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
             check( ddsHeader.surfaceFlags & DdsSurfaceFlags::CubeMapFull );
             check( !(ddsHeader.surfaceFlags & DdsSurfaceFlags::Volume) );
             check( ddsHeader.complexityFlags & DdsComplexityFlags::Complex );
+
+            check( ddsHeader.width == ddsHeader.height );
         }
 
         if( ddsHeader.surfaceFlags & DdsSurfaceFlags::Volume ) {
@@ -153,56 +167,150 @@ Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
         check( ddsHeader.pixelFormat.size == 32 );
     }
 
-    Texture::Description description;
+    return ddsHeader;
+}
 
-    if( ddsHeader.surfaceFlags & DdsSurfaceFlags::Volume )
-        description.layout = Texture::Layout::Separate3d;
-    else if( ddsHeader.surfaceFlags & DdsSurfaceFlags::CubeMap )
-        description.layout = Texture::Layout::CubeMap;
-    else
-        description.layout = Texture::Layout::Separate2d;
+Texture::Pointer createTexture( const DdsHeader &ddsHeader ) {
+    const Texture::Format format = selectTextureFormat( ddsHeader.pixelFormat );
 
-    description.format = selectTextureFormat( ddsHeader.pixelFormat );
-    description.width = ddsHeader.width;
-    description.height = ddsHeader.height;
-
-    if( (ddsHeader.surfaceFlags & DdsSurfaceFlags::Volume) &&
-            (ddsHeader.flags & DdsFlags::Depth) )
-        description.depth = ddsHeader.depth;
-    else
-        description.depth = 1;
+    unsigned int mipLevels = 1;
 
     if( (ddsHeader.complexityFlags & DdsComplexityFlags::MipMap) &&
             (ddsHeader.flags & DdsFlags::MipMapCount) )
-        description.mipLevels = ddsHeader.mipMapCount;
-    else
-        description.mipLevels = 1;
+        mipLevels = ddsHeader.mipMapCount;
 
-    description.texelSamples = 1;
-    description.resourceType = ResourceType::Static;
+    if( ddsHeader.surfaceFlags & DdsSurfaceFlags::Volume ) {
+        Texture::Separate3dDescription description;
 
-    Texture::Pointer texture = Texture::create( description );
+        description.format = format;
+        description.width = ddsHeader.width;
+        description.height = ddsHeader.height;
+        description.depth = ddsHeader.depth;
+        description.mipLevels = mipLevels;
+        description.resourceType = ResourceType::Static;
 
-    std::vector<char> texels;
-    switch( description.format ) {
-    case Texture::Format::AsrgbDxt1:
-        texels.resize(
-            static_cast<size_t>(ceil(description.width / 4.0f)) *
-            static_cast<size_t>(ceil(description.height / 4.0f)) * 8 );
-        break;
-    case Texture::Format::AsrgbDxt3:
-    case Texture::Format::AsrgbDxt5:
-        texels.resize(
-            static_cast<size_t>(ceil(description.width / 4.0f)) *
-            static_cast<size_t>(ceil(description.height / 4.0f)) * 16 );
-        break;
-    default:
-        throwNotImplemented();
+        return Texture::create( description );
+
+    } else if( ddsHeader.surfaceFlags & DdsSurfaceFlags::CubeMap ) {
+        Texture::CubeMapDescription description;
+
+        description.format = format;
+        description.dimension = ddsHeader.width;
+        description.mipLevels = mipLevels;
+        description.resourceType = ResourceType::Static;
+
+        return Texture::create( description );
+
+    } else {
+        Texture::Separate2dDescription description;
+
+        description.format = format;
+        description.width = ddsHeader.width;
+        description.height = ddsHeader.height;
+        description.mipLevels = mipLevels;
+        description.resourceType = ResourceType::Static;
+
+        return Texture::create( description );
+    }
+}
+
+void parseDdsTextureLayer(
+    BinaryInputStream &stream, Texture::Pointer texture,
+    unsigned int layer = 0 )
+{
+    const Texture::Description &textureDescription = texture->getDescription();
+
+    for( unsigned int mipLevel = 0;
+            mipLevel < textureDescription.mipLevels; ++mipLevel )
+    {
+        const Texture::MipLevelDimensions dimensions =
+            texture->getMipLevelDimensions( mipLevel );
+
+        std::vector<char> texels;
+        switch( textureDescription.format ) {
+        case Texture::Format::SrgbaUint8:
+            texels.resize(
+                dimensions.width * dimensions.height * dimensions.depth * 4 );
+            break;
+        case Texture::Format::SrgbaDxt1:
+            texels.resize(
+                static_cast<size_t>(ceil(dimensions.width / 4.0f)) *
+                static_cast<size_t>(ceil(dimensions.height / 4.0f)) * 8 );
+            break;
+        case Texture::Format::SrgbaDxt3:
+        case Texture::Format::SrgbaDxt5:
+            texels.resize(
+                static_cast<size_t>(ceil(dimensions.width / 4.0f)) *
+                static_cast<size_t>(ceil(dimensions.height / 4.0f)) * 16 );
+            break;
+        default:
+            throwNotImplemented();
+        }
+
+        stream.read( texels.data(), texels.size() );
+
+        switch( textureDescription.layout ) {
+        case Texture::Layout::Separate2d:
+            {
+                Texture::Separate2dRegion region = { 0 };
+
+                region.mipLevel = mipLevel;
+                region.width = dimensions.width;
+                region.height = dimensions.height;
+
+                texture->setTexels( region, texels.data() );
+            }
+            break;
+        case Texture::Layout::Separate3d:
+            {
+                Texture::Separate3dRegion region = { 0 };
+
+                region.mipLevel = mipLevel;
+                region.width = dimensions.width;
+                region.height = dimensions.height;
+                region.depth = dimensions.depth;
+
+                texture->setTexels( region, texels.data() );
+            }
+            break;
+        case Texture::Layout::CubeMap:
+            {
+                Texture::CubeMapRegion region = { 0 };
+
+                region.mipLevel = mipLevel;
+                region.face = layer;
+                region.width = dimensions.width;
+                region.height = dimensions.height;
+
+                texture->setTexels( region, texels.data() );
+            }
+            break;
+        default:
+            throwNotImplemented();
+        }
+    }
+}
+
+Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
+    const DdsHeader ddsHeader = parseDdsHeader( stream, strict );
+
+    const Texture::Pointer texture = createTexture( ddsHeader );
+
+    if( texture->getDescription().layout != Texture::Layout::CubeMap ) {
+        parseDdsTextureLayer( stream, texture );
+    } else {
+        const unsigned int faces[] = {
+            Texture::CubeMapFace::PositiveX,
+            Texture::CubeMapFace::NegativeX,
+            Texture::CubeMapFace::PositiveY,
+            Texture::CubeMapFace::NegativeY,
+            Texture::CubeMapFace::PositiveZ,
+            Texture::CubeMapFace::NegativeZ
+        };
+        for( unsigned int face : faces )
+            parseDdsTextureLayer( stream, texture, face );
     }
 
-    stream.read( texels.data(), texels.size() );
-
-    texture->setTexels( 0, texels.data() );
     return texture;
 }
 
@@ -232,6 +340,19 @@ Texture::Pointer Texture::load(
         throw ResourceLoadingError() << "Couldn't open " << filename;
 
     return Texture::load( stream, fileFormat );
+}
+
+Texture::MipLevelDimensions
+Texture::getMipLevelDimensions( unsigned int mipLevel ) const {
+    const Description &description = getDescription();
+
+    storm_assert( mipLevel < description.mipLevels );
+
+    Texture::MipLevelDimensions dimensions;
+    dimensions.width = std::max( description.width >> mipLevel, 1u );
+    dimensions.height = std::max( description.height >> mipLevel, 1u );
+    dimensions.depth = std::max( description.depth >> mipLevel, 1u );
+    return dimensions;
 }
 
 }

@@ -156,9 +156,25 @@ void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
         const PixelDescription pixelDescription =
             getCompatiblePixelDescription( internalFormat );
 
-        ::glTexImage2D( target, level, internalFormat, width, height, 0,
-            pixelDescription.format, pixelDescription.type, nullptr );
-        checkResult( "::glTexImage2D" );
+        if( target != GL_TEXTURE_CUBE_MAP ) {
+            ::glTexImage2D( target, level, internalFormat, width, height, 0,
+                pixelDescription.format, pixelDescription.type, nullptr );
+            checkResult( "::glTexImage2D" );
+        } else {
+            const GLenum faces[] = {
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+            };
+            for( GLenum face : faces ) {
+                ::glTexImage2D( face, level, internalFormat, width, height, 0,
+                    pixelDescription.format, pixelDescription.type, nullptr );
+                checkResult( "::glTexImage2D" );
+            }
+        }
 
         width = std::max( 1, (width / 2) );
         if( target != GL_TEXTURE_1D_ARRAY )
