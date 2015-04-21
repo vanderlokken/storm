@@ -35,7 +35,8 @@ public:
     virtual void setOutputRectangle( const Rectangle& );
 
     virtual Framebuffer::Pointer getFramebuffer() const;
-    virtual void setFramebuffer( Framebuffer::Pointer );
+    virtual void setFramebuffer(
+        Framebuffer::Pointer, bool preserveOutputRectangle );
 
     virtual void clearColorBuffer( const Color &color = Color::Black );
     virtual void clearDepthBuffer( float depth = 1.0f );

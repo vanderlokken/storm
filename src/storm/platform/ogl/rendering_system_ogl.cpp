@@ -311,7 +311,9 @@ Framebuffer::Pointer RenderingSystemOgl::getFramebuffer() const {
     return _framebuffer;
 }
 
-void RenderingSystemOgl::setFramebuffer( Framebuffer::Pointer framebuffer ) {
+void RenderingSystemOgl::setFramebuffer(
+    Framebuffer::Pointer framebuffer, bool preserveOutputRectangle )
+{
     if( _framebuffer == framebuffer )
         return;
 
@@ -323,6 +325,28 @@ void RenderingSystemOgl::setFramebuffer( Framebuffer::Pointer framebuffer ) {
 
     ::glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
     checkResult( "::glBindFramebuffer" );
+
+    if( !preserveOutputRectangle ) {
+        unsigned int width;
+        unsigned int height;
+
+        if( framebuffer ) {
+            const Framebuffer::Buffer &buffer =
+                framebuffer->getDescription().buffers.front();
+
+            const Texture::MipLevelDimensions mipLevelDimensions =
+                buffer.texture->getMipLevelDimensions( buffer.mipLevel );
+            width = mipLevelDimensions.width;
+            height = mipLevelDimensions.height;
+        } else {
+            const Dimensions windowDimensions =
+                RenderingWindow::getInstance()->getDimensions();
+            width = windowDimensions.width;
+            height = windowDimensions.height;
+        }
+
+        setOutputRectangle( {0, 0, width, height} );
+    }
 
     _framebuffer = framebuffer;
 }

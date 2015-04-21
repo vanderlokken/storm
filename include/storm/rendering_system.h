@@ -48,7 +48,7 @@ public:
     virtual void setOutputRectangle( const Rectangle& ) = 0;
 
     virtual Framebuffer::Pointer getFramebuffer() const = 0;
-    virtual void setFramebuffer( Framebuffer::Pointer ) = 0;
+    virtual void setFramebuffer( Framebuffer::Pointer, bool preserveOutputRectangle = false ) = 0;
 
     virtual void clearColorBuffer( const Color &color = Color::Black ) = 0;
     virtual void clearDepthBuffer( float depth = 1.0f ) = 0;
