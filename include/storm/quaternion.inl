@@ -152,7 +152,8 @@ inline Quaternion Quaternion::fromAxes( const Vector &from, const Vector &to ) {
         crossProduct.x,
         crossProduct.y,
         crossProduct.z,
-        sqrt(from.getSquaredLength() * to.getSquaredLength()) + dotProduct );
+        sqrt(from.getSquaredLength() * to.getSquaredLength()) + dotProduct
+    ).getNormalized();
 }
 
 inline Quaternion Quaternion::slerp(
