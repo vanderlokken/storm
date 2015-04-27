@@ -74,15 +74,32 @@ struct DdsPixelFormatFlags {
     static const uint32_t Rgba = Alpha | Rgb;
 };
 
-Texture::Format selectTextureFormat( const DdsPixelFormat &ddsPixelFormat ) {
+Texture::Format selectTextureFormat(
+    const DdsPixelFormat &ddsPixelFormat, bool srgbDefault )
+{
     if( ddsPixelFormat.flags & DdsPixelFormatFlags::FourCC ) {
         switch( ddsPixelFormat.fourCC ) {
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('1' << 24):
-            return Texture::Format::SrgbaDxt1;
+            return srgbDefault ?
+                Texture::Format::SrgbaDxt1 : Texture::Format::RgbaDxt1;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('3' << 24):
-            return Texture::Format::SrgbaDxt3;
+            return srgbDefault ?
+                Texture::Format::SrgbaDxt3 : Texture::Format::RgbaDxt3;
         case ('D' << 0) | ('X' << 8) | ('T' << 16) | ('5' << 24):
-            return Texture::Format::SrgbaDxt5;
+            return srgbDefault ?
+                Texture::Format::SrgbaDxt5 : Texture::Format::RgbaDxt5;
+        case 111:
+            return Texture::Format::RedFloat16;
+        case 112:
+            return Texture::Format::RgFloat16;
+        case 113:
+            return Texture::Format::RgbaFloat16;
+        case 114:
+            return Texture::Format::RedFloat32;
+        case 115:
+            return Texture::Format::RgFloat32;
+        case 116:
+            return Texture::Format::RgbaFloat32;
         }
     }
 
@@ -93,7 +110,8 @@ Texture::Format selectTextureFormat( const DdsPixelFormat &ddsPixelFormat ) {
         ddsPixelFormat.bBitMask == 0x00ff0000 &&
         ddsPixelFormat.aBitMask == 0xff000000 )
     {
-        return Texture::Format::SrgbaUint8;
+        return srgbDefault ?
+            Texture::Format::SrgbaUint8 : Texture::Format::RgbaUint8;
     }
 
     throw ResourceLoadingError() << "Unsupported DDS texture";
@@ -170,8 +188,11 @@ DdsHeader parseDdsHeader( BinaryInputStream &stream, bool strict ) {
     return ddsHeader;
 }
 
-Texture::Pointer createTexture( const DdsHeader &ddsHeader ) {
-    const Texture::Format format = selectTextureFormat( ddsHeader.pixelFormat );
+Texture::Pointer createTexture(
+    const DdsHeader &ddsHeader, const Texture::LoadingParameters &parameters )
+{
+    const Texture::Format format =
+        selectTextureFormat( ddsHeader.pixelFormat, parameters.srgbDefault );
 
     unsigned int mipLevels = 1;
 
@@ -226,27 +247,51 @@ void parseDdsTextureLayer(
         const Texture::MipLevelDimensions dimensions =
             texture->getMipLevelDimensions( mipLevel );
 
-        std::vector<char> texels;
+        size_t texelSize = 0;
+
         switch( textureDescription.format ) {
-        case Texture::Format::SrgbaUint8:
-            texels.resize(
-                dimensions.width * dimensions.height * dimensions.depth * 4 );
+        case Texture::Format::RedFloat16:
+            texelSize = 2;
             break;
+        case Texture::Format::RgbaUint8:
+        case Texture::Format::SrgbaUint8:
+        case Texture::Format::RgFloat16:
+        case Texture::Format::RedFloat32:
+            texelSize = 4;
+            break;
+        case Texture::Format::RgbaFloat16:
+        case Texture::Format::RgFloat32:
+            texelSize = 8;
+            break;
+        case Texture::Format::RgbaFloat32:
+            texelSize = 16;
+            break;
+        }
+
+        std::vector<char> texels(
+            dimensions.width *
+            dimensions.height *
+            dimensions.depth *
+            texelSize );
+
+        switch( textureDescription.format ) {
+        case Texture::Format::RgbaDxt1:
         case Texture::Format::SrgbaDxt1:
             texels.resize(
                 static_cast<size_t>(ceil(dimensions.width / 4.0f)) *
                 static_cast<size_t>(ceil(dimensions.height / 4.0f)) * 8 );
             break;
+        case Texture::Format::RgbaDxt3:
+        case Texture::Format::RgbaDxt5:
         case Texture::Format::SrgbaDxt3:
         case Texture::Format::SrgbaDxt5:
             texels.resize(
                 static_cast<size_t>(ceil(dimensions.width / 4.0f)) *
                 static_cast<size_t>(ceil(dimensions.height / 4.0f)) * 16 );
             break;
-        default:
-            throwNotImplemented();
         }
 
+        storm_assert( texels.size() != 0 );
         stream.read( texels.data(), texels.size() );
 
         switch( textureDescription.layout ) {
@@ -291,10 +336,15 @@ void parseDdsTextureLayer(
     }
 }
 
-Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
+Texture::Pointer parseDds(
+    BinaryInputStream &stream, const Texture::LoadingParameters &parameters )
+{
+    const bool strict =
+        parameters.fileFormat == Texture::FileFormat::DdsStrict;
+
     const DdsHeader ddsHeader = parseDdsHeader( stream, strict );
 
-    const Texture::Pointer texture = createTexture( ddsHeader );
+    const Texture::Pointer texture = createTexture( ddsHeader, parameters );
 
     if( texture->getDescription().layout != Texture::Layout::CubeMap ) {
         parseDdsTextureLayer( stream, texture );
@@ -316,14 +366,15 @@ Texture::Pointer parseDds( BinaryInputStream &stream, bool strict ) {
 
 } // namespace
 
-Texture::Pointer Texture::load( std::istream &stream, FileFormat fileFormat ) {
+Texture::Pointer Texture::load(
+    std::istream &stream, const LoadingParameters &parameters )
+{
     try {
         BinaryInputStream binaryInputStream( stream );
-        switch( fileFormat ) {
+        switch( parameters.fileFormat ) {
         case FileFormat::Dds:
-            return parseDds( binaryInputStream, /* strict = */ false );
         case FileFormat::DdsStrict:
-            return parseDds( binaryInputStream, /* strict = */ true );
+            return parseDds( binaryInputStream, parameters );
         }
         throw ResourceLoadingError() << "Unexpected file format value";
     } catch( std::ios_base::failure& ) {
@@ -332,14 +383,14 @@ Texture::Pointer Texture::load( std::istream &stream, FileFormat fileFormat ) {
 }
 
 Texture::Pointer Texture::load(
-    const std::string &filename, FileFormat fileFormat )
+    const std::string &filename, const LoadingParameters &parameters )
 {
     std::ifstream stream( filename, std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;
 
-    return Texture::load( stream, fileFormat );
+    return Texture::load( stream, parameters );
 }
 
 Texture::MipLevelDimensions

@@ -173,8 +173,18 @@ public:
         Dds
     };
 
-    static Pointer load( std::istream &stream, FileFormat fileFormat );
-    static Pointer load( const std::string &filename, FileFormat fileFormat );
+    struct LoadingParameters {
+        FileFormat fileFormat;
+        // Treat 8-bit RGB and RGBA color values as sRGB and sRGBA. This
+        // parameter is used only when file doesn't contain any color space
+        // information.
+        bool srgbDefault;
+    };
+
+    static Pointer load(
+        std::istream &stream, const LoadingParameters &parameters );
+    static Pointer load(
+        const std::string &filename, const LoadingParameters &parameters );
 
     virtual ~Texture() {}
 
