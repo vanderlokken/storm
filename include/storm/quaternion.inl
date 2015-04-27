@@ -101,6 +101,10 @@ inline Quaternion Quaternion::getNormalized() const {
     return result;
 }
 
+inline Quaternion Quaternion::getConjugate() const {
+    return Quaternion( -x, -y, -z, w );
+}
+
 inline Matrix Quaternion::toRotationMatrix() const {
     const float squaredLength = x * x + y * y + z * z + w * w;
     const float scale = squaredLength ? 2 / squaredLength : 0;

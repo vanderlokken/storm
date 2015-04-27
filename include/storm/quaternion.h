@@ -1,6 +1,7 @@
 #pragma once
 
 #include <storm/matrix.h>
+#include <storm/vector.h>
 
 namespace storm {
 
@@ -24,6 +25,8 @@ struct Quaternion {
 
     void normalize();
     Quaternion getNormalized() const;
+
+    Quaternion getConjugate() const;
 
     Matrix toRotationMatrix() const;
 
