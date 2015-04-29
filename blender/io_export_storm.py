@@ -26,9 +26,11 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     filename_ext = ".smesh"
 
     export_normals = bpy.props.BoolProperty(
-        name="Export normals")
+        name="Export normals", default=True)
+    export_tangents = bpy.props.BoolProperty(
+        name="Export tangents", default=True)
     export_texture_coordinates = bpy.props.BoolProperty(
-        name="Export texture coordinates")
+        name="Export texture coordinates", default=True)
     export_blending_indices = bpy.props.BoolProperty(
         name="Export blending indices")
     export_blending_weights = bpy.props.BoolProperty(
@@ -37,6 +39,28 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     @classmethod
     def poll(cls, context):
         return context.object and context.object.type == "MESH"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "export_normals")
+        layout.separator()
+
+        uv_dependent_attributes = layout.column()
+
+        if not context.object.data.uv_layers.active:
+            uv_dependent_attributes.label(text="No UV", icon="ERROR")
+            uv_dependent_attributes.active = False
+
+            self.properties.export_tangents = False
+            self.properties.export_texture_coordinates = False
+
+        uv_dependent_attributes.prop(self, "export_tangents")
+        uv_dependent_attributes.prop(self, "export_texture_coordinates")
+
+        layout.separator()
+        layout.prop(self, "export_blending_indices")
+        layout.prop(self, "export_blending_weights")
 
     def execute(self, context):
         self._context = context
@@ -95,6 +119,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     def _export_attributes(self):
         attributes_export = [
             self.export_normals,
+            self.export_tangents,
             self.export_texture_coordinates,
             self.export_blending_indices,
             self.export_blending_weights]
@@ -131,6 +156,8 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         write_attribute(SemanticsPosition, Format3Float)
         if self.export_normals:
             write_attribute(SemanticsNormal, Format3Float)
+        if self.export_tangents:
+            write_attribute(SemanticsTangent, Format3Float)
         if self.export_texture_coordinates:
             write_attribute(SemanticsTextureCoordinates, Format2Float)
         if self.export_blending_indices:
@@ -141,6 +168,11 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
     def _export_mesh(self):
         mesh = self._context.object.to_mesh(
             scene=self._context.scene, apply_modifiers=True, settings="RENDER")
+
+        if self.export_normals:
+            mesh.calc_normals_split()
+        if self.export_tangents:
+            mesh.calc_tangents(mesh.uv_layers.active.name)
 
         vertex_groups_bones_mapping = self._vertex_groups_bones_mapping
 
@@ -161,15 +193,16 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
             vertex_data += struct.pack("<fff", *convert_coordinates(vertex.co))
 
             if self.export_normals:
-                vertex_data += struct.pack("<fff", *convert_coordinates(
-                    vertex.normal if polygon.use_smooth else polygon.normal))
+                vertex_data += struct.pack(
+                    "<fff", *convert_coordinates(loop.normal))
+
+            if self.export_tangents:
+                vertex_data += struct.pack(
+                    "<fff", *convert_coordinates(loop.tangent))
 
             if self.export_texture_coordinates:
-                if mesh.uv_layers:
-                    vertex_data += struct.pack(
-                        "<ff", *mesh.uv_layers[0].data[loop.index].uv)
-                else:
-                    vertex_data += struct.pack("<ff", 0, 0)
+                vertex_data += struct.pack(
+                    "<ff", *mesh.uv_layers.active.data[loop.index].uv)
 
             if self.export_blending_indices:
                 indices = [vertex_groups_bones_mapping[group.group] for
