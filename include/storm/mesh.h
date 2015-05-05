@@ -32,6 +32,10 @@ public:
     static Pointer load( std::istream &stream );
     static Pointer load( const std::string &filename );
 
+    // Returns a mesh that covers entire screen in normalized device
+    // coordinates. Vertices have no attributes besides positions.
+    static Pointer getFullscreen();
+
     virtual ~Mesh() { }
 
     virtual const Description& getDescription() const = 0;
