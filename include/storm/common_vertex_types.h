@@ -42,4 +42,13 @@ struct OrientedTexturedVertex {
     static VertexFormat::Pointer getFormat();
 };
 
+struct SurfaceVertex {
+    Vector position;
+    Vector normal;
+    Vector tangent;
+    FlatVector textureCoordinates;
+
+    static VertexFormat::Pointer getFormat();
+};
+
 }
