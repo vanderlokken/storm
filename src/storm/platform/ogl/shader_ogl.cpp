@@ -14,6 +14,8 @@ namespace storm {
 
 namespace {
 
+class ShaderBinaryLoadingError : public Exception {};
+
 struct ValueHandleImplementation {
     enum class Type {
         UniformBlock,
@@ -99,6 +101,11 @@ bool isSupportedSamplerType( GLenum uniformType ) {
 
 // ProgramHandleOgl
 
+ProgramHandleOgl::ProgramHandleOgl() {
+    _handle = ::glCreateProgram();
+    checkResult( "::glCreateProgram" );
+}
+
 ProgramHandleOgl::ProgramHandleOgl(
     GLenum shaderType, const char *sourceCode )
 {
@@ -112,8 +119,9 @@ ProgramHandleOgl::~ProgramHandleOgl() {
 
 // ShaderOgl
 
-ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
-    : _type( type ), _handle( convertType(type), sourceCode.c_str() )
+ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type ) :
+    _type( type ),
+    _handle( convertType(type), sourceCode.c_str() )
 {
     if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE ) {
         std::string log( getProgramParameter(GL_INFO_LOG_LENGTH), 0 );
@@ -128,8 +136,70 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type )
     createUniformBlocksMapping();
 }
 
+ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
+    _type( type )
+{
+    const size_t headerSize = 2 * sizeof( GLenum );
+
+    if( binary.size() > headerSize &&
+            getOpenGlSupportStatus().ARB_get_program_binary )
+    {
+        const GLenum shaderType =
+            *reinterpret_cast<const GLenum*>( binary.data() );
+        const GLenum binaryFormat =
+            *reinterpret_cast<const GLenum*>( binary.data() + sizeof(GLenum) );
+
+        if( shaderType != convertType(_type) )
+            throw ShaderBinaryLoadingError();
+
+        const GLvoid *binaryData = binary.data() + headerSize;
+        const GLsizei binaryRepresentationLength = binary.size() - headerSize;
+
+        ::glProgramBinary(
+            _handle,
+            binaryFormat,
+            binaryData,
+            binaryRepresentationLength );
+    }
+
+    if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE )
+        throw ShaderBinaryLoadingError();
+
+    createSamplersMapping();
+    createUniformBlocksMapping();
+}
+
 Shader::Type ShaderOgl::getType() const {
     return _type;
+}
+
+std::vector<unsigned char> ShaderOgl::getBinaryRepresentation() const {
+    std::vector<unsigned char> result;
+
+    if( getOpenGlSupportStatus().ARB_get_program_binary ) {
+        const GLint binaryRepresentationLength =
+            getProgramParameter( GL_PROGRAM_BINARY_LENGTH );
+
+        const size_t headerSize = 2 * sizeof( GLenum );
+        result.resize( headerSize + binaryRepresentationLength );
+
+        GLenum *shaderType =
+            reinterpret_cast<GLenum*>( result.data() );
+        GLenum *binaryFormat =
+            reinterpret_cast<GLenum*>( result.data() + sizeof(GLenum) );
+        void *binaryData = result.data() + headerSize;
+
+        *shaderType = convertType( _type );
+
+        ::glGetProgramBinary(
+            _handle,
+            binaryRepresentationLength, nullptr,
+            binaryFormat,
+            binaryData );
+        checkResult( "::glGetProgramBinary" );
+    }
+
+    return result;
 }
 
 Shader::ValueHandle ShaderOgl::getValueHandle(
@@ -349,6 +419,18 @@ Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
     RenderingSystemOgl::installOpenGlContext();
 
     return std::make_shared< ShaderOgl >( sourceCode, type );
+}
+
+Shader::Pointer Shader::create(
+    const std::vector<unsigned char> &binaryRepresentation, Type type )
+{
+    RenderingSystemOgl::installOpenGlContext();
+
+    try {
+        return std::make_shared< ShaderOgl >( binaryRepresentation, type );
+    } catch( const ShaderBinaryLoadingError& ) {
+        return nullptr;
+    }
 }
 
 }

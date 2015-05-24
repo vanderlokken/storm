@@ -10,6 +10,7 @@ namespace storm {
 
 class ProgramHandleOgl : public HandleOgl {
 public:
+    ProgramHandleOgl();
     ProgramHandleOgl( GLenum shaderType, const char *sourceCode );
     ~ProgramHandleOgl();
 };
@@ -18,8 +19,11 @@ class ShaderOgl : public Shader {
     NONCOPYABLE( ShaderOgl );
 public:
     ShaderOgl( const std::string &sourceCode, Type type );
+    ShaderOgl( const std::vector<unsigned char> &binary, Type type );
 
     virtual Type getType() const;
+
+    virtual std::vector<unsigned char> getBinaryRepresentation() const;
 
     virtual ValueHandle getValueHandle( const std::string &identifier ) const;
 
