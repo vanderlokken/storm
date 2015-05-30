@@ -40,6 +40,8 @@ public:
 
     GLenum getTarget() const;
 
+    static GLenum convertCubeMapFace( unsigned int face );
+
 private:
     void validateDescription() const;
 

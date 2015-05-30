@@ -356,26 +356,15 @@ void TextureOgl::setTexels(
         getMipLevelDimensions( region.mipLevel );
 
     storm_assert( region.mipLevel < _description.mipLevels );
-    storm_assert( region.face >= CubeMapFace::PositiveX );
-    storm_assert( region.face <= CubeMapFace::NegativeZ );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
     storm_assert( region.y + region.height <= mipLevelDimensions.height );
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
-    static const GLenum faces[] = {
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    };
-
     if( _texelDescription.compressed ) {
         CompressedRegion compressedRegion;
 
-        compressedRegion.target = faces[region.face];
+        compressedRegion.target = convertCubeMapFace( region.face );
         compressedRegion.mipLevel = region.mipLevel;
         compressedRegion.x = region.x;
         compressedRegion.y = region.y;
@@ -389,7 +378,7 @@ void TextureOgl::setTexels(
     setTexelTransferAlignment( region.width );
 
     ::glTexSubImage2D(
-        faces[region.face],
+        convertCubeMapFace( region.face ),
         region.mipLevel,
         region.x,
         region.y,
@@ -421,6 +410,22 @@ const TextureHandleOgl& TextureOgl::getHandle() const {
 
 GLenum TextureOgl::getTarget() const {
     return _target;
+}
+
+GLenum TextureOgl::convertCubeMapFace( unsigned int face ) {
+    storm_assert( face >= CubeMapFace::PositiveX );
+    storm_assert( face <= CubeMapFace::NegativeZ );
+
+    static const GLenum faces[] = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    };
+
+    return faces[face];
 }
 
 void TextureOgl::validateDescription() const {

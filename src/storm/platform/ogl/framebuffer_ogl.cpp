@@ -72,6 +72,12 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
                 nativeTexture->getHandle(), buffer.mipLevel, buffer.layer );
             checkResult( "::glFramebufferTextureLayer" );
             break;
+        case Texture::Layout::CubeMap:
+            ::glFramebufferTexture2D( GL_FRAMEBUFFER, attachment,
+                TextureOgl::convertCubeMapFace(buffer.layer),
+                nativeTexture->getHandle(), buffer.mipLevel );
+            checkResult( "::glFramebufferTexture2D" );
+            break;
         default:
             throwNotImplemented();
         }
