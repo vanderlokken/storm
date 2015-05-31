@@ -176,8 +176,39 @@ void TextureOgl::getTexels(
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
-    if( _description.layout == Layout::CubeMap )
-        throwNotImplemented();
+    if( _description.layout == Layout::CubeMap ) {
+
+        if( _texelDescription.compressed )
+            throwNotImplemented();
+
+        const MipLevelDimensions mipLevelDimensions =
+            getMipLevelDimensions( mipLevel );
+
+        setTexelTransferAlignment( mipLevelDimensions.width );
+
+        const GLenum targets[] = {
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+            GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+            GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+            GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+            GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+        };
+
+        for( GLenum target : targets ) {
+            ::glGetTexImage( target, mipLevel,
+                _texelDescription.format, _texelDescription.type, texels );
+            checkResult( "::glGetTexImage" );
+
+            texels = static_cast<unsigned char*>( texels ) +
+                _texelDescription.size *
+                mipLevelDimensions.width *
+                mipLevelDimensions.height;
+        }
+
+        resetTexelTransferAlignment();
+        return;
+    }
 
     if( !_texelDescription.compressed ) {
         setTexelTransferAlignment( getMipLevelDimensions(mipLevel).width );
