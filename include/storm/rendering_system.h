@@ -29,6 +29,8 @@ public:
     virtual void setVsyncEnabled( bool enabled ) = 0;
 
     virtual void renderMesh( Mesh::Pointer ) = 0;
+    virtual void renderGenerated(
+        unsigned int vertexCount, Mesh::PrimitiveTopology ) = 0;
 
     virtual Shader::Pointer getShader( Shader::Type ) const = 0;
     virtual void setShader( Shader::Pointer ) = 0;

@@ -11,12 +11,16 @@ public:
     ~ProgramPipelineHandleOgl();
 };
 
+class VertexArrayHandleOgl;
+
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
     virtual void beginFrameRendering();
     virtual void endFrameRendering();
 
     virtual void renderMesh( Mesh::Pointer );
+    virtual void renderGenerated(
+        unsigned int vertexCount, Mesh::PrimitiveTopology );
 
     virtual void setShader( Shader::Pointer );
 
@@ -56,9 +60,10 @@ protected:
 private:
     static void setBooleanGlState( GLenum state, bool value );
 
-    // This object should be constructed after OpenGL context creation. To
+    // These objects should be constructed after OpenGL context creation. To
     // ensure this we're using heap allocation instead of stack allocation.
-    std::unique_ptr<ProgramPipelineHandleOgl> _programPipeline;
+    std::shared_ptr<ProgramPipelineHandleOgl> _programPipeline;
+    std::shared_ptr<VertexArrayHandleOgl> _vertexArray;
 
     RasterizationTechnique::Pointer _rasterizationTechnique;
     OutputTechnique::Pointer _outputTechnique;

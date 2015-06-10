@@ -5,10 +5,10 @@
 
 namespace storm {
 
-class MeshHandleOgl : public HandleOgl {
+class VertexArrayHandleOgl : public HandleOgl {
 public:
-    MeshHandleOgl();
-    ~MeshHandleOgl();
+    VertexArrayHandleOgl();
+    ~VertexArrayHandleOgl();
 };
 
 class MeshOgl : public Mesh {
@@ -18,14 +18,14 @@ public:
     virtual const Description& getDescription() const;
 
     GLenum getPrimitiveTopology() const;
-    const MeshHandleOgl& getHandle() const;
+    const VertexArrayHandleOgl& getHandle() const;
 
-private:
     static GLenum convertPrimitiveTopology( PrimitiveTopology );
 
+private:
     Description _description;
     GLenum _primitiveTopology;
-    MeshHandleOgl _handle;
+    VertexArrayHandleOgl _handle;
 };
 
 }

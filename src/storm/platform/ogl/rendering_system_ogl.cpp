@@ -48,12 +48,13 @@ void RenderingSystemOgl::initialize() {
     _clippingRectangle.width = _outputRectangle.width = dimensions.width;
     _clippingRectangle.height = _outputRectangle.height = dimensions.height;
 
-    _programPipeline.reset( new ProgramPipelineHandleOgl );
+    _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
+    _vertexArray = std::make_shared<VertexArrayHandleOgl>();
 
     ::glBindProgramPipeline( *_programPipeline );
     checkResult( "::glBindProgramPipeline" );
 
-    _backbuffer.reset( new BackbufferOgl );
+    _backbuffer = std::make_shared<BackbufferOgl>();
 
     _primitiveRestartIndex = 0xffff;
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
@@ -102,6 +103,17 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
     ::glDrawElements( primitiveTopology, indexCount, indexFormat, indexOffset );
     checkResult( "::glDrawElements" );
     return;
+}
+
+void RenderingSystemOgl::renderGenerated(
+    unsigned int vertexCount, Mesh::PrimitiveTopology primitiveTopology )
+{
+    ::glBindVertexArray( *_vertexArray );
+    checkResult( "::glBindVertexArray" );
+
+    ::glDrawArrays(
+        MeshOgl::convertPrimitiveTopology(primitiveTopology), 0, vertexCount );
+    checkResult( "::glDrawArrays" );
 }
 
 void RenderingSystemOgl::setShader( Shader::Pointer shader ) {

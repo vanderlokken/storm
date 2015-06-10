@@ -8,13 +8,13 @@
 
 namespace storm {
 
-MeshHandleOgl::MeshHandleOgl() {
+VertexArrayHandleOgl::VertexArrayHandleOgl() {
     ::glGenVertexArrays( 1, &_handle );
     checkResult( "::glGenVertexArrays" );
     return;
 }
 
-MeshHandleOgl::~MeshHandleOgl() {
+VertexArrayHandleOgl::~VertexArrayHandleOgl() {
     ::glDeleteVertexArrays( 1, &_handle );
     return;
 }
@@ -53,7 +53,7 @@ GLenum MeshOgl::getPrimitiveTopology() const {
     return _primitiveTopology;
 }
 
-const MeshHandleOgl& MeshOgl::getHandle() const {
+const VertexArrayHandleOgl& MeshOgl::getHandle() const {
     return _handle;
 }
 
