@@ -8,8 +8,13 @@ endif()
 project(storm)
 
 option(storm_build_examples "Whether to build examples or not" ON)
+option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 
 include_directories(include src)
+
+if(storm_enable_png_support)
+    add_definitions(-Dstorm_enable_png_support)
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR-")
@@ -79,6 +84,10 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/sampler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_dds.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_dds.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_png.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_png.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/throw_exception.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
 )

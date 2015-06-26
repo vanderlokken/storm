@@ -170,7 +170,8 @@ public:
 
     enum class FileFormat {
         DdsStrict,
-        Dds
+        Dds,
+        Png // libpng support is optional and disabled by default
     };
 
     struct LoadingParameters {

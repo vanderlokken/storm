@@ -49,6 +49,10 @@ public:
             return swapByteOrder( value );
     }
 
+    std::istream& operator * () {
+        return _stream;
+    }
+
 private:
     static ByteOrder getHostByteOrder() {
         const uint32_t value = 1;
