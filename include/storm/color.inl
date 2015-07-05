@@ -10,9 +10,9 @@ inline Color::Color(
 {
 }
 
-namespace {
+namespace internal {
 
-unsigned char fromNormalized( float normalizedValue ) {
+inline unsigned char fromNormalized( float normalizedValue ) {
 
     normalizedValue = normalizedValue < 0 ? 0 : normalizedValue;
     normalizedValue = normalizedValue > 1 ? 1 : normalizedValue;
@@ -20,7 +20,7 @@ unsigned char fromNormalized( float normalizedValue ) {
     return static_cast< unsigned char >( normalizedValue * 255 );
 }
 
-}
+} // namespace internal
 
 inline CompressedColor::CompressedColor() :
     value( 0xFF000000 )
@@ -38,10 +38,10 @@ inline CompressedColor::CompressedColor(
 
 inline CompressedColor::CompressedColor( Color color ) :
     value(
-        (fromNormalized(color.a) << 24) |
-        (fromNormalized(color.b) << 16) |
-        (fromNormalized(color.g) <<  8) |
-        (fromNormalized(color.r) <<  0) )
+        (internal::fromNormalized(color.a) << 24) |
+        (internal::fromNormalized(color.b) << 16) |
+        (internal::fromNormalized(color.g) <<  8) |
+        (internal::fromNormalized(color.r) <<  0) )
 {
 }
 
@@ -99,19 +99,19 @@ inline float CompressedColor::getNormalizedA() const {
 }
 
 inline void CompressedColor::setNormalizedR( float normalizedR ) {
-    setR( fromNormalized(normalizedR) );
+    setR( internal::fromNormalized(normalizedR) );
 }
 
 inline void CompressedColor::setNormalizedG( float normalizedG ) {
-    setG( fromNormalized(normalizedG) );
+    setG( internal::fromNormalized(normalizedG) );
 }
 
 inline void CompressedColor::setNormalizedB( float normalizedB ) {
-    setB( fromNormalized(normalizedB) );
+    setB( internal::fromNormalized(normalizedB) );
 }
 
 inline void CompressedColor::setNormalizedA( float normalizedA ) {
-    setA( fromNormalized(normalizedA) );
+    setA( internal::fromNormalized(normalizedA) );
 }
 
 inline CompressedColor::operator Color() const {
