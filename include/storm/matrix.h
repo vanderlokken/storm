@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 #include <storm/vector.h>
 
 namespace storm {
@@ -16,8 +14,8 @@ public:
         float _31, float _32, float _33, float _34,
         float _41, float _42, float _43, float _44 );
 
-    float* operator [] ( size_t index );
-    const float* operator [] ( size_t index ) const;
+    float* operator [] ( unsigned int index );
+    const float* operator [] ( unsigned int index ) const;
 
     Matrix& operator *= ( const Matrix& );
     Matrix& operator += ( const Matrix& );

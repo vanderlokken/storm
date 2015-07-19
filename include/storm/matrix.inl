@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cmath>
-
 namespace storm {
 
 inline Matrix::Matrix()
@@ -24,11 +22,11 @@ inline Matrix::Matrix(
 {
 }
 
-inline float* Matrix::operator [] ( size_t index ) {
+inline float* Matrix::operator [] ( unsigned int index ) {
     return &_11 + index * 4;
 }
 
-inline const float* Matrix::operator [] ( size_t index ) const {
+inline const float* Matrix::operator [] ( unsigned int index ) const {
     return &_11 + index * 4;
 }
 
