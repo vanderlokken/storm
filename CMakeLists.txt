@@ -92,10 +92,21 @@ set(storm_common_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
 )
 
-file(DOWNLOAD "http://www.opengl.org/registry/api/GL/glcorearb.h"
+set(glcorearb_header
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/glcorearb.h)
 
+if(NOT EXISTS ${glcorearb_header})
+    file(DOWNLOAD "http://www.opengl.org/registry/api/GL/glcorearb.h"
+        ${glcorearb_header} STATUS status)
+    list(GET status 0 error_code)
+    if(error_code)
+        file(REMOVE ${glcorearb_header})
+        message(FATAL_ERROR "Couldn't download 'glcorearb.h'.")
+    endif()
+endif()
+
 set(storm_ogl_sources
+    ${glcorearb_header}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
@@ -107,7 +118,6 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/check_result_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/glcorearb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/handle_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.h
