@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Storm (.smesh)",
-    "author": "vanderlokken@gmail.com",
-    "version": (1, 1),
+    "name": "Export Storm Framework Mesh Format (.storm-mesh)",
+    "author": "vanderlokken",
+    "version": (1, 2),
     "blender": (2, 65, 0),
-    "location": "File > Export > Storm (.smesh)",
-    "description": "Export Storm (.smesh)",
+    "location": "File > Export > Storm Framework Mesh (.storm-mesh)",
+    "description": "Export mesh in Storm Framework format",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
@@ -18,12 +18,12 @@ from bpy_extras.io_utils import ExportHelper
 
 
 class StormExportOperator(bpy.types.Operator, ExportHelper):
-    """Export Storm (.smesh)"""
+    """Export Storm Framework Mesh (.storm-mesh)"""
 
-    bl_idname = "export.storm"
-    bl_label = "Export Storm"
+    bl_idname = "export_mesh.storm"
+    bl_label = "Export Storm Framework Mesh"
 
-    filename_ext = ".smesh"
+    filename_ext = ".storm-mesh"
 
     export_normals = bpy.props.BoolProperty(
         name="Export normals", default=True)
@@ -73,7 +73,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
     def _export(self):
         with self._duplicated_object():
-            self._apply_transformations()
+            self._apply_scaling()
             self._convert_quadrangles_to_triangles()
             self._export_attributes()
             self._export_mesh()
@@ -90,13 +90,13 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         finally:
             bpy.ops.object.delete()
 
-    def _apply_transformations(self):
-        bpy.ops.object.transform_apply(
-            location=True, rotation=True, scale=True)
+    def _apply_scaling(self):
+        bpy.ops.object.transform_apply(scale=True)
 
     def _convert_quadrangles_to_triangles(self):
         bpy.ops.object.mode_set(mode="EDIT")
 
+        bpy.ops.mesh.reveal()
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.mesh.quads_convert_to_tris()
 
@@ -178,12 +178,9 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
         convert_coordinates = lambda vector: (vector[0], vector[2], -vector[1])
 
-        polygon_loop_pairs = []
-        for polygon in mesh.polygons:
-            if polygon.hide:
-                continue
-            for loop_index in polygon.loop_indices:
-                polygon_loop_pairs.append((polygon, mesh.loops[loop_index]))
+        polygon_loop_pairs = [
+            (polygon, mesh.loops[loop_index]) for polygon in mesh.polygons
+                for loop_index in polygon.loop_indices]
 
         vertex_data = bytearray()
 
@@ -255,7 +252,8 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
 def menu_function(self, context):
     self.layout.operator(
-        StormExportOperator.bl_idname, text="Storm (.smesh)")
+        StormExportOperator.bl_idname,
+        text="Storm Framework Mesh (.storm-mesh)")
 
 
 def register():
