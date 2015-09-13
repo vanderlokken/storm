@@ -190,8 +190,10 @@ DdsHeader parseDdsHeader( BinaryInputStream &stream, bool strict ) {
 Texture::Pointer createTexture(
     const DdsHeader &ddsHeader, const Texture::LoadingParameters &parameters )
 {
+    const bool srgbDefault =
+        parameters.defaultColorSpace == Texture::ColorSpace::sRGB;
     const Texture::Format format =
-        selectTextureFormat( ddsHeader.pixelFormat, parameters.srgbDefault );
+        selectTextureFormat( ddsHeader.pixelFormat, srgbDefault );
 
     unsigned int mipLevels = 1;
 

@@ -40,8 +40,10 @@ Texture::Pointer parsePng(
         throw ResourceLoadingError() << "Invalid PNG texture data";
 
     Texture::Separate2dDescription description;
-    description.format = parameters.srgbDefault ?
-        Texture::Format::SrgbaUint8 : Texture::Format::RgbaUint8;
+    if( parameters.defaultColorSpace == Texture::ColorSpace::sRGB )
+        description.format = Texture::Format::SrgbaUint8;
+    else
+        description.format = Texture::Format::RgbaUint8;
     description.width = image.width;
     description.height = image.height;
     description.mipLevels = 1;

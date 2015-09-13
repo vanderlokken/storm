@@ -174,12 +174,16 @@ public:
         Png // libpng support is optional and disabled by default
     };
 
+    enum class ColorSpace {
+        Linear,
+        sRGB
+    };
+
     struct LoadingParameters {
         FileFormat fileFormat;
-        // Treat 8-bit RGB and RGBA color values as sRGB and sRGBA. This
-        // parameter is used only when file doesn't contain any color space
-        // information.
-        bool srgbDefault;
+        // This parameter is used only when file doesn't contain any color
+        // space information and color values are stored in 8-bit format.
+        ColorSpace defaultColorSpace;
     };
 
     static Pointer load(
