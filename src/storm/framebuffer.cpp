@@ -2,6 +2,18 @@
 
 namespace storm {
 
+Framebuffer::Pointer Framebuffer::create( Texture::Pointer texture ) {
+    Framebuffer::Buffer buffer;
+    buffer.texture = texture;
+    buffer.mipLevel = 0;
+    buffer.layer = 0;
+
+    Framebuffer::Description description;
+    description.buffers = {buffer};
+
+    return Framebuffer::create( description );
+}
+
 Framebuffer::Pointer Framebuffer::create( Dimensions dimensions,
     unsigned int texelSamples, const std::vector<Texture::Format> &bufferFormats )
 {

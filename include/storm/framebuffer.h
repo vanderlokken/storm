@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <storm/dimensions.h>
@@ -21,7 +22,8 @@ public:
         std::vector<Buffer> buffers;
     };
 
-    static Pointer create( const Description& );
+    static Pointer create( const Description &description );
+    static Pointer create( Texture::Pointer texture );
 
     static Pointer create( Dimensions dimensions, unsigned int texelSamples,
         const std::vector<Texture::Format> &bufferFormats );
