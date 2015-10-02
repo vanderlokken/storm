@@ -22,6 +22,7 @@ Texture::Pointer Texture::load(
         return parsePng( binaryInputStream, parameters );
     default:
         storm_assert_unreachable( "Unexpected file format value" );
+        return nullptr;
     }
 }
 

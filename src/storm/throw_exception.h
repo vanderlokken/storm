@@ -8,16 +8,6 @@
 #define throwNotImplemented() \
     throw Exception( __FILE__, __LINE__, __FUNCTION__, "Not implemented" )
 
-namespace {
-
-#ifndef NDEBUG
-    bool isDebug() { return true; }
-#else
-    bool isDebug() { return false; }
-#endif
-
-}
-
 #ifndef NDEBUG
     #define storm_assert_default_message( expression ) \
         if( expression ) { } else { \
@@ -37,6 +27,5 @@ namespace {
     #define storm_assert( ... )
 #endif
 
-// The following macro uses "isDebug" function to supress a warning about
-// constant conditional expressions
-#define storm_assert_unreachable( message ) storm_assert( isDebug(), message )
+#define storm_assert_unreachable( message ) \
+    storm_assert( !"Reachable", message )
