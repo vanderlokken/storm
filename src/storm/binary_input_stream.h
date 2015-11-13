@@ -6,13 +6,19 @@
 
 namespace storm {
 
+enum class ByteOrder {
+    BigEndian,
+    LittleEndian
+};
+
+inline ByteOrder getHostByteOrder() {
+    const uint32_t value = 1;
+    return *reinterpret_cast<const uint8_t*>( &value ) == 1 ?
+        ByteOrder::LittleEndian : ByteOrder::BigEndian;
+}
+
 class BinaryInputStream {
 public:
-    enum class ByteOrder {
-        BigEndian,
-        LittleEndian
-    };
-
     explicit BinaryInputStream( std::istream &stream,
         ByteOrder dataByteOrder = ByteOrder::LittleEndian ) :
             _stream( stream ),
@@ -30,8 +36,8 @@ public:
         _stream.exceptions( _originalExceptionMask );
     }
 
-    BinaryInputStream& read( char *data, std::streamsize count ) {
-        _stream.read( data, count );
+    BinaryInputStream& read( void *data, std::streamsize count ) {
+        _stream.read( static_cast<char*>(data), count );
         return *this;
     }
 
@@ -54,12 +60,6 @@ public:
     }
 
 private:
-    static ByteOrder getHostByteOrder() {
-        const uint32_t value = 1;
-        return *reinterpret_cast<const uint8_t*>( &value ) == 1 ?
-            ByteOrder::LittleEndian : ByteOrder::BigEndian;
-    }
-
     static uint8_t swapByteOrder( uint8_t value ) {
         return value;
     }
