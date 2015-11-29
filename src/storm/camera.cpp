@@ -129,4 +129,22 @@ Matrix OrthographicCamera::getProjectionTransformation() const {
     return result;
 }
 
+Vector unprojectScreenCoordinates( int x, int y, const Camera &camera ) {
+    const Matrix inverseTransformation = (
+        camera.getViewTransformation() *
+        camera.getProjectionTransformation()
+    ).getInverted();
+
+    const float xNormalized =
+        -1.0f + 2.0f * x / camera.getFrameDimensions().width;
+    const float yNormalized =
+        1.0f - 2.0f * y / camera.getFrameDimensions().height;
+
+    const Vector nearPlanePoint( xNormalized, yNormalized, -1.0f );
+    const Vector farPlanePoint( xNormalized, yNormalized, 1.0f );
+
+    return farPlanePoint * inverseTransformation -
+        nearPlanePoint * inverseTransformation;
+}
+
 }

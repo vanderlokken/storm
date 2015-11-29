@@ -58,4 +58,6 @@ public:
     virtual Matrix getProjectionTransformation() const;
 };
 
+Vector unprojectScreenCoordinates( int x, int y, const Camera &camera );
+
 }
