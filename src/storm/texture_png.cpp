@@ -1,5 +1,6 @@
 #include <storm/texture_png.h>
 
+#include <sstream>
 #include <vector>
 
 #include <storm/throw_exception.h>
@@ -14,10 +15,12 @@ Texture::Pointer parsePng(
     BinaryInputStream &stream, const Texture::LoadingParameters &parameters )
 {
 #ifdef storm_enable_png_support
-    std::istreambuf_iterator<char> begin( *stream );
-    std::istreambuf_iterator<char> end;
+    std::ostringstream bufferStream;
 
-    const std::vector<uint8_t> buffer( begin, end );
+    if( !(bufferStream << (*stream).rdbuf()) )
+        throw ResourceLoadingError() << "Couldn't read texture";
+
+    const std::string buffer = bufferStream.str();
 
     png_image image = {};
 

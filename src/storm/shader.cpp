@@ -1,6 +1,8 @@
 #include <storm/shader.h>
 
+#include <cstdint>
 #include <fstream>
+#include <sstream>
 
 #include <storm/throw_exception.h>
 
@@ -9,14 +11,22 @@ namespace storm {
 Shader::Pointer Shader::load(
     std::istream &stream, Type type, Format format )
 {
-    std::istreambuf_iterator<char> begin( stream );
-    std::istreambuf_iterator<char> end;
+    std::ostringstream bufferStream;
+
+    if( !(bufferStream << stream.rdbuf()) )
+        throw ResourceLoadingError() << "Couldn't read shader";
+
+    const std::string buffer = bufferStream.str();
 
     switch( format ) {
     case Format::Source:
-        return Shader::create( std::string(begin, end), type );
+        return Shader::create( buffer, type );
     case Format::Binary:
-        return Shader::create( std::vector<unsigned char>(begin, end), type );
+        return Shader::create(
+            std::vector<uint8_t>(
+                reinterpret_cast<const uint8_t*>(buffer.data()),
+                reinterpret_cast<const uint8_t*>(buffer.data()) + buffer.size()
+            ), type );
     default:
         throwNotImplemented();
     }
@@ -25,7 +35,7 @@ Shader::Pointer Shader::load(
 Shader::Pointer Shader::load(
     const std::string &filename, Type type, Format format )
 {
-    std::ifstream stream( filename, std::ios::binary );
+    std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;
