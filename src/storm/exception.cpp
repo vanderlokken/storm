@@ -31,9 +31,4 @@ Exception::Exception( const std::string &description )
     }
 #endif
 
-Exception& Exception::operator << ( const std::string &message ) {
-    _message += message;
-    return *this;
-}
-
 }
