@@ -177,6 +177,7 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         vertex_groups_bones_mapping = self._vertex_groups_bones_mapping
 
         convert_coordinates = lambda vector: (vector[0], vector[2], -vector[1])
+        convert_uv = lambda vector: (vector[0], 1 - vector[1])
 
         polygon_loop_pairs = [
             (polygon, mesh.loops[loop_index]) for polygon in mesh.polygons
@@ -198,8 +199,9 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
                     "<fff", *convert_coordinates(loop.tangent))
 
             if self.export_texture_coordinates:
+                uv = mesh.uv_layers.active.data[loop.index].uv
                 vertex_data += struct.pack(
-                    "<ff", *mesh.uv_layers.active.data[loop.index].uv)
+                    "<ff", *convert_uv(uv))
 
             if self.export_blending_indices:
                 indices = [vertex_groups_bones_mapping[group.group] for
