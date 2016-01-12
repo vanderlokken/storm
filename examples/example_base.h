@@ -35,7 +35,7 @@ void exampleMain() {
 int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
     try {
         exampleMain();
-    } catch( const std::exception &error ) {
+    } catch( const std::Exception &error ) {
         ::MessageBoxA( 0, error.what(), "storm", MB_ICONERROR );
         return 1;
     }
@@ -47,7 +47,7 @@ int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
 int main() {
     try {
         exampleMain();
-    } catch( const storm::exception &error ) {
+    } catch( const storm::Exception &error ) {
         std::cerr << error.what() << std::endl;
         return 1;
     }

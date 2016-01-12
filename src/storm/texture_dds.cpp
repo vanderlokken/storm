@@ -1,5 +1,6 @@
 #include <storm/texture_dds.h>
 
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
