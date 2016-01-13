@@ -8,11 +8,13 @@ struct FlatVector {
 
     FlatVector& operator += ( const FlatVector& );
     FlatVector& operator -= ( const FlatVector& );
+    FlatVector& operator *= ( const FlatVector& );
     FlatVector& operator *= ( float );
     FlatVector& operator /= ( float );
 
     FlatVector operator + ( const FlatVector& ) const;
     FlatVector operator - ( const FlatVector& ) const;
+    FlatVector operator * ( const FlatVector& ) const;
     FlatVector operator * ( float ) const;
     FlatVector operator / ( float ) const;
 

@@ -26,6 +26,12 @@ inline FlatVector& FlatVector::operator -= ( const FlatVector &vector ) {
     return *this;
 }
 
+inline FlatVector& FlatVector::operator *= ( const FlatVector &vector ) {
+    x *= vector.x;
+    y *= vector.y;
+    return *this;
+}
+
 inline FlatVector& FlatVector::operator *= ( float multiplier ) {
     x *= multiplier;
     y *= multiplier;
@@ -49,6 +55,12 @@ inline FlatVector FlatVector::operator - ( const FlatVector &vector ) const {
     return FlatVector(
         x - vector.x,
         y - vector.y );
+}
+
+inline FlatVector FlatVector::operator * ( const FlatVector &vector ) const {
+    return FlatVector(
+        x * vector.x,
+        y * vector.y );
 }
 
 inline FlatVector FlatVector::operator * ( float multiplier ) const {

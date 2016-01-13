@@ -8,11 +8,13 @@ struct Vector {
 
     Vector& operator += ( const Vector& );
     Vector& operator -= ( const Vector& );
+    Vector& operator *= ( const Vector& );
     Vector& operator *= ( float );
     Vector& operator /= ( float );
 
     Vector operator + ( const Vector& ) const;
     Vector operator - ( const Vector& ) const;
+    Vector operator * ( const Vector& ) const;
     Vector operator * ( float ) const;
     Vector operator / ( float ) const;
 

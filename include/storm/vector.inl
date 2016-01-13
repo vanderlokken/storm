@@ -28,6 +28,13 @@ inline Vector& Vector::operator -= ( const Vector &vector ) {
     return *this;
 }
 
+inline Vector& Vector::operator *= ( const Vector &vector ) {
+    x *= vector.x;
+    y *= vector.y;
+    z *= vector.z;
+    return *this;
+}
+
 inline Vector& Vector::operator *= ( float multiplier ) {
     x *= multiplier;
     y *= multiplier;
@@ -55,6 +62,13 @@ inline Vector Vector::operator - ( const Vector &vector ) const {
         x - vector.x,
         y - vector.y,
         z - vector.z );
+}
+
+inline Vector Vector::operator * ( const Vector &vector ) const {
+    return Vector(
+        x * vector.x,
+        y * vector.y,
+        z * vector.z );
 }
 
 inline Vector Vector::operator * ( float multiplier ) const {
