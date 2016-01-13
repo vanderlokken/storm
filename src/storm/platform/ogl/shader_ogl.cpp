@@ -160,6 +160,13 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
             binaryFormat,
             binaryData,
             binaryRepresentationLength );
+
+#ifndef NDEBUG
+        // We intentionally ignore shader binary loading errors and set error
+        // flag to the 'GL_NO_ERROR' value. We will detect loading result using
+        // the 'GL_LINK_STATUS' value.
+        ::glGetError();
+#endif
     }
 
     if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE )
