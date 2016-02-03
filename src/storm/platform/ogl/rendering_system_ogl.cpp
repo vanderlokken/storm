@@ -275,17 +275,31 @@ void RenderingSystemOgl::setBlendingTechnique(
     setBooleanGlState( GL_BLEND, blendingEnabled );
 
     if( blendingEnabled ) {
-        ::glBlendEquationSeparate(
-            colorEquation.operation,
-            alphaEquation.operation );
-        checkResult( "::glBlendEquationSeparate" );
+        if( colorEquation.operation == alphaEquation.operation ) {
+            ::glBlendEquation( colorEquation.operation );
+            checkResult( "::glBlendEquation" );
+        } else {
+            ::glBlendEquationSeparate(
+                colorEquation.operation,
+                alphaEquation.operation );
+            checkResult( "::glBlendEquationSeparate" );
+        }
 
-        ::glBlendFuncSeparate(
-            colorEquation.sourceFactor,
-            colorEquation.destinationFactor,
-            alphaEquation.sourceFactor,
-            alphaEquation.destinationFactor );
-        checkResult( "::glBlendFuncSeparate" );
+        if( colorEquation.sourceFactor == alphaEquation.sourceFactor &&
+            colorEquation.destinationFactor == alphaEquation.destinationFactor )
+        {
+            ::glBlendFunc(
+                colorEquation.sourceFactor,
+                colorEquation.destinationFactor );
+            checkResult( "::glBlendFunc" );
+        } else {
+            ::glBlendFuncSeparate(
+                colorEquation.sourceFactor,
+                colorEquation.destinationFactor,
+                alphaEquation.sourceFactor,
+                alphaEquation.destinationFactor );
+            checkResult( "::glBlendFuncSeparate" );
+        }
     }
 
     _blendingTechnique = technique;
