@@ -2,16 +2,32 @@
 
 #include <memory>
 
-#include <storm/platform/win/api_win.h>
-
 namespace storm {
+
+EventLoopWin::EventLoopWin() :
+    _acceleratorTableHandle( 0 )
+{
+    ACCEL accelerator;
+    accelerator.fVirt = FALT | FVIRTKEY;
+    accelerator.key = VK_RETURN;
+    accelerator.cmd = ToggleFullscreenModeCommand;
+
+    _acceleratorTableHandle = ::CreateAcceleratorTable( &accelerator, 1 );
+}
+
+EventLoopWin::~EventLoopWin() {
+    ::DestroyAcceleratorTable( _acceleratorTableHandle );
+}
 
 void EventLoopWin::processEvents() {
     MSG message;
 
     while( ::PeekMessage(&message, 0, 0, 0, PM_REMOVE) ) {
-        ::TranslateMessage( &message );
-        ::DispatchMessage( &message );
+        if( !::TranslateAccelerator(
+                message.hwnd, _acceleratorTableHandle, &message) ) {
+            ::TranslateMessage( &message );
+            ::DispatchMessage( &message );
+        }
     }
 
     _eventsProcessed = true;

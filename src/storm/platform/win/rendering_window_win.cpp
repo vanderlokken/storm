@@ -1,8 +1,9 @@
 #include <storm/platform/win/rendering_window_win.h>
 
+#include <algorithm>
 #include <memory>
 
-#include <storm/event_loop.h>
+#include <storm/platform/win/event_loop_win.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
@@ -127,8 +128,8 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
 
     ::AdjustWindowRect( &windowRectangle, windowStyle, hasMenu );
 
-    const int resultX = windowRectangle.left;
-    const int resultY = windowRectangle.top;
+    const int resultX = std::max<long>( windowRectangle.left, 0 );
+    const int resultY = std::max<long>( windowRectangle.top, 0 );
     const int resultWidth = windowRectangle.right - windowRectangle.left;
     const int resultHeight = windowRectangle.bottom - windowRectangle.top;
 
@@ -216,6 +217,20 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
 
         case WM_DISPLAYCHANGE:
             // TODO: fix fullscreen rendering window behaviour on display mode changes.
+            break;
+
+        case WM_COMMAND:
+            if( HIWORD(firstParameter) == 1 &&
+                LOWORD(firstParameter) ==
+                    EventLoopWin::ToggleFullscreenModeCommand )
+            {
+                if( instance->_fullscreen ) {
+                    observers.notify( &Observer::onWindowedModeRequest );
+                } else {
+                    observers.notify( &Observer::onFullscreenModeRequest );
+                }
+                return 0;
+            }
             break;
 
         case WM_CLOSE:

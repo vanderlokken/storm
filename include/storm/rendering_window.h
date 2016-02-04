@@ -15,6 +15,9 @@ public:
         std::function<void()> onFocusOut;
         std::function<void()> onFolding;
         std::function<void()> onUnfolding;
+        // Note: mode switch can be requested by pressing Alt+Enter
+        std::function<void()> onWindowedModeRequest;
+        std::function<void()> onFullscreenModeRequest;
     };
 
     struct FullscreenMode {
