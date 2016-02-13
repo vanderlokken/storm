@@ -66,18 +66,18 @@ Matrix Camera::getViewTransformation() const {
     Vector zAxis = _target - _position;
     zAxis.normalize();
 
-    Vector xAxis = Vector::getCrossProduct( directionUp, zAxis );
+    Vector xAxis = crossProduct( directionUp, zAxis );
     xAxis.normalize();
 
-    Vector yAxis = Vector::getCrossProduct( zAxis, xAxis );
+    Vector yAxis = crossProduct( zAxis, xAxis );
 
     return Matrix(
         xAxis.x, yAxis.x, zAxis.x, 0,
         xAxis.y, yAxis.y, zAxis.y, 0,
         xAxis.z, yAxis.z, zAxis.z, 0,
-        -Vector::getDotProduct( xAxis, _position ),
-        -Vector::getDotProduct( yAxis, _position ),
-        -Vector::getDotProduct( zAxis, _position ), 1 );
+        -dotProduct( xAxis, _position ),
+        -dotProduct( yAxis, _position ),
+        -dotProduct( zAxis, _position ), 1 );
 }
 
 PerspectiveCamera::PerspectiveCamera() :

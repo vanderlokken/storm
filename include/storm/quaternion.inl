@@ -66,14 +66,14 @@ inline Quaternion Quaternion::operator * ( const Quaternion &other ) const {
     const Vector first( x, y, z );
     const Vector second( other.x, other.y, other.z );
 
-    const Vector result = Vector::getCrossProduct( first, second ) +
+    const Vector result = crossProduct( first, second ) +
         second * w + first * other.w;
 
     return Quaternion(
         result.x,
         result.y,
         result.z,
-        w * other.w - Vector::getDotProduct(first, second) );
+        w * other.w - dotProduct(first, second) );
 }
 
 inline Quaternion Quaternion::operator * ( float multiplier ) const {
@@ -146,13 +146,13 @@ inline Quaternion Quaternion::fromAxisAngle(
 }
 
 inline Quaternion Quaternion::fromAxes( const Vector &from, const Vector &to ) {
-    const Vector crossProduct = Vector::getCrossProduct( from, to );
-    const float dotProduct = Vector::getDotProduct( from, to );
+    const Vector crossProductValue = crossProduct( from, to );
+    const float dotProductValue = dotProduct( from, to );
     return Quaternion(
-        crossProduct.x,
-        crossProduct.y,
-        crossProduct.z,
-        sqrt(from.getSquaredLength() * to.getSquaredLength()) + dotProduct
+        crossProductValue.x,
+        crossProductValue.y,
+        crossProductValue.z,
+        sqrt(from.getLengthSquared() * to.getLengthSquared()) + dotProductValue
     ).getNormalized();
 }
 

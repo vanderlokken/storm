@@ -5,7 +5,7 @@ libstorm is a free open-source 3D graphics application framework for Windows and
 
 System requirements (Windows):
 * CMake
-* Visual Studio 2013
+* Visual Studio 2015
 * OpenGL 3.3
 
 System requirements (Linux):

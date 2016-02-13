@@ -11,7 +11,6 @@
 #include <storm/display.h>
 #include <storm/event_loop.h>
 #include <storm/exception.h>
-#include <storm/flat_vector.h>
 #include <storm/framebuffer.h>
 #include <storm/keyboard.h>
 #include <storm/matrix.h>

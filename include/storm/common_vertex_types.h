@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/color.h>
-#include <storm/flat_vector.h>
 #include <storm/vector.h>
 #include <storm/vertex_format.h>
 
@@ -15,7 +14,7 @@ struct PositionedVertex {
 
 struct TexturedVertex {
     Vector position;
-    FlatVector textureCoordinates;
+    Vector2d textureCoordinates;
 
     static VertexFormat::Pointer getFormat();
 };
@@ -37,7 +36,7 @@ struct OrientedVertex {
 struct OrientedTexturedVertex {
     Vector position;
     Vector normal;
-    FlatVector textureCoordinates;
+    Vector2d textureCoordinates;
 
     static VertexFormat::Pointer getFormat();
 };
@@ -46,7 +45,7 @@ struct SurfaceVertex {
     Vector position;
     Vector normal;
     Vector tangent;
-    FlatVector textureCoordinates;
+    Vector2d textureCoordinates;
 
     static VertexFormat::Pointer getFormat();
 };

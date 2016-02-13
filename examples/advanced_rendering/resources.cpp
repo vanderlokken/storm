@@ -51,40 +51,40 @@ storm::Sampler::Pointer createCheckboardPatternSampler() {
 }
 
 storm::Mesh::Pointer createTexturedCubeMesh() {
-    using storm::FlatVector;
+    using storm::Vector2d;
     using storm::Vector;
 
     const std::array<storm::OrientedTexturedVertex, 24> vertices = {
         // Top
-        Vector(-1,  1, -1), Vector(0, 1, 0), FlatVector(0, 0),
-        Vector(-1,  1,  1), Vector(0, 1, 0), FlatVector(0, 1),
-        Vector( 1,  1, -1), Vector(0, 1, 0), FlatVector(1, 0),
-        Vector( 1,  1,  1), Vector(0, 1, 0), FlatVector(1, 1),
+        Vector(-1,  1, -1), Vector(0, 1, 0), Vector2d(0, 0),
+        Vector(-1,  1,  1), Vector(0, 1, 0), Vector2d(0, 1),
+        Vector( 1,  1, -1), Vector(0, 1, 0), Vector2d(1, 0),
+        Vector( 1,  1,  1), Vector(0, 1, 0), Vector2d(1, 1),
         // Bottom
-        Vector(-1, -1,  1), Vector(0, -1, 0), FlatVector(0, 0),
-        Vector(-1, -1, -1), Vector(0, -1, 0), FlatVector(0, 1),
-        Vector( 1, -1,  1), Vector(0, -1, 0), FlatVector(1, 0),
-        Vector( 1, -1, -1), Vector(0, -1, 0), FlatVector(1, 1),
+        Vector(-1, -1,  1), Vector(0, -1, 0), Vector2d(0, 0),
+        Vector(-1, -1, -1), Vector(0, -1, 0), Vector2d(0, 1),
+        Vector( 1, -1,  1), Vector(0, -1, 0), Vector2d(1, 0),
+        Vector( 1, -1, -1), Vector(0, -1, 0), Vector2d(1, 1),
         // Front
-        Vector(-1, -1, -1), Vector(0, 0, -1), FlatVector(1, 0),
-        Vector(-1,  1, -1), Vector(0, 0, -1), FlatVector(1, 1),
-        Vector( 1, -1, -1), Vector(0, 0, -1), FlatVector(0, 0),
-        Vector( 1,  1, -1), Vector(0, 0, -1), FlatVector(0, 1),
+        Vector(-1, -1, -1), Vector(0, 0, -1), Vector2d(1, 0),
+        Vector(-1,  1, -1), Vector(0, 0, -1), Vector2d(1, 1),
+        Vector( 1, -1, -1), Vector(0, 0, -1), Vector2d(0, 0),
+        Vector( 1,  1, -1), Vector(0, 0, -1), Vector2d(0, 1),
         // Back
-        Vector( 1, -1,  1), Vector(0, 0, 1), FlatVector(1, 0),
-        Vector( 1,  1,  1), Vector(0, 0, 1), FlatVector(1, 1),
-        Vector(-1, -1,  1), Vector(0, 0, 1), FlatVector(0, 0),
-        Vector(-1,  1,  1), Vector(0, 0, 1), FlatVector(0, 1),
+        Vector( 1, -1,  1), Vector(0, 0, 1), Vector2d(1, 0),
+        Vector( 1,  1,  1), Vector(0, 0, 1), Vector2d(1, 1),
+        Vector(-1, -1,  1), Vector(0, 0, 1), Vector2d(0, 0),
+        Vector(-1,  1,  1), Vector(0, 0, 1), Vector2d(0, 1),
         // Right
-        Vector( 1, -1, -1), Vector(1, 0, 0), FlatVector(0, 0),
-        Vector( 1,  1, -1), Vector(1, 0, 0), FlatVector(0, 1),
-        Vector( 1, -1,  1), Vector(1, 0, 0), FlatVector(1, 0),
-        Vector( 1,  1,  1), Vector(1, 0, 0), FlatVector(1, 1),
+        Vector( 1, -1, -1), Vector(1, 0, 0), Vector2d(0, 0),
+        Vector( 1,  1, -1), Vector(1, 0, 0), Vector2d(0, 1),
+        Vector( 1, -1,  1), Vector(1, 0, 0), Vector2d(1, 0),
+        Vector( 1,  1,  1), Vector(1, 0, 0), Vector2d(1, 1),
         // Left
-        Vector(-1, -1,  1), Vector(-1, 0, 0), FlatVector(0, 0),
-        Vector(-1,  1,  1), Vector(-1, 0, 0), FlatVector(0, 1),
-        Vector(-1, -1, -1), Vector(-1, 0, 0), FlatVector(1, 0),
-        Vector(-1,  1, -1), Vector(-1, 0, 0), FlatVector(1, 1)
+        Vector(-1, -1,  1), Vector(-1, 0, 0), Vector2d(0, 0),
+        Vector(-1,  1,  1), Vector(-1, 0, 0), Vector2d(0, 1),
+        Vector(-1, -1, -1), Vector(-1, 0, 0), Vector2d(1, 0),
+        Vector(-1,  1, -1), Vector(-1, 0, 0), Vector2d(1, 1)
     };
 
     // 0xffff is a primitive restart index.

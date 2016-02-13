@@ -35,8 +35,6 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/display.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/event_loop.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/exception.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/flat_vector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/framebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/keyboard.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/matrix.h
