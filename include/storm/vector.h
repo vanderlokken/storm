@@ -34,7 +34,39 @@ struct VectorData<Type, 4> {
 #pragma warning( pop )
 
 template<class Type, size_t Size>
-struct BasicVector : VectorData<Type, Size> {
+struct BasicVector;
+
+template<class Type, size_t Size>
+struct VectorBasis {};
+
+template<class Type>
+struct VectorBasis<Type, 1> {
+    static const BasicVector<Type, 1> AxisX;
+};
+
+template<class Type>
+struct VectorBasis<Type, 2> {
+    static const BasicVector<Type, 2> AxisX;
+    static const BasicVector<Type, 2> AxisY;
+};
+
+template<class Type>
+struct VectorBasis<Type, 3> {
+    static const BasicVector<Type, 3> AxisX;
+    static const BasicVector<Type, 3> AxisY;
+    static const BasicVector<Type, 3> AxisZ;
+};
+
+template<class Type>
+struct VectorBasis<Type, 4> {
+    static const BasicVector<Type, 4> AxisX;
+    static const BasicVector<Type, 4> AxisY;
+    static const BasicVector<Type, 4> AxisZ;
+    static const BasicVector<Type, 4> AxisW;
+};
+
+template<class Type, size_t Size>
+struct BasicVector : VectorData<Type, Size>, VectorBasis<Type, Size> {
     BasicVector();
 
     template<class... Values>

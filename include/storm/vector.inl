@@ -4,6 +4,40 @@
 
 namespace storm {
 
+template<class Type>
+const BasicVector<Type, 1> VectorBasis<Type, 1>::AxisX =
+    BasicVector<Type, 1>( Type(1) );
+
+template<class Type>
+const BasicVector<Type, 2> VectorBasis<Type, 2>::AxisX =
+    BasicVector<Type, 2>( Type(1), Type(0) );
+template<class Type>
+const BasicVector<Type, 2> VectorBasis<Type, 2>::AxisY =
+    BasicVector<Type, 2>( Type(0), Type(1) );
+
+template<class Type>
+const BasicVector<Type, 3> VectorBasis<Type, 3>::AxisX =
+    BasicVector<Type, 3>( Type(1), Type(0), Type(0) );
+template<class Type>
+const BasicVector<Type, 3> VectorBasis<Type, 3>::AxisY =
+    BasicVector<Type, 3>( Type(0), Type(1), Type(0) );
+template<class Type>
+const BasicVector<Type, 3> VectorBasis<Type, 3>::AxisZ =
+    BasicVector<Type, 3>( Type(0), Type(0), Type(1) );
+
+template<class Type>
+const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisX =
+    BasicVector<Type, 4>( Type(1), Type(0), Type(0), Type(0) );
+template<class Type>
+const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisY =
+    BasicVector<Type, 4>( Type(0), Type(1), Type(0), Type(0) );
+template<class Type>
+const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisZ =
+    BasicVector<Type, 4>( Type(0), Type(0), Type(1), Type(0) );
+template<class Type>
+const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisW =
+    BasicVector<Type, 4>( Type(0), Type(0), Type(0), Type(1) );
+
 template<class Type, size_t Size>
 inline BasicVector<Type, Size>::BasicVector() :
     VectorData {{0}}
