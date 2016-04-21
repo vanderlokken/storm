@@ -116,6 +116,8 @@ Matrix PerspectiveCamera::getProjectionTransformation() const {
 OrthographicCamera::OrthographicCamera() { }
 
 Matrix OrthographicCamera::getProjectionTransformation() const {
+    storm_assert( _frameDimensions.width && _frameDimensions.height );
+
     const float depthRange = _maximalDepth - _minimalDepth;
 
     Matrix result;

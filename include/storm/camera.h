@@ -6,6 +6,7 @@
 
 namespace storm {
 
+// Note: camera uses left-handed coordinate system
 class Camera {
 public:
     const Vector& getPosition() const;
