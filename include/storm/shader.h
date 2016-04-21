@@ -52,9 +52,14 @@ public:
     // unavailable 'getBinaryRepresentation' returns zero-length result.
     virtual std::vector<unsigned char> getBinaryRepresentation() const = 0;
 
+    // When a shader contains no value with the specified identifier, this
+    // method returns a default-constructed 'ValueHandle' instance which
+    // evaluates to 'false'.
     virtual ValueHandle getValueHandle(
         const std::string &identifier ) const = 0;
 
+    // The following methods throw 'ShaderValueLookupError'-typed exceptions
+    // when the specified value handle is invalid.
     virtual void setValue( ValueHandle handle, Buffer::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;

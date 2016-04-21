@@ -231,7 +231,7 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
     checkResult( "::glGetUniformBlockIndex" );
 
     if( blockIndex == GL_INVALID_INDEX )
-        throw ShaderValueLookupError() << "Invalid uniform identifier";
+        return nullptr;
 
     const auto valueHandle = std::make_shared<ValueHandleImplementation>();
     valueHandle->shader = this;
@@ -241,10 +241,11 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
+    validateValueHandle( handle );
+
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->shader == this );
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::UniformBlock );
 
@@ -257,10 +258,11 @@ void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
+    validateValueHandle( handle );
+
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->shader == this );
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::Sampler );
 
@@ -272,10 +274,11 @@ void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
+    validateValueHandle( handle );
+
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->shader == this );
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::Sampler );
 
@@ -406,6 +409,15 @@ void ShaderOgl::createUniformBlocksMapping() {
         ::glUniformBlockBinding( _handle, index, bindingPoint );
         checkResult( "::glUniformBlockBinding" );
     }
+}
+
+void ShaderOgl::validateValueHandle( ValueHandle handle ) const {
+    const auto handleImplementation =
+        std::static_pointer_cast<ValueHandleImplementation>( handle );
+
+    if( !handleImplementation ||
+         handleImplementation->shader != this )
+        throw ShaderValueLookupError() << "Invalid value handle";
 }
 
 GLenum ShaderOgl::convertType( Type type ) {

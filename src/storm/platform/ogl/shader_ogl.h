@@ -41,6 +41,8 @@ private:
     void createSamplersMapping();
     void createUniformBlocksMapping();
 
+    void validateValueHandle( ValueHandle handle ) const;
+
     static GLenum convertType( Type );
 
     struct GlslSampler {
