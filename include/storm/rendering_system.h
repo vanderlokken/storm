@@ -28,7 +28,7 @@ public:
     virtual bool isVsyncEnabled() const = 0;
     virtual void setVsyncEnabled( bool enabled ) = 0;
 
-    virtual void renderMesh( Mesh::Pointer ) = 0;
+    virtual void renderMesh( Mesh::Pointer mesh, unsigned count = 1 ) = 0;
     virtual void renderGenerated(
         unsigned int vertexCount, Mesh::PrimitiveTopology ) = 0;
 

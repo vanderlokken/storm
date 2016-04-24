@@ -70,7 +70,7 @@ void RenderingSystemOgl::endFrameRendering() {
     return;
 }
 
-void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
+void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     storm_assert( mesh );
 
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
@@ -100,9 +100,15 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh ) {
         GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
 
-    ::glDrawElements( primitiveTopology, indexCount, indexFormat, indexOffset );
-    checkResult( "::glDrawElements" );
-    return;
+    if( count == 1 ) {
+        ::glDrawElements(
+            primitiveTopology, indexCount, indexFormat, indexOffset );
+        checkResult( "::glDrawElements" );
+    } else {
+        ::glDrawElementsInstanced(
+            primitiveTopology, indexCount, indexFormat, indexOffset, count );
+        checkResult( "::glDrawElementsInstanced" );
+    }
 }
 
 void RenderingSystemOgl::renderGenerated(
