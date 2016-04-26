@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Export Storm Framework Mesh Format (.storm-mesh)",
     "author": "vanderlokken",
-    "version": (1, 2),
+    "version": (1, 3),
     "blender": (2, 65, 0),
     "location": "File > Export > Storm Framework Mesh (.storm-mesh)",
     "description": "Export mesh in Storm Framework format",
@@ -15,7 +15,7 @@ import struct
 
 import bpy
 from bpy_extras.io_utils import ExportHelper
-
+from mathutils import Matrix
 
 class StormExportOperator(bpy.types.Operator, ExportHelper):
     """Export Storm Framework Mesh (.storm-mesh)"""
@@ -100,6 +100,10 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.mesh.quads_convert_to_tris()
 
+        # This operator is required since we'll mirror object by turning
+        # coordinate system from right-handed to left-handed.
+        bpy.ops.mesh.flip_normals()
+
         bpy.ops.object.mode_set(mode="OBJECT")
 
     @property
@@ -169,6 +173,16 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         mesh = self._context.object.to_mesh(
             scene=self._context.scene, apply_modifiers=True, settings="RENDER")
 
+        # This transformation swaps Y and Z axes, turning coordinate system from
+        # right-handed to left-handed.
+        transformation = Matrix()
+        transformation.zero()
+        transformation[0][0] = 1
+        transformation[1][2] = 1
+        transformation[2][1] = 1
+        transformation[3][3] = 1
+        mesh.transform(transformation)
+
         if self.export_normals:
             mesh.calc_normals_split()
         if self.export_tangents:
@@ -176,7 +190,6 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
 
         vertex_groups_bones_mapping = self._vertex_groups_bones_mapping
 
-        convert_coordinates = lambda vector: (vector[0], vector[2], -vector[1])
         convert_uv = lambda vector: (vector[0], 1 - vector[1])
 
         polygon_loop_pairs = [
@@ -188,20 +201,16 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         for polygon, loop in polygon_loop_pairs:
             vertex = mesh.vertices[loop.vertex_index]
 
-            vertex_data += struct.pack("<fff", *convert_coordinates(vertex.co))
+            vertex_data += struct.pack("<fff", *vertex.co)
 
             if self.export_normals:
-                vertex_data += struct.pack(
-                    "<fff", *convert_coordinates(loop.normal))
-
+                vertex_data += struct.pack("<fff", *loop.normal)
             if self.export_tangents:
-                vertex_data += struct.pack(
-                    "<fff", *convert_coordinates(loop.tangent))
+                vertex_data += struct.pack("<fff", *loop.tangent)
 
             if self.export_texture_coordinates:
                 uv = mesh.uv_layers.active.data[loop.index].uv
-                vertex_data += struct.pack(
-                    "<ff", *convert_uv(uv))
+                vertex_data += struct.pack("<ff", *convert_uv(uv))
 
             if self.export_blending_indices:
                 indices = [vertex_groups_bones_mapping[group.group] for
