@@ -1,6 +1,7 @@
 #include <storm/platform/ogl/sampler_ogl.h>
 
 #include <storm/platform/ogl/check_result_ogl.h>
+#include <storm/platform/ogl/condition_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/throw_exception.h>
 
@@ -39,6 +40,12 @@ SamplerOgl::SamplerOgl( const Description &description )
     ::glSamplerParameterfv(
         _handle, GL_TEXTURE_BORDER_COLOR, &description.borderColor.r );
     checkResult( "::glSamplerParameterfv" );
+
+    if( _description.comparison.enabled ) {
+        setParameter( GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+        setParameter( GL_TEXTURE_COMPARE_FUNC,
+            convertCondition(_description.comparison.condition) );
+    }
 
     // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
     #define TEXTURE_MAX_ANISOTROPY_EXT 0x84FE

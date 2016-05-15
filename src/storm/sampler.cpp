@@ -8,7 +8,12 @@ Sampler::Pointer Sampler::getDefault() {
     description.magnifyingFilter = MagnifyingFilter::Linear;
     description.maximalAnisotropyDegree = 1;
     description.wrapModes = {
-        WrapMode::Clamped, WrapMode::Clamped, WrapMode::Clamped };
+        WrapMode::Clamped,
+        WrapMode::Clamped,
+        WrapMode::Clamped
+    };
+    description.comparison.enabled = false;
+    description.comparison.condition = Condition::False;
     description.borderColor = Color::Black;
 
     static const Sampler::Pointer sampler = create( description );
@@ -18,7 +23,10 @@ Sampler::Pointer Sampler::getDefault() {
 Sampler::Pointer Sampler::getDefaultWithTiling() {
     Description description = getDefault()->getDescription();
     description.wrapModes = {
-        WrapMode::Repeated, WrapMode::Repeated, WrapMode::Repeated };
+        WrapMode::Repeated,
+        WrapMode::Repeated,
+        WrapMode::Repeated
+    };
 
     static const Sampler::Pointer sampler = create( description );
     return sampler;

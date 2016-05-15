@@ -2,22 +2,13 @@
 
 #include <memory>
 
+#include <storm/condition.h>
+
 namespace storm {
 
 class OutputTechnique {
 public:
     typedef std::shared_ptr<OutputTechnique> Pointer;
-
-    enum class Condition {
-        False,
-        True,
-        Less,
-        LessOrEqual,
-        Greater,
-        GreaterOrEqual,
-        Equal,
-        NotEqual
-    };
 
     enum class StencilOperation {
         Zero,

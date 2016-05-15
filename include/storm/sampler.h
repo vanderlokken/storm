@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <storm/color.h>
+#include <storm/condition.h>
 
 namespace storm {
 
@@ -30,12 +31,21 @@ public:
         WithBorderColor
     };
 
+    struct Comparison {
+        bool enabled;
+        Condition condition;
+    };
+
     struct Description {
         MinifyingFilter minifyingFilter;
         MagnifyingFilter magnifyingFilter;
+
         unsigned int maximalAnisotropyDegree;
+
         std::array<WrapMode, 3> wrapModes;
         Color borderColor;
+
+        Comparison comparison;
     };
 
     static Sampler::Pointer create( const Description& );

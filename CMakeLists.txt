@@ -31,6 +31,7 @@ set(storm_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/color.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/color.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/common_vertex_types.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/condition.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/dimensions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/display.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/storm/event_loop.h
@@ -114,6 +115,8 @@ set(storm_ogl_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/check_result_ogl.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/condition_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/condition_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/handle_ogl.h

@@ -44,7 +44,6 @@ public:
     virtual const Description& getNativeDescription() const;
 
 private:
-    static GLenum convertCondition( Condition );
     static GLenum convertStencilOperation( StencilOperation );
 
     static DepthTest convertDepthTestDescription(
