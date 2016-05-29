@@ -2,6 +2,8 @@
 
 #include <functional>
 
+#include <storm/vector.h>
+
 namespace storm {
 
 class Mouse {
@@ -14,15 +16,8 @@ public:
         SideSecond
     };
 
-    struct Movement {
-        int x;
-        int y;
-    };
-
-    struct CursorPosition {
-        int x;
-        int y;
-    };
+    using Movement = IntVector2d;
+    using CursorPosition = IntVector2d;
 
     struct Observer {
         std::function<void(Button)> onButtonPress;
