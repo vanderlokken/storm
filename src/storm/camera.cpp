@@ -61,15 +61,11 @@ void Camera::setFrameDimensions( const Dimensions &frameDimensions ) {
 }
 
 Matrix Camera::getViewTransformation() const {
-    const Vector directionUp( 0, 1, 0 );
+    const Vector directionUp = Vector::AxisY;
 
-    Vector zAxis = _target - _position;
-    zAxis.normalize();
-
-    Vector xAxis = crossProduct( directionUp, zAxis );
-    xAxis.normalize();
-
-    Vector yAxis = crossProduct( zAxis, xAxis );
+    const Vector zAxis = (_target - _position).getNormalized();
+    const Vector xAxis = crossProduct( directionUp, zAxis ).getNormalized();
+    const Vector yAxis = crossProduct( zAxis, xAxis );
 
     return Matrix(
         xAxis.x, yAxis.x, zAxis.x, 0,
@@ -131,16 +127,18 @@ Matrix OrthographicCamera::getProjectionTransformation() const {
     return result;
 }
 
-Vector unprojectScreenCoordinates( int x, int y, const Camera &camera ) {
+Vector unprojectScreenCoordinates(
+    IntVector2d screenCoordinates, const Camera &camera )
+{
     const Matrix inverseTransformation = (
         camera.getViewTransformation() *
         camera.getProjectionTransformation()
     ).getInverted();
 
     const float xNormalized =
-        -1.0f + 2.0f * x / camera.getFrameDimensions().width;
+        -1.0f + 2.0f * screenCoordinates.x / camera.getFrameDimensions().width;
     const float yNormalized =
-        1.0f - 2.0f * y / camera.getFrameDimensions().height;
+        1.0f - 2.0f * screenCoordinates.y / camera.getFrameDimensions().height;
 
     const Vector nearPlanePoint( xNormalized, yNormalized, -1.0f );
     const Vector farPlanePoint( xNormalized, yNormalized, 1.0f );
