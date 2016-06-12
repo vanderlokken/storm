@@ -13,10 +13,19 @@ option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 include_directories(include src)
 
 if(storm_enable_png_support)
+    find_package(png)
+
+    if(NOT PNG_FOUND)
+        message(FATAL_ERROR "libpng is not found")
+    endif()
+
+    include_directories(${PNG_INCLUDE_DIRS})
+    add_definitions(${PNG_DEFINITIONS})
     add_definitions(-Dstorm_enable_png_support)
 endif()
 
 if(MSVC)
+    set(CMAKE_DEBUG_POSTFIX "d")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR-")
 elseif(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
@@ -192,6 +201,14 @@ add_library(storm STATIC
     ${storm_common_sources}
     ${storm_ogl_sources}
     ${storm_platform_sources}
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    DESTINATION include
+)
+
+install(TARGETS storm
+    ARCHIVE DESTINATION lib
 )
 
 if(storm_build_examples)
