@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(VERSION 2.8.7)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-    message(FATAL_ERROR "In-source builds are not allowed; please specify standalone build directory.")
+    message(FATAL_ERROR
+        "In-source builds are not allowed\n"
+        "Please specify standalone build directory"
+    )
 endif()
 
 project(storm)
@@ -13,11 +16,7 @@ option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 include_directories(include src)
 
 if(storm_enable_png_support)
-    find_package(png)
-
-    if(NOT PNG_FOUND)
-        message(FATAL_ERROR "libpng is not found")
-    endif()
+    find_package(png REQUIRED)
 
     include_directories(${PNG_INCLUDE_DIRS})
     add_definitions(${PNG_DEFINITIONS})
