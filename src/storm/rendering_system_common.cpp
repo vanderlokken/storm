@@ -4,7 +4,9 @@
 
 namespace storm {
 
-Shader::Pointer RenderingSystemCommon::getShader( Shader::Type shaderType ) const {
+Shader::Pointer RenderingSystemCommon::getShader(
+    Shader::Type shaderType ) const
+{
     switch( shaderType ) {
     case Shader::Type::Vertex:
         return _vertexShader;
@@ -28,6 +30,22 @@ void RenderingSystemCommon::setShader( Shader::Pointer shader ) {
         break;
     case Shader::Type::Geometry:
         _geometryShader = shader;
+        break;
+    default:
+        storm_assert_unreachable( "Unexpected shader type value" );
+    }
+}
+
+void RenderingSystemCommon::resetShader( Shader::Type shaderType ) {
+    switch( shaderType ) {
+    case Shader::Type::Vertex:
+        _vertexShader.reset();
+        break;
+    case Shader::Type::Pixel:
+        _pixelShader.reset();
+        break;
+    case Shader::Type::Geometry:
+        _geometryShader.reset();
         break;
     default:
         storm_assert_unreachable( "Unexpected shader type value" );

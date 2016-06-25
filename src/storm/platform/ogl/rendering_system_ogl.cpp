@@ -134,18 +134,22 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
 
     const auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
 
-    GLbitfield stage = 0;
-    if( shaderType == Shader::Type::Vertex )
-        stage = GL_VERTEX_SHADER_BIT;
-    else if( shaderType == Shader::Type::Pixel )
-        stage = GL_FRAGMENT_SHADER_BIT;
-    else if( shaderType == Shader::Type::Geometry )
-        stage = GL_GEOMETRY_SHADER_BIT;
+    const GLbitfield stage = selectShaderStage( shaderType );
 
     ::glUseProgramStages( *_programPipeline, stage, nativeShader->getHandle() );
     checkResult( "::glUseProgramStages" );
 
     nativeShader->install();
+}
+
+void RenderingSystemOgl::resetShader( Shader::Type shaderType ) {
+    if( getShader(shaderType) == nullptr )
+        return;
+
+    ::glUseProgramStages( *_programPipeline, selectShaderStage(shaderType), 0 );
+    checkResult( "::glUseProgramStages" );
+
+    RenderingSystemCommon::resetShader( shaderType );
 }
 
 RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const {
@@ -480,6 +484,19 @@ void RenderingSystemOgl::setBooleanGlState( GLenum state, bool value ) {
         ::glDisable( state );
         checkResult( "::glDisable" );
     }
+}
+
+GLbitfield RenderingSystemOgl::selectShaderStage( Shader::Type shaderType ) {
+    switch( shaderType ) {
+    case Shader::Type::Vertex:
+        return GL_VERTEX_SHADER_BIT;
+    case Shader::Type::Pixel:
+        return GL_FRAGMENT_SHADER_BIT;
+    case Shader::Type::Geometry:
+        return GL_GEOMETRY_SHADER_BIT;
+    }
+    storm_assert_unreachable( "Unexpected shader type value" );
+    return 0;
 }
 
 }

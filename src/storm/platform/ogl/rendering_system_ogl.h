@@ -23,6 +23,7 @@ public:
         unsigned int vertexCount, Mesh::PrimitiveTopology );
 
     virtual void setShader( Shader::Pointer );
+    virtual void resetShader( Shader::Type );
 
     virtual RasterizationTechnique::Pointer getRasterizationTechnique() const;
     virtual OutputTechnique::Pointer getOutputTechnique() const;
@@ -59,6 +60,7 @@ protected:
 
 private:
     static void setBooleanGlState( GLenum state, bool value );
+    static GLbitfield selectShaderStage( Shader::Type shaderType );
 
     // These objects should be constructed after OpenGL context creation. To
     // ensure this we're using heap allocation instead of stack allocation.

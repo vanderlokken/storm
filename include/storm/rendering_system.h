@@ -34,6 +34,7 @@ public:
 
     virtual Shader::Pointer getShader( Shader::Type ) const = 0;
     virtual void setShader( Shader::Pointer ) = 0;
+    virtual void resetShader( Shader::Type ) = 0;
 
     virtual RasterizationTechnique::Pointer getRasterizationTechnique() const = 0;
     virtual OutputTechnique::Pointer getOutputTechnique() const = 0;
