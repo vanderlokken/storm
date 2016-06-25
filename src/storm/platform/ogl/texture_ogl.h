@@ -53,8 +53,10 @@ private:
         unsigned int mipLevel;
         unsigned int x;
         unsigned int y;
+        unsigned int z;
         unsigned int width;
         unsigned int height;
+        unsigned int depth;
     };
 
     void setTexelsCompressed(

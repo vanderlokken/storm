@@ -267,8 +267,10 @@ void TextureOgl::setTexels(
         compressedRegion.mipLevel = region.mipLevel;
         compressedRegion.x = region.x;
         compressedRegion.y = region.y;
+        compressedRegion.z = 0;
         compressedRegion.width = region.width;
         compressedRegion.height = region.height;
+        compressedRegion.depth = 1;
 
         setTexelsCompressed( compressedRegion, data );
         return;
@@ -361,6 +363,22 @@ void TextureOgl::setTexels(
 
     ScopeTextureBinding scopeTextureBinding( _target, _texture );
 
+    if( _texelDescription.compressed ) {
+        CompressedRegion compressedRegion;
+
+        compressedRegion.target = _target;
+        compressedRegion.mipLevel = region.mipLevel;
+        compressedRegion.x = region.x;
+        compressedRegion.y = region.y;
+        compressedRegion.z = region.layer;
+        compressedRegion.width = region.width;
+        compressedRegion.height = region.height;
+        compressedRegion.depth = 1;
+
+        setTexelsCompressed( compressedRegion, data );
+        return;
+    }
+
     setTexelTransferAlignment( region.width );
 
     ::glTexSubImage3D(
@@ -399,8 +417,10 @@ void TextureOgl::setTexels(
         compressedRegion.mipLevel = region.mipLevel;
         compressedRegion.x = region.x;
         compressedRegion.y = region.y;
+        compressedRegion.z = 0;
         compressedRegion.width = region.width;
         compressedRegion.height = region.height;
+        compressedRegion.depth = 1;
 
         setTexelsCompressed( compressedRegion, data );
         return;
@@ -470,6 +490,7 @@ void TextureOgl::validateDescription() const {
     if( _texelDescription.compressed ) {
         storm_assert(
             _description.layout == Layout::Separate2d ||
+            _description.layout == Layout::Layered2d ||
             _description.layout == Layout::CubeMap );
     }
 }
@@ -537,19 +558,35 @@ void TextureOgl::setTexelsCompressed(
     const GLsizei dataSize =
         static_cast<GLsizei>( ceil(1.0f * region.width / block.width) ) *
         static_cast<GLsizei>( ceil(1.0f * region.height / block.height) ) *
-        block.size;
+        static_cast<GLsizei>( region.depth ) * block.size;
 
-    ::glCompressedTexSubImage2D(
-        region.target,
-        region.mipLevel,
-        region.x,
-        region.y,
-        region.width,
-        region.height,
-        _texelDescription.internalFormat,
-        dataSize,
-        texels );
-    checkResult( "::glCompressedTexSubImage2D" );
+    if( region.target != GL_TEXTURE_2D_ARRAY ) {
+        ::glCompressedTexSubImage2D(
+            region.target,
+            region.mipLevel,
+            region.x,
+            region.y,
+            region.width,
+            region.height,
+            _texelDescription.internalFormat,
+            dataSize,
+            texels );
+        checkResult( "::glCompressedTexSubImage2D" );
+    } else {
+        ::glCompressedTexSubImage3D(
+            region.target,
+            region.mipLevel,
+            region.x,
+            region.y,
+            region.z,
+            region.width,
+            region.height,
+            region.depth,
+            _texelDescription.internalFormat,
+            dataSize,
+            texels );
+        checkResult( "::glCompressedTexSubImage3D" );
+    }
 }
 
 GLenum TextureOgl::selectTarget( Layout layout ) {
