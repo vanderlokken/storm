@@ -1,37 +1,53 @@
 #pragma once
 
+#include <cstddef>
+
 namespace storm {
 
-template<class Type, size_t Size>
-struct VectorData {
-    Type elements[Size];
-};
-
+#ifdef _MSC_VER
 // Disable MSVC warning "nonstandard extension used: nameless struct/union"
 #pragma warning( push )
 #pragma warning( disable : 4201 )
+#endif
+
+template<class Type, size_t Size>
+struct VectorData {
+    typedef struct {
+        Type elements[Size];
+    } Storage;
+};
 
 template<class Type>
 struct VectorData<Type, 1> {
-    union { Type elements[1]; struct {Type x;}; };
+    typedef struct {
+        union { Type elements[1]; struct {Type x;}; };
+    } Storage;
 };
 
 template<class Type>
 struct VectorData<Type, 2> {
-    union { Type elements[2]; struct {Type x; Type y;}; };
+    typedef struct {
+        union { Type elements[2]; struct {Type x; Type y;}; };
+    } Storage;
 };
 
 template<class Type>
 struct VectorData<Type, 3> {
-    union { Type elements[3]; struct {Type x; Type y; Type z;}; };
+    typedef struct {
+        union { Type elements[3]; struct {Type x; Type y; Type z;}; };
+    } Storage;
 };
 
 template<class Type>
 struct VectorData<Type, 4> {
-    union { Type elements[4]; struct {Type x; Type y; Type z; Type w;}; };
+    typedef struct {
+        union { Type elements[4]; struct {Type x; Type y; Type z; Type w;}; };
+    } Storage;
 };
 
+#ifdef _MSC_VER
 #pragma warning( pop )
+#endif
 
 template<class Type, size_t Size>
 struct BasicVector;
@@ -66,7 +82,7 @@ struct VectorBasis<Type, 4> {
 };
 
 template<class Type, size_t Size>
-struct BasicVector : VectorData<Type, Size>, VectorBasis<Type, Size> {
+struct BasicVector : VectorData<Type, Size>::Storage, VectorBasis<Type, Size> {
     BasicVector();
 
     template<class... Values>

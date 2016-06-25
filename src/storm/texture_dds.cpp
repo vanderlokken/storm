@@ -581,7 +581,7 @@ void parseDdsTextureLayer(
         const Texture::MipLevelDimensions dimensions =
             texture->getMipLevelDimensions( mipLevel );
 
-        size_t texelSize = 0;
+        size_t texelSize;
 
         switch( textureDescription.format ) {
         case Texture::Format::RedFloat16:
@@ -602,6 +602,9 @@ void parseDdsTextureLayer(
             break;
         case Texture::Format::RgbaFloat32:
             texelSize = 16;
+            break;
+        default:
+            texelSize = 0;
             break;
         }
 
@@ -625,6 +628,9 @@ void parseDdsTextureLayer(
             texels.resize(
                 static_cast<size_t>(ceil(dimensions.width / 4.0f)) *
                 static_cast<size_t>(ceil(dimensions.height / 4.0f)) * 16 );
+            break;
+        default:
+            // Ignore GCC warnings 'enumeration value not handled in switch'
             break;
         }
 

@@ -16,7 +16,7 @@ option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 include_directories(include src)
 
 if(storm_enable_png_support)
-    find_package(png REQUIRED)
+    find_package(PNG REQUIRED)
 
     include_directories(${PNG_INCLUDE_DIRS})
     add_definitions(${PNG_DEFINITIONS})

@@ -40,14 +40,14 @@ const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisW =
 
 template<class Type, size_t Size>
 inline BasicVector<Type, Size>::BasicVector() :
-    VectorData {{0}}
+    VectorData<Type, Size>::Storage {{{0}}}
 {
 }
 
 template<class Type, size_t Size>
 template<class... Values>
 inline BasicVector<Type, Size>::BasicVector( Values... values ) :
-    VectorData {{static_cast<Type>(values)...}}
+    VectorData<Type, Size>::Storage {{{values...}}}
 {
     static_assert(
         sizeof...(Values) == Size,
@@ -61,7 +61,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator += (
     const BasicVector<Type, Size> &vector )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] += vector[index];
+        (*this)[index] += vector[index];
     return *this;
 }
 
@@ -70,7 +70,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator -= (
     const BasicVector<Type, Size> &vector )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] -= vector[index];
+        (*this)[index] -= vector[index];
     return *this;
 }
 
@@ -79,7 +79,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator *= (
     const BasicVector<Type, Size> &vector )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] *= vector[index];
+        (*this)[index] *= vector[index];
     return *this;
 }
 
@@ -88,7 +88,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator /= (
     const BasicVector<Type, Size> &vector )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] /= vector[index];
+        (*this)[index] /= vector[index];
     return *this;
 }
 
@@ -97,7 +97,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator += (
     const Type &value )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] += value;
+        (*this)[index] += value;
     return *this;
 }
 
@@ -106,7 +106,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator -= (
     const Type &value )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] -= value;
+        (*this)[index] -= value;
     return *this;
 }
 
@@ -115,7 +115,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator *= (
     const Type &value )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] *= value;
+        (*this)[index] *= value;
     return *this;
 }
 
@@ -124,7 +124,7 @@ inline BasicVector<Type, Size>& BasicVector<Type, Size>::operator /= (
     const Type &value )
 {
     for( size_t index = 0; index < Size; ++index )
-        elements[index] /= value;
+        (*this)[index] /= value;
     return *this;
 }
 
@@ -136,7 +136,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator + (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] + vector[index];
+        result[index] = (*this)[index] + vector[index];
     return result;
 }
 
@@ -146,7 +146,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator - (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] - vector[index];
+        result[index] = (*this)[index] - vector[index];
     return result;
 }
 
@@ -156,7 +156,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator * (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] * vector[index];
+        result[index] = (*this)[index] * vector[index];
     return result;
 }
 
@@ -166,7 +166,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator / (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] / vector[index];
+        result[index] = (*this)[index] / vector[index];
     return result;
 }
 
@@ -176,7 +176,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator + (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] + value;
+        result[index] = (*this)[index] + value;
     return result;
 }
 
@@ -186,7 +186,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator - (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] - value;
+        result[index] = (*this)[index] - value;
     return result;
 }
 
@@ -196,7 +196,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator * (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] * value;
+        result[index] = (*this)[index] * value;
     return result;
 }
 
@@ -206,7 +206,7 @@ inline BasicVector<Type, Size> BasicVector<Type, Size>::operator / (
 {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = elements[index] / value;
+        result[index] = (*this)[index] / value;
     return result;
 }
 
@@ -214,18 +214,18 @@ template<class Type, size_t Size>
 inline BasicVector<Type, Size> BasicVector<Type, Size>::operator - () const {
     BasicVector<Type, Size> result;
     for( size_t index = 0; index < Size; ++index )
-        result[index] = -elements[index];
+        result[index] = -(*this)[index];
     return result;
 }
 
 template<class Type, size_t Size>
 const Type& BasicVector<Type, Size>::operator [] ( size_t index ) const {
-    return elements[index];
+    return this->elements[index];
 }
 
 template<class Type, size_t Size>
 Type& BasicVector<Type, Size>::operator [] ( size_t index ) {
-    return elements[index];
+    return this->elements[index];
 }
 
 // Member functions
@@ -271,7 +271,7 @@ inline void BasicVector<Type, Size>::normalize() {
     const Type length = getLength<Type>();
     const Type lengthReciprocal = static_cast<Type>( 1 ) / length;
 
-    if( isnormal(lengthReciprocal) )
+    if( std::isnormal(lengthReciprocal) )
         *this *= lengthReciprocal;
 }
 

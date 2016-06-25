@@ -10,7 +10,7 @@ namespace storm {
 Camera::Camera() :
     _minimalDepth( 0.1f ),
     _maximalDepth( 1000.0f ),
-    _target( 0, 0, 1 )
+    _target( Vector::AxisZ )
 {
 }
 
