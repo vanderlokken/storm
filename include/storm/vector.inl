@@ -307,6 +307,30 @@ inline BasicVector<Type, 3> crossProduct(
 }
 
 template<class Type, size_t Size>
+inline BasicVector<Type, Size> componentwiseMinimum(
+    const BasicVector<Type, Size> &first,
+    const BasicVector<Type, Size> &second )
+{
+    BasicVector<Type, Size> result;
+    for( size_t index = 0; index < Size; ++index )
+        result[index] =
+            (first[index] < second[index] ? first[index] : second[index]);
+    return result;
+}
+
+template<class Type, size_t Size>
+inline BasicVector<Type, Size> componentwiseMaximum(
+    const BasicVector<Type, Size> &first,
+    const BasicVector<Type, Size> &second )
+{
+    BasicVector<Type, Size> result;
+    for( size_t index = 0; index < Size; ++index )
+        result[index] =
+            (first[index] > second[index] ? first[index] : second[index]);
+    return result;
+}
+
+template<class Type, size_t Size>
 inline BasicVector<Type, Size> operator + (
     const Type &value, const BasicVector<Type, Size> &vector )
 {

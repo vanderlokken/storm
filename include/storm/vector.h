@@ -152,6 +152,16 @@ BasicVector<Type, 3> crossProduct(
     const BasicVector<Type, 3> &first,
     const BasicVector<Type, 3> &second );
 
+template<class Type, size_t Size>
+BasicVector<Type, Size> componentwiseMinimum(
+    const BasicVector<Type, Size> &first,
+    const BasicVector<Type, Size> &second );
+
+template<class Type, size_t Size>
+BasicVector<Type, Size> componentwiseMaximum(
+    const BasicVector<Type, Size> &first,
+    const BasicVector<Type, Size> &second );
+
 using Vector = BasicVector<float, 3>;
 
 using Vector2d = BasicVector<float, 2>;
