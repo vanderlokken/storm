@@ -60,6 +60,7 @@ void RenderingSystemOgl::initialize() {
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
 
     setBooleanGlState( GL_PRIMITIVE_RESTART, true );
+    setBooleanGlState( GL_TEXTURE_CUBE_MAP_SEAMLESS, true );
 }
 
 void RenderingSystemOgl::beginFrameRendering() {
