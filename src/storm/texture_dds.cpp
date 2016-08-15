@@ -246,9 +246,9 @@ struct DdsResourceFlags {
 Texture::Format convertPixelFormatDxGI( DXGI_FORMAT pixelFormatDxGI ) {
     switch( pixelFormatDxGI ) {
     case DXGI_FORMAT_R8G8B8A8_UNORM:
-        return Texture::Format::RgbaUint8;
+        return Texture::Format::RgbaNormUint8;
     case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
-        return Texture::Format::SrgbaUint8;
+        return Texture::Format::SrgbaNormUint8;
 
     case DXGI_FORMAT_R16_FLOAT:
         return Texture::Format::RedFloat16;
@@ -256,6 +256,20 @@ Texture::Format convertPixelFormatDxGI( DXGI_FORMAT pixelFormatDxGI ) {
         return Texture::Format::RgFloat16;
     case DXGI_FORMAT_R16G16B16A16_FLOAT:
         return Texture::Format::RgbaFloat16;
+
+    case DXGI_FORMAT_R16_SINT:
+        return Texture::Format::RedInt16;
+    case DXGI_FORMAT_R16G16_SINT:
+        return Texture::Format::RgInt16;
+    case DXGI_FORMAT_R16G16B16A16_SINT:
+        return Texture::Format::RgbaInt16;
+
+    case DXGI_FORMAT_R16_UINT:
+        return Texture::Format::RedUint16;
+    case DXGI_FORMAT_R16G16_UINT:
+        return Texture::Format::RgUint16;
+    case DXGI_FORMAT_R16G16B16A16_UINT:
+        return Texture::Format::RgbaUint16;
 
     case DXGI_FORMAT_R32_FLOAT:
         return Texture::Format::RedFloat32;
@@ -265,6 +279,24 @@ Texture::Format convertPixelFormatDxGI( DXGI_FORMAT pixelFormatDxGI ) {
         return Texture::Format::RgbFloat32;
     case DXGI_FORMAT_R32G32B32A32_FLOAT:
         return Texture::Format::RgbaFloat32;
+
+    case DXGI_FORMAT_R32_SINT:
+        return Texture::Format::RedInt32;
+    case DXGI_FORMAT_R32G32_SINT:
+        return Texture::Format::RgInt32;
+    case DXGI_FORMAT_R32G32B32_SINT:
+        return Texture::Format::RgbInt32;
+    case DXGI_FORMAT_R32G32B32A32_SINT:
+        return Texture::Format::RgbaInt32;
+
+    case DXGI_FORMAT_R32_UINT:
+        return Texture::Format::RedUint32;
+    case DXGI_FORMAT_R32G32_UINT:
+        return Texture::Format::RgUint32;
+    case DXGI_FORMAT_R32G32B32_UINT:
+        return Texture::Format::RgbUint32;
+    case DXGI_FORMAT_R32G32B32A32_UINT:
+        return Texture::Format::RgbaUint32;
 
     case DXGI_FORMAT_BC1_UNORM:
         return Texture::Format::RgbaDxt1;
@@ -329,7 +361,7 @@ Texture::Format selectTextureFormat(
         ddsPixelFormat.aBitMask == 0xff000000 )
     {
         return defaultColorSpace == Texture::ColorSpace::sRGB ?
-            Texture::Format::SrgbaUint8 : Texture::Format::RgbaUint8;
+            Texture::Format::SrgbaNormUint8 : Texture::Format::RgbaNormUint8;
     }
 
     throw ResourceLoadingError() << "Unsupported DDS texture";
@@ -587,20 +619,32 @@ void parseDdsTextureLayer(
         case Texture::Format::RedFloat16:
             texelSize = 2;
             break;
-        case Texture::Format::RgbaUint8:
-        case Texture::Format::SrgbaUint8:
+        case Texture::Format::RgbaNormUint8:
+        case Texture::Format::SrgbaNormUint8:
         case Texture::Format::RgFloat16:
+        case Texture::Format::RgInt16:
+        case Texture::Format::RgUint16:
         case Texture::Format::RedFloat32:
+        case Texture::Format::RedInt32:
+        case Texture::Format::RedUint32:
             texelSize = 4;
             break;
         case Texture::Format::RgbaFloat16:
+        case Texture::Format::RgbaInt16:
+        case Texture::Format::RgbaUint16:
         case Texture::Format::RgFloat32:
+        case Texture::Format::RgInt32:
+        case Texture::Format::RgUint32:
             texelSize = 8;
             break;
         case Texture::Format::RgbFloat32:
+        case Texture::Format::RgbInt32:
+        case Texture::Format::RgbUint32:
             texelSize = 12;
             break;
         case Texture::Format::RgbaFloat32:
+        case Texture::Format::RgbaInt32:
+        case Texture::Format::RgbaUint32:
             texelSize = 16;
             break;
         default:

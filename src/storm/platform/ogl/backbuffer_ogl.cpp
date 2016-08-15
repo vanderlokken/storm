@@ -20,8 +20,8 @@ void BackbufferOgl::renderTexture(
         textureLayout == Texture::Layout::Separate2dMsaa ||
         textureLayout == Texture::Layout::Layered2dMsaa );
     storm_assert(
-        texture->getDescription().format == Texture::Format::RgbaUint8 ||
-        texture->getDescription().format == Texture::Format::SrgbaUint8 );
+        texture->getDescription().format == Texture::Format::RgbaNormUint8 ||
+        texture->getDescription().format == Texture::Format::SrgbaNormUint8 );
 
     ScopeFramebufferBinding scopedFramebufferBinding( _copyFramebuffer );
 

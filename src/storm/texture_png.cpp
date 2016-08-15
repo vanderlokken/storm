@@ -44,9 +44,9 @@ Texture::Pointer parsePng(
 
     Texture::Separate2dDescription description;
     if( parameters.defaultColorSpace == Texture::ColorSpace::sRGB )
-        description.format = Texture::Format::SrgbaUint8;
+        description.format = Texture::Format::SrgbaNormUint8;
     else
-        description.format = Texture::Format::RgbaUint8;
+        description.format = Texture::Format::RgbaNormUint8;
     description.width = image.width;
     description.height = image.height;
     description.mipLevels = 1;

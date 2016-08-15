@@ -616,14 +616,16 @@ GLenum TextureOgl::selectTarget( Layout layout ) {
 TextureOgl::TexelDescription
 TextureOgl::selectTexelDescription( Format format ) {
     switch( format ) {
-    case Format::RgbUint8:
+    // 8-bit normalized unsigned integer formats.
+    case Format::RgbNormUint8:
         return { GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE, 3, false };
-    case Format::RgbaUint8:
+    case Format::RgbaNormUint8:
         return { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 4, false };
-    case Format::SrgbUint8:
+    case Format::SrgbNormUint8:
         return { GL_SRGB8_ALPHA8, GL_RGB, GL_UNSIGNED_BYTE, 3, false };
-    case Format::SrgbaUint8:
+    case Format::SrgbaNormUint8:
         return { GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, 4, false };
+    // 16-bit floating point formats.
     case Format::RedFloat16:
         return { GL_R16F, GL_RED, GL_HALF_FLOAT, 2, false };
     case Format::RgFloat16:
@@ -632,6 +634,25 @@ TextureOgl::selectTexelDescription( Format format ) {
         return { GL_RGB16F, GL_RGB, GL_HALF_FLOAT, 6, false };
     case Format::RgbaFloat16:
         return { GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, 8, false };
+    // 16-bit integer formats.
+    case Format::RedInt16:
+        return { GL_R16I, GL_RED_INTEGER, GL_SHORT, 2, false };
+    case Format::RgInt16:
+        return { GL_RG16I, GL_RG_INTEGER, GL_SHORT, 4, false };
+    case Format::RgbInt16:
+        return { GL_RGB16I, GL_RGB_INTEGER, GL_SHORT, 6, false };
+    case Format::RgbaInt16:
+        return { GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, 8, false };
+    // 16-bit unsigned integer formats.
+    case Format::RedUint16:
+        return { GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 2, false };
+    case Format::RgUint16:
+        return { GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, 4, false };
+    case Format::RgbUint16:
+        return { GL_RGB16UI, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, 6, false };
+    case Format::RgbaUint16:
+        return { GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, 8, false };
+    // 32-bit floating point formats.
     case Format::RedFloat32:
         return { GL_R32F, GL_RED, GL_FLOAT, 4, false };
     case Format::RgFloat32:
@@ -640,28 +661,48 @@ TextureOgl::selectTexelDescription( Format format ) {
         return { GL_RGB32F, GL_RGB, GL_FLOAT, 12, false };
     case Format::RgbaFloat32:
         return { GL_RGBA32F, GL_RGBA, GL_FLOAT, 16, false };
-    case Format::DepthUint16:
+    // 32-bit integer formats.
+    case Format::RedInt32:
+        return { GL_R32I, GL_RED_INTEGER, GL_INT, 4, false };
+    case Format::RgInt32:
+        return { GL_RG32I, GL_RG_INTEGER, GL_INT, 8, false };
+    case Format::RgbInt32:
+        return { GL_RGB32I, GL_RGB_INTEGER, GL_INT, 12, false };
+    case Format::RgbaInt32:
+        return { GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, 16, false };
+    // 32-bit unsigned integer formats.
+    case Format::RedUint32:
+        return { GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, 4, false };
+    case Format::RgUint32:
+        return { GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, 8, false };
+    case Format::RgbUint32:
+        return { GL_RGB32UI, GL_RGB_INTEGER, GL_UNSIGNED_INT, 12, false };
+    case Format::RgbaUint32:
+        return { GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, 16, false };
+    // Depth texture formats.
+    case Format::DepthNormUint16:
         return {
             GL_DEPTH_COMPONENT16,
             GL_DEPTH_COMPONENT,
             GL_UNSIGNED_SHORT, 2, false
         };
-    case Format::DepthUint24:
+    case Format::DepthNormUint24:
         return {
             GL_DEPTH_COMPONENT24,
             GL_DEPTH_COMPONENT,
             GL_UNSIGNED_INT, 4, false
         };
-    case Format::DepthUint32:
+    case Format::DepthNormUint32:
         return {
             GL_DEPTH_COMPONENT32,
             GL_DEPTH_COMPONENT,
             GL_UNSIGNED_INT, 4, false
         };
-    case Format::DepthUint24StencilUint8:
+    case Format::DepthNormUint24StencilUint8:
         return {
             GL_DEPTH24_STENCIL8,
             GL_DEPTH_STENCIL,
+            // TODO: check texel size value.
             GL_UNSIGNED_INT_24_8, 8, false
         };
     case Format::DepthFloat32:
@@ -670,6 +711,7 @@ TextureOgl::selectTexelDescription( Format format ) {
             GL_DEPTH_COMPONENT,
             GL_FLOAT, 4, false
         };
+    // DXT-compressed texture formats.
     case Format::RgbDxt1:
         return { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_RGB, 0, 0, true };
     case Format::RgbaDxt1:

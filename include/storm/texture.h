@@ -38,11 +38,11 @@ public:
     };
 
     enum class Format {
-        // 8-bit unsigned integer formats.
-        RgbUint8,
-        RgbaUint8,
-        SrgbUint8,
-        SrgbaUint8,
+        // 8-bit normalized unsigned integer formats.
+        RgbNormUint8,
+        RgbaNormUint8,
+        SrgbNormUint8,
+        SrgbaNormUint8,
 
         // 16-bit floating point formats.
         RedFloat16,
@@ -50,17 +50,41 @@ public:
         RgbFloat16,
         RgbaFloat16,
 
+        // 16-bit integer formats.
+        RedInt16,
+        RgInt16,
+        RgbInt16,
+        RgbaInt16,
+
+        // 16-bit unsigned integer formats.
+        RedUint16,
+        RgUint16,
+        RgbUint16,
+        RgbaUint16,
+
         // 32-bit floating point formats.
         RedFloat32,
         RgFloat32,
         RgbFloat32,
         RgbaFloat32,
 
+        // 32-bit integer formats.
+        RedInt32,
+        RgInt32,
+        RgbInt32,
+        RgbaInt32,
+
+        // 32-bit unsigned integer formats.
+        RedUint32,
+        RgUint32,
+        RgbUint32,
+        RgbaUint32,
+
         // Depth texture formats.
-        DepthUint16,
-        DepthUint24,
-        DepthUint32,
-        DepthUint24StencilUint8,
+        DepthNormUint16,
+        DepthNormUint24,
+        DepthNormUint32,
+        DepthNormUint24StencilUint8,
         DepthFloat32,
 
         // DXT-compressed texture formats.

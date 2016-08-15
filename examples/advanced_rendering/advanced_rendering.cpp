@@ -113,8 +113,8 @@ private:
 
         storm::Framebuffer::Pointer framebuffer = storm::Framebuffer::create(
             _frameDimensions, texelSamples, {
-                storm::Texture::Format::RgbaUint8,
-                storm::Texture::Format::DepthUint24
+                storm::Texture::Format::RgbaNormUint8,
+                storm::Texture::Format::DepthNormUint24
             });
 
         storm::RenderingSystem::getInstance()->setFramebuffer( framebuffer );

@@ -42,13 +42,13 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
 
         GLenum attachment;
         switch( nativeTexture->getDescription().format ) {
-        case Texture::Format::DepthUint16:
-        case Texture::Format::DepthUint24:
-        case Texture::Format::DepthUint32:
+        case Texture::Format::DepthNormUint16:
+        case Texture::Format::DepthNormUint24:
+        case Texture::Format::DepthNormUint32:
         case Texture::Format::DepthFloat32:
             attachment = GL_DEPTH_ATTACHMENT;
             break;
-        case Texture::Format::DepthUint24StencilUint8:
+        case Texture::Format::DepthNormUint24StencilUint8:
             attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             break;
         default:

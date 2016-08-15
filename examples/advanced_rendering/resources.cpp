@@ -8,7 +8,7 @@
 
 storm::Texture::Pointer createCheckboardPatternTexture() {
     storm::Texture::Separate2dDescription description;
-    description.format = storm::Texture::Format::RgbaUint8;
+    description.format = storm::Texture::Format::RgbaNormUint8;
     description.width = 2;
     description.height = 2;
     description.mipLevels = 1;
