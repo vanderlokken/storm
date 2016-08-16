@@ -53,10 +53,10 @@ void BackbufferOgl::renderTexture(
     const GLuint width = dimensions.width;
     const GLuint height = dimensions.height;
 
-    storm_assert(
-        std::max(texture->getDescription().width >> mipLevel, 1u) == width );
-    storm_assert(
-        std::max(texture->getDescription().height >> mipLevel, 1u) == height );
+    const Texture::MipLevelDimensions mipLevelDimensions =
+        texture->getMipLevelDimensions( mipLevel );
+    storm_assert( mipLevelDimensions.width == width );
+    storm_assert( mipLevelDimensions.height == height );
 
     ::glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height,
         GL_COLOR_BUFFER_BIT, GL_NEAREST );
