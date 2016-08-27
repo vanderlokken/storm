@@ -16,6 +16,18 @@
 
 namespace storm {
 
+namespace {
+
+bool isSeamlessCubemapSupported() {
+    // There's a bug in the official drivers for the following GPU.
+    const std::string unacceptableRenderer = "GeForce GTS 250/PCIe/SSE2/3DNOW!";
+    const std::string renderer =
+        reinterpret_cast<const char*>( ::glGetString(GL_RENDERER) );
+    return renderer != unacceptableRenderer;
+}
+
+} // namespace
+
 ProgramPipelineHandleOgl::ProgramPipelineHandleOgl() {
     ::glGenProgramPipelines( 1, &_handle );
     checkResult( "::glGenProgramPipelines" );
@@ -59,8 +71,10 @@ void RenderingSystemOgl::initialize() {
     _primitiveRestartIndex = 0xffff;
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
 
-    setBooleanGlState( GL_PRIMITIVE_RESTART, true );
-    setBooleanGlState( GL_TEXTURE_CUBE_MAP_SEAMLESS, true );
+    setBooleanGlState(
+        GL_PRIMITIVE_RESTART, true );
+    setBooleanGlState(
+        GL_TEXTURE_CUBE_MAP_SEAMLESS, isSeamlessCubemapSupported() );
 }
 
 void RenderingSystemOgl::beginFrameRendering() {
