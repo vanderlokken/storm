@@ -24,6 +24,8 @@ public:
     const Dimensions& getFrameDimensions() const;
     void setFrameDimensions( const Dimensions& );
 
+    float getFrameAspectRatio() const;
+
     Matrix getViewTransformation() const;
     virtual Matrix getProjectionTransformation() const = 0;
 
@@ -45,6 +47,8 @@ public:
 
     float getFieldOfView() const;
     void setFieldOfView( float );
+
+    float getVerticalFieldOfView() const;
 
     virtual Matrix getProjectionTransformation() const;
 

@@ -60,6 +60,11 @@ void Camera::setFrameDimensions( const Dimensions &frameDimensions ) {
     _frameDimensions = frameDimensions;
 }
 
+float Camera::getFrameAspectRatio() const {
+    return _frameDimensions.width /
+        static_cast<float>( _frameDimensions.height );
+}
+
 Matrix Camera::getViewTransformation() const {
     const Vector directionUp = Vector::AxisY;
 
@@ -89,19 +94,22 @@ void PerspectiveCamera::setFieldOfView( float fieldOfView ) {
     _fieldOfView = fieldOfView;
 }
 
+float PerspectiveCamera::getVerticalFieldOfView() const {
+    return 2 * std::atan(
+        std::tan(getFieldOfView() / 2) / getFrameAspectRatio() );
+}
+
 Matrix PerspectiveCamera::getProjectionTransformation() const {
     storm_assert( _frameDimensions.width && _frameDimensions.height );
 
-    const float aspectRatio =
-         _frameDimensions.width / static_cast<float>( _frameDimensions.height );
     const float depthRange = _maximalDepth - _minimalDepth;
-
-    const float scale = static_cast<float>( tan((M_PI - _fieldOfView) / 2) );
+    const float scale =
+        static_cast<float>( std::tan((M_PI - _fieldOfView) / 2) );
 
     Matrix result;
 
     result[0][0] = scale;
-    result[1][1] = scale * aspectRatio;
+    result[1][1] = scale * getFrameAspectRatio();
     result[2][2] = _maximalDepth / depthRange;
     result[2][3] = 1.0f;
     result[3][2] = -_minimalDepth * _maximalDepth / depthRange;
