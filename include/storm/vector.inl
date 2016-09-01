@@ -40,7 +40,7 @@ const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisW =
 
 template<class Type, size_t Size>
 inline BasicVector<Type, Size>::BasicVector() :
-    VectorData<Type, Size>::Storage {{{0}}}
+    VectorData<Type, Size>::Storage {{}}
 {
 }
 
@@ -50,7 +50,7 @@ inline BasicVector<Type, Size>::BasicVector( Values... values ) :
     VectorData<Type, Size>::Storage {{{values...}}}
 {
     static_assert(
-        sizeof...(Values) == Size,
+        sizeof...(Values) == Size || sizeof...(Values) == 0,
         "The number of arguments must match the size of vector" );
 }
 
