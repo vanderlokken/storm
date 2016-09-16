@@ -23,6 +23,7 @@ struct OpenGlSupportStatus {
     bool ARB_texture_storage;
     bool ARB_texture_storage_multisample;
     bool ARB_timer_query;
+    bool EXT_texture_filter_anisotropic;
     bool KHR_debug;
 };
 

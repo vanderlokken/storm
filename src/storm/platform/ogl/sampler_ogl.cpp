@@ -47,14 +47,16 @@ SamplerOgl::SamplerOgl( const Description &description )
             convertCondition(_description.comparison.condition) );
     }
 
-    // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
-    #define TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-
     storm_assert( description.maximalAnisotropyDegree >= 1 );
 
-    ::glSamplerParameterf( _handle, TEXTURE_MAX_ANISOTROPY_EXT,
-        static_cast< float >(description.maximalAnisotropyDegree) );
-    checkResult( "::glSamplerParameterf" );
+    if( getOpenGlSupportStatus().EXT_texture_filter_anisotropic ) {
+        // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
+        #define TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+
+        ::glSamplerParameterf( _handle, TEXTURE_MAX_ANISOTROPY_EXT,
+            static_cast<float>(description.maximalAnisotropyDegree) );
+        checkResult( "::glSamplerParameterf" );
+    }
 }
 
 const Sampler::Description& SamplerOgl::getDescription() const {

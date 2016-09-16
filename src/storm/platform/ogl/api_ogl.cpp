@@ -1270,6 +1270,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
                 &status.ARB_timer_query
             },
             {
+                "GL_EXT_texture_filter_anisotropic",
+                &status.EXT_texture_filter_anisotropic
+            },
+            {
                 "GL_KHR_debug",
                 &status.KHR_debug
             }
