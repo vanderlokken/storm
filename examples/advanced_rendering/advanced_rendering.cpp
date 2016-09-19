@@ -84,8 +84,10 @@ public:
         _meshRotationAngle += timeDelta.count() * rotationSpeed;
 
         const storm::Quaternion rotationQuaternion =
-            storm::Quaternion::fromAxisAngle( {0, 1, 0}, _meshRotationAngle ) *
-            storm::Quaternion::fromAxisAngle( {1, 0, 0}, _meshRotationAngle );
+            storm::Quaternion::fromAxisAngle(
+                storm::Vector::AxisY, _meshRotationAngle ) *
+            storm::Quaternion::fromAxisAngle(
+                storm::Vector::AxisX, _meshRotationAngle );
 
         _transformations.world = rotationQuaternion.toRotationMatrix();
         _constantBuffer->setData( &_transformations );
@@ -141,8 +143,8 @@ private:
     }
 
     void installCamera() {
-        const storm::Vector cameraPosition( 2.0, 1.5, 2.0 );
-        const storm::Vector cameraTarget( 0, 0, 0 );
+        const storm::Vector cameraPosition( 2.0f, 1.5f, 2.0f );
+        const storm::Vector cameraTarget( 0.f, 0.f, 0.f );
 
         storm::PerspectiveCamera camera;
         camera.setPosition( cameraPosition );
