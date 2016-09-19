@@ -18,7 +18,10 @@ RenderingSystemGlx::RenderingSystemGlx( XDisplay *display, Window window ) :
         throw SystemRequirementsNotMet() <<
             "The 'GLX_ARB_create_context' extension is not supported.";
 
-    const int *frameBufferAttributes = nullptr; // Use default values
+    const int frameBufferAttributes[] = {
+        GLX_DOUBLEBUFFER, 1,
+        0
+    };
 
     int configNumber = 0;
     const GLXFBConfig *frameBufferConfigs = ::glXChooseFBConfig(
