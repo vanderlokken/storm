@@ -103,6 +103,25 @@ void RenderingWindowX11::setFullscreen( FullscreenMode fullscreenMode ) {
     _fullscreen = true;
 }
 
+const std::string& RenderingWindowX11::getTitle() const {
+    return _title;
+}
+
+void RenderingWindowX11::setTitle( const std::string &title ) {
+    ::XChangeProperty(
+        _display,
+        _handle,
+        ::XInternAtom(_display, "_NET_WM_NAME", /*onlyExisting = */ false),
+        ::XInternAtom(_display, "UTF8_STRING", /*onlyExisting = */ false),
+        8 /* format, bits */,
+        PropModeReplace,
+        const_cast<unsigned char*>(
+            reinterpret_cast<const unsigned char*>(title.data())),
+        title.size() );
+
+    _title = title;
+}
+
 Window RenderingWindowX11::getHandle() const {
     return _handle;
 }

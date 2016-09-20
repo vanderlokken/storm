@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 #include <storm/platform/win/event_loop_win.h>
 #include <storm/throw_exception.h>
@@ -169,6 +170,37 @@ void RenderingWindowWin::setFullscreen( FullscreenMode fullscreenMode ) {
     _fullscreen = true;
     _fullscreenMode = fullscreenMode;
     _dimensions = { width, height };
+}
+
+const std::string& RenderingWindowWin::getTitle() const {
+    return _title;
+}
+
+void RenderingWindowWin::setTitle( const std::string &title ) {
+    const int bufferSize = ::MultiByteToWideChar(
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        title.data(),
+        title.size(),
+        nullptr,
+        0 );
+
+    std::vector<wchar_t> buffer( bufferSize, 0 );
+
+    const int success = ::MultiByteToWideChar(
+        CP_UTF8,
+        MB_ERR_INVALID_CHARS,
+        title.data(),
+        title.size(),
+        buffer.data(),
+        buffer.size() );
+
+    if( !success )
+        throwRuntimeError( "Invalid title string" );
+
+    ::SetWindowTextW( _handle, buffer.data() );
+
+    _title = title;
 }
 
 HWND RenderingWindowWin::getHandle() const {

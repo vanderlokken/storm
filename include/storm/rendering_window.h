@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 
 #include <storm/dimensions.h>
 #include <storm/display.h>
@@ -45,6 +46,9 @@ public:
     // mode. When specified custom diplay mode is not supported falls back to
     // the windowed fullscreen mode.
     virtual void setFullscreen( FullscreenMode fullscreenMode = {} ) = 0;
+
+    virtual const std::string& getTitle() const = 0;
+    virtual void setTitle( const std::string &title ) = 0;
 };
 
 struct ScopedRenderingWindowObserver : RenderingWindow::Observer {

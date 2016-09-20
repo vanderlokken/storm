@@ -29,6 +29,9 @@ public:
     virtual void setWindowed( Dimensions windowDimensions );
     virtual void setFullscreen( FullscreenMode fullscreenMode );
 
+    virtual const std::string& getTitle() const;
+    virtual void setTitle( const std::string &title );
+
     Window getHandle() const;
 
     void addEventMask( unsigned long eventMask );
@@ -45,6 +48,8 @@ private:
     XDisplay *_display;
 
     bool _fullscreen;
+
+    std::string _title;
 
     EventLoopX11::Listener _eventListener;
 

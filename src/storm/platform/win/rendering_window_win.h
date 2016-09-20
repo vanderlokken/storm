@@ -25,6 +25,9 @@ public:
     virtual void setWindowed( Dimensions windowDimensions );
     virtual void setFullscreen( FullscreenMode fullscreenMode );
 
+    virtual const std::string& getTitle() const;
+    virtual void setTitle( const std::string &title );
+
     HWND getHandle() const;
 
 private:
@@ -37,6 +40,8 @@ private:
     Dimensions _dimensions;
     bool _fullscreen;
     FullscreenMode _fullscreenMode;
+
+    std::string _title;
 
     ObserverList<Observer> _observers;
 };
