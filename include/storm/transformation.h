@@ -14,4 +14,6 @@ Matrix createXRotationTransformation( float angle );
 Matrix createYRotationTransformation( float angle );
 Matrix createZRotationTransformation( float angle );
 
+bool isAffineTransformation( const Matrix &transformation );
+
 }

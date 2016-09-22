@@ -5,10 +5,12 @@
 namespace storm {
 
 Matrix createTranslationTransformation( float x, float y, float z ) {
-    return Matrix( 1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   x, y, z, 1 );
+    return Matrix(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        x, y, z, 1
+    );
 }
 
 Matrix createTranslationTransformation( const Vector &vector ) {
@@ -16,10 +18,12 @@ Matrix createTranslationTransformation( const Vector &vector ) {
 }
 
 Matrix createScalingTransformation( float x, float y, float z ) {
-    return Matrix( x, 0, 0, 0,
-                   0, y, 0, 0,
-                   0, 0, z, 0,
-                   0, 0, 0, 1 );
+    return Matrix(
+        x, 0, 0, 0,
+        0, y, 0, 0,
+        0, 0, z, 0,
+        0, 0, 0, 1
+    );
 }
 
 Matrix createScalingTransformation( const Vector &vector ) {
@@ -30,30 +34,45 @@ Matrix createXRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 
-    return Matrix( 1,      0,      0,      0,
-                   0, cosine,  -sine,      0,
-                   0,   sine, cosine,      0,
-                   0,      0,      0,      1 );
+    return Matrix(
+        1,      0,      0,      0,
+        0, cosine,  -sine,      0,
+        0,   sine, cosine,      0,
+        0,      0,      0,      1
+    );
 }
 
 Matrix createYRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 
-    return Matrix( cosine,      0,   sine,      0,
-                        0,      1,      0,      0,
-                    -sine,      0, cosine,      0,
-                        0,      0,      0,      1 );
+    return Matrix(
+        cosine,      0,   sine,      0,
+             0,      1,      0,      0,
+         -sine,      0, cosine,      0,
+             0,      0,      0,      1
+    );
 }
 
 Matrix createZRotationTransformation( float angle ) {
     const float   sine = sin( angle );
     const float cosine = cos( angle );
 
-    return Matrix( cosine,  -sine,      0,      0,
-                     sine, cosine,      0,      0,
-                        0,      0,      1,      0,
-                        0,      0,      0,      1 );
+    return Matrix(
+        cosine,  -sine,      0,      0,
+          sine, cosine,      0,      0,
+             0,      0,      1,      0,
+             0,      0,      0,      1
+    );
+}
+
+bool isAffineTransformation( const Matrix &transformation ) {
+    return (
+        transformation[0][3] == 0 &&
+        transformation[1][3] == 0 &&
+        transformation[2][3] == 0 &&
+        transformation[3][3] == 1
+    );
 }
 
 }
