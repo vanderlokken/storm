@@ -60,6 +60,8 @@ public:
 
     // The following methods throw 'ShaderValueLookupError'-typed exceptions
     // when the specified value handle is invalid.
+    virtual void setValue(
+        ValueHandle handle, Buffer::Pointer, size_t offset, size_t size ) = 0;
     virtual void setValue( ValueHandle handle, Buffer::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;

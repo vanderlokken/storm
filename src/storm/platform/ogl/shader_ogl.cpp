@@ -52,14 +52,19 @@ void bindSampler( Sampler::Pointer sampler, GLuint textureUnit ) {
     checkResult( "::glBindSampler" );
 }
 
-void bindUniformBuffer( Buffer::Pointer buffer, GLuint bindingPoint ) {
+void bindUniformBuffer(
+    Buffer::Pointer buffer,
+    GLuint bindingPoint,
+    GLintptr offset,
+    GLsizeiptr size )
+{
     const auto nativeBuffer = std::static_pointer_cast<BufferOgl>( buffer );
 
     storm_assert( nativeBuffer, "Shader uniform buffer is not set" );
 
-    ::glBindBufferBase( GL_UNIFORM_BUFFER, bindingPoint,
-        nativeBuffer->getHandle() );
-    checkResult( "::glBindBufferBase" );
+    ::glBindBufferRange( GL_UNIFORM_BUFFER, bindingPoint,
+        nativeBuffer->getHandle(), offset, size );
+    checkResult( "::glBindBufferRange" );
 }
 
 bool isSupportedSamplerType( GLenum uniformType ) {
@@ -240,7 +245,9 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
     return valueHandle;
 }
 
-void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
+void ShaderOgl::setValue(
+    ValueHandle handle, Buffer::Pointer buffer, size_t offset, size_t size )
+{
     validateValueHandle( handle );
 
     const auto handleImplementation =
@@ -252,9 +259,23 @@ void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
     GlslUniformBlock &glslUniformBlock =
         _uniformBlocksMapping[handleImplementation->index];
     glslUniformBlock.buffer = buffer;
+    glslUniformBlock.offset = offset;
+    glslUniformBlock.size = size;
 
     if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
-         bindUniformBuffer( buffer, glslUniformBlock.bindingPoint );
+         bindUniformBuffer(
+            buffer,
+            glslUniformBlock.bindingPoint,
+            glslUniformBlock.offset,
+            glslUniformBlock.size );
+}
+
+void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
+    setValue(
+        std::move(handle),
+        std::move(buffer),
+        0 /* offset */,
+        buffer->getDescription().size );
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
@@ -299,7 +320,11 @@ void ShaderOgl::install() const {
         bindSampler( key.second.sampler, key.second.textureUnit );
     }
     for( const auto &key: _uniformBlocksMapping ) {
-        bindUniformBuffer( key.second.buffer, key.second.bindingPoint );
+        bindUniformBuffer(
+            key.second.buffer,
+            key.second.bindingPoint,
+            key.second.offset,
+            key.second.size );
     }
 }
 
@@ -404,6 +429,8 @@ void ShaderOgl::createUniformBlocksMapping() {
         GlslUniformBlock glslUniformBlock;
         glslUniformBlock.bindingPoint = bindingPoint;
         glslUniformBlock.buffer = nullptr;
+        glslUniformBlock.offset = 0;
+        glslUniformBlock.size = 0;
         _uniformBlocksMapping.insert( {index, glslUniformBlock} );
 
         ::glUniformBlockBinding( _handle, index, bindingPoint );
