@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <vector>
 
 #include <storm/noncopyable.h>
 #include <storm/platform/ogl/handle_ogl.h>
@@ -38,28 +38,26 @@ public:
 private:
     GLint getProgramParameter( GLenum parameter ) const;
 
-    void createSamplersMapping();
-    void createUniformBlocksMapping();
+    void setBaseBindingPoints();
+
+    void setupSamplersBinding();
+    void setupUniformBlocksBinding();
 
     void validateValueHandle( ValueHandle handle ) const;
 
     static GLenum convertType( Type );
 
-    struct GlslSampler {
-        GLuint textureUnit;
-        Texture::Pointer texture;
-        Sampler::Pointer sampler;
-    };
-
-    struct GlslUniformBlock {
-        GLuint bindingPoint;
-        Buffer::Pointer buffer;
-    };
-
     Type _type;
     ProgramHandleOgl _handle;
-    std::map<GLint, GlslSampler> _samplersMapping;
-    std::map<GLint, GlslUniformBlock> _uniformBlocksMapping;
+
+    GLuint _baseSamplerBinding;
+    GLuint _baseBufferBinding;
+
+    std::vector<GLint> _samplerUniformLocations;
+
+    std::vector<Texture::Pointer> _textures;
+    std::vector<Sampler::Pointer> _samplers;
+    std::vector<Buffer::Pointer> _buffers;
 };
 
 }
