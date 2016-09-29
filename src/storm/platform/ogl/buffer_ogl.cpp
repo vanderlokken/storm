@@ -1,5 +1,6 @@
 #include <storm/platform/ogl/buffer_ogl.h>
 
+#include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/platform/ogl/resource_type_ogl.h>
@@ -25,10 +26,19 @@ BufferOgl::BufferOgl( const Description &description, const void *data ) :
     ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
     checkResult( "::glBindBuffer" );
 
-    const GLenum usage = getResourceUsage( _description.resourceType );
+    if( getOpenGlSupportStatus().ARB_buffer_storage ) {
+        const GLbitfield flags = GL_DYNAMIC_STORAGE_BIT;
 
-    ::glBufferData( GL_COPY_WRITE_BUFFER, _description.size, data, usage );
-    checkResult( "::glBufferData" );
+        ::glBufferStorage(
+            GL_COPY_WRITE_BUFFER, _description.size, data, flags );
+        checkResult( "::glBufferStorage" );
+
+    } else {
+        const GLenum usage = getResourceUsage( _description.resourceType );
+
+        ::glBufferData( GL_COPY_WRITE_BUFFER, _description.size, data, usage );
+        checkResult( "::glBufferData" );
+    }
 }
 
 void BufferOgl::getData( size_t offset, size_t size, void *data ) const {

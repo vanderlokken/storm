@@ -1246,6 +1246,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
 
         const std::map< std::string, bool* > extensionSupport = {
             {
+                "GL_ARB_buffer_storage",
+                &status.ARB_buffer_storage
+            },
+            {
                 "GL_ARB_get_program_binary",
                 &status.ARB_get_program_binary
             },
