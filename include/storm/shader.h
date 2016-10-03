@@ -58,13 +58,25 @@ public:
     virtual ValueHandle getValueHandle(
         const std::string &identifier ) const = 0;
 
-    // The following methods throw 'ShaderValueLookupError'-typed exceptions
-    // when the specified value handle is invalid.
-    virtual void setValue(
-        ValueHandle handle, Buffer::Pointer, size_t offset, size_t size ) = 0;
-    virtual void setValue( ValueHandle handle, Buffer::Pointer ) = 0;
-    virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
-    virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;
+    // The following methods throw exceptions.
+    // 1. 'ShaderValueLookupError', if the specified value handle was not
+    // obtained, using the 'getValueHandle' method of the same object.
+    // 2. 'ShaderValueTypeError', if the specified value is of a different
+    // type.
+
+    // Binds an entire constant buffer to the specified value.
+    virtual void setValue( ValueHandle handle, Buffer::Pointer buffer ) = 0;
+    // Binds a constant buffer range to the specified value.
+    // The range offset must be a multiple of the 'BufferOffsetAlignment' value.
+    virtual void setValue( ValueHandle handle, BufferRange bufferRange ) = 0;
+    // Binds a sampler to the specified value.
+    virtual void setValue( ValueHandle handle, Sampler::Pointer sampler ) = 0;
+    // Binds a texture to the specified value.
+    virtual void setValue( ValueHandle handle, Texture::Pointer texture ) = 0;
+
+    void setValue( const std::string &identifier, BufferRange bufferRange ) {
+        setValue( getValueHandle(identifier), bufferRange );
+    }
 
     void setValue( const std::string &identifier, Buffer::Pointer buffer ) {
         setValue( getValueHandle(identifier), buffer );
@@ -77,9 +89,12 @@ public:
     void setValue( const std::string &identifier, Texture::Pointer texture ) {
         setValue( getValueHandle(identifier), texture );
     }
+
+    static const size_t BufferOffsetAlignment = 256;
 };
 
 class ShaderCompilationError : public Exception {};
 class ShaderValueLookupError : public Exception {};
+class ShaderValueTypeError : public Exception {};
 
 }

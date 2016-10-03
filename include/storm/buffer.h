@@ -49,4 +49,11 @@ template<class Container> Buffer::Pointer Buffer::create(
     return create( description, container.data() );
 }
 
+struct BufferRange {
+    Buffer::Pointer buffer;
+
+    size_t offset;
+    size_t size;
+};
+
 }

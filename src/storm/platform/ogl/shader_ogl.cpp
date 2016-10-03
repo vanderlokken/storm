@@ -245,37 +245,35 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
     return valueHandle;
 }
 
-void ShaderOgl::setValue(
-    ValueHandle handle, Buffer::Pointer buffer, size_t offset, size_t size )
-{
+void ShaderOgl::setValue( ValueHandle handle, BufferRange bufferRange ) {
     validateValueHandle( handle );
 
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->type ==
-        ValueHandleImplementation::Type::UniformBlock );
+    if( handleImplementation->type !=
+            ValueHandleImplementation::Type::UniformBlock ) {
+        throw ShaderValueTypeError() <<
+            "The specified value is not of a constant buffer type.";
+    }
 
     GlslUniformBlock &glslUniformBlock =
         _uniformBlocksMapping[handleImplementation->index];
-    glslUniformBlock.buffer = buffer;
-    glslUniformBlock.offset = offset;
-    glslUniformBlock.size = size;
+    glslUniformBlock.bufferRange = bufferRange;
 
     if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
-         bindUniformBuffer(
-            buffer,
+        bindUniformBuffer(
+            glslUniformBlock.bufferRange.buffer,
             glslUniformBlock.bindingPoint,
-            glslUniformBlock.offset,
-            glslUniformBlock.size );
+            glslUniformBlock.bufferRange.offset,
+            glslUniformBlock.bufferRange.size );
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
+    const size_t offset = 0;
+    const size_t size = buffer->getDescription().size;
     setValue(
-        std::move(handle),
-        std::move(buffer),
-        0 /* offset */,
-        buffer->getDescription().size );
+        std::move(handle), BufferRange {std::move(buffer), offset, size} );
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
@@ -284,8 +282,11 @@ void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->type ==
-        ValueHandleImplementation::Type::Sampler );
+    if( handleImplementation->type !=
+            ValueHandleImplementation::Type::Sampler ) {
+        throw ShaderValueTypeError() <<
+            "The specified value is not of a sampler type.";
+    }
 
     GlslSampler &glslSampler = _samplersMapping[handleImplementation->index];
     glslSampler.texture = texture;
@@ -300,8 +301,11 @@ void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
     const auto handleImplementation =
         std::static_pointer_cast<ValueHandleImplementation>( handle );
 
-    storm_assert( handleImplementation->type ==
-        ValueHandleImplementation::Type::Sampler );
+    if( handleImplementation->type !=
+            ValueHandleImplementation::Type::Sampler ) {
+        throw ShaderValueTypeError() <<
+            "The specified value is not of a sampler type.";
+    }
 
     GlslSampler &glslSampler = _samplersMapping[handleImplementation->index];
     glslSampler.sampler = sampler;
@@ -321,10 +325,10 @@ void ShaderOgl::install() const {
     }
     for( const auto &key: _uniformBlocksMapping ) {
         bindUniformBuffer(
-            key.second.buffer,
+            key.second.bufferRange.buffer,
             key.second.bindingPoint,
-            key.second.offset,
-            key.second.size );
+            key.second.bufferRange.offset,
+            key.second.bufferRange.size );
     }
 }
 
@@ -428,9 +432,9 @@ void ShaderOgl::createUniformBlocksMapping() {
 
         GlslUniformBlock glslUniformBlock;
         glslUniformBlock.bindingPoint = bindingPoint;
-        glslUniformBlock.buffer = nullptr;
-        glslUniformBlock.offset = 0;
-        glslUniformBlock.size = 0;
+        glslUniformBlock.bufferRange.buffer = nullptr;
+        glslUniformBlock.bufferRange.offset = 0;
+        glslUniformBlock.bufferRange.size = 0;
         _uniformBlocksMapping.insert( {index, glslUniformBlock} );
 
         ::glUniformBlockBinding( _handle, index, bindingPoint );

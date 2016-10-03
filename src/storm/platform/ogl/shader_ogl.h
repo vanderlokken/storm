@@ -27,11 +27,10 @@ public:
 
     virtual ValueHandle getValueHandle( const std::string &identifier ) const;
 
-    virtual void setValue(
-        ValueHandle handle, Buffer::Pointer, size_t offset, size_t size );
-    virtual void setValue( ValueHandle handle, Buffer::Pointer );
-    virtual void setValue( ValueHandle handle, Sampler::Pointer );
-    virtual void setValue( ValueHandle handle, Texture::Pointer );
+    virtual void setValue( ValueHandle handle, Buffer::Pointer buffer );
+    virtual void setValue( ValueHandle handle, BufferRange bufferRange );
+    virtual void setValue( ValueHandle handle, Sampler::Pointer sampler );
+    virtual void setValue( ValueHandle handle, Texture::Pointer texture );
 
     const ProgramHandleOgl& getHandle() const;
 
@@ -55,9 +54,7 @@ private:
 
     struct GlslUniformBlock {
         GLuint bindingPoint;
-        GLintptr offset;
-        GLsizeiptr size;
-        Buffer::Pointer buffer;
+        BufferRange bufferRange;
     };
 
     Type _type;
