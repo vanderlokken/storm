@@ -36,6 +36,9 @@ public:
     virtual void setShader( Shader::Pointer ) = 0;
     virtual void resetShader( Shader::Type ) = 0;
 
+    virtual size_t getRootBufferSize() const = 0;
+    virtual void setRootBufferData( size_t offset, size_t size, const void *data ) = 0;
+
     virtual RasterizationTechnique::Pointer getRasterizationTechnique() const = 0;
     virtual OutputTechnique::Pointer getOutputTechnique() const = 0;
     virtual BlendingTechnique::Pointer getBlendingTechnique() const = 0;

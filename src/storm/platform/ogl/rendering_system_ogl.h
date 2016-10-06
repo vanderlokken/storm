@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include <storm/platform/ogl/handle_ogl.h>
 #include <storm/rendering_system_common.h>
 
@@ -24,6 +27,10 @@ public:
 
     virtual void setShader( Shader::Pointer );
     virtual void resetShader( Shader::Type );
+
+    virtual size_t getRootBufferSize() const;
+    virtual void setRootBufferData(
+        size_t offset, size_t size, const void *data );
 
     virtual RasterizationTechnique::Pointer getRasterizationTechnique() const;
     virtual OutputTechnique::Pointer getOutputTechnique() const;
@@ -78,6 +85,8 @@ private:
     Backbuffer::Pointer _backbuffer;
 
     GLuint _primitiveRestartIndex;
+
+    std::vector<uint8_t> _rootBufferData;
 };
 
 }

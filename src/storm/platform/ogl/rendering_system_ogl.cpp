@@ -1,5 +1,7 @@
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
+#include <algorithm>
+
 #include <storm/platform/ogl/api_ogl.h>
 
 #include <storm/platform/ogl/backbuffer_ogl.h>
@@ -75,6 +77,9 @@ void RenderingSystemOgl::initialize() {
         GL_PRIMITIVE_RESTART, true );
     setBooleanGlState(
         GL_TEXTURE_CUBE_MAP_SEAMLESS, isSeamlessCubemapSupported() );
+
+    const size_t rootBufferSize = 128;
+    _rootBufferData.resize( rootBufferSize );
 }
 
 void RenderingSystemOgl::beginFrameRendering() {
@@ -155,6 +160,8 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
     checkResult( "::glUseProgramStages" );
 
     nativeShader->install();
+    nativeShader->handleRootBufferUpdate(
+        _rootBufferData, /* offset */ 0, _rootBufferData.size() );
 }
 
 void RenderingSystemOgl::resetShader( Shader::Type shaderType ) {
@@ -165,6 +172,33 @@ void RenderingSystemOgl::resetShader( Shader::Type shaderType ) {
     checkResult( "::glUseProgramStages" );
 
     RenderingSystemCommon::resetShader( shaderType );
+}
+
+size_t RenderingSystemOgl::getRootBufferSize() const {
+    return _rootBufferData.size();
+}
+
+void RenderingSystemOgl::setRootBufferData(
+    size_t offset, size_t size, const void *data )
+{
+    storm_assert( _rootBufferData.size() >= offset + size );
+    std::copy(
+        static_cast<const uint8_t*>(data),
+        static_cast<const uint8_t*>(data) + size,
+        _rootBufferData.begin() + offset );
+
+    Shader *shaders[] = {
+        _geometryShader.get(),
+        _vertexShader.get(),
+        _pixelShader.get()
+    };
+
+    for( Shader *shader : shaders ) {
+        if( shader ) {
+            static_cast<ShaderOgl*>( shader )->handleRootBufferUpdate(
+                _rootBufferData, offset, size );
+        }
+    }
 }
 
 RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const {

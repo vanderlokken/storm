@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include <storm/noncopyable.h>
@@ -35,13 +36,17 @@ public:
 
     void install() const;
 
+    void handleRootBufferUpdate(
+        const std::vector<uint8_t> &rootBuffer, size_t offset, size_t size );
+
 private:
     GLint getProgramParameter( GLenum parameter ) const;
 
-    void setBaseBindingPoints();
+    void setupBindings();
 
     void setupSamplersBinding();
     void setupUniformBlocksBinding();
+    void setupRootUniformsBinding();
 
     void validateValueHandle( ValueHandle handle ) const;
 
@@ -58,6 +63,8 @@ private:
     std::vector<Texture::Pointer> _textures;
     std::vector<Sampler::Pointer> _samplers;
     std::vector<Buffer::Pointer> _buffers;
+
+    std::vector<GLint> _rootUniformLocations;
 };
 
 }

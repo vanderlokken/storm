@@ -55,6 +55,12 @@ public:
     // When a shader contains no value with the specified identifier, this
     // method returns a default-constructed 'ValueHandle' instance which
     // evaluates to 'false'.
+    //
+    // This method doesn't return handles for GLSL standalone uniform values.
+    // Standalone GLSL uniforms of the 'vec4' type, which have reserved names
+    // '_root_0', '_root_1', '_root_2', etc., are bound to the root buffer with
+    // offsets 0, 16, 32, etc. Use the 'RenderingSystem::setRootBufferData'
+    // method to set their values.
     virtual ValueHandle getValueHandle(
         const std::string &identifier ) const = 0;
 

@@ -102,6 +102,8 @@ bool isSupportedSamplerType( GLenum uniformType ) {
 const size_t shaderTextureUnits = 16;
 const size_t shaderUniformBlocks = 12;
 
+const size_t rootUniformDataSize = 16;
+
 } // namespace
 
 // ProgramHandleOgl
@@ -137,10 +139,7 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type ) :
         throw ShaderCompilationError() << "Shader compilation failed:\n" << log;
     }
 
-    setBaseBindingPoints();
-
-    setupSamplersBinding();
-    setupUniformBlocksBinding();
+    setupBindings();
 }
 
 ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
@@ -169,9 +168,9 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
             binaryRepresentationLength );
 
 #ifndef NDEBUG
-        // We intentionally ignore shader binary loading errors and set error
-        // flag to the 'GL_NO_ERROR' value. We will detect loading result using
-        // the 'GL_LINK_STATUS' value.
+        // We intentionally ignore shader binary loading errors and set the
+        // error flag to the 'GL_NO_ERROR' value. We will detect loading result
+        // using the 'GL_LINK_STATUS' value.
         ::glGetError();
 #endif
     }
@@ -179,10 +178,7 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
     if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE )
         throw ShaderBinaryLoadingError();
 
-    setBaseBindingPoints();
-
-    setupSamplersBinding();
-    setupUniformBlocksBinding();
+    setupBindings();
 }
 
 Shader::Type ShaderOgl::getType() const {
@@ -230,7 +226,10 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
             _samplerUniformLocations.begin(),
             _samplerUniformLocations.end(),
             location );
-        storm_assert( iterator != _samplerUniformLocations.end() );
+
+        if( iterator == _samplerUniformLocations.end() ) {
+            return ValueHandle();
+        }
 
         const auto valueHandle = std::make_shared<ValueHandleImplementation>();
         valueHandle->shader = this;
@@ -315,6 +314,29 @@ void ShaderOgl::install() const {
     }
 }
 
+void ShaderOgl::handleRootBufferUpdate(
+    const std::vector<uint8_t> &rootBuffer, size_t offset, size_t size )
+{
+    for( size_t rootUniformIndex = offset / rootUniformDataSize;
+            rootUniformIndex * rootUniformDataSize < offset + size;
+            ++rootUniformIndex ) {
+        const GLint uniformLocation =
+            _rootUniformLocations.at( rootUniformIndex );
+
+        if( uniformLocation != -1 ) {
+            const GLsizei count = 1;
+            const GLfloat *value = reinterpret_cast<const GLfloat*>(
+                rootBuffer.data() + rootUniformIndex * rootUniformDataSize );
+            ::glProgramUniform4fv( _handle, uniformLocation, count, value );
+#ifndef NDEBUG
+            // We intentionally ignore type mismatch errors and set the error
+            // flag to the 'GL_NO_ERROR' value.
+            ::glGetError();
+#endif
+        }
+    }
+}
+
 GLint ShaderOgl::getProgramParameter( GLenum parameter ) const {
     GLint value = 0;
 
@@ -324,12 +346,16 @@ GLint ShaderOgl::getProgramParameter( GLenum parameter ) const {
     return value;
 }
 
-void ShaderOgl::setBaseBindingPoints() {
+void ShaderOgl::setupBindings() {
     // Shaders of different types use different binding point ranges. Note:
     // MAX_COMBINED_TEXTURE_IMAGE_UNITS = 3 * MAX_<stage>_TEXTURE_IMAGE_UNITS
     // MAX_COMBINED_UNIFORM_BLOCKS      = 3 * MAX_<stage>_UNIFORM_BLOCKS
     _baseSamplerBinding = shaderTextureUnits * static_cast<GLuint>( _type );
     _baseBufferBinding = shaderUniformBlocks * static_cast<GLuint>( _type );
+
+    setupSamplersBinding();
+    setupUniformBlocksBinding();
+    setupRootUniformsBinding();
 }
 
 void ShaderOgl::setupSamplersBinding() {
@@ -352,12 +378,12 @@ void ShaderOgl::setupSamplersBinding() {
         _handle, activeUniforms, indices.data(), GL_UNIFORM_SIZE, &sizes[0] );
     checkResult( "::glGetActiveUniformsiv" );
 
-    size_t textureUnit = 0;
-
-    auto mapUniform = [this, &textureUnit]( const std::string &identifier ) {
+    auto mapUniform = [this]( const std::string &identifier ) {
         const GLint location =
             ::glGetUniformLocation( _handle, identifier.c_str() );
         checkResult( "::glGetUniformLocation" );
+
+        const size_t textureUnit = _textures.size();
 
         ::glProgramUniform1i(
             _handle, location, _baseSamplerBinding + textureUnit );
@@ -367,8 +393,6 @@ void ShaderOgl::setupSamplersBinding() {
 
         _textures.push_back( nullptr );
         _samplers.push_back( Sampler::getDefault() );
-
-        ++textureUnit;
     };
 
     std::string identifier(
@@ -417,6 +441,22 @@ void ShaderOgl::setupUniformBlocksBinding() {
     }
 
     storm_assert( _buffers.size() <= shaderUniformBlocks );
+}
+
+void ShaderOgl::setupRootUniformsBinding() {
+    const size_t rootBufferSize =
+        RenderingSystem::getInstance()->getRootBufferSize();
+    _rootUniformLocations.resize( rootBufferSize / rootUniformDataSize, -1 );
+
+    for( size_t rootUniformIndex = 0;
+            rootUniformIndex < _rootUniformLocations.size();
+            ++rootUniformIndex ) {
+        const std::string identifier =
+            "_root_" + std::to_string( rootUniformIndex );
+        _rootUniformLocations[rootUniformIndex] =
+            ::glGetUniformLocation( _handle, identifier.c_str() );
+        checkResult( "::glGetUniformLocation" );
+    }
 }
 
 void ShaderOgl::validateValueHandle( ValueHandle handle ) const {
