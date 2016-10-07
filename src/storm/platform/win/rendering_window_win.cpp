@@ -185,7 +185,8 @@ void RenderingWindowWin::setTitle( const std::string &title ) {
         nullptr,
         0 );
 
-    std::vector<wchar_t> buffer( bufferSize, 0 );
+    // Note: +1 is for terminating null character.
+    std::vector<wchar_t> buffer( bufferSize + 1, 0 );
 
     const int success = ::MultiByteToWideChar(
         CP_UTF8,
