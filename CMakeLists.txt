@@ -26,6 +26,7 @@ endif()
 if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR-")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
 elseif(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 endif()
@@ -202,12 +203,23 @@ add_library(storm STATIC
     ${storm_platform_sources}
 )
 
+set_target_properties(storm PROPERTIES
+    COMPILE_PDB_NAME_DEBUG "stormd"
+    COMPILE_PDB_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}"
+)
+
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
 install(TARGETS storm
     ARCHIVE DESTINATION lib
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/stormd.pdb"
+    DESTINATION lib
+    CONFIGURATIONS Debug
 )
 
 if(storm_build_examples)
