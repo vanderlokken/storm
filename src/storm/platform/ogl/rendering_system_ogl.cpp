@@ -77,6 +77,8 @@ void RenderingSystemOgl::initialize() {
         GL_PRIMITIVE_RESTART, true );
     setBooleanGlState(
         GL_TEXTURE_CUBE_MAP_SEAMLESS, isSeamlessCubemapSupported() );
+    setBooleanGlState(
+        GL_FRAMEBUFFER_SRGB, true );
 
     const size_t rootBufferSize = 128;
     _rootBufferData.resize( rootBufferSize );
