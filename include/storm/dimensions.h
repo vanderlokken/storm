@@ -13,6 +13,13 @@ struct Dimensions {
     {
     }
 
+    float getAspectRatio() const {
+        return (
+            static_cast<float>(width) /
+            static_cast<float>(height)
+        );
+    }
+
     unsigned int width;
     unsigned int height;
 };
