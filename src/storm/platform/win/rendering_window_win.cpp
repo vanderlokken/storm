@@ -53,8 +53,8 @@ RenderingWindowWin::RenderingWindowWin() :
 
     const wchar_t *className = windowClass.lpszClassName;
     const wchar_t *windowName = L"";
-    const DWORD style = WS_CAPTION | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
-        WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
+    const DWORD style =
+        WS_CAPTION | WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
     const int x = 0;
     const int y = 0;
     const int width = 0;
@@ -111,6 +111,7 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
     restoreDisplayMode();
 
     addWindowStyle( _handle, WS_CAPTION );
+    removeWindowStyle( _handle, WS_MAXIMIZE | WS_MAXIMIZEBOX );
 
     const unsigned int width = windowDimensions.width;
     const unsigned int height = windowDimensions.height;
@@ -141,6 +142,18 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
     _dimensions = windowDimensions;
 }
 
+void RenderingWindowWin::setWindowedMaximized() {
+    restoreDisplayMode();
+
+    addWindowStyle( _handle, WS_MAXIMIZE | WS_MAXIMIZEBOX | WS_CAPTION );
+
+    _fullscreen = false;
+    _dimensions = Dimensions {
+        static_cast<unsigned>(::GetSystemMetrics(SM_CXFULLSCREEN)),
+        static_cast<unsigned>(::GetSystemMetrics(SM_CYFULLSCREEN))
+    };
+}
+
 void RenderingWindowWin::setFullscreen( FullscreenMode fullscreenMode ) {
     if( fullscreenMode.custom ) {
         DEVMODE displayMode = {};
@@ -160,7 +173,7 @@ void RenderingWindowWin::setFullscreen( FullscreenMode fullscreenMode ) {
     } else
         restoreDisplayMode();
 
-    removeWindowStyle( _handle, WS_CAPTION );
+    removeWindowStyle( _handle, WS_CAPTION | WS_MAXIMIZEBOX );
 
     const unsigned int width = ::GetSystemMetrics( SM_CXSCREEN );
     const unsigned int height = ::GetSystemMetrics( SM_CYSCREEN );

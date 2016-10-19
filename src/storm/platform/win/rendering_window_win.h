@@ -23,6 +23,7 @@ public:
     virtual bool isFullscreen() const;
 
     virtual void setWindowed( Dimensions windowDimensions );
+    virtual void setWindowedMaximized();
     virtual void setFullscreen( FullscreenMode fullscreenMode );
 
     virtual const std::string& getTitle() const;
