@@ -35,6 +35,7 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
     ScopeFramebufferBinding scopeFramebufferBinding( _handle );
 
     size_t colorAttachmentsNumber = 0;
+    size_t depthAttachmentsNumber = 0;
 
     for( const auto &buffer : description.buffers ) {
         const auto nativeTexture =
@@ -46,11 +47,17 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         case Texture::Format::DepthNormUint24:
         case Texture::Format::DepthNormUint32:
         case Texture::Format::DepthFloat32:
+            storm_assert( depthAttachmentsNumber == 0 );
+            ++depthAttachmentsNumber;
             attachment = GL_DEPTH_ATTACHMENT;
             break;
+
         case Texture::Format::DepthNormUint24StencilUint8:
+            storm_assert( depthAttachmentsNumber == 0 );
+            ++depthAttachmentsNumber;
             attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             break;
+
         default:
             attachment = GL_COLOR_ATTACHMENT0 + (colorAttachmentsNumber++);
             break;
