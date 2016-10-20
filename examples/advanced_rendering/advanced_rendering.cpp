@@ -147,11 +147,12 @@ private:
         const storm::Vector cameraTarget( 0.f, 0.f, 0.f );
 
         storm::PerspectiveCamera camera;
-        camera.setPosition( cameraPosition );
-        camera.setTarget( cameraTarget );
-        camera.setFrameDimensions( _frameDimensions );
+        camera.setFrameAspectRatio( _frameDimensions.getAspectRatio() );
+        camera.move( cameraPosition );
+        camera.pointAt( cameraTarget );
 
-        _transformations.viewProjection = camera.getViewTransformation() *
+        _transformations.viewProjection =
+            camera.getViewTransformation() *
             camera.getProjectionTransformation();
     }
 
