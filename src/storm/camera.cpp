@@ -103,9 +103,9 @@ Matrix PerspectiveCamera::getProjectionTransformation() const {
 
     result[0][0] = scale;
     result[1][1] = scale * _frameAspectRatio;
-    result[2][2] = _depthRange.maximum / depthRange;
+    result[2][2] = (_depthRange.minimum + _depthRange.maximum) / depthRange;
     result[2][3] = 1.0f;
-    result[3][2] = -_depthRange.minimum * _depthRange.maximum / depthRange;
+    result[3][2] = -2 * _depthRange.minimum * _depthRange.maximum / depthRange;
 
     return result;
 }
@@ -133,8 +133,8 @@ Matrix OrthographicCamera::getProjectionTransformation() const {
 
     result[0][0] =  2.0f / _frameDimensions.x;
     result[1][1] =  2.0f / _frameDimensions.y;
-    result[2][2] =  1.0f / depthRange;
-    result[3][2] = -_depthRange.minimum / depthRange;
+    result[2][2] =  2.0f / depthRange;
+    result[3][2] = -(_depthRange.minimum + _depthRange.maximum) / depthRange;
     result[3][3] =  1.0f;
 
     return result;

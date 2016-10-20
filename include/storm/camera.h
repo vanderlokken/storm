@@ -11,6 +11,8 @@ struct Rectangle;
 class Camera {
 public:
     struct DepthRange {
+        // The [minimum, maximum] z coordinate range in the view space will be
+        // mapped to the [-1, 1] z coordinate range in the NDC space.
         float minimum;
         float maximum;
     };
@@ -25,7 +27,12 @@ public:
     DepthRange getDepthRange() const;
     void setDepthRange( DepthRange );
 
+    // Returns transformation matrix, which maps world space coordinates to
+    // the view space.
     Matrix getViewTransformation() const;
+
+    // Returns transformation matrix, which maps view space coordinates to
+    // the clip space.
     virtual Matrix getProjectionTransformation() const = 0;
 
     void move( const Vector& );
