@@ -47,14 +47,16 @@ Matrix Camera::getViewTransformation() const {
     const Vector zAxis = _direction;
     const Vector xAxis = crossProduct( directionUp, zAxis ).getNormalized();
     const Vector yAxis = crossProduct( zAxis, xAxis );
+    // Note: the 'yAxis' vector is normalized by construction.
 
     return Matrix(
         xAxis.x, yAxis.x, zAxis.x, 0,
         xAxis.y, yAxis.y, zAxis.y, 0,
         xAxis.z, yAxis.z, zAxis.z, 0,
-        -dotProduct( xAxis, _position ),
-        -dotProduct( yAxis, _position ),
-        -dotProduct( zAxis, _position ), 1 );
+        -dotProduct(xAxis, _position),
+        -dotProduct(yAxis, _position),
+        -dotProduct(zAxis, _position), 1
+    );
 }
 
 void Camera::move( const Vector &offset ) {
