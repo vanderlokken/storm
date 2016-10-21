@@ -9,8 +9,7 @@
 namespace storm {
 
 Camera::Camera() :
-    _depthRange( DepthRange {0.1f, 1000.0f} ),
-    _direction( Vector::AxisZ )
+    _depthRange( DepthRange {0.1f, 1000.0f} )
 {
 }
 
@@ -22,12 +21,16 @@ void Camera::setPosition( const Vector &position ) {
     _position = position;
 }
 
-const Vector& Camera::getDirection() const {
-    return _direction;
+const Quaternion& Camera::getRotation() const {
+    return _rotation;
 }
 
-void Camera::setDirection( const Vector &direction ) {
-    _direction = direction.getNormalized();
+void Camera::setRotation( const Quaternion &rotation ) {
+    _rotation = rotation;
+}
+
+Vector Camera::getDirection() const {
+    return Vector::AxisZ * _rotation.toRotationMatrix();
 }
 
 Camera::DepthRange Camera::getDepthRange() const {
@@ -42,12 +45,11 @@ void Camera::setDepthRange( DepthRange depthRange ) {
 }
 
 Matrix Camera::getViewTransformation() const {
-    const Vector directionUp = Vector::AxisY;
+    const Matrix rotationTransformation = _rotation.toRotationMatrix();
 
-    const Vector zAxis = _direction;
-    const Vector xAxis = crossProduct( directionUp, zAxis ).getNormalized();
-    const Vector yAxis = crossProduct( zAxis, xAxis );
-    // Note: the 'yAxis' vector is normalized by construction.
+    const Vector zAxis = Vector::AxisZ * rotationTransformation;
+    const Vector xAxis = Vector::AxisX * rotationTransformation;
+    const Vector yAxis = Vector::AxisY * rotationTransformation;
 
     return Matrix(
         xAxis.x, yAxis.x, zAxis.x, 0,
@@ -63,8 +65,30 @@ void Camera::move( const Vector &offset ) {
     _position += offset;
 }
 
-void Camera::pointAt( const Vector &target ) {
-    _direction = (target - _position).getNormalized();
+void Camera::pointAt(
+    const Vector &target,
+    const Vector &directionUp )
+{
+    const Vector direction = (target - _position).getNormalized();
+
+    const Quaternion firstRotation =
+        Quaternion::fromAxes( Vector::AxisZ, direction );
+
+    const Vector obtainedAxisY =
+        Vector::AxisY * firstRotation.toRotationMatrix();
+    const Vector requiredAxisY = (
+        directionUp - direction * dotProduct(direction, directionUp)
+    ).getNormalized();
+
+    const float rotationAngle =
+        std::acos( dotProduct(obtainedAxisY, requiredAxisY) );
+    const bool isReverseDirection =
+        dotProduct( direction, crossProduct(obtainedAxisY, requiredAxisY) ) < 0;
+
+    const Quaternion secondRotation = Quaternion::fromAxisAngle(
+        Vector::AxisZ, !isReverseDirection ? rotationAngle : -rotationAngle );
+
+    setRotation( firstRotation * secondRotation );
 }
 
 PerspectiveCamera::PerspectiveCamera() :

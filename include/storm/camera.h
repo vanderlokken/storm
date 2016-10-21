@@ -1,6 +1,7 @@
 #pragma once
 
 #include <storm/matrix.h>
+#include <storm/quaternion.h>
 #include <storm/vector.h>
 
 namespace storm {
@@ -20,9 +21,10 @@ public:
     const Vector& getPosition() const;
     void setPosition( const Vector& );
 
-    // The returned direction is normalized.
-    const Vector& getDirection() const;
-    void setDirection( const Vector& );
+    const Quaternion& getRotation() const;
+    void setRotation( const Quaternion& );
+
+    Vector getDirection() const;
 
     DepthRange getDepthRange() const;
     void setDepthRange( DepthRange );
@@ -35,8 +37,10 @@ public:
     // the clip space.
     virtual Matrix getProjectionTransformation() const = 0;
 
-    void move( const Vector& );
-    void pointAt( const Vector& );
+    void move( const Vector &offset );
+    void pointAt(
+        const Vector &target,
+        const Vector &directionUp = Vector::AxisY );
 
 protected:
     Camera();
@@ -45,7 +49,7 @@ protected:
 
 private:
     Vector _position;
-    Vector _direction;
+    Quaternion _rotation;
 };
 
 class PerspectiveCamera : public Camera {
