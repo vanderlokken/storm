@@ -502,21 +502,24 @@ std::string RenderingSystemOgl::getDebugMessageLog() const {
             std::string message(
                 getIntegerParameter(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH), 0 );
 
+            GLenum severity = 0;
             ::glGetDebugMessageLog(
                 /* messageCount = */ 1,
                 message.size(),
                 nullptr,
                 nullptr,
                 nullptr,
-                nullptr,
+                &severity,
                 nullptr,
                 &message[0] );
             checkResult( "::glGetDebugMessageLog" );
 
-            // Remove null character.
-            message.erase( message.size() - 1 );
+            // Replace the null character.
+            message.back() = '\n';
 
-            log += message + '\n';
+            if( severity != GL_DEBUG_SEVERITY_NOTIFICATION ) {
+                log += message;
+            }
         }
     }
     return log;
