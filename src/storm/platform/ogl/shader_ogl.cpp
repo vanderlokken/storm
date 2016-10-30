@@ -262,10 +262,13 @@ void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
         ValueHandleImplementation::Type::UniformBlock );
 
     const size_t index = handleImplementation->index;
-    _buffers.at( index ) = buffer;
 
-    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
-        bindUniformBuffer( buffer.get(), _baseBufferBinding + index );
+    if( _buffers.at(index) != buffer ) {
+        _buffers.at( index ) = buffer;
+
+        if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+            bindUniformBuffer( buffer.get(), _baseBufferBinding + index );
+    }
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
@@ -278,10 +281,13 @@ void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
         ValueHandleImplementation::Type::Sampler );
 
     const size_t index = handleImplementation->index;
-    _textures.at( index ) = texture;
 
-    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
-        bindTexture( texture.get(), _baseSamplerBinding + index );
+    if( _textures.at(index) != texture ) {
+        _textures.at( index ) = texture;
+
+        if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+            bindTexture( texture.get(), _baseSamplerBinding + index );
+    }
 }
 
 void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
@@ -294,10 +300,13 @@ void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
         ValueHandleImplementation::Type::Sampler );
 
     const size_t index = handleImplementation->index;
-    _samplers.at( index ) = sampler;
 
-    if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
-        bindSampler( sampler.get(), _baseSamplerBinding + index );
+    if( _samplers.at(index) != sampler ) {
+        _samplers.at( index ) = sampler;
+
+        if( RenderingSystemOgl::getInstance()->getShader(_type).get() == this )
+            bindSampler( sampler.get(), _baseSamplerBinding + index );
+    }
 }
 
 const ProgramHandleOgl& ShaderOgl::getHandle() const {

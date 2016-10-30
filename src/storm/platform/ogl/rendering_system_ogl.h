@@ -69,10 +69,12 @@ private:
     static void setBooleanGlState( GLenum state, bool value );
     static GLbitfield selectShaderStage( Shader::Type shaderType );
 
+    void bindVertexArray( GLuint vertexArray );
+
     // These objects should be constructed after OpenGL context creation. To
     // ensure this we're using heap allocation instead of stack allocation.
     std::shared_ptr<ProgramPipelineHandleOgl> _programPipeline;
-    std::shared_ptr<VertexArrayHandleOgl> _vertexArray;
+    std::shared_ptr<VertexArrayHandleOgl> _vertexArrayWithoutData;
 
     RasterizationTechnique::Pointer _rasterizationTechnique;
     OutputTechnique::Pointer _outputTechnique;
@@ -84,6 +86,7 @@ private:
     Framebuffer::Pointer _framebuffer;
     Backbuffer::Pointer _backbuffer;
 
+    GLuint _vertexArray;
     GLuint _primitiveRestartIndex;
 
     std::vector<uint8_t> _rootBufferData;

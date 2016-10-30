@@ -63,12 +63,15 @@ void RenderingSystemOgl::initialize() {
     _clippingRectangle.height = _outputRectangle.height = dimensions.height;
 
     _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
-    _vertexArray = std::make_shared<VertexArrayHandleOgl>();
+    _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();
 
     ::glBindProgramPipeline( *_programPipeline );
     checkResult( "::glBindProgramPipeline" );
 
     _backbuffer = std::make_shared<BackbufferOgl>();
+
+    ::glBindVertexArray( _vertexArray = *_vertexArrayWithoutData );
+    checkResult( "::glBindVertexArray" );
 
     _primitiveRestartIndex = 0xffff;
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
@@ -96,9 +99,7 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     storm_assert( mesh );
 
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
-
-    ::glBindVertexArray( nativeMesh->getHandle() );
-    checkResult( "::glBindVertexArray" );
+    bindVertexArray( nativeMesh->getHandle() );
 
     const auto &indexBufferDescription =
         mesh->getDescription().indexBuffer->getDescription();
@@ -136,8 +137,7 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
 void RenderingSystemOgl::renderGenerated(
     unsigned int vertexCount, Mesh::PrimitiveTopology primitiveTopology )
 {
-    ::glBindVertexArray( *_vertexArray );
-    checkResult( "::glBindVertexArray" );
+    bindVertexArray( *_vertexArrayWithoutData );
 
     ::glDrawArrays(
         MeshOgl::convertPrimitiveTopology(primitiveTopology), 0, vertexCount );
@@ -528,6 +528,15 @@ std::string RenderingSystemOgl::getDebugMessageLog() const {
 void RenderingSystemOgl::installOpenGlContext() {
     // OpenGL context is installed when the rendering system is being created
     RenderingSystem::getInstance();
+}
+
+void RenderingSystemOgl::bindVertexArray( GLuint vertexArray ) {
+    if( _vertexArray != vertexArray ) {
+        _vertexArray = vertexArray;
+
+        ::glBindVertexArray( vertexArray );
+        checkResult( "::glBindVertexArray" );
+    }
 }
 
 void RenderingSystemOgl::setBooleanGlState( GLenum state, bool value ) {
