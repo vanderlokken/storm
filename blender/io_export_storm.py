@@ -169,10 +169,8 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         if self.export_blending_weights:
             write_attribute(SemanticsBlendingWeights, Format3Float)
 
-    def _export_mesh(self):
-        mesh = self._context.object.to_mesh(
-            scene=self._context.scene, apply_modifiers=True, settings="RENDER")
-
+    @staticmethod
+    def _transform_mesh_coordinate_system(mesh):
         # This transformation swaps Y and Z axes, turning coordinate system from
         # right-handed to left-handed.
         transformation = Matrix()
@@ -183,82 +181,88 @@ class StormExportOperator(bpy.types.Operator, ExportHelper):
         transformation[3][3] = 1
         mesh.transform(transformation)
 
+    def _export_mesh(self):
+        mesh = self._context.object.to_mesh(
+            scene=self._context.scene, apply_modifiers=True, settings="RENDER")
+
+        self._transform_mesh_coordinate_system(mesh)
+
         if self.export_normals:
             mesh.calc_normals_split()
         if self.export_tangents:
             mesh.calc_tangents(mesh.uv_layers.active.name)
 
-        vertex_groups_bones_mapping = self._vertex_groups_bones_mapping
+        vertices = []
+        indices = []
 
-        convert_uv = lambda vector: (vector[0], 1 - vector[1])
+        for polygon in mesh.polygons:
+            for loop_index in polygon.loop_indices:
+                vertex = self._pack_vertex_data(mesh, loop_index)
 
-        polygon_loop_pairs = [
-            (polygon, mesh.loops[loop_index]) for polygon in mesh.polygons
-                for loop_index in polygon.loop_indices]
+                if vertex in vertices:
+                    index = vertices.index(vertex)
+                else:
+                    index = len(vertices)
+                    vertices.append(vertex)
+
+                indices.append(index)
 
         vertex_data = bytearray()
+        for vertex in vertices:
+            vertex_data += vertex
 
-        for polygon, loop in polygon_loop_pairs:
-            vertex = mesh.vertices[loop.vertex_index]
+        if len(vertices) <= (2 ** 16 - 1):
+            index_data = struct.pack(
+                "<{0}H".format(len(indices)), *indices)
+        else:
+            index_data = struct.pack(
+                "<{0}I".format(len(indices)), *indices)
 
-            vertex_data += struct.pack("<fff", *vertex.co)
-
-            if self.export_normals:
-                vertex_data += struct.pack("<fff", *loop.normal)
-            if self.export_tangents:
-                vertex_data += struct.pack("<fff", *loop.tangent)
-
-            if self.export_texture_coordinates:
-                uv = mesh.uv_layers.active.data[loop.index].uv
-                vertex_data += struct.pack("<ff", *convert_uv(uv))
-
-            if self.export_blending_indices:
-                indices = [vertex_groups_bones_mapping[group.group] for
-                    group in vertex.groups]
-                indices = [index for index in indices if index is not None]
-
-                while len(indices) < 4:
-                    indices.append(0)
-
-                vertex_data += struct.pack(
-                    "<BBBB", indices[0], indices[1], indices[2], indices[3])
-
-            if self.export_blending_weights:
-                weights = [group.weight for group in vertex.groups if
-                    vertex_groups_bones_mapping[group.group] is not None]
-
-                while len(weights) < 3:
-                    weights.append(0)
-
-                weights = [weight / (sum(weights) or 1) for weight in weights]
-
-                vertex_data += struct.pack(
-                    "<fff", weights[0], weights[1], weights[2])
-
-        vertex_number = len(polygon_loop_pairs)
-
-        vertex_size = int(len(vertex_data) / vertex_number)
+        vertex_size = len(vertex_data) // len(vertices)
+        index_size = len(index_data) // len(indices)
 
         self._file.write(struct.pack("<B", vertex_size))
         self._file.write(struct.pack("<I", len(vertex_data)))
         self._file.write(vertex_data)
-
-        index_data = bytearray()
-
-        if vertex_number <= (2 ** 16 - 1):
-            index_data += struct.pack(
-                "<{0}H".format(vertex_number), *range(vertex_number))
-        else:
-            index_data += struct.pack(
-                "<{0}I".format(vertex_number), *range(vertex_number))
-
-        index_size = int(len(index_data) / vertex_number)
 
         self._file.write(struct.pack("<B", index_size))
         self._file.write(struct.pack("<I", len(index_data)))
         self._file.write(index_data)
 
         bpy.data.meshes.remove(mesh)
+
+    def _pack_vertex_data(self, mesh, loop_index):
+        loop = mesh.loops[loop_index]
+        vertex = mesh.vertices[loop.vertex_index]
+
+        convert_uv = lambda vector: (vector[0], 1 - vector[1])
+
+        vertex_data = bytearray()
+        vertex_data += struct.pack("<fff", *vertex.co)
+
+        if self.export_normals:
+            vertex_data += struct.pack("<fff", *loop.normal)
+        if self.export_tangents:
+            vertex_data += struct.pack("<fff", *loop.tangent)
+
+        if self.export_texture_coordinates:
+            uv = mesh.uv_layers.active.data[loop.index].uv
+            vertex_data += struct.pack("<ff", *convert_uv(uv))
+
+        if self.export_blending_indices:
+            indices = [self._vertex_groups_bones_mapping[group.group] for
+                group in vertex.groups]
+            indices = filter(lambda index: index is not None, indices)
+            vertex_data += struct.pack("<BBBB", *(indices + [0, 0, 0, 0])[0:4])
+
+        if self.export_blending_weights:
+            weights = [group.weight for group in vertex.groups if
+                self._vertex_groups_bones_mapping[group.group] is not None]
+            if sum(weights) != 0:
+                weights = [weight / sum(weights) for weight in weights]
+            vertex_data += struct.pack("<fff", *(weights + [0, 0, 0])[0:3])
+
+        return vertex_data
 
 
 def menu_function(self, context):
