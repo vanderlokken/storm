@@ -22,10 +22,23 @@ namespace {
 
 bool isSeamlessCubemapSupported() {
     // There's a bug in the official drivers for the following GPU.
-    const std::string unacceptableRenderer = "GeForce GTS 250/PCIe/SSE2/3DNOW!";
+    const std::string unacceptableRenderers[] = {
+        "GeForce GTS 250/PCIe/SSE2/3DNOW!",
+        "GeForce GTS 250/PCIe/SSE2"
+    };
+
     const std::string renderer =
         reinterpret_cast<const char*>( ::glGetString(GL_RENDERER) );
-    return renderer != unacceptableRenderer;
+
+    const auto iterator = std::find(
+        std::begin(
+            unacceptableRenderers),
+        std::end(
+            unacceptableRenderers),
+        renderer
+    );
+
+    return iterator == std::end( unacceptableRenderers );
 }
 
 } // namespace
