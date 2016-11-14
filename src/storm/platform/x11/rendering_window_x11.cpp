@@ -229,27 +229,19 @@ void RenderingWindowX11::installStateChangeHandlers() {
 }
 
 void RenderingWindowX11::setFullscreen( bool fullscreen ) {
-    static Atom windowStateAtom = ::XInternAtom(
-        _display, "_NET_WM_STATE", /*onlyExisting = */ false );
     static Atom windowStateFullscreenAtom = ::XInternAtom(
         _display, "_NET_WM_STATE_FULLSCREEN", /*onlyExisting = */ false );
 
-    XEvent event = {};
-    event.xclient.type = ClientMessage;
-    event.xclient.display = _display;
-    event.xclient.window = _handle;
-    event.xclient.message_type = windowStateAtom;
-    event.xclient.format = 32;
-    event.xclient.data.l[0] =
-        (fullscreen ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
-    event.xclient.data.l[1] = windowStateFullscreenAtom;
-
-    ::XSendEvent(
+    Atom atoms[2] = { windowStateFullscreenAtom, None };
+    ::XChangeProperty(
         _display,
-        ::XDefaultRootWindow(_display ),
-        /*propagate = */ false,
-        /*eventMask = */ SubstructureNotifyMask | SubstructureRedirectMask,
-        &event );
+        _handle,
+        ::XInternAtom(_display, "_NET_WM_STATE", /*onlyExisting = */ false),
+        ::XInternAtom(_display, "ATOM", /*onlyExisting = */ false),
+        32 /* format, bits */,
+        PropModeReplace,
+        reinterpret_cast<unsigned char*>(atoms),
+        1 );
 }
 
 void RenderingWindowX11::setDimensionsConstraint( Dimensions dimensions ) {
