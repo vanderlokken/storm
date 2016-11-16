@@ -309,6 +309,9 @@ public:
     virtual void setTexels(
         const CubeMapRegion &region, const void *texels ) = 0;
 
+    // Warning: the filtering algorithm, which is used to generate mip map, is
+    // implementation dependent. On NVidia drivers the result can be affected
+    // by bound sampler objects.
     virtual void generateMipMap() = 0;
 
     virtual const Description& getDescription() const = 0;
