@@ -27,7 +27,8 @@ typedef int (APIENTRYP PFNWGLGETSWAPINTERVALEXTPROC) ();
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB          0x00000001
 #define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
 
-typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (
+    HDC hDC, HGLRC hShareContext, const int *attribList);
 
 // ----------------------------------------------------------------------------
 
@@ -131,7 +132,15 @@ void RenderingSystemWgl::setVsyncEnabled( bool enabled ) {
     static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
         loadWglExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
             "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
-    wglSwapIntervalEXT( enabled ? 1 : 0 );
+
+    // -1 is used when the 'WGL_EXT_swap_control_tear' is supported; otherwise
+    // 1 is used.
+    ::SetLastError( 0 );
+    wglSwapIntervalEXT( enabled ? -1 : 0 );
+
+    if( ::GetLastError() == ERROR_INVALID_DATA ) {
+        wglSwapIntervalEXT( enabled ? 1 : 0 );
+    }
 }
 
 void RenderingSystemWgl::selectPixelFormat() {
