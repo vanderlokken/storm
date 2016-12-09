@@ -232,11 +232,12 @@ bool MouseWin::isCursorInClientRectangle() {
 
     ::ScreenToClient( windowHandle, &cursorPosition );
 
-    return
+    return (
         cursorPosition.x >= 0 &&
         cursorPosition.y >= 0 &&
-        cursorPosition.x < windowDimensions.width &&
-        cursorPosition.y < windowDimensions.height;
+        static_cast<unsigned int>(cursorPosition.x) < windowDimensions.width &&
+        static_cast<unsigned int>(cursorPosition.y) < windowDimensions.height
+    );
 }
 
 void MouseWin::lockCursor() {

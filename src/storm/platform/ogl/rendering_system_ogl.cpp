@@ -258,7 +258,9 @@ void RenderingSystemOgl::setRasterizationTechnique(
     setBooleanGlState( GL_SCISSOR_TEST, description.rectangleClippingEnabled );
     setBooleanGlState( GL_DEPTH_CLAMP, !description.depthClippingEnabled );
 
-    ::glPolygonOffset( description.slopeScaleDepthBias, description.depthBias );
+    ::glPolygonOffset(
+        static_cast<GLfloat>(description.slopeScaleDepthBias),
+        static_cast<GLfloat>(description.depthBias) );
     checkResult( "::glPolygonOffset" );
 
     _rasterizationTechnique = technique;

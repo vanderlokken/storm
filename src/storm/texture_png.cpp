@@ -65,6 +65,9 @@ Texture::Pointer parsePng(
 
     return texture;
 #else
+    (void)stream;
+    (void)parameters;
+
     throwNotImplemented();
 #endif
 }

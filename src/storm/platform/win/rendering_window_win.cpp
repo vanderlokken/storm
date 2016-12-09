@@ -113,15 +113,15 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
     addWindowStyle( _handle, WS_CAPTION );
     removeWindowStyle( _handle, WS_MAXIMIZE | WS_MAXIMIZEBOX );
 
-    const unsigned int width = windowDimensions.width;
-    const unsigned int height = windowDimensions.height;
+    const long width = static_cast<long>( windowDimensions.width );
+    const long height = static_cast<long>( windowDimensions.height );
 
     RECT desktopRectangle = { 0, 0, 0, 0 };
 
     ::GetWindowRect( ::GetDesktopWindow(), &desktopRectangle );
 
-    const unsigned int x = ( desktopRectangle.right - width ) / 2;
-    const unsigned int y = ( desktopRectangle.bottom - height ) / 2;
+    const long x = ( desktopRectangle.right - width ) / 2;
+    const long y = ( desktopRectangle.bottom - height ) / 2;
 
     RECT windowRectangle = { x, y, x + width, y + height };
 
