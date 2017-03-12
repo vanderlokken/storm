@@ -33,7 +33,7 @@ KeyboardWin::~KeyboardWin() {
 }
 
 void KeyboardWin::onEvent( const RAWKEYBOARD &keyboard ) {
-    typedef std::pair<USHORT, bool> KeyCode;
+    typedef std::pair<int, bool> KeyCode;
 
     // The following integer constants and respective Key values are taken from
     // http://msdn.microsoft.com/en-us/library/ms894073.aspx

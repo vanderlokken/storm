@@ -41,7 +41,7 @@ void VertexFormatOgl::install() const {
 VertexFormatOgl::AttributeFormatDescription
     VertexFormatOgl::getAttributeFormatDescription( Attribute::Format format )
 {
-    AttributeFormatDescription result;
+    AttributeFormatDescription result = {};
 
     switch( format ) {
     case Attribute::Format::Float:
