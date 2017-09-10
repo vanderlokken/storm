@@ -281,41 +281,41 @@ void RenderingSystemOgl::setOutputTechnique(
     const auto &depthTest = description.depthTest;
     const auto &stencilTest = description.stencilTest;
 
-    setBooleanGlState( GL_DEPTH_TEST, depthTest.enabled );
-    setBooleanGlState( GL_STENCIL_TEST, stencilTest.enabled );
+    setBooleanGlState( GL_DEPTH_TEST, depthTest.has_value() );
+    setBooleanGlState( GL_STENCIL_TEST, stencilTest.has_value() );
 
-    if( depthTest.enabled ) {
-        ::glDepthFunc( depthTest.passCondition );
+    if( depthTest ) {
+        ::glDepthFunc( depthTest->passCondition );
         checkResult( "::glDepthFunc" );
     }
 
-    if( stencilTest.enabled ) {
+    if( stencilTest ) {
         ::glStencilOpSeparate(
             GL_FRONT,
-            stencilTest.algorithmForFrontFaces.operationOnStencilTestFail,
-            stencilTest.algorithmForFrontFaces.operationOnDepthTestFail,
-            stencilTest.algorithmForFrontFaces.operationOnDepthTestPass );
+            stencilTest->algorithmForFrontFaces.operationOnStencilTestFail,
+            stencilTest->algorithmForFrontFaces.operationOnDepthTestFail,
+            stencilTest->algorithmForFrontFaces.operationOnDepthTestPass );
         checkResult( "::glStencilOpSeparate" );
 
         ::glStencilOpSeparate(
             GL_BACK,
-            stencilTest.algorithmForBackFaces.operationOnStencilTestFail,
-            stencilTest.algorithmForBackFaces.operationOnDepthTestFail,
-            stencilTest.algorithmForBackFaces.operationOnDepthTestPass );
+            stencilTest->algorithmForBackFaces.operationOnStencilTestFail,
+            stencilTest->algorithmForBackFaces.operationOnDepthTestFail,
+            stencilTest->algorithmForBackFaces.operationOnDepthTestPass );
         checkResult( "::glStencilOpSeparate" );
 
         ::glStencilFuncSeparate(
             GL_FRONT,
-            stencilTest.algorithmForFrontFaces.passCondition,
-            stencilTest.referenceValue,
-            stencilTest.mask );
+            stencilTest->algorithmForFrontFaces.passCondition,
+            stencilTest->referenceValue,
+            stencilTest->mask );
         checkResult( "::glStencilFuncSeparate" );
 
         ::glStencilFuncSeparate(
             GL_BACK,
-            stencilTest.algorithmForBackFaces.passCondition,
-            stencilTest.referenceValue,
-            stencilTest.mask );
+            stencilTest->algorithmForBackFaces.passCondition,
+            stencilTest->referenceValue,
+            stencilTest->mask );
         checkResult( "::glStencilFuncSeparate" );
     }
 

@@ -18,8 +18,8 @@ public:
 
     static Pointer create( const Description&, const void *data = nullptr );
 
-    template<class Container>
-        static Pointer create( const Container &container );
+    template <class Container>
+    static Pointer create( const Container &container );
 
     virtual ~Buffer() { }
 
@@ -37,9 +37,8 @@ public:
     virtual const Description& getDescription() const = 0;
 };
 
-template<class Container> Buffer::Pointer Buffer::create(
-    const Container &container )
-{
+template <class Container>
+Buffer::Pointer Buffer::create( const Container &container ) {
     Description description;
     description.size =
         sizeof( typename Container::value_type ) * container.size();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include <storm/condition.h>
 
@@ -22,13 +23,10 @@ public:
     };
 
     struct DepthTest {
-        bool enabled;
         Condition passCondition;
     };
 
     struct StencilTest {
-        bool enabled;
-
         unsigned int referenceValue;
         unsigned int mask;
 
@@ -44,9 +42,9 @@ public:
     };
 
     struct Description {
-          DepthTest depthTest;
-        StencilTest stencilTest;
-               bool writeDepthValues;
+        std::optional<DepthTest> depthTest;
+        std::optional<StencilTest> stencilTest;
+        bool writeDepthValues;
     };
 
     static OutputTechnique::Pointer create( const Description& );

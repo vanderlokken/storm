@@ -3,13 +3,10 @@
 namespace storm {
 
 struct Rectangle {
-    Rectangle()
-        : x( 0 ), y( 0 ), width( 0 ), height( 0 )
-    {
-    }
+    Rectangle() = default;
 
-    Rectangle( int x, int y, unsigned int width, unsigned int height )
-        : x( x ), y( y ), width( width ), height( height )
+    Rectangle( int x, int y, unsigned int width, unsigned int height ) :
+        x( x ), y( y ), width( width ), height( height )
     {
     }
 
@@ -20,10 +17,10 @@ struct Rectangle {
         return x <= x_ && y <= y_ && getRight() >= x_ && getBottom() >= y_;
     }
 
-    int x;
-    int y;
-    unsigned int width;
-    unsigned int height;
+    int x = 0;
+    int y = 0;
+    unsigned int width = 0;
+    unsigned int height = 0;
 };
 
 }

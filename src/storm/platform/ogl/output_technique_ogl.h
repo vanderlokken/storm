@@ -7,17 +7,11 @@ namespace storm {
 
 class OutputTechniqueOgl : public OutputTechnique {
 public:
-
-    // The following structures store values adapted for OpenGL
-
     struct DepthTest {
-        bool enabled;
         GLenum passCondition;
     };
 
     struct StencilTest {
-        bool enabled;
-
         unsigned int referenceValue;
         unsigned int mask;
 
@@ -33,9 +27,9 @@ public:
     };
 
     struct Description {
-          DepthTest depthTest;
-        StencilTest stencilTest;
-               bool writeDepthValues;
+        std::optional<DepthTest> depthTest;
+        std::optional<StencilTest> stencilTest;
+        bool writeDepthValues;
     };
 
     OutputTechniqueOgl( const OutputTechnique::Description& );

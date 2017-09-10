@@ -6,7 +6,7 @@
 namespace storm {
 
 struct Quaternion {
-    Quaternion();
+    Quaternion() = default;
     Quaternion( float, float, float, float );
 
     Quaternion& operator += ( const Quaternion& );
@@ -35,10 +35,10 @@ struct Quaternion {
     static Quaternion slerp(
         const Quaternion&, const Quaternion&, float );
 
-    float x;
-    float y;
-    float z;
-    float w;
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float w = 1;
 };
 
 Quaternion operator * ( float, const Quaternion& );

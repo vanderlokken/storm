@@ -114,7 +114,7 @@ public:
         Menu
     };
 
-    typedef uint32_t CharacterCode;
+    using CharacterCode = uint32_t;
 
     struct Observer {
         std::function<void(Key)> onKeyPress;

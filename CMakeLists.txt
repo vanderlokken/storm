@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-cmake_policy(VERSION 2.8.7)
+cmake_minimum_required(VERSION 3.9)
+cmake_policy(VERSION 3.9)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR
@@ -23,12 +23,14 @@ if(storm_enable_png_support)
     add_definitions(-Dstorm_enable_png_support)
 endif()
 
+set(CMAKE_CXX_STANDARD 17)
+
 if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR-")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR- /std:c++latest")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
 elseif(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
 set(storm_includes

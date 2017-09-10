@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include <storm/dimensions.h>
@@ -21,11 +22,6 @@ public:
         std::function<void()> onFullscreenModeRequest;
     };
 
-    struct FullscreenMode {
-        bool custom;
-        Display::Mode mode;
-    };
-
     static RenderingWindow* getInstance();
 
     virtual ~RenderingWindow() {}
@@ -41,12 +37,13 @@ public:
     virtual void setWindowed( Dimensions windowDimensions ) = 0;
     virtual void setWindowedMaximized() = 0;
     // With default arguments sets so-called 'windowed fullscreen' mode which
-    // doesn't change display mode. When custom display mode is specified, every
-    // time the rendering window receives focus, sets custom display mode,
-    // and every time the rendering window loses focus, restores default display
-    // mode. When specified custom diplay mode is not supported falls back to
-    // the windowed fullscreen mode.
-    virtual void setFullscreen( FullscreenMode fullscreenMode = {} ) = 0;
+    // doesn't change display mode. When the custom display mode is specified,
+    // every time the rendering window receives focus, this mode is applied,
+    // and every time the rendering window loses focus, default display mode is
+    // restored. When the specified custom diplay mode is not supported falls
+    // back to the windowed fullscreen mode.
+    virtual void setFullscreen(
+        std::optional<Display::Mode> displayMode = {} ) = 0;
 
     virtual const std::string& getTitle() const = 0;
     virtual void setTitle( const std::string &title ) = 0;

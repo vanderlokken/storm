@@ -6,7 +6,7 @@ namespace storm {
 
 class Matrix {
 public:
-    Matrix();
+    Matrix() = default;
 
     Matrix(
         float _11, float _12, float _13, float _14,
@@ -35,10 +35,10 @@ public:
     static const Matrix Identity;
 
 private:
-    float _11, _12, _13, _14;
-    float _21, _22, _23, _24;
-    float _31, _32, _33, _34;
-    float _41, _42, _43, _44;
+    float _11 = 0, _12 = 0, _13 = 0, _14 = 0;
+    float _21 = 0, _22 = 0, _23 = 0, _24 = 0;
+    float _31 = 0, _32 = 0, _33 = 0, _34 = 0;
+    float _41 = 0, _42 = 0, _43 = 0, _44 = 0;
 
     friend Vector& operator *= ( Vector&, const Matrix& );
 };

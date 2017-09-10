@@ -95,8 +95,10 @@ void RenderingWindowX11::setWindowedMaximized() {
     throwNotImplemented();
 }
 
-void RenderingWindowX11::setFullscreen( FullscreenMode fullscreenMode ) {
-    if( fullscreenMode.custom )
+void RenderingWindowX11::setFullscreen(
+    std::optional<Display::Mode> fullscreenMode )
+{
+    if( fullscreenMode )
         throwNotImplemented();
 
     setDimensionsConstraint( {0, 0} );

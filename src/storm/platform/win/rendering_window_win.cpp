@@ -29,8 +29,7 @@ void restoreDisplayMode() {
 
 RenderingWindowWin::RenderingWindowWin() :
     _handle( 0 ),
-    _fullscreen( false ),
-    _fullscreenMode( FullscreenMode() )
+    _fullscreen( false )
 {
     const HINSTANCE instance = ::GetModuleHandle( 0 );
 
@@ -154,20 +153,22 @@ void RenderingWindowWin::setWindowedMaximized() {
     };
 }
 
-void RenderingWindowWin::setFullscreen( FullscreenMode fullscreenMode ) {
-    if( fullscreenMode.custom ) {
+void RenderingWindowWin::setFullscreen(
+    std::optional<Display::Mode> fullscreenMode )
+{
+    if( fullscreenMode ) {
         DEVMODE displayMode = {};
         displayMode.dmSize = sizeof( displayMode );
-        displayMode.dmPelsWidth = fullscreenMode.mode.width;
-        displayMode.dmPelsHeight = fullscreenMode.mode.height;
-        displayMode.dmDisplayFrequency = fullscreenMode.mode.refreshRate;
+        displayMode.dmPelsWidth = fullscreenMode->width;
+        displayMode.dmPelsHeight = fullscreenMode->height;
+        displayMode.dmDisplayFrequency = fullscreenMode->refreshRate;
         displayMode.dmFields =
             DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
 
         if( ::ChangeDisplaySettings(&displayMode, CDS_FULLSCREEN) !=
             DISP_CHANGE_SUCCESSFUL )
         {
-            fullscreenMode = {};
+            fullscreenMode = std::nullopt;
             restoreDisplayMode();
         }
     } else
@@ -237,7 +238,7 @@ LRESULT CALLBACK RenderingWindowWin::windowProcedure(
                 const bool active = LOWORD( firstParameter ) != WA_INACTIVE;
 
                 if( instance->_fullscreen &&
-                    instance->_fullscreenMode.custom )
+                    instance->_fullscreenMode )
                 {
                     if( active ) {
                         instance->setFullscreen( instance->_fullscreenMode );

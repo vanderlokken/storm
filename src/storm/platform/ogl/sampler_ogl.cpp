@@ -18,8 +18,8 @@ SamplerHandleOgl::~SamplerHandleOgl() {
     return;
 }
 
-SamplerOgl::SamplerOgl( const Description &description )
-    : _description( description )
+SamplerOgl::SamplerOgl( const Description &description ) :
+    _description( description )
 {
     auto setParameter = [this](GLenum parameter, GLint value) {
         ::glSamplerParameteri( _handle, parameter, value );
@@ -41,10 +41,10 @@ SamplerOgl::SamplerOgl( const Description &description )
         _handle, GL_TEXTURE_BORDER_COLOR, &description.borderColor.r );
     checkResult( "::glSamplerParameterfv" );
 
-    if( _description.comparison.enabled ) {
+    if( _description.comparisonCondition ) {
         setParameter( GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
         setParameter( GL_TEXTURE_COMPARE_FUNC,
-            convertCondition(_description.comparison.condition) );
+            convertCondition(*_description.comparisonCondition) );
     }
 
     storm_assert( description.maximalAnisotropyDegree >= 1 );
@@ -114,7 +114,7 @@ GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
 Sampler::Pointer Sampler::create( const Description &description ) {
     RenderingSystemOgl::installOpenGlContext();
 
-    return std::make_shared< SamplerOgl >( description );
+    return std::make_shared<SamplerOgl>( description );
 }
 
 }

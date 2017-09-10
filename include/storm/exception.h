@@ -19,11 +19,7 @@ public:
         _message += message;
     }
 
-#ifndef _MSC_VER
     virtual const char* what() const noexcept( true );
-#else
-    virtual const char* what() const;
-#endif
 
 private:
     std::string _message;

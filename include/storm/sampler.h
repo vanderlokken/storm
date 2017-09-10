@@ -2,6 +2,7 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 
 #include <storm/color.h>
 #include <storm/condition.h>
@@ -31,21 +32,16 @@ public:
         WithBorderColor
     };
 
-    struct Comparison {
-        bool enabled;
-        Condition condition;
-    };
-
     struct Description {
         MinifyingFilter minifyingFilter;
         MagnifyingFilter magnifyingFilter;
 
-        unsigned int maximalAnisotropyDegree;
+        unsigned maximalAnisotropyDegree;
 
         std::array<WrapMode, 3> wrapModes;
         Color borderColor;
 
-        Comparison comparison;
+        std::optional<Condition> comparisonCondition;
     };
 
     static Sampler::Pointer create( const Description& );

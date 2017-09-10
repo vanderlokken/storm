@@ -6,13 +6,17 @@
 namespace storm {
 
 OutputTechniqueOgl::OutputTechniqueOgl(
-    const OutputTechnique::Description &description )
-        : _description( description )
+        const OutputTechnique::Description &description ) :
+    _description( description )
 {
-    _nativeDescription.depthTest =
-        convertDepthTestDescription( description.depthTest );
-    _nativeDescription.stencilTest =
-        convertStencilTestDescription( description.stencilTest );
+    if( description.depthTest ) {
+        _nativeDescription.depthTest =
+            convertDepthTestDescription( *description.depthTest );
+    }
+    if( description.stencilTest ) {
+        _nativeDescription.stencilTest =
+            convertStencilTestDescription( *description.stencilTest );
+    }
     _nativeDescription.writeDepthValues = description.writeDepthValues;
 }
 
@@ -58,10 +62,8 @@ OutputTechniqueOgl::DepthTest OutputTechniqueOgl::convertDepthTestDescription(
     const OutputTechnique::DepthTest &description )
 {
     OutputTechniqueOgl::DepthTest result;
-    result.enabled = description.enabled;
 
-    if( description.enabled )
-        result.passCondition = convertCondition( description.passCondition );
+    result.passCondition = convertCondition( description.passCondition );
 
     return result;
 }
@@ -70,7 +72,6 @@ OutputTechniqueOgl::StencilTest OutputTechniqueOgl::convertStencilTestDescriptio
     const OutputTechnique::StencilTest &description )
 {
     OutputTechniqueOgl::StencilTest result;
-    result.enabled = description.enabled;
 
     auto convertAlgorithm = []( OutputTechnique::StencilTest::Algorithm algorithm ) {
         StencilTest::Algorithm result;
@@ -86,21 +87,21 @@ OutputTechniqueOgl::StencilTest OutputTechniqueOgl::convertStencilTestDescriptio
         return result;
     };
 
-    if( description.enabled ) {
-        result.referenceValue = description.referenceValue;
-        result.mask = description.mask;
+    result.referenceValue = description.referenceValue;
+    result.mask = description.mask;
 
-        result.algorithmForFrontFaces =
-            convertAlgorithm( description.algorithmForFrontFaces );
-        result.algorithmForBackFaces =
-            convertAlgorithm( description.algorithmForBackFaces );
-    }
+    result.algorithmForFrontFaces =
+        convertAlgorithm( description.algorithmForFrontFaces );
+    result.algorithmForBackFaces =
+        convertAlgorithm( description.algorithmForBackFaces );
 
     return result;
 }
 
-OutputTechnique::Pointer OutputTechnique::create( const Description &description ) {
-    return std::make_shared< OutputTechniqueOgl >( description );
+OutputTechnique::Pointer OutputTechnique::create(
+    const Description &description )
+{
+    return std::make_shared<OutputTechniqueOgl>( description );
 }
 
 }

@@ -16,19 +16,13 @@ Exception::Exception(
     _message = messageStream.str();
 }
 
-Exception::Exception( const std::string &description )
-    : _message( description )
+Exception::Exception( const std::string &description ) :
+    _message( description )
 {
 }
 
-#ifndef _MSC_VER
-    const char* Exception::what() const noexcept( true ) {
-        return _message.c_str();
-    }
-#else
-    const char* Exception::what() const {
-        return _message.c_str();
-    }
-#endif
+const char* Exception::what() const noexcept( true ) {
+    return _message.c_str();
+}
 
 }

@@ -3,24 +3,11 @@
 namespace storm {
 
 OutputTechnique::Pointer OutputTechnique::getDefault() {
+    DepthTest depthTest;
+    depthTest.passCondition = Condition::Less;
+
     Description description;
-    description.depthTest.enabled = true;
-    description.depthTest.passCondition = Condition::Less;
-
-    description.stencilTest.enabled = false;
-    description.stencilTest.referenceValue = 0;
-    description.stencilTest.mask = ~0U;
-
-    description.stencilTest.algorithmForFrontFaces.passCondition = Condition::True;
-    description.stencilTest.algorithmForFrontFaces.operationOnStencilTestFail = StencilOperation::Keep;
-    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestFail = StencilOperation::Keep;
-    description.stencilTest.algorithmForFrontFaces.operationOnDepthTestPass = StencilOperation::Keep;
-
-    description.stencilTest.algorithmForBackFaces.passCondition = Condition::True;
-    description.stencilTest.algorithmForBackFaces.operationOnStencilTestFail = StencilOperation::Keep;
-    description.stencilTest.algorithmForBackFaces.operationOnDepthTestFail = StencilOperation::Keep;
-    description.stencilTest.algorithmForBackFaces.operationOnDepthTestPass = StencilOperation::Keep;
-
+    description.depthTest = depthTest;
     description.writeDepthValues = true;
 
     static const OutputTechnique::Pointer technique = create( description );
@@ -37,7 +24,7 @@ OutputTechnique::Pointer OutputTechnique::getDefaultWithoutDepthOutput() {
 
 OutputTechnique::Pointer OutputTechnique::getDefaultWithoutDepthInputOutput() {
     Description description = getDefault()->getDescription();
-    description.depthTest.enabled = false;
+    description.depthTest = std::nullopt;
     description.writeDepthValues = false;
 
     static const OutputTechnique::Pointer technique = create( description );

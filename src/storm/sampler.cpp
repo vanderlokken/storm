@@ -12,8 +12,6 @@ Sampler::Pointer Sampler::getDefault() {
         WrapMode::Clamped,
         WrapMode::Clamped
     };
-    description.comparison.enabled = false;
-    description.comparison.condition = Condition::False;
     description.borderColor = Color::Black;
 
     static const Sampler::Pointer sampler = create( description );
