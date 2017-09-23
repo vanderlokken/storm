@@ -12,37 +12,42 @@ namespace storm {
 
 template<class Type, size_t Size>
 struct VectorData {
-    typedef struct {
-        Type elements[Size];
-    } Storage;
+    VectorData();
+    explicit VectorData( const Type (&elements)[Size] );
+
+    Type elements[Size];
 };
 
 template<class Type>
 struct VectorData<Type, 1> {
-    typedef struct {
-        union { Type elements[1]; struct {Type x;}; };
-    } Storage;
+    VectorData();
+    explicit VectorData( Type x );
+
+    union { Type elements[1]; struct {Type x;}; };
 };
 
 template<class Type>
 struct VectorData<Type, 2> {
-    typedef struct {
-        union { Type elements[2]; struct {Type x; Type y;}; };
-    } Storage;
+    VectorData();
+    VectorData( Type x, Type y );
+
+    union { Type elements[2]; struct {Type x; Type y;}; };
 };
 
 template<class Type>
 struct VectorData<Type, 3> {
-    typedef struct {
-        union { Type elements[3]; struct {Type x; Type y; Type z;}; };
-    } Storage;
+    VectorData();
+    VectorData( Type x, Type y, Type z );
+
+    union { Type elements[3]; struct {Type x; Type y; Type z;}; };
 };
 
 template<class Type>
 struct VectorData<Type, 4> {
-    typedef struct {
-        union { Type elements[4]; struct {Type x; Type y; Type z; Type w;}; };
-    } Storage;
+    VectorData();
+    VectorData( Type x, Type y, Type z, Type w );
+
+    union { Type elements[4]; struct {Type x; Type y; Type z; Type w;}; };
 };
 
 #ifdef _MSC_VER
@@ -82,11 +87,8 @@ struct VectorBasis<Type, 4> {
 };
 
 template<class Type, size_t Size>
-struct BasicVector : VectorData<Type, Size>::Storage, VectorBasis<Type, Size> {
-    BasicVector();
-
-    template<class... Values>
-    BasicVector( Values... values );
+struct BasicVector : VectorData<Type, Size>, VectorBasis<Type, Size> {
+    using VectorData<Type, Size>::VectorData;
 
     BasicVector<Type, Size>& operator += ( const BasicVector<Type, Size>& );
     BasicVector<Type, Size>& operator -= ( const BasicVector<Type, Size>& );

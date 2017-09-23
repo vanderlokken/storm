@@ -4,6 +4,80 @@
 
 namespace storm {
 
+template<class Type, size_t Size>
+inline VectorData<Type, Size>::VectorData() {
+    for( size_t index = 0; index < Size; ++index ) {
+        elements[index] = Type();
+    }
+}
+
+template<class Type, size_t Size>
+inline VectorData<Type, Size>::VectorData( const Type (&elements)[Size] ) {
+    for( size_t index = 0; index < Size; ++index ) {
+        this->elements[index] = elements[index];
+    }
+}
+
+template<class Type>
+inline VectorData<Type, 1>::VectorData() :
+    x()
+{
+}
+
+template<class Type>
+inline VectorData<Type, 1>::VectorData( Type x ) :
+    x( x )
+{
+}
+
+template<class Type>
+inline VectorData<Type, 2>::VectorData() :
+    x(),
+    y()
+{
+}
+
+template<class Type>
+inline VectorData<Type, 2>::VectorData( Type x, Type y ) :
+    x( x ),
+    y( y )
+{
+}
+
+template<class Type>
+inline VectorData<Type, 3>::VectorData() :
+    x(),
+    y(),
+    z()
+{
+}
+
+template<class Type>
+inline VectorData<Type, 3>::VectorData( Type x, Type y, Type z ) :
+    x( x ),
+    y( y ),
+    z( z )
+{
+}
+
+template<class Type>
+inline VectorData<Type, 4>::VectorData() :
+    x(),
+    y(),
+    z(),
+    w()
+{
+}
+
+template<class Type>
+inline VectorData<Type, 4>::VectorData( Type x, Type y, Type z, Type w ) :
+    x( x ),
+    y( y ),
+    z( z ),
+    w( w )
+{
+}
+
 template<class Type>
 const BasicVector<Type, 1> VectorBasis<Type, 1>::AxisX =
     BasicVector<Type, 1>( Type(1) );
@@ -37,22 +111,6 @@ const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisZ =
 template<class Type>
 const BasicVector<Type, 4> VectorBasis<Type, 4>::AxisW =
     BasicVector<Type, 4>( Type(0), Type(0), Type(0), Type(1) );
-
-template<class Type, size_t Size>
-inline BasicVector<Type, Size>::BasicVector() :
-    VectorData<Type, Size>::Storage {{}}
-{
-}
-
-template<class Type, size_t Size>
-template<class... Values>
-inline BasicVector<Type, Size>::BasicVector( Values... values ) :
-    VectorData<Type, Size>::Storage {{{values...}}}
-{
-    static_assert(
-        sizeof...(Values) == Size || sizeof...(Values) == 0,
-        "The number of arguments must match the size of vector" );
-}
 
 // Mutating operators
 
