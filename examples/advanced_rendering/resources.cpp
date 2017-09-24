@@ -47,8 +47,6 @@ storm::Sampler::Pointer createCheckboardPatternSampler() {
         storm::Sampler::WrapMode::Repeated
     };
     description.borderColor = storm::Color::Black;
-    description.comparison.enabled = false;
-    description.comparison.condition = storm::Condition::False;
     return storm::Sampler::create( description );
 }
 
