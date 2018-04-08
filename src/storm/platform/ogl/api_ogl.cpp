@@ -17,7 +17,7 @@ namespace {
 
 #ifdef _WIN32
 
-typedef int (APIENTRY *openGlFunction)();
+using openGlFunction = PROC;
 
 openGlFunction load( const char *functionName ) {
     static const HMODULE library = ::GetModuleHandle( L"opengl32.dll" );
