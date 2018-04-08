@@ -165,7 +165,7 @@ TextureOgl::TextureOgl( const Description &description ) :
 }
 
 void TextureOgl::getTexels(
-    unsigned int mipLevel, unsigned int /*size*/, void *texels ) const
+    unsigned int mipLevel, size_t /*size*/, void *texels ) const
 {
     storm_assert( _description.layout != Layout::Separate2dMsaa );
     storm_assert( _description.layout != Layout::Layered2dMsaa );

@@ -282,7 +282,7 @@ public:
     // since OpenGL doesn't support an appropriate operation.
 
     virtual void getTexels(
-        unsigned int mipLevel, unsigned int size, void *texels ) const = 0;
+        unsigned int mipLevel, size_t size, void *texels ) const = 0;
 
     // Requirements for DXT-compressed textures:
     // 1. "texels" buffer size must be greater or equal to

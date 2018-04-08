@@ -17,7 +17,7 @@ public:
     TextureOgl( const Description& );
 
     virtual void getTexels(
-        unsigned int mipLevel, unsigned int size, void *texels ) const;
+        unsigned int mipLevel, size_t size, void *texels ) const;
 
     virtual void setTexels(
         const Separate1dRegion &region, const void *texels );
