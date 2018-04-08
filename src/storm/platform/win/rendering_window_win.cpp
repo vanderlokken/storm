@@ -18,7 +18,7 @@ void addWindowStyle( HWND handle, DWORD style ) {
 
 void removeWindowStyle( HWND handle, DWORD style ) {
     ::SetWindowLongPtr( handle, GWL_STYLE,
-        ::GetWindowLongPtr(handle, GWL_STYLE) & ~style );
+        ::GetWindowLongPtr(handle, GWL_STYLE) & ~static_cast<LONG_PTR>(style) );
 }
 
 void restoreDisplayMode() {
@@ -124,8 +124,9 @@ void RenderingWindowWin::setWindowed( Dimensions windowDimensions ) {
 
     RECT windowRectangle = { x, y, x + width, y + height };
 
-    const DWORD windowStyle = ::GetWindowLongPtr( _handle, GWL_STYLE );
-    const BOOL  hasMenu     = ::GetMenu( _handle ) != 0;
+    const DWORD windowStyle =
+        static_cast<DWORD>( ::GetWindowLongPtr(_handle, GWL_STYLE) );
+    const BOOL hasMenu = ::GetMenu( _handle ) != 0;
 
     ::AdjustWindowRect( &windowRectangle, windowStyle, hasMenu );
 
@@ -195,7 +196,7 @@ void RenderingWindowWin::setTitle( const std::string &title ) {
         CP_UTF8,
         MB_ERR_INVALID_CHARS,
         title.data(),
-        title.size(),
+        static_cast<int>(title.size()),
         nullptr,
         0 );
 
@@ -206,9 +207,9 @@ void RenderingWindowWin::setTitle( const std::string &title ) {
         CP_UTF8,
         MB_ERR_INVALID_CHARS,
         title.data(),
-        title.size(),
+        static_cast<int>(title.size()),
         buffer.data(),
-        buffer.size() );
+        static_cast<int>(buffer.size()) );
 
     if( !success )
         throwRuntimeError( "Invalid title string" );

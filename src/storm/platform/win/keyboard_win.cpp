@@ -215,12 +215,13 @@ LRESULT KeyboardWin::handleInputMessage( WPARAM, LPARAM secondParameter ) {
 }
 
 LRESULT KeyboardWin::handleCharacterInputMessage( WPARAM firstParameter, LPARAM ) {
-    onCharacterInput( firstParameter );
+    onCharacterInput(
+        static_cast<storm::Keyboard::CharacterCode>(firstParameter) );
     return USE_DEFAULT_PROCESSING;
 }
 
 LRESULT KeyboardWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) {
-    const BOOL activated = firstParameter;
+    const BOOL activated = static_cast<BOOL>( firstParameter );
 
     if( !activated )
         onInputFocusLost();

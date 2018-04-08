@@ -59,7 +59,8 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
             break;
 
         default:
-            attachment = GL_COLOR_ATTACHMENT0 + (colorAttachmentsNumber++);
+            attachment = GL_COLOR_ATTACHMENT0 +
+                static_cast<GLenum>( colorAttachmentsNumber++ );
             break;
         }
 
@@ -96,8 +97,8 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
     std::vector<GLenum> buffers( colorAttachmentsNumber );
     std::iota( buffers.begin(), buffers.end(), GL_COLOR_ATTACHMENT0 );
 
-    ::glDrawBuffers( buffers.size(), buffers.data() );
-    checkResult( "::glDrawBuffers​" );
+    ::glDrawBuffers( static_cast<GLsizei>(buffers.size()), buffers.data() );
+    checkResult( "::glDrawBuffers" );
 }
 
 const Framebuffer::Description& FramebufferOgl::getDescription() const {

@@ -28,7 +28,7 @@ void VertexFormatOgl::install() const {
             formatDescription.componentCount,
             formatDescription.componentType,
             formatDescription.componentNormalized,
-            _description.size /* stride */, offset );
+            static_cast<GLsizei>(_description.size) /* stride */, offset );
         checkResult( "::glVertexAttribPointer" );
 
         ::glEnableVertexAttribArray( index++ );

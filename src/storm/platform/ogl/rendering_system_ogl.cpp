@@ -130,8 +130,8 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     }
 
     const GLenum primitiveTopology = nativeMesh->getPrimitiveTopology();
-    const GLsizei indexCount =
-        indexBufferDescription.size / indexBufferDescription.elementSize;
+    const GLsizei indexCount = static_cast<GLsizei>(
+        indexBufferDescription.size / indexBufferDescription.elementSize );
     const GLenum indexFormat = (indexBufferDescription.elementSize == 2) ?
         GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
@@ -520,7 +520,7 @@ std::string RenderingSystemOgl::getDebugMessageLog() const {
             GLenum severity = 0;
             ::glGetDebugMessageLog(
                 /* messageCount = */ 1,
-                message.size(),
+                static_cast<GLsizei>(message.size()),
                 nullptr,
                 nullptr,
                 nullptr,

@@ -28,10 +28,10 @@ struct ValueHandleImplementation {
     size_t index;
 };
 
-void bindTexture( const Texture *texture, GLuint textureUnit ) {
+void bindTexture( const Texture *texture, size_t textureUnit ) {
     const auto nativeTexture = static_cast<const TextureOgl*>( texture );
 
-    ::glActiveTexture( GL_TEXTURE0 + textureUnit );
+    ::glActiveTexture( static_cast<GLuint>(GL_TEXTURE0 + textureUnit) );
     checkResult( "::glActiveTexture" );
 
     if( nativeTexture )
@@ -42,21 +42,22 @@ void bindTexture( const Texture *texture, GLuint textureUnit ) {
     checkResult( "::glBindTexture" );
 }
 
-void bindSampler( const Sampler *sampler, GLuint textureUnit ) {
+void bindSampler( const Sampler *sampler, size_t textureUnit ) {
     const auto nativeSampler = static_cast<const SamplerOgl*>( sampler );
 
     storm_assert( nativeSampler, "Shader texture sampler is not set" );
 
-    ::glBindSampler( textureUnit, nativeSampler->getHandle() );
+    ::glBindSampler(
+        static_cast<GLuint>(textureUnit), nativeSampler->getHandle() );
     checkResult( "::glBindSampler" );
 }
 
-void bindUniformBuffer( const Buffer *buffer, GLuint bindingPoint ) {
+void bindUniformBuffer( const Buffer *buffer, size_t bindingPoint ) {
     const auto nativeBuffer = static_cast<const BufferOgl*>( buffer );
 
     storm_assert( nativeBuffer, "Shader uniform buffer is not set" );
 
-    ::glBindBufferBase( GL_UNIFORM_BUFFER, bindingPoint,
+    ::glBindBufferBase( GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingPoint),
         nativeBuffer->getHandle() );
     checkResult( "::glBindBufferBase" );
 }
@@ -133,7 +134,8 @@ ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type ) :
     if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE ) {
         std::string log( getProgramParameter(GL_INFO_LOG_LENGTH), 0 );
 
-        ::glGetProgramInfoLog( _handle, log.size(), nullptr, &log[0] );
+        ::glGetProgramInfoLog(
+            _handle, static_cast<GLsizei>(log.size()), nullptr, &log[0] );
         checkResult( "::glGetProgramInfoLog" );
 
         throw ShaderCompilationError() << "Shader compilation failed:\n" << log;
@@ -159,7 +161,8 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
             throw ShaderBinaryLoadingError();
 
         const GLvoid *binaryData = binary.data() + headerSize;
-        const GLsizei binaryRepresentationLength = binary.size() - headerSize;
+        const GLsizei binaryRepresentationLength =
+            static_cast<GLsizei>( binary.size() - headerSize );
 
         ::glProgramBinary(
             _handle,
@@ -395,7 +398,9 @@ void ShaderOgl::setupSamplersBinding() {
         const size_t textureUnit = _textures.size();
 
         ::glProgramUniform1i(
-            _handle, location, _baseSamplerBinding + textureUnit );
+            _handle,
+            location,
+            static_cast<GLint>(_baseSamplerBinding + textureUnit) );
         checkResult( "::glProgramUniform1i" );
 
         _samplerUniformLocations.push_back( location );
@@ -412,7 +417,11 @@ void ShaderOgl::setupSamplersBinding() {
             continue;
 
         ::glGetActiveUniformName(
-            _handle, index, identifier.size(), nullptr, &identifier[0] );
+            _handle,
+            index,
+            static_cast<GLsizei>(identifier.size()),
+            nullptr,
+            &identifier[0] );
         checkResult( "::glGetActiveUniformName" );
 
         if( sizes[index] == 1 )

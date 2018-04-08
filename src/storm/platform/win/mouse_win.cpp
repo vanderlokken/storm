@@ -342,8 +342,7 @@ LRESULT MouseWin::handleCursorMessage( WPARAM, LPARAM secondParameter ) {
 }
 
 LRESULT MouseWin::handleActivationMessage( WPARAM firstParameter, LPARAM ) {
-
-    const BOOL activated = firstParameter;
+    const BOOL activated = static_cast<BOOL>( firstParameter );
 
     if( !activated ) {
         unlockCursor();
