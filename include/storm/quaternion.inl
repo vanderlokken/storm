@@ -143,6 +143,11 @@ inline Quaternion Quaternion::fromAxisAngle(
 inline Quaternion Quaternion::fromAxes( const Vector &from, const Vector &to ) {
     const Vector crossProductValue = crossProduct( from, to );
     const float dotProductValue = dotProduct( from, to );
+
+    if( dotProductValue < 0 && crossProductValue.getLengthSquared() < 1e-20 ) {
+        return Quaternion( 1, 0, 0, 0 );
+    }
+
     return Quaternion(
         crossProductValue.x,
         crossProductValue.y,
