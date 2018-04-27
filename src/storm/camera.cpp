@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #include <storm/camera.h>
 
+#include <algorithm>
 #include <cmath>
 
 #include <storm/rectangle.h>
@@ -80,8 +81,11 @@ void Camera::pointAt(
         directionUp - direction * dotProduct(direction, directionUp)
     ).getNormalized();
 
-    const float rotationAngle =
-        std::acos( dotProduct(obtainedAxisY, requiredAxisY) );
+    float rotationAngleCosine = dotProduct( obtainedAxisY, requiredAxisY );
+    rotationAngleCosine = std::min( 1.f, rotationAngleCosine );
+    rotationAngleCosine = std::max( -1.f, rotationAngleCosine );
+
+    const float rotationAngle = std::acos( rotationAngleCosine );
     const bool isReverseDirection =
         dotProduct( direction, crossProduct(obtainedAxisY, requiredAxisY) ) < 0;
 
