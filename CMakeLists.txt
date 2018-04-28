@@ -1,36 +1,64 @@
-cmake_minimum_required(VERSION 3.9)
-cmake_policy(VERSION 3.9)
-
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-    message(FATAL_ERROR
-        "In-source builds are not allowed\n"
-        "Please specify standalone build directory"
-    )
-endif()
+cmake_minimum_required(VERSION 3.11.1)
 
 project(storm)
+
+find_package(OpenGL REQUIRED)
 
 option(storm_build_examples "Whether to build examples or not" ON)
 option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 
-include_directories(include src)
+add_library(storm STATIC)
+
+target_compile_features(storm PUBLIC cxx_std_17)
+target_link_libraries(storm PUBLIC OpenGL::GL)
+target_include_directories(storm
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE src
+)
+
+if(UNIX)
+    find_package(X11 REQUIRED)
+
+    if(NOT X11_Xi_FOUND)
+        message(FATAL_ERROR "The 'Xi' library is not found")
+    endif()
+
+    if(NOT X11_Xrandr_FOUND)
+        message(FATAL_ERROR "The 'Xrandr' library is not found")
+    endif()
+
+    target_link_libraries(storm PUBLIC
+        ${X11_X11_LIB}
+        ${X11_Xi_LIB}
+        ${X11_Xrandr_LIB}
+    )
+    target_include_directories(storm PRIVATE
+        ${X11_X11_INCLUDE_PATH}
+        ${X11_Xi_INCLUDE_PATH}
+        ${X11_Xrandr_INCLUDE_PATH}
+    )
+endif()
 
 if(storm_enable_png_support)
     find_package(PNG REQUIRED)
 
-    include_directories(${PNG_INCLUDE_DIRS})
-    add_definitions(${PNG_DEFINITIONS})
-    add_definitions(-Dstorm_enable_png_support)
+    target_link_libraries(storm PUBLIC PNG::PNG)
+    target_compile_definitions(storm PRIVATE storm_enable_png_support)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set_target_properties(storm PROPERTIES
+    COMPILE_PDB_NAME_DEBUG stormd
+    COMPILE_PDB_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 if(MSVC)
-    set(CMAKE_DEBUG_POSTFIX "d")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE /W4 /GR- /std:c++latest")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
+    set_target_properties(storm PROPERTIES DEBUG_POSTFIX d)
+    target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4 /GR-)
+    target_compile_definitions(storm PRIVATE UNICODE _UNICODE)
 elseif(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    target_compile_options(storm PRIVATE -Wall)
 endif()
 
 set(storm_includes
@@ -198,30 +226,31 @@ elseif(UNIX)
     )
 endif()
 
-add_library(storm STATIC
+target_sources(storm PRIVATE
     ${storm_includes}
     ${storm_common_sources}
     ${storm_ogl_sources}
     ${storm_platform_sources}
 )
 
-set_target_properties(storm PROPERTIES
-    COMPILE_PDB_NAME_DEBUG "stormd"
-    COMPILE_PDB_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}"
-)
-
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
-install(TARGETS storm
+install(TARGETS storm EXPORT storm-config
     ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
 )
 
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/stormd.pdb"
+    ${CMAKE_CURRENT_BINARY_DIR}/stormd.pdb
     DESTINATION lib
     CONFIGURATIONS Debug
+)
+
+install(EXPORT storm-config
+    DESTINATION lib/cmake/storm
+    NAMESPACE storm::
 )
 
 if(storm_build_examples)
