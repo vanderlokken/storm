@@ -6,8 +6,8 @@
 #define NOMINMAX
 #endif
 
-// Automatically downloaded from http://www.opengl.org/registry/api/GL/glcorearb.h
-#include <storm/platform/ogl/glcorearb.h>
+// Unpacked from contrib/glcorearb.tar.gz
+#include "glcorearb.h"
 
 namespace storm {
 

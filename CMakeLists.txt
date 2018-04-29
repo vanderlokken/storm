@@ -15,7 +15,9 @@ target_include_directories(storm
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-    PRIVATE src
+    PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include
+        src
 )
 
 if(UNIX)
@@ -61,18 +63,16 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
     target_compile_options(storm PRIVATE -Wall)
 endif()
 
-set(glcorearb_header
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/glcorearb.h)
-
-if(NOT EXISTS ${glcorearb_header})
-    file(DOWNLOAD "http://www.opengl.org/registry/api/GL/glcorearb.h"
-        ${glcorearb_header} STATUS status)
-    list(GET status 0 error_code)
-    if(error_code)
-        file(REMOVE ${glcorearb_header})
-        message(FATAL_ERROR "Couldn't download 'glcorearb.h'.")
-    endif()
-endif()
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/include
+    COMMAND ${CMAKE_COMMAND} -E chdir
+        ${CMAKE_CURRENT_BINARY_DIR}/include
+        ${CMAKE_COMMAND} -E
+            tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
+)
 
 target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/blending_technique.cpp
@@ -96,6 +96,7 @@ target_sources(storm PRIVATE
 )
 
 target_sources(storm PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.cpp
