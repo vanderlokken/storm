@@ -71,6 +71,10 @@ add_custom_command(
         ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_COMMAND} -E
             tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
+    # We need to update the timestamp of the output file. When it's newer than
+    # the timestamp of the archive file CMake skips unpacking.
+    COMMAND ${CMAKE_COMMAND} -E touch
+        ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
 )
 
