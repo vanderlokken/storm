@@ -150,7 +150,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
-install(TARGETS storm EXPORT storm-config
+install(TARGETS storm EXPORT storm_config
     ARCHIVE DESTINATION lib
     INCLUDES DESTINATION include
 )
@@ -161,7 +161,7 @@ install(FILES
     CONFIGURATIONS Debug
 )
 
-install(EXPORT storm-config
+install(EXPORT storm_config
     DESTINATION lib/cmake/storm
     NAMESPACE storm::
 )
