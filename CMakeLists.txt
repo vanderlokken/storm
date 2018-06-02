@@ -10,7 +10,7 @@ option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 add_library(storm STATIC)
 
 target_compile_features(storm PUBLIC cxx_std_17)
-target_link_libraries(storm PUBLIC OpenGL::GL)
+target_link_libraries(storm PRIVATE OpenGL::GL)
 target_include_directories(storm
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -31,7 +31,7 @@ if(UNIX)
         message(FATAL_ERROR "The 'Xrandr' library is not found")
     endif()
 
-    target_link_libraries(storm PUBLIC
+    target_link_libraries(storm PRIVATE
         ${X11_X11_LIB}
         ${X11_Xi_LIB}
         ${X11_Xrandr_LIB}
@@ -46,7 +46,7 @@ endif()
 if(storm_enable_png_support)
     find_package(PNG REQUIRED)
 
-    target_link_libraries(storm PUBLIC PNG::PNG)
+    target_link_libraries(storm PRIVATE PNG::PNG)
     target_compile_definitions(storm PRIVATE storm_enable_png_support)
 endif()
 
@@ -164,7 +164,10 @@ install(FILES
 install(EXPORT storm_config
     DESTINATION lib/cmake/storm
     NAMESPACE storm::
+    FILE storm-config-base.cmake
 )
+
+install(FILES storm-config.cmake DESTINATION lib/cmake/storm)
 
 if(storm_build_examples)
     add_subdirectory(examples/advanced_rendering)
