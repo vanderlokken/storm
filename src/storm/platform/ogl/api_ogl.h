@@ -6,8 +6,8 @@
 #define NOMINMAX
 #endif
 
-// Unpacked from contrib/glcorearb.tar.gz
-#include "glcorearb.h"
+// Unpacked from contrib/glcorearb-*.tar.gz
+#include <GL/glcorearb.h>
 
 namespace storm {
 

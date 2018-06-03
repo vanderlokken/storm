@@ -15,7 +15,7 @@ target_include_directories(storm
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -57,37 +57,44 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
-    COMMAND ${CMAKE_COMMAND} -E chdir
-        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
-        ${CMAKE_COMMAND} -E
-            tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
-    # We need to update the timestamp of the output file. When it's newer than
-    # the timestamp of the archive file CMake skips unpacking.
-    COMMAND ${CMAKE_COMMAND} -E touch
-        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
-)
-
-add_custom_command(
     OUTPUT
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
     COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
-    COMMAND ${CMAKE_COMMAND} -E chdir
-        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
-        ${CMAKE_COMMAND} -E
-            tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng.tar.gz
+    COMMAND
+        ${CMAKE_COMMAND} -E chdir
+            ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL
+        ${CMAKE_COMMAND} -E tar zxf
+            ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb-20180525.tar.gz
+    COMMAND
+        ${CMAKE_COMMAND} -E chdir
+            ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR
+        ${CMAKE_COMMAND} -E tar zxf
+            ${CMAKE_CURRENT_SOURCE_DIR}/contrib/khrplatform-20180315.tar.gz
+    COMMAND
+        ${CMAKE_COMMAND} -E chdir
+            ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
+        ${CMAKE_COMMAND} -E tar zxf
+            ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng-20180326.tar.gz
     # We need to update the timestamp of the output file. When it's newer than
     # the timestamp of the archive file CMake skips unpacking.
+    COMMAND ${CMAKE_COMMAND} -E touch
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
+    COMMAND ${CMAKE_COMMAND} -E touch
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
     COMMAND ${CMAKE_COMMAND} -E touch
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
     COMMAND ${CMAKE_COMMAND} -E touch
         ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng.tar.gz
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb-20180525.tar.gz
+        ${CMAKE_CURRENT_SOURCE_DIR}/contrib/khrplatform-20180315.tar.gz
+        ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng-20180326.tar.gz
 )
 
 # See the 'texture_png.cpp' file for the details
@@ -120,7 +127,8 @@ target_sources(storm PRIVATE
 )
 
 target_sources(storm PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.cpp
