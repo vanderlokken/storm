@@ -5,7 +5,6 @@ project(storm)
 find_package(OpenGL REQUIRED)
 
 option(storm_build_examples "Whether to build examples or not" ON)
-option(storm_enable_png_support "Whether to enable PNG support or not" OFF)
 
 add_library(storm STATIC)
 
@@ -16,8 +15,9 @@ target_include_directories(storm
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/include
-        src
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 if(UNIX)
@@ -43,13 +43,6 @@ if(UNIX)
     )
 endif()
 
-if(storm_enable_png_support)
-    find_package(PNG REQUIRED)
-
-    target_link_libraries(storm PRIVATE PNG::PNG)
-    target_compile_definitions(storm PRIVATE storm_enable_png_support)
-endif()
-
 set_target_properties(storm PROPERTIES
     COMPILE_PDB_NAME_DEBUG stormd
     COMPILE_PDB_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}
@@ -64,21 +57,48 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
     COMMAND ${CMAKE_COMMAND} -E make_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/include
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
     COMMAND ${CMAKE_COMMAND} -E chdir
-        ${CMAKE_CURRENT_BINARY_DIR}/include
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb
         ${CMAKE_COMMAND} -E
             tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
     # We need to update the timestamp of the output file. When it's newer than
     # the timestamp of the archive file CMake skips unpacking.
     COMMAND ${CMAKE_COMMAND} -E touch
-        ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/glcorearb.tar.gz
 )
 
+add_custom_command(
+    OUTPUT
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
+    COMMAND ${CMAKE_COMMAND} -E chdir
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
+        ${CMAKE_COMMAND} -E
+            tar zxf ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng.tar.gz
+    # We need to update the timestamp of the output file. When it's newer than
+    # the timestamp of the archive file CMake skips unpacking.
+    COMMAND ${CMAKE_COMMAND} -E touch
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
+    COMMAND ${CMAKE_COMMAND} -E touch
+        ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng.tar.gz
+)
+
+# See the 'texture_png.cpp' file for the details
+set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp PROPERTIES
+        HEADER_FILE_ONLY TRUE
+)
+
 target_sources(storm PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/blending_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
@@ -100,7 +120,7 @@ target_sources(storm PRIVATE
 )
 
 target_sources(storm PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/include/glcorearb.h
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/glcorearb/glcorearb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.cpp
