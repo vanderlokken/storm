@@ -25,32 +25,32 @@ void restoreDisplayMode() {
     ::ChangeDisplaySettings( /*mode = */ nullptr, 0 );
 }
 
+void registerWindowClass( const wchar_t *className, WNDPROC windowProcedure ) {
+    WNDCLASS classDescription;
+    classDescription.style = 0;
+    classDescription.lpfnWndProc = windowProcedure;
+    classDescription.cbClsExtra = 0;
+    classDescription.cbWndExtra = 0;
+    classDescription.hInstance = GetModuleHandleW( nullptr );
+    classDescription.hIcon = nullptr;
+    classDescription.hCursor = nullptr;
+    classDescription.hbrBackground = nullptr;
+    classDescription.lpszMenuName = nullptr;
+    classDescription.lpszClassName = className;
+
+    if( !RegisterClassW(&classDescription) ) {
+        throw Exception() <<
+            "Couldn't register a window class. Error code: " << GetLastError();
+    }
 }
+
+} // namespace
 
 RenderingWindowWin::RenderingWindowWin() :
     _handle( 0 ),
     _fullscreen( false )
 {
-    const HINSTANCE instance = ::GetModuleHandle( 0 );
-
-    WNDCLASS windowClass;
-    windowClass.style = 0;
-    windowClass.lpfnWndProc = &RenderingWindowWin::windowProcedure;
-    windowClass.cbClsExtra = 0;
-    windowClass.cbWndExtra = 0;
-    windowClass.hInstance = instance;
-    windowClass.hIcon = 0;
-    windowClass.hCursor = ::LoadCursor( 0, IDC_ARROW );
-    windowClass.hbrBackground = reinterpret_cast< HBRUSH >( COLOR_3DFACE + 1 );
-    windowClass.lpszMenuName = nullptr;
-    windowClass.lpszClassName = L"Storm Rendering Window";
-
-    const ATOM classId = ::RegisterClass( &windowClass );
-
-    if( !classId )
-        throwRuntimeError( "::RegisterClass has failed" );
-
-    const wchar_t *className = windowClass.lpszClassName;
+    const wchar_t *className = L"Storm Rendering Window";
     const wchar_t *windowName = L"";
     const DWORD style =
         WS_CAPTION | WS_MINIMIZEBOX | WS_POPUP | WS_SYSMENU | WS_VISIBLE;
@@ -58,11 +58,14 @@ RenderingWindowWin::RenderingWindowWin() :
     const int y = 0;
     const int width = 0;
     const int height = 0;
-    const HWND parentWindowHandle = 0;
-    const HMENU menuHandle = 0;
+    const HWND parentWindowHandle = nullptr;
+    const HMENU menuHandle = nullptr;
+    const HINSTANCE instance = ::GetModuleHandleW( nullptr );
     void *parameter = nullptr;
 
-    _handle = ::CreateWindow(
+    registerWindowClass( className, &RenderingWindowWin::windowProcedure );
+
+    _handle = ::CreateWindowW(
         className,
         windowName,
         style,
