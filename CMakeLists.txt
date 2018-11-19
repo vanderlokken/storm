@@ -151,6 +151,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.cpp
     )
 elseif(UNIX)

@@ -33,14 +33,15 @@ void registerWindowClass( const wchar_t *className, WNDPROC windowProcedure ) {
     classDescription.cbWndExtra = 0;
     classDescription.hInstance = GetModuleHandleW( nullptr );
     classDescription.hIcon = nullptr;
-    classDescription.hCursor = nullptr;
+    classDescription.hCursor = LoadCursor( nullptr, IDC_ARROW );
     classDescription.hbrBackground = nullptr;
     classDescription.lpszMenuName = nullptr;
     classDescription.lpszClassName = className;
 
     if( !RegisterClassW(&classDescription) ) {
         throw Exception() <<
-            "Couldn't register a window class. Error code: " << GetLastError();
+            "Couldn't register a window class. Error code: " <<
+            std::to_string( GetLastError() );
     }
 }
 

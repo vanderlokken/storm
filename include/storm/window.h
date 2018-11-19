@@ -1,80 +1,98 @@
 #pragma once
 
+#include <functional>
 #include <memory>
-#include <optional>
 #include <string>
-#include <variant>
+#include <string_view>
 
-namespace storm::window_events {
+#include <storm/dimensions.h>
+#include <storm/mouse.h>
+#include <storm/vector.h>
 
-struct ShutdownRequested {};
+// namespace storm::window_events {
 
-// Alt+Enter handling
-struct FullscreenModeRequested {};
-struct WindowedModeRequested {};
+// // Mouse events
+// struct MouseButtonPressed {
+//     MouseButton button;
+// };
+// struct MouseButtonReleased {
+//     MouseButton button;
+// };
+// struct MouseWheelRotated {
+//     MouseButton button;
+// };
+// struct MouseMoved {
+//     IntVector2d displacement;
+// };
+// struct MouseCursorMoved {
+//     IntVector2d position;
+//     IntVector2d displacement;
+// };
 
-// Mouse events
-struct MouseButtonPressed {
-    MouseButton button;
-};
-struct MouseButtonReleased {
-    MouseButton button;
-};
-struct MouseWheelRotated {
-    MouseButton button;
-};
-struct MouseMoved {
-    IntVector2d displacement;
-};
-struct MouseCursorMoved {
-    IntVector2d position;
-    IntVector2d displacement;
-};
-
-} // namespace storm::window_events
+// } // namespace storm::window_events
 
 namespace storm {
 
-// Observer?
-using WindowEvent = std::variant<
-    ShutdownRequested,
-    FullscreenModeRequested,
-    WindowedModeRequested,
-    MouseButtonPressed,
-    MouseButtonReleased,
-    MouseWheelRotated,
-    MouseMoved,
-    MouseCursorMoved
->;
+struct WindowObserver {
+    std::function<void()> onShutdownRequested;
+
+    std::function<void()> onFocusReceived;
+    std::function<void()> onFocusLost;
+
+    // This function is called when the window is in the windowed fullscreen
+    // mode and the display resolution is changed.
+    std::function<void()> onResized;
+
+    std::function<void(IntVector2d)> onMouseMotion;
+    std::function<void(Mouse::Button)> onMouseButtonPressed;
+    std::function<void(Mouse::Button)> onMouseButtonReleased;
+    std::function<void(float)> onMouseWheelRotated;
+
+    // TODO: add mouse events
+    // TODO: add keyboard events
+
+    // std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
+    // std::function<void(Keyboard::Key)> onKeyboardKeyReleased;
+    // std::function<void(Keyboard::Key)> onKeyboardKeyRepeated;
+};
 
 class Window {
 public:
-    std::unique_ptr<Window> create();
+    // A created window is invisible and set to the windowed fullscreen mode
+    // with pointer locking enabled.
+    static std::unique_ptr<Window> create();
 
     virtual ~Window() {}
 
-    // ?
-    virtual std::optional<WindowEvent> getEvent() = 0;
-    virtual WindowEvent waitEvent() = 0;
+    virtual void processEvents() = 0;
 
-    // ?
+    virtual void setObserver( WindowObserver observer ) = 0;
+
+    virtual void* getHandle() const = 0;
+
+    // Returns the dimensions of the client area in pixels.
     virtual Dimensions getDimensions() const = 0;
-    virtual void setWindowed( Dimensions dimensions ) = 0;
-    virtual void setWindowedFullscreen() = 0;
 
     virtual bool isVisible() const = 0;
     virtual void setVisible( bool visible ) = 0;
 
+    virtual bool hasFocus() const = 0;
+
     virtual std::string_view getTitle() const = 0;
-    // Throws an exception if 'title' is not a valid UTF-8 encoded value.
+    // The 'title' should be a UTF-8 encoded value.
     virtual void setTitle( std::string title ) = 0;
 
-    virtual bool isMouseCursorVisible() const = 0;
-    virtual void setMouseCursorVisible( bool visible ) = 0;
+    virtual bool isPointerVisible() const = 0;
+    virtual void setPointerVisible( bool visible ) = 0;
 
-    // ?
-    virtual bool isMouseCursorLocked() const = 0;
-    virtual void setMouseCursorLocked( bool locked ) = 0;
+    // When pointer locking is enabled, the pointer is confined within the
+    // client area of the window. The confinement is applied only when the
+    // window is active.
+    virtual bool isPointerLocked() const = 0;
+    virtual void setPointerLocked( bool locked ) = 0;
+
+    // TODO: add the pointer icon control API
+    // TODO: add the window icon control API
 };
 
 }
