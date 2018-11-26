@@ -66,7 +66,7 @@ public:
         Plus,
         LeftBracket,
         RightBracket,
-        Colon,
+        Semicolon,
         Comma,
         Period,
         Slash,

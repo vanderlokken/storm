@@ -6,30 +6,9 @@
 #include <string_view>
 
 #include <storm/dimensions.h>
+#include <storm/keyboard.h>
 #include <storm/mouse.h>
 #include <storm/vector.h>
-
-// namespace storm::window_events {
-
-// // Mouse events
-// struct MouseButtonPressed {
-//     MouseButton button;
-// };
-// struct MouseButtonReleased {
-//     MouseButton button;
-// };
-// struct MouseWheelRotated {
-//     MouseButton button;
-// };
-// struct MouseMoved {
-//     IntVector2d displacement;
-// };
-// struct MouseCursorMoved {
-//     IntVector2d position;
-//     IntVector2d displacement;
-// };
-
-// } // namespace storm::window_events
 
 namespace storm {
 
@@ -48,12 +27,8 @@ struct WindowObserver {
     std::function<void(Mouse::Button)> onMouseButtonReleased;
     std::function<void(float)> onMouseWheelRotated;
 
-    // TODO: add mouse events
-    // TODO: add keyboard events
-
-    // std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
-    // std::function<void(Keyboard::Key)> onKeyboardKeyReleased;
-    // std::function<void(Keyboard::Key)> onKeyboardKeyRepeated;
+    std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
+    std::function<void(Keyboard::Key)> onKeyboardKeyReleased;
 };
 
 class Window {

@@ -96,7 +96,7 @@ void KeyboardWin::onEvent( const RAWKEYBOARD &keyboard ) {
         {{13, false}, Key::Plus},
         {{26, false}, Key::LeftBracket},
         {{27, false}, Key::RightBracket},
-        {{39, false}, Key::Colon},
+        {{39, false}, Key::Semicolon},
         {{51, false}, Key::Comma},
         {{52, false}, Key::Period},
         {{53, false}, Key::Slash},
