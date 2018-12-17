@@ -48,6 +48,7 @@ void BackbufferOgl::renderTexture(
     ::glReadBuffer( GL_COLOR_ATTACHMENT0 );
     checkResult( "::glReadBuffer" );
 
+    // TODO: fix this
     const Dimensions dimensions =
         RenderingWindow::getInstance()->getDimensions();
     const GLuint width = dimensions.width;

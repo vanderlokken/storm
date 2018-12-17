@@ -84,6 +84,12 @@ storm_contrib(
 )
 
 storm_contrib(
+    ${CMAKE_CURRENT_SOURCE_DIR}/contrib/wglext-20181130.tar.gz
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
+)
+
+storm_contrib(
     ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng-20180326.tar.gz
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
@@ -121,6 +127,7 @@ target_sources(storm PRIVATE
 
 target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp

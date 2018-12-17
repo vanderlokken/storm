@@ -100,14 +100,6 @@ void RenderingSystemOgl::initialize() {
     _rootBufferData.resize( rootBufferSize );
 }
 
-void RenderingSystemOgl::beginFrameRendering() {
-    return;
-}
-
-void RenderingSystemOgl::endFrameRendering() {
-    return;
-}
-
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     storm_assert( mesh );
 

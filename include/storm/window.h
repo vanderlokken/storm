@@ -33,9 +33,10 @@ struct WindowObserver {
 
 class Window {
 public:
-    // A created window is invisible and set to the windowed fullscreen mode
-    // with pointer locking enabled.
-    static std::unique_ptr<Window> create();
+    using Pointer = std::shared_ptr<Window>;
+
+    // A created window is invisible and set to the windowed fullscreen mode.
+    static Pointer create();
 
     virtual ~Window() {}
 
