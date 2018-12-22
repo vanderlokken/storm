@@ -28,6 +28,7 @@ struct WindowObserver {
     std::function<void(float)> onMouseWheelRotated;
 
     std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
+    std::function<void(Keyboard::Key)> onKeyboardKeyRepeated;
     std::function<void(Keyboard::Key)> onKeyboardKeyReleased;
 };
 
@@ -48,6 +49,9 @@ public:
 
     // Returns the dimensions of the client area in pixels.
     virtual Dimensions getDimensions() const = 0;
+
+    virtual void setWindowedFullscreenMode() = 0;
+    virtual void setWindowedMode( Dimensions dimensions ) = 0;
 
     virtual bool isVisible() const = 0;
     virtual void setVisible( bool visible ) = 0;

@@ -129,6 +129,8 @@ private:
 
 public:
     WindowImplementation() {
+        _isKeyPressed.reserve( static_cast<size_t>(Key::Count) );
+
         _windowMessageHandlers = {
             {WM_ACTIVATEAPP,   &WindowImplementation::onWmActivateApp},
             {WM_CLOSE,         &WindowImplementation::onWmClose},
@@ -140,13 +142,9 @@ public:
 
         registerWindowClass();
 
-        // _dimensions = Dimensions {
-        //     static_cast<unsigned>( GetSystemMetrics(SM_CXSCREEN) ),
-        //     static_cast<unsigned>( GetSystemMetrics(SM_CYSCREEN) )
-        // };
         _dimensions = Dimensions {
-            static_cast<unsigned>( 100 ),
-            static_cast<unsigned>( 100 )
+            static_cast<unsigned>( GetSystemMetrics(SM_CXSCREEN) ),
+            static_cast<unsigned>( GetSystemMetrics(SM_CYSCREEN) )
         };
 
         _handle = CreateWindow(
@@ -164,6 +162,7 @@ public:
         );
 
         registerInputDevices();
+        setPixelFormat();
     }
 
     ~WindowImplementation() {
@@ -194,6 +193,34 @@ public:
 
     Dimensions getDimensions() const override {
         return _dimensions;
+    }
+
+    void setWindowedFullscreenMode() override {
+        SetWindowPos(
+            _handle,
+            nullptr,
+            0,
+            0,
+            GetSystemMetrics(SM_CXSCREEN),
+            GetSystemMetrics(SM_CYSCREEN),
+            SWP_NOACTIVATE | SWP_NOZORDER );
+
+        _isFullscreen = true;
+    }
+
+    void setWindowedMode( Dimensions dimensions ) override {
+        SetWindowPos(
+            _handle,
+            nullptr,
+            (GetSystemMetrics(SM_CXSCREEN) -
+                static_cast<int>(dimensions.width)) / 2,
+            (GetSystemMetrics(SM_CYSCREEN) -
+                static_cast<int>(dimensions.height)) / 2,
+            dimensions.width,
+            dimensions.height,
+            SWP_NOACTIVATE | SWP_NOZORDER );
+
+        _isFullscreen = false;
     }
 
     bool isVisible() const override {
@@ -289,6 +316,28 @@ private:
             sizeof(RAWINPUTDEVICE) );
     }
 
+    void setPixelFormat() const {
+        PIXELFORMATDESCRIPTOR pixelFormatDescriptor = {};
+        pixelFormatDescriptor.nSize = sizeof( pixelFormatDescriptor );
+        pixelFormatDescriptor.nVersion = 1;
+        pixelFormatDescriptor.dwFlags =
+            PFD_DEPTH_DONTCARE |
+            PFD_DOUBLEBUFFER |
+            PFD_DRAW_TO_WINDOW |
+            PFD_SUPPORT_OPENGL;
+        pixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
+        pixelFormatDescriptor.cColorBits = 24;
+        pixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
+
+        const HDC deviceContext = GetDC( _handle );
+
+        const int pixelFormat =
+            ChoosePixelFormat( deviceContext, &pixelFormatDescriptor );
+
+        SetPixelFormat( deviceContext, pixelFormat, &pixelFormatDescriptor );
+        ReleaseDC( deviceContext );
+    }
+
     static LRESULT CALLBACK windowProcedure(
         HWND window, UINT message, WPARAM wParam, LPARAM lParam )
     {
@@ -341,14 +390,9 @@ private:
     }
 
     std::optional<LRESULT> onWmDisplayChange( WPARAM, LPARAM ) {
-        SetWindowPos(
-            _handle,
-            nullptr,
-            0,
-            0,
-            GetSystemMetrics(SM_CXSCREEN),
-            GetSystemMetrics(SM_CYSCREEN),
-            SWP_NOACTIVATE | SWP_NOZORDER );
+        if( _isFullscreen ) {
+            setWindowedFullscreen();
+        }
 
         return std::nullopt;
     }
@@ -456,18 +500,30 @@ private:
         }
     }
 
-    void onRawKeyboardInput( const RAWKEYBOARD &keyboard ) const {
+    void onRawKeyboardInput( const RAWKEYBOARD &keyboard ) {
+        auto processKey = [=]( Key key ) {
+            const bool isPressed = (keyboard.Flags & RI_KEY_BREAK) == 0;
+
+            if( isPressed ) {
+                if( !_isKeyPressed[key] ) {
+                    runCallback(  _observer.onKeyboardKeyPressed, key );
+                } else {
+                    runCallback( _observer.onKeyboardKeyRepeated, key );
+                }
+            } else {
+                runCallback( _observer.onKeyboardKeyReleased, key );
+            }
+
+            _isKeyPressed[key] = isPressed;
+        };
+
         if( keyboard.Flags & RI_KEY_E1 ) {
             // For some reason the 'Pause' key is special and produces the
             // following scan code sequence: 0xe1 0x1d 0x45 0xe1 0x9d 0xc5
             const USHORT pauseKeyScanCode = 0x1d;
 
             if( keyboard.MakeCode == pauseKeyScanCode ) {
-                if( keyboard.Flags & RI_KEY_BREAK ) {
-                    runCallback( _observer.onKeyboardKeyReleased, Key::Pause );
-                } else {
-                    runCallback( _observer.onKeyboardKeyPressed, Key::Pause );
-                }
+                processKey( Key::Pause );
             }
 
             return;
@@ -495,11 +551,7 @@ private:
                     return;
                 }
 
-                if( keyboard.Flags & RI_KEY_BREAK ) {
-                    runCallback( _observer.onKeyboardKeyReleased, *key );
-                } else {
-                    runCallback( _observer.onKeyboardKeyPressed, *key );
-                }
+                processKey( *key );
             }
         }
     }
@@ -511,8 +563,12 @@ private:
     std::string _title;
     Dimensions _dimensions;
 
+    bool _isFullscreen = true;
+
     bool _isPointerVisible = true;
     bool _isPointerLocked = false;
+
+    std::unordered_map<Key, bool> _isKeyPressed;
 
     using WindowMessageHandlers = std::unordered_map<
         UINT, std::optional<LRESULT>(WindowImplementation::*)(WPARAM, LPARAM)>;

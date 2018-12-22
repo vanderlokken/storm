@@ -111,7 +111,9 @@ public:
         PrintScreen,
         Pause,
         LeftCommand, RightCommand,
-        Menu
+        Menu,
+        // The number of elements in the 'Key' enumeration
+        Count
     };
 
     using CharacterCode = uint32_t;
