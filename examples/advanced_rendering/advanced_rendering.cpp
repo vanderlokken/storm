@@ -4,7 +4,7 @@
 #include <storm/matrix.h>
 #include <storm/quaternion.h>
 #include <storm/rendering_system.h>
-#include <storm/rendering_window.h>
+#include <storm/window.h>
 
 #include "../example_base.h"
 #include "resources.h"
@@ -63,8 +63,13 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    Example() : _frameDimensions( 640, 480 ), _meshRotationAngle( 0 ) {
-        storm::RenderingWindow::getInstance()->setWindowed( _frameDimensions );
+    explicit Example( storm::Window::Pointer window ) :
+        _frameDimensions( 640, 480 ), _meshRotationAngle( 0 )
+    {
+        window->setWindowedMode( _frameDimensions );
+
+        storm::RenderingSystem::getInstance()->setOutputWindow(
+            std::move(window) );
 
         _mesh = createTexturedCubeMesh();
         _texture = createCheckboardPatternTexture();
@@ -97,14 +102,12 @@ public:
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
 
-        renderingSystem->beginFrameRendering();
-
         renderingSystem->clearColorBuffer();
         renderingSystem->clearDepthBuffer();
 
         renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->endFrameRendering();
+        renderingSystem->presentBackbuffer();
 
         renderingSystem->getBackbuffer()->renderTexture( _colorBufferTexture );
     }
@@ -176,6 +179,6 @@ private:
     float _meshRotationAngle;
 };
 
-std::unique_ptr<ExampleBase> createExample() {
-    return std::unique_ptr<ExampleBase>( new Example );
+std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window ) {
+    return std::make_unique<Example>( std::move(window) );
 }

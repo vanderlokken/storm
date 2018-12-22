@@ -21,7 +21,6 @@
 #include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
 #include <storm/rendering_system.h>
-#include <storm/rendering_window.h>
 #include <storm/resource_type.h>
 #include <storm/sampler.h>
 #include <storm/shader.h>
@@ -29,3 +28,4 @@
 #include <storm/transformation.h>
 #include <storm/vector.h>
 #include <storm/vertex_format.h>
+#include <storm/window.h>

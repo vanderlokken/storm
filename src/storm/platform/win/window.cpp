@@ -335,7 +335,7 @@ private:
             ChoosePixelFormat( deviceContext, &pixelFormatDescriptor );
 
         SetPixelFormat( deviceContext, pixelFormat, &pixelFormatDescriptor );
-        ReleaseDC( deviceContext );
+        ReleaseDC( _handle, deviceContext );
     }
 
     static LRESULT CALLBACK windowProcedure(
@@ -391,7 +391,7 @@ private:
 
     std::optional<LRESULT> onWmDisplayChange( WPARAM, LPARAM ) {
         if( _isFullscreen ) {
-            setWindowedFullscreen();
+            setWindowedFullscreenMode();
         }
 
         return std::nullopt;
@@ -577,8 +577,8 @@ private:
 
 } // namespace
 
-std::unique_ptr<Window> Window::create() {
-    return std::make_unique<WindowImplementation>();
+Window::Pointer Window::create() {
+    return std::make_shared<WindowImplementation>();
 }
 
 }

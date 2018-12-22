@@ -70,10 +70,11 @@ void RenderingSystemOgl::initialize() {
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
 
-    const Dimensions dimensions =
-        RenderingWindow::getInstance()->getDimensions();
-    _clippingRectangle.width = _outputRectangle.width = dimensions.width;
-    _clippingRectangle.height = _outputRectangle.height = dimensions.height;
+    // TODO: fix this
+    // const Dimensions dimensions =
+    //     RenderingWindow::getInstance()->getDimensions();
+    _clippingRectangle.width = _outputRectangle.width = 0;
+    _clippingRectangle.height = _outputRectangle.height = 0;
 
     _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
     _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();
@@ -433,10 +434,15 @@ void RenderingSystemOgl::setFramebuffer(
             width = mipLevelDimensions.width;
             height = mipLevelDimensions.height;
         } else {
-            const Dimensions windowDimensions =
-                RenderingWindow::getInstance()->getDimensions();
-            width = windowDimensions.width;
-            height = windowDimensions.height;
+            if( const Window::Pointer window = getOutputWindow() ) {
+                const Dimensions windowDimensions = window->getDimensions();
+
+                width = windowDimensions.width;
+                height = windowDimensions.height;
+            } else {
+                width = 0;
+                height = 0;
+            }
         }
 
         setOutputRectangle( {0, 0, width, height} );

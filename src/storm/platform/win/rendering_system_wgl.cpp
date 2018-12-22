@@ -23,8 +23,23 @@ public:
     DeviceContextHandle& operator = (
         const DeviceContextHandle& ) = delete;
 
+    DeviceContextHandle( DeviceContextHandle &&context ) {
+        *this = std::move( context );
+    }
+
+    DeviceContextHandle& operator = ( DeviceContextHandle &&context ) {
+        _contextHandle = context._contextHandle;
+        _windowHandle = context._windowHandle;
+
+        context._contextHandle = nullptr;
+
+        return *this;
+    }
+
     ~DeviceContextHandle() {
-        ReleaseDC( _windowHandle, _contextHandle );
+        if( _contextHandle ) {
+            ReleaseDC( _windowHandle, _contextHandle );
+        }
     }
 
     operator HDC() const {
@@ -72,12 +87,15 @@ public:
 
         wglMakeCurrent( deviceContext, renderingContext );
 
-        _wglCreateContextAttribsARB = loadExtensionFunction(
-            "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
-        _wglGetSwapIntervalEXT = loadExtensionFunction(
-            "wglGetSwapIntervalEXT", "WGL_EXT_swap_control" );
-        _wglSwapIntervalEXT = loadExtensionFunction(
-            "wglSwapIntervalEXT", "WGL_EXT_swap_control" )
+        _wglCreateContextAttribsARB =
+            loadExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
+                "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
+        _wglGetSwapIntervalEXT =
+            loadExtensionFunction<PFNWGLGETSWAPINTERVALEXTPROC>(
+                "wglGetSwapIntervalEXT", "WGL_EXT_swap_control" );
+        _wglSwapIntervalEXT =
+            loadExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
+                "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
 
         const int contextAttributes[] = {
             WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -109,7 +127,7 @@ public:
         _outputWindow = std::move( window );
 
         const DeviceContextHandle deviceContext = getDeviceContext();
-        wglMakeCurrent( deviceContext, *_renderingContext )
+        wglMakeCurrent( deviceContext, *_renderingContext );
     }
 
     void presentBackbuffer() override {

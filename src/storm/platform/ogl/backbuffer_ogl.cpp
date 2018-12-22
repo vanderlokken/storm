@@ -6,7 +6,7 @@
 #include <storm/platform/ogl/texture_ogl.h>
 
 #include <storm/rendering_system.h>
-#include <storm/rendering_window.h>
+#include <storm/window.h>
 
 namespace storm {
 
@@ -48,20 +48,23 @@ void BackbufferOgl::renderTexture(
     ::glReadBuffer( GL_COLOR_ATTACHMENT0 );
     checkResult( "::glReadBuffer" );
 
-    // TODO: fix this
-    const Dimensions dimensions =
-        RenderingWindow::getInstance()->getDimensions();
-    const GLuint width = dimensions.width;
-    const GLuint height = dimensions.height;
+    if( const Window::Pointer window =
+            RenderingSystem::getInstance()->getOutputWindow() ) {
+        const Dimensions dimensions = window->getDimensions();
+        const GLuint width = dimensions.width;
+        const GLuint height = dimensions.height;
 
-    const Texture::MipLevelDimensions mipLevelDimensions =
-        texture->getMipLevelDimensions( mipLevel );
-    storm_assert( mipLevelDimensions.width == width );
-    storm_assert( mipLevelDimensions.height == height );
+        const Texture::MipLevelDimensions mipLevelDimensions =
+            texture->getMipLevelDimensions( mipLevel );
+        storm_assert( mipLevelDimensions.width == width );
+        storm_assert( mipLevelDimensions.height == height );
 
-    ::glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height,
-        GL_COLOR_BUFFER_BIT, GL_NEAREST );
-    checkResult( "::glBlitFramebuffer" );
+        ::glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height,
+            GL_COLOR_BUFFER_BIT, GL_NEAREST );
+        checkResult( "::glBlitFramebuffer" );
+    } else {
+        storm_assert( !"The output window is not set" );
+    }
 }
 
 }
