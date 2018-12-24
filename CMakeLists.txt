@@ -123,6 +123,7 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_dds.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_png.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/window.cpp
 )
 
 target_sources(storm PRIVATE

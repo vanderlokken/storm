@@ -7,6 +7,7 @@
 #include <storm/platform/win/api_win.h>
 
 #include <kbd.h>
+#include <windowsx.h>
 
 namespace storm {
 
@@ -136,6 +137,7 @@ public:
             {WM_CLOSE,         &WindowImplementation::onWmClose},
             {WM_DISPLAYCHANGE, &WindowImplementation::onWmDisplayChange},
             {WM_INPUT,         &WindowImplementation::onWmInput},
+            {WM_MOUSEMOVE,     &WindowImplementation::onWmMouseMove},
             {WM_SETCURSOR,     &WindowImplementation::onWmSetCursor},
             {WM_SIZE,          &WindowImplementation::onWmSize},
         };
@@ -416,6 +418,16 @@ private:
             onRawKeyboardInput( rawInput.data.keyboard );
         }
 
+        return std::nullopt;
+    }
+
+    std::optional<LRESULT> onWmMouseMove( WPARAM, LPARAM lParam ) {
+        const IntVector2d position(
+            GET_X_LPARAM(lParam),
+            GET_Y_LPARAM(lParam)
+        );
+
+        runCallback( _observer.onPointerMotion, position );
         return std::nullopt;
     }
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <storm/dimensions.h>
 #include <storm/keyboard.h>
@@ -26,6 +27,8 @@ struct WindowObserver {
     std::function<void(Mouse::Button)> onMouseButtonPressed;
     std::function<void(Mouse::Button)> onMouseButtonReleased;
     std::function<void(float)> onMouseWheelRotated;
+
+    std::function<void(IntVector2d)> onPointerMotion;
 
     std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
     std::function<void(Keyboard::Key)> onKeyboardKeyRepeated;
@@ -73,6 +76,24 @@ public:
 
     // TODO: add the pointer icon control API
     // TODO: add the window icon control API
+};
+
+class ProxyWindowObserver {
+public:
+    ProxyWindowObserver();
+
+    ProxyWindowObserver( const ProxyWindowObserver& ) = delete;
+    ProxyWindowObserver& operator = ( const ProxyWindowObserver& ) = delete;
+
+    ProxyWindowObserver( ProxyWindowObserver&& ) = default;
+    ProxyWindowObserver& operator = ( ProxyWindowObserver&& ) = default;
+
+    operator WindowObserver() const;
+
+    void addObserver( std::weak_ptr<WindowObserver> observer );
+
+private:
+    std::shared_ptr<std::vector<std::weak_ptr<WindowObserver>>> _observers;
 };
 
 }
