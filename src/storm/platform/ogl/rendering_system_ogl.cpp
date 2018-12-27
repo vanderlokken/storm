@@ -1,6 +1,7 @@
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
 #include <algorithm>
+#include <string_view>
 
 #include <storm/platform/ogl/api_ogl.h>
 
@@ -22,19 +23,17 @@ namespace {
 
 bool isSeamlessCubemapSupported() {
     // There's a bug in the official drivers for the following GPU.
-    const std::string unacceptableRenderers[] = {
+    const std::string_view unacceptableRenderers[] = {
         "GeForce GTS 250/PCIe/SSE2/3DNOW!",
         "GeForce GTS 250/PCIe/SSE2"
     };
 
-    const std::string renderer =
+    const std::string_view renderer =
         reinterpret_cast<const char*>( ::glGetString(GL_RENDERER) );
 
     const auto iterator = std::find(
-        std::begin(
-            unacceptableRenderers),
-        std::end(
-            unacceptableRenderers),
+        std::begin(unacceptableRenderers),
+        std::end(unacceptableRenderers),
         renderer
     );
 
@@ -69,12 +68,6 @@ void RenderingSystemOgl::initialize() {
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
-
-    // TODO: fix this
-    // const Dimensions dimensions =
-    //     RenderingWindow::getInstance()->getDimensions();
-    _clippingRectangle.width = _outputRectangle.width = 0;
-    _clippingRectangle.height = _outputRectangle.height = 0;
 
     _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
     _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();

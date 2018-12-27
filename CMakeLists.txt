@@ -111,10 +111,10 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/output_technique.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/proxy_window_observer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rasterization_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rendering_system_common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/sampler.cpp
@@ -123,7 +123,6 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_dds.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/texture_png.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/transformation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/window.cpp
 )
 
 target_sources(storm PRIVATE
@@ -153,14 +152,8 @@ if(WIN32)
     target_sources(storm PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/clock_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.cpp
     )
 elseif(UNIX)
     target_sources(storm PRIVATE

@@ -1,4 +1,4 @@
-#include <storm/window.h>
+#include <storm/proxy_window_observer.h>
 
 #include <algorithm>
 
@@ -45,59 +45,64 @@ void runCallback( Observers &observers, T callback, Args&&... args )
 ProxyWindowObserver::ProxyWindowObserver() :
     _observers( std::make_shared<Observers>() )
 {
-}
-
-ProxyWindowObserver::operator WindowObserver() const {
-    const std::shared_ptr<Observers> observers = _observers;
-
-    WindowObserver windowObserver;
-
-    windowObserver.onShutdownRequested = [=] {
-        runCallback( *observers, &WindowObserver::onShutdownRequested );
-    };
-    windowObserver.onFocusReceived = [=] {
-        runCallback( *observers, &WindowObserver::onFocusReceived );
-    };
-    windowObserver.onFocusLost = [=] {
-        runCallback( *observers, &WindowObserver::onFocusLost );
-    };
-    windowObserver.onResized = [=] {
-        runCallback( *observers, &WindowObserver::onResized );
-    };
-    windowObserver.onMouseMotion = [=]( IntVector2d delta ) {
-        runCallback( *observers, &WindowObserver::onMouseMotion, delta );
-    };
-    windowObserver.onMouseButtonPressed = [=]( Mouse::Button button ) {
-        runCallback(
-            *observers, &WindowObserver::onMouseButtonPressed, button );
-    };
-    windowObserver.onMouseButtonReleased = [=]( Mouse::Button button ) {
-        runCallback(
-            *observers, &WindowObserver::onMouseButtonReleased, button );
-    };
-    windowObserver.onMouseWheelRotated = [=]( float delta ) {
-        runCallback( *observers, &WindowObserver::onMouseWheelRotated, delta );
-    };
-    windowObserver.onPointerMotion = [=]( IntVector2d delta ) {
-        runCallback( *observers, &WindowObserver::onPointerMotion, delta );
-    };
-    windowObserver.onKeyboardKeyPressed = [=]( Keyboard::Key key ) {
-        runCallback( *observers, &WindowObserver::onKeyboardKeyPressed, key );
-    };
-    windowObserver.onKeyboardKeyRepeated = [=]( Keyboard::Key key ) {
-        runCallback( *observers, &WindowObserver::onKeyboardKeyRepeated, key );
-    };
-    windowObserver.onKeyboardKeyReleased = [=]( Keyboard::Key key ) {
-        runCallback( *observers, &WindowObserver::onKeyboardKeyReleased, key );
-    };
-
-    return windowObserver;
+    update();
 }
 
 void ProxyWindowObserver::addObserver(
     std::weak_ptr<WindowObserver> observer )
 {
+    // The copy is required to correctly handle the situation when a new
+    // observer is added from an observer callback.
+    _observers = std::make_shared<Observers>( *_observers );
     _observers->push_back( std::move(observer) );
+    update();
+}
+
+const WindowObserver* ProxyWindowObserver::operator -> () const {
+    return &_observer;
+}
+
+void ProxyWindowObserver::update() {
+    const std::shared_ptr<Observers> observers = _observers;
+
+    _observer.onShutdownRequested = [=] {
+        runCallback( *observers, &WindowObserver::onShutdownRequested );
+    };
+    _observer.onFocusReceived = [=] {
+        runCallback( *observers, &WindowObserver::onFocusReceived );
+    };
+    _observer.onFocusLost = [=] {
+        runCallback( *observers, &WindowObserver::onFocusLost );
+    };
+    _observer.onResized = [=] {
+        runCallback( *observers, &WindowObserver::onResized );
+    };
+    _observer.onMouseMotion = [=]( IntVector2d delta ) {
+        runCallback( *observers, &WindowObserver::onMouseMotion, delta );
+    };
+    _observer.onMouseButtonPressed = [=]( MouseButton button ) {
+        runCallback(
+            *observers, &WindowObserver::onMouseButtonPressed, button );
+    };
+    _observer.onMouseButtonReleased = [=]( MouseButton button ) {
+        runCallback(
+            *observers, &WindowObserver::onMouseButtonReleased, button );
+    };
+    _observer.onMouseWheelRotated = [=]( float delta ) {
+        runCallback( *observers, &WindowObserver::onMouseWheelRotated, delta );
+    };
+    _observer.onPointerMotion = [=]( IntVector2d delta ) {
+        runCallback( *observers, &WindowObserver::onPointerMotion, delta );
+    };
+    _observer.onKeyboardKeyPressed = [=]( KeyboardKey key ) {
+        runCallback( *observers, &WindowObserver::onKeyboardKeyPressed, key );
+    };
+    _observer.onKeyboardKeyRepeated = [=]( KeyboardKey key ) {
+        runCallback( *observers, &WindowObserver::onKeyboardKeyRepeated, key );
+    };
+    _observer.onKeyboardKeyReleased = [=]( KeyboardKey key ) {
+        runCallback( *observers, &WindowObserver::onKeyboardKeyReleased, key );
+    };
 }
 
 }

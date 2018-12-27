@@ -9,13 +9,11 @@
 #include <storm/common_vertex_types.h>
 #include <storm/dimensions.h>
 #include <storm/display.h>
-#include <storm/event_loop.h>
 #include <storm/exception.h>
 #include <storm/framebuffer.h>
-#include <storm/keyboard.h>
+#include <storm/input.h>
 #include <storm/matrix.h>
 #include <storm/mesh.h>
-#include <storm/mouse.h>
 #include <storm/output_technique.h>
 #include <storm/quaternion.h>
 #include <storm/rasterization_technique.h>

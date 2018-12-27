@@ -27,10 +27,10 @@ void exampleMain() {
 
     bool isRunning = true;
 
-    storm::WindowObserver observer;
-    observer.onShutdownRequested = [&] { isRunning = false; };
+    const auto observer = std::make_shared<storm::WindowObserver>();
+    observer->onShutdownRequested = [&] { isRunning = false; };
 
-    window->setObserver( observer );
+    window->addObserver( observer );
     window->setVisible( true );
 
     while( isRunning ) {

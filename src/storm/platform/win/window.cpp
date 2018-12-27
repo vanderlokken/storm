@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <storm/platform/win/api_win.h>
+#include <storm/proxy_window_observer.h>
 
 #include <kbd.h>
 #include <windowsx.h>
@@ -13,7 +14,7 @@ namespace storm {
 
 namespace {
 
-using Key = Keyboard::Key;
+using Key = KeyboardKey;
 
 struct ScanCodeMapping {
     std::optional<Key> normal;
@@ -185,8 +186,8 @@ public:
         }
     }
 
-    void setObserver( WindowObserver observer ) override {
-        _observer = std::move( observer );
+    void addObserver( std::weak_ptr<WindowObserver> observer ) override {
+        _proxyObserver.addObserver( std::move(observer) );
     }
 
     void* getHandle() const override {
@@ -299,7 +300,7 @@ private:
         RegisterClass( &classDescription );
     }
 
-    void registerInputDevices() const {
+    static void registerInputDevices() {
         // See the "Top-Level Collections Opened by Windows for System Use" page
         const USHORT hidUsagePageGeneric = 0x01;
         const USHORT hidUsageGenericMouse = 0x02;
@@ -307,9 +308,9 @@ private:
 
         const std::array<RAWINPUTDEVICE, 2> devices = {
             RAWINPUTDEVICE {
-                hidUsagePageGeneric, hidUsageGenericMouse, 0, _handle},
+                hidUsagePageGeneric, hidUsageGenericMouse, 0, 0},
             RAWINPUTDEVICE {
-                hidUsagePageGeneric, hidUsageGenericKeyboard, 0, _handle}
+                hidUsagePageGeneric, hidUsageGenericKeyboard, 0, 0}
         };
 
         RegisterRawInputDevices(
@@ -372,21 +373,21 @@ private:
 
     std::optional<LRESULT> onWmActivateApp( WPARAM wParam, LPARAM ) {
         if( wParam == TRUE ) {
-            runCallback( _observer.onFocusReceived );
+            runCallback( _proxyObserver->onFocusReceived );
 
             if( _isPointerLocked ) {
 
             }
         } else {
             ClipCursor( nullptr );
-            runCallback( _observer.onFocusLost );
+            runCallback( _proxyObserver->onFocusLost );
         }
 
         return std::nullopt;
     }
 
     std::optional<LRESULT> onWmClose( WPARAM, LPARAM ) {
-        runCallback( _observer.onShutdownRequested );
+        runCallback( _proxyObserver->onShutdownRequested );
 
         return 0;
     }
@@ -400,22 +401,24 @@ private:
     }
 
     std::optional<LRESULT> onWmInput( WPARAM, LPARAM lParam ) {
-        RAWINPUT rawInput = {};
-        UINT rawInputSize = sizeof( rawInput );
+        if( hasFocus() ) {
+            RAWINPUT rawInput = {};
+            UINT rawInputSize = sizeof( rawInput );
 
-        GetRawInputData(
-            reinterpret_cast<HRAWINPUT>(lParam),
-            RID_INPUT,
-            &rawInput,
-            &rawInputSize,
-            sizeof(rawInput.header) );
+            GetRawInputData(
+                reinterpret_cast<HRAWINPUT>(lParam),
+                RID_INPUT,
+                &rawInput,
+                &rawInputSize,
+                sizeof(rawInput.header) );
 
-        if( rawInput.header.dwType == RIM_TYPEMOUSE ) {
-            onRawMouseInput( rawInput.data.mouse );
-        }
+            if( rawInput.header.dwType == RIM_TYPEMOUSE ) {
+                onRawMouseInput( rawInput.data.mouse );
+            }
 
-        if( rawInput.header.dwType == RIM_TYPEKEYBOARD ) {
-            onRawKeyboardInput( rawInput.data.keyboard );
+            if( rawInput.header.dwType == RIM_TYPEKEYBOARD ) {
+                onRawKeyboardInput( rawInput.data.keyboard );
+            }
         }
 
         return std::nullopt;
@@ -427,7 +430,7 @@ private:
             GET_Y_LPARAM(lParam)
         );
 
-        runCallback( _observer.onPointerMotion, position );
+        runCallback( _proxyObserver->onPointerMotion, position );
         return std::nullopt;
     }
 
@@ -448,21 +451,18 @@ private:
         return std::nullopt;
     }
 
-    std::optional<LRESULT> onWmSize( WPARAM wParam, LPARAM ) {
+    std::optional<LRESULT> onWmSize( WPARAM wParam, LPARAM lParam ) {
         if( wParam == SIZE_RESTORED ) {
-            RECT rectangle = {};
-            GetClientRect( _handle, &rectangle );
-
             const Dimensions dimensions = {
-                static_cast<unsigned int>(rectangle.right),
-                static_cast<unsigned int>(rectangle.bottom)
+                LOWORD(lParam),
+                HIWORD(lParam)
             };
 
             if( dimensions.width != _dimensions.width ||
                 dimensions.height != _dimensions.height)
             {
                 _dimensions = dimensions;
-                runCallback( _observer.onResized );
+                runCallback( _proxyObserver->onResized );
             }
         }
 
@@ -470,7 +470,7 @@ private:
     }
 
     void onRawMouseInput( const RAWMOUSE &mouse ) const {
-        using Button = Mouse::Button;
+        using Button = MouseButton;
 
         for( const auto [mask, button] : {
                 std::make_pair(RI_MOUSE_BUTTON_1_DOWN, Button::Left),
@@ -479,7 +479,7 @@ private:
                 std::make_pair(RI_MOUSE_BUTTON_4_DOWN, Button::SideFirst),
                 std::make_pair(RI_MOUSE_BUTTON_5_DOWN, Button::SideSecond)} ) {
             if( mouse.ulButtons & mask ) {
-                runCallback( _observer.onMouseButtonPressed, button );
+                runCallback( _proxyObserver->onMouseButtonPressed, button );
             }
         }
 
@@ -490,21 +490,21 @@ private:
                 std::make_pair(RI_MOUSE_BUTTON_4_UP, Button::SideFirst),
                 std::make_pair(RI_MOUSE_BUTTON_5_UP, Button::SideSecond)} ) {
             if( mouse.ulButtons & mask ) {
-                runCallback( _observer.onMouseButtonReleased, button );
+                runCallback( _proxyObserver->onMouseButtonReleased, button );
             }
         }
 
         if( mouse.ulButtons & RI_MOUSE_WHEEL ) {
             const float normalizationFactor = 1 / 120.0f;
             runCallback(
-                _observer.onMouseWheelRotated,
+                _proxyObserver->onMouseWheelRotated,
                 normalizationFactor * static_cast<SHORT>(mouse.usButtonData) );
         }
 
         if( (mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0 &&
                 (mouse.lLastX || mouse.lLastY) ) {
             runCallback(
-                _observer.onMouseMotion,
+                _proxyObserver->onMouseMotion,
                 IntVector2d(
                     mouse.lLastX,
                     mouse.lLastY
@@ -518,12 +518,12 @@ private:
 
             if( isPressed ) {
                 if( !_isKeyPressed[key] ) {
-                    runCallback(  _observer.onKeyboardKeyPressed, key );
+                    runCallback( _proxyObserver->onKeyboardKeyPressed, key );
                 } else {
-                    runCallback( _observer.onKeyboardKeyRepeated, key );
+                    runCallback( _proxyObserver->onKeyboardKeyRepeated, key );
                 }
             } else {
-                runCallback( _observer.onKeyboardKeyReleased, key );
+                runCallback( _proxyObserver->onKeyboardKeyReleased, key );
             }
 
             _isKeyPressed[key] = isPressed;
@@ -570,7 +570,7 @@ private:
 
     HWND _handle = nullptr;
 
-    WindowObserver _observer;
+    ProxyWindowObserver _proxyObserver;
 
     std::string _title;
     Dimensions _dimensions;

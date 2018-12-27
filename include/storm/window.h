@@ -4,11 +4,9 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <vector>
 
 #include <storm/dimensions.h>
-#include <storm/keyboard.h>
-#include <storm/mouse.h>
+#include <storm/input.h>
 #include <storm/vector.h>
 
 namespace storm {
@@ -24,15 +22,15 @@ struct WindowObserver {
     std::function<void()> onResized;
 
     std::function<void(IntVector2d)> onMouseMotion;
-    std::function<void(Mouse::Button)> onMouseButtonPressed;
-    std::function<void(Mouse::Button)> onMouseButtonReleased;
+    std::function<void(MouseButton)> onMouseButtonPressed;
+    std::function<void(MouseButton)> onMouseButtonReleased;
     std::function<void(float)> onMouseWheelRotated;
 
     std::function<void(IntVector2d)> onPointerMotion;
 
-    std::function<void(Keyboard::Key)> onKeyboardKeyPressed;
-    std::function<void(Keyboard::Key)> onKeyboardKeyRepeated;
-    std::function<void(Keyboard::Key)> onKeyboardKeyReleased;
+    std::function<void(KeyboardKey)> onKeyboardKeyPressed;
+    std::function<void(KeyboardKey)> onKeyboardKeyRepeated;
+    std::function<void(KeyboardKey)> onKeyboardKeyReleased;
 };
 
 class Window {
@@ -46,7 +44,9 @@ public:
 
     virtual void processEvents() = 0;
 
-    virtual void setObserver( WindowObserver observer ) = 0;
+    // The observer is automatically removed when the 'observer.expired()'
+    // condition is true
+    virtual void addObserver( std::weak_ptr<WindowObserver> observer ) = 0;
 
     virtual void* getHandle() const = 0;
 
@@ -76,24 +76,6 @@ public:
 
     // TODO: add the pointer icon control API
     // TODO: add the window icon control API
-};
-
-class ProxyWindowObserver {
-public:
-    ProxyWindowObserver();
-
-    ProxyWindowObserver( const ProxyWindowObserver& ) = delete;
-    ProxyWindowObserver& operator = ( const ProxyWindowObserver& ) = delete;
-
-    ProxyWindowObserver( ProxyWindowObserver&& ) = default;
-    ProxyWindowObserver& operator = ( ProxyWindowObserver&& ) = default;
-
-    operator WindowObserver() const;
-
-    void addObserver( std::weak_ptr<WindowObserver> observer );
-
-private:
-    std::shared_ptr<std::vector<std::weak_ptr<WindowObserver>>> _observers;
 };
 
 }
