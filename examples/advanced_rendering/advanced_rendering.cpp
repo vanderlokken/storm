@@ -107,9 +107,8 @@ public:
 
         renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->presentBackbuffer();
-
         renderingSystem->getBackbuffer()->renderTexture( _colorBufferTexture );
+        renderingSystem->presentBackbuffer();
     }
 
 private:

@@ -23,10 +23,19 @@ void main() {
 class Example : public ExampleBase {
 public:
     explicit Example( storm::Window::Pointer window ) {
-        window->setWindowedMode( {640, 480} );
+        const storm::Dimensions outputWindowDimensions( 640, 480 );
 
-        storm::RenderingSystem::getInstance()->setOutputWindow(
-            std::move(window) );
+        window->setWindowedMode( outputWindowDimensions );
+
+        storm::RenderingSystem *renderingSystem =
+            storm::RenderingSystem::getInstance();
+        renderingSystem->setOutputWindow( std::move(window) );
+        renderingSystem->setOutputRectangle(
+            storm::Rectangle(
+                0,
+                0,
+                outputWindowDimensions.width,
+                outputWindowDimensions.height) );
 
         _vertexShader = storm::Shader::create(
             vertexShaderSource, storm::Shader::Type::Vertex );

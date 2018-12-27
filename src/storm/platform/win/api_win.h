@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 
 // https://docs.microsoft.com/en-us/windows/desktop/winprog/using-the-windows-headers
 

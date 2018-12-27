@@ -154,15 +154,15 @@ public:
 private:
     template <class FuntionPointer>
     static FuntionPointer loadExtensionFunction(
-        const std::string &functionName, const std::string &extensionName )
+        std::string_view functionName, std::string_view extensionName )
     {
         if( const FuntionPointer function = reinterpret_cast<FuntionPointer>(
-                wglGetProcAddress(functionName.c_str())) ) {
+                wglGetProcAddress(functionName.data())) ) {
             return function;
         }
 
         throw SystemRequirementsNotMet() <<
-            "The '" + extensionName + "' extension is not supported";
+            "The '" << extensionName << "' extension is not supported";
     }
 
     DeviceContextHandle getDeviceContext() const {
