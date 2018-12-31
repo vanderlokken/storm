@@ -7,13 +7,13 @@ namespace storm {
 
 class DisplayX11 : public Display {
 public:
-    explicit DisplayX11( XDisplay *display );
+    DisplayX11();
 
     virtual Mode getDefaultMode() const;
     virtual std::vector<Mode> getSupportedModes() const;
 
 private:
-    XDisplay *_display;
+    DisplayConnection _display;
 };
 
 }

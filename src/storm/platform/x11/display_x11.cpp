@@ -47,7 +47,7 @@ private:
 };
 
 ScopedXRandrResource<XRRScreenResources> getXRandrScreenResources(
-    XDisplay *display )
+    ::Display *display )
 {
     XRRScreenResources *screenResources =
         ::XRRGetScreenResources( display, ::XDefaultRootWindow(display) );
@@ -60,7 +60,7 @@ ScopedXRandrResource<XRRScreenResources> getXRandrScreenResources(
 }
 
 ScopedXRandrResource<XRROutputInfo> getXRandrOutputInfo(
-    XDisplay *display, XRRScreenResources *screenResources, RROutput output )
+    ::Display *display, XRRScreenResources *screenResources, RROutput output )
 {
     XRROutputInfo *outputInfo =
         ::XRRGetOutputInfo( display, screenResources, output );
@@ -73,7 +73,7 @@ ScopedXRandrResource<XRROutputInfo> getXRandrOutputInfo(
 }
 
 ScopedXRandrResource<XRRCrtcInfo> getXRandrCrtcInfo(
-    XDisplay *display, XRRScreenResources *screenResources, RRCrtc crtc )
+    ::Display *display, XRRScreenResources *screenResources, RRCrtc crtc )
 {
     XRRCrtcInfo *crtcInfo = ::XRRGetCrtcInfo( display, screenResources, crtc );
     if( !crtcInfo )
@@ -85,7 +85,7 @@ ScopedXRandrResource<XRRCrtcInfo> getXRandrCrtcInfo(
 }
 
 ScopedXRandrResource<XRROutputInfo> getFirstConnectedOutput(
-    XDisplay *display, XRRScreenResources *screenResources )
+    ::Display *display, XRRScreenResources *screenResources )
 {
     for( int outputIndex = 0;
             outputIndex < screenResources->noutput; ++outputIndex )
@@ -119,9 +119,7 @@ unsigned int getRefreshRate( const XRRModeInfo &mode ) {
 
 } // namespace
 
-DisplayX11::DisplayX11( XDisplay *display ) :
-    _display( display )
-{
+DisplayX11::DisplayX11() {
     int majorVersion = 0;
     int minorVersion = 0;
     const Status supported =
@@ -178,8 +176,7 @@ std::vector<Display::Mode> DisplayX11::getSupportedModes() const {
 }
 
 Display* Display::getInstance() {
-    static const std::unique_ptr<DisplayX11> instance(
-        new DisplayX11(getDisplayHandleX11()) );
+    static const auto instance = std::make_unique<DisplayX11>();
     return instance.get();
 }
 

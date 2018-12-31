@@ -4,11 +4,11 @@
 #include <optional>
 #include <unordered_map>
 
-#include <storm/platform/win/api_win.h>
-#include <storm/proxy_window_observer.h>
-
 #include <kbd.h>
 #include <windowsx.h>
+
+#include <storm/platform/win/api_win.h>
+#include <storm/proxy_window_observer.h>
 
 namespace storm {
 

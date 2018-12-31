@@ -1,94 +1,135 @@
-#include <storm/platform/x11/rendering_system_glx.h>
-
+#include <storm/platform/ogl/api_ogl.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/platform/x11/display_connection_x11.h>
-#include <storm/platform/x11/rendering_window_x11.h>
 #include <storm/throw_exception.h>
+
+// To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
+#define __gl_h_
+
+#include <GL/glx.h>
+#include <X11/Xlib.h>
 
 namespace storm {
 
-RenderingSystemGlx::RenderingSystemGlx( XDisplay *display, Window window ) :
-    _display( display ), _window( window )
-{
-    auto address = ::glXGetProcAddressARB(
-        reinterpret_cast<const unsigned char*>( "glXCreateContextAttribsARB") );
-    const PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB =
-        reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( address );
+namespace {
 
-    if( !glXCreateContextAttribsARB )
-        throw SystemRequirementsNotMet() <<
-            "The 'GLX_ARB_create_context' extension is not supported.";
+class RenderingSystemGlx : public RenderingSystemOgl {
+public:
+    RenderingSystemGlx() :
+        _defaultWindow( Window::create() )
+    {
+        const auto glXCreateContextAttribsARB =
+            reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
+                glXGetProcAddress(
+                    reinterpret_cast<const unsigned char*>(
+                        "glXCreateContextAttribsARB")) );
 
-    const int frameBufferAttributes[] = {
-        GLX_DOUBLEBUFFER, 1,
-        0
-    };
+        if( !glXCreateContextAttribsARB ) {
+            throw SystemRequirementsNotMet() <<
+                "The 'GLX_ARB_create_context' extension is not supported.";
+        }
 
-    int configNumber = 0;
-    const GLXFBConfig *frameBufferConfigs = ::glXChooseFBConfig(
-        _display, /*screen = */ 0, frameBufferAttributes, &configNumber);
+        const int contextAttributes[] = {
+            GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+            GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+            GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+    #ifndef NDEBUG
+            GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
+    #endif
+            0
+        };
 
-    if( !configNumber )
-        throwRuntimeError( "::glXChooseFBConfig has failed" );
+        _context = glXCreateContextAttribsARB(
+            _display,
+            chooseFramebufferConfig(),
+            0,    // shareListContext
+            true, // useDirectRendering
+            contextAttributes );
 
-    const GLXContext shareListContext = 0;
-    const bool useDirectRendering = true;
+        if( !_context ) {
+            throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+        }
 
-    const int contextAttributes[] = {
-        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-        GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-#ifndef NDEBUG
-        GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
-#endif
-        0
-    };
+        glXMakeCurrent( _display, getWindowHandle(), _context );
 
-    _context = glXCreateContextAttribsARB( _display, *frameBufferConfigs,
-        shareListContext, useDirectRendering, contextAttributes );
+        initialize();
+    }
 
-    if( !_context )
-        throwRuntimeError( "::glXCreateContextAttribsARB has failed" );
+    ~RenderingSystemGlx() {
+        glXMakeCurrent( _display, None, 0 );
+        glXDestroyContext( _display, _context );
+    }
 
-    ::glXMakeCurrent( _display, _window, _context );
+    Window::Pointer getOutputWindow() const override {
+        return _outputWindow;
+    }
 
-    initialize();
-}
+    void setOutputWindow( Window::Pointer window ) override {
+        _outputWindow = std::move( window );
 
-RenderingSystemGlx::~RenderingSystemGlx() {
-    ::glXMakeCurrent( _display, None, 0 );
-    ::glXDestroyContext( _display, _context );
-}
+        glXMakeCurrent( _display, getWindowHandle(), _context );
+    }
 
-void RenderingSystemGlx::beginFrameRendering() {}
+    void presentBackbuffer() override {
+        glXSwapBuffers( _display, getWindowHandle() );
+    }
 
-void RenderingSystemGlx::endFrameRendering() {
-    ::glXSwapBuffers( _display, _window );
-}
+    bool isVsyncEnabled() const override {
+        unsigned int interval = 0;
 
-bool RenderingSystemGlx::isVsyncEnabled() const {
-    unsigned int interval = 0;
-    ::glXQueryDrawable(
-        ::glXGetCurrentDisplay(),
-        ::glXGetCurrentDrawable(),
-        GLX_SWAP_INTERVAL_EXT, &interval );
-    return interval != 0;
-}
+        glXQueryDrawable(
+            glXGetCurrentDisplay(),
+            glXGetCurrentDrawable(),
+            GLX_SWAP_INTERVAL_EXT,
+            &interval );
 
-void RenderingSystemGlx::setVsyncEnabled( bool ) {
-    // TODO: implement
-}
+        return interval != 0;
+    }
 
-RenderingSystemGlx* RenderingSystemGlx::getInstance() {
-    const auto create = [] {
-        Window window = RenderingWindowX11::getInstance()->getHandle();
-        return new RenderingSystemGlx( getDisplayHandleX11(), window );
-    };
-    static const std::unique_ptr<RenderingSystemGlx> instance( create() );
-    return instance.get();
-}
+    void setVsyncEnabled( bool enabled ) override {
+        // TODO: implement
+    }
+
+private:
+    GLXFBConfig chooseFramebufferConfig() const {
+        // TODO: figure out proper attributes
+        const int attributes[] = {
+            GLX_DOUBLEBUFFER, 1,
+            0
+        };
+
+        int size;
+
+        if( GLXFBConfig *configs = glXChooseFBConfig(
+                _display, /* screen = */ 0, attributes, &size) ) {
+            const GLXFBConfig result = *configs;
+            XFree( configs );
+            return result;
+        }
+
+        throw Exception() << "glXChooseFBConfig has failed";
+    }
+
+    ::Window getWindowHandle() const {
+        return _outputWindow ?
+            reinterpret_cast<::Window>( _outputWindow->getHandle() ) :
+            reinterpret_cast<::Window>( _defaultWindow->getHandle() );
+    }
+
+    DisplayConnection _display;
+
+    Window::Pointer _defaultWindow;
+    Window::Pointer _outputWindow;
+
+    GLXContext _context;
+};
+
+} // namespace
 
 RenderingSystem* RenderingSystem::getInstance() {
-    return RenderingSystemGlx::getInstance();
+    static const std::unique_ptr<RenderingSystemGlx> instance =
+        std::make_unique<RenderingSystemGlx>();
+    return instance.get();
 }
 
 }

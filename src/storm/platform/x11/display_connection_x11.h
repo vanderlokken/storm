@@ -2,11 +2,35 @@
 
 #include <X11/Xlib.h>
 
-// Use an alias to avoid name clashes with storm::Display.
-typedef Display XDisplay;
+#include <storm/exception.h>
 
 namespace storm {
 
-XDisplay* getDisplayHandleX11();
+class DisplayConnection {
+public:
+    DisplayConnection() :
+        _display( XOpenDisplay(nullptr) )
+    {
+        if( !_display ) {
+            throw SystemRequirementsNotMet() << "X server is unavailable";
+        }
+    }
+
+    ~DisplayConnection() {
+        XCloseDisplay( _display );
+    }
+
+    DisplayConnection(
+        const DisplayConnection& ) = delete;
+    DisplayConnection& operator = (
+        const DisplayConnection& ) = delete;
+
+    operator ::Display* () const {
+        return _display;
+    }
+
+private:
+    ::Display *_display;
+};
 
 }

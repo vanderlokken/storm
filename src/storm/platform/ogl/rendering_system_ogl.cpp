@@ -15,8 +15,6 @@
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 
-#include <storm/rendering_window.h>
-
 namespace storm {
 
 namespace {

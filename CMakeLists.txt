@@ -23,6 +23,10 @@ target_include_directories(storm
 if(UNIX)
     find_package(X11 REQUIRED)
 
+    if(NOT X11_Xfixes_FOUND)
+        message(FATAL_ERROR "The 'Xfixes' library is not found")
+    endif()
+
     if(NOT X11_Xi_FOUND)
         message(FATAL_ERROR "The 'Xi' library is not found")
     endif()
@@ -33,11 +37,13 @@ if(UNIX)
 
     target_link_libraries(storm PRIVATE
         ${X11_X11_LIB}
+        ${X11_Xfixes_LIB}
         ${X11_Xi_LIB}
         ${X11_Xrandr_LIB}
     )
     target_include_directories(storm PRIVATE
         ${X11_X11_INCLUDE_PATH}
+        ${X11_Xfixes_INCLUDE_PATH}
         ${X11_Xi_INCLUDE_PATH}
         ${X11_Xrandr_INCLUDE_PATH}
     )
@@ -53,7 +59,7 @@ if(MSVC)
     target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4 /GR-)
     target_compile_definitions(storm PRIVATE UNICODE _UNICODE)
 elseif(CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(storm PRIVATE -Wall)
+    target_compile_options(storm PRIVATE -Wall $<$<CONFIG:Debug>:-g>)
 endif()
 
 macro(storm_contrib archive output_directory)
@@ -159,13 +165,8 @@ elseif(UNIX)
     target_sources(storm PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/input_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/mouse_x11.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp
     )
 endif()
 
