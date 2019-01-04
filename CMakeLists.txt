@@ -117,6 +117,7 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/input.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/output_technique.cpp
@@ -196,4 +197,5 @@ install(FILES storm-config.cmake DESTINATION lib/cmake/storm)
 if(storm_build_examples)
     add_subdirectory(examples/advanced_rendering)
     add_subdirectory(examples/triangle_rendering)
+    add_subdirectory(examples/user_input)
 endif()

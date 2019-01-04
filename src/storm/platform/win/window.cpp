@@ -4,11 +4,11 @@
 #include <optional>
 #include <unordered_map>
 
-#include <kbd.h>
-#include <windowsx.h>
-
 #include <storm/platform/win/api_win.h>
 #include <storm/proxy_window_observer.h>
+
+#include <kbd.h>
+#include <windowsx.h>
 
 namespace storm {
 
@@ -280,6 +280,8 @@ public:
 
     void setPointerLocked( bool locked ) override {
         _isPointerLocked = locked;
+
+        updateCursorClippingRectangle();
     }
 
 private:
@@ -374,13 +376,10 @@ private:
     std::optional<LRESULT> onWmActivateApp( WPARAM wParam, LPARAM ) {
         if( wParam == TRUE ) {
             runCallback( _proxyObserver->onFocusReceived );
-
-            if( _isPointerLocked ) {
-
-            }
+            updateCursorClippingRectangle();
         } else {
-            ClipCursor( nullptr );
             runCallback( _proxyObserver->onFocusLost );
+            ClipCursor( nullptr );
         }
 
         return std::nullopt;
@@ -401,24 +400,22 @@ private:
     }
 
     std::optional<LRESULT> onWmInput( WPARAM, LPARAM lParam ) {
-        if( hasFocus() ) {
-            RAWINPUT rawInput = {};
-            UINT rawInputSize = sizeof( rawInput );
+        RAWINPUT rawInput = {};
+        UINT rawInputSize = sizeof( rawInput );
 
-            GetRawInputData(
-                reinterpret_cast<HRAWINPUT>(lParam),
-                RID_INPUT,
-                &rawInput,
-                &rawInputSize,
-                sizeof(rawInput.header) );
+        GetRawInputData(
+            reinterpret_cast<HRAWINPUT>(lParam),
+            RID_INPUT,
+            &rawInput,
+            &rawInputSize,
+            sizeof(rawInput.header) );
 
-            if( rawInput.header.dwType == RIM_TYPEMOUSE ) {
-                onRawMouseInput( rawInput.data.mouse );
-            }
+        if( rawInput.header.dwType == RIM_TYPEMOUSE ) {
+            onRawMouseInput( rawInput.data.mouse );
+        }
 
-            if( rawInput.header.dwType == RIM_TYPEKEYBOARD ) {
-                onRawKeyboardInput( rawInput.data.keyboard );
-            }
+        if( rawInput.header.dwType == RIM_TYPEKEYBOARD ) {
+            onRawKeyboardInput( rawInput.data.keyboard );
         }
 
         return std::nullopt;
@@ -436,12 +433,6 @@ private:
 
     std::optional<LRESULT> onWmSetCursor( WPARAM, LPARAM lParam ) {
         if( LOWORD(lParam) == HTCLIENT ) {
-            if( _isPointerLocked ) {
-
-            } else {
-                ClipCursor( nullptr );
-            }
-
             if( !_isPointerVisible ) {
                 SetCursor( nullptr );
                 return TRUE;
@@ -464,6 +455,8 @@ private:
                 _dimensions = dimensions;
                 runCallback( _proxyObserver->onResized );
             }
+
+            updateCursorClippingRectangle();
         }
 
         return std::nullopt;
@@ -564,6 +557,19 @@ private:
                 }
 
                 processKey( *key );
+            }
+        }
+    }
+
+    void updateCursorClippingRectangle() const {
+        if( hasFocus() ) {
+            if( _isPointerLocked ) {
+                RECT rectangle = {};
+                GetWindowRect( _handle, &rectangle );
+
+                ClipCursor( &rectangle );
+            } else {
+                ClipCursor( nullptr );
             }
         }
     }

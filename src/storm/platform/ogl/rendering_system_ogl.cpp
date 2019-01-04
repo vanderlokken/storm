@@ -63,6 +63,8 @@ void RenderingSystemOgl::initialize() {
 
     setVsyncEnabled( true );
 
+    // TODO: set output and clipping rectangles
+
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );

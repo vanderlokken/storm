@@ -80,7 +80,7 @@ public:
         installCamera();
     }
 
-    virtual void update() {
+    void update() override {
         const storm::Clock::TimePoint timePoint = storm::Clock::now();
         const storm::Clock::TimeDelta timeDelta = timePoint - _timePoint;
         _timePoint = timePoint;
@@ -98,7 +98,7 @@ public:
         _constantBuffer->setData( &_transformations );
     }
 
-    virtual void render() {
+    void render() override {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
 

@@ -1,9 +1,12 @@
 #include <storm/window.h>
 
+#include <iostream>
+
 #include <array>
 #include <algorithm>
 #include <climits>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include <X11/extensions/Xfixes.h>
@@ -12,6 +15,7 @@
 
 #include <storm/platform/x11/display_connection_x11.h>
 #include <storm/proxy_window_observer.h>
+#include <storm/rectangle.h>
 
 namespace storm {
 
@@ -24,42 +28,113 @@ void runCallback( const std::function<T> &callback, Args&&... args ) {
     }
 }
 
-class WindowImplementation : public Window {
+class PointerLockingRegion {
+public:
+    PointerLockingRegion(
+            ::Display *display, ::Window window, Rectangle area ) :
+        _display( display )
+    {
+        std::array<int, 1> devices = { XIAllDevices };
+
+        _left = XFixesCreatePointerBarrier(
+            _display,
+            window,
+            area.x,
+            area.y,
+            area.x,
+            area.getBottom(),
+            BarrierNegativeX,
+            devices.size(),
+            devices.data() );
+
+        _right = XFixesCreatePointerBarrier(
+            _display,
+            window,
+            area.getRight(),
+            area.y,
+            area.getRight(),
+            area.getBottom(),
+            BarrierPositiveX,
+            devices.size(),
+            devices.data() );
+
+        _top = XFixesCreatePointerBarrier(
+            _display,
+            window,
+            area.x,
+            area.y,
+            area.getRight(),
+            area.y,
+            BarrierNegativeY,
+            devices.size(),
+            devices.data() );
+
+        _bottom = XFixesCreatePointerBarrier(
+            _display,
+            window,
+            area.x,
+            area.getBottom(),
+            area.getRight(),
+            area.getBottom(),
+            BarrierPositiveY,
+            devices.size(),
+            devices.data() );
+    }
+
+    PointerLockingRegion(
+        const PointerLockingRegion& ) = delete;
+    PointerLockingRegion& operator = (
+        const PointerLockingRegion& ) = delete;
+
+    ~PointerLockingRegion() {
+        XFixesDestroyPointerBarrier( _display, _left );
+        XFixesDestroyPointerBarrier( _display, _right );
+        XFixesDestroyPointerBarrier( _display, _top );
+        XFixesDestroyPointerBarrier( _display, _bottom );
+    }
+
 private:
-    static constexpr long eventMask =
-        XI_ButtonPressMask |
-        XI_ButtonReleaseMask |
-        XI_FocusInMask |
-        XI_FocusOutMask |
-        XI_KeyPressMask |
-        XI_KeyReleaseMask |
-        XI_EnterMask |
-        XI_LeaveMask |
-        XI_MotionMask;
+    Display *_display;
+
+    PointerBarrier _left   = 0;
+    PointerBarrier _right  = 0;
+    PointerBarrier _top    = 0;
+    PointerBarrier _bottom = 0;
+};
+
+class WindowImplementation : public Window {
+// private:
+//     static constexpr long eventMask =
+//         FocusChangeMask |
+//         KeyPressMask |
+//         KeyReleaseMask;
 
 public:
     WindowImplementation() {
+        _eventHandlers = {
+            {XI_FocusIn, &WindowImplementation::onFocusIn},
+            {XI_FocusOut, &WindowImplementation::onFocusOut}
+        };
+
         loadAtoms();
+        queryRequiredExtensions();
+        createTransparentCursor();
 
         Screen *screen = XDefaultScreenOfDisplay( _display );
 
-        const ::Window parentWindow = XDefaultRootWindow( _display );
-
-        const unsigned long borderColor = XBlackPixelOfScreen( screen );
-        const unsigned long backgroundColor = XWhitePixelOfScreen( screen );
-
         _handle = XCreateSimpleWindow(
             _display,
-            parentWindow,
-            0, // x
-            0, // y
-            1, // width
-            1, // height
-            0, // border width
-            borderColor,
-            backgroundColor );
+            XDefaultRootWindow(_display), // parent
+            0,                            // x
+            0,                            // y
+            1,                            // width
+            1,                            // height
+            0,                            // border width
+            XBlackPixelOfScreen(screen),  // border color
+            XBlackPixelOfScreen(screen)   // background color
+        );
 
-        XSelectInput( _display, _handle, eventMask );
+        // XSelectInput( _display, _handle, eventMask );
 
         std::array<Atom, 1> protocols = { _atoms.wmDeleteWindow };
         XSetWMProtocols(
@@ -69,22 +144,37 @@ public:
             protocols.size() );
 
         removeDecorations();
-
         setWindowedFullscreenMode();
+        selectInputEvents();
     }
 
     ~WindowImplementation() {
         XDestroyWindow( _display, _handle );
+        XFreeCursor( _display, _transparentCursor );
     }
 
     void processEvents() override {
         XEvent event;
 
-        while( XCheckWindowEvent(_display, _handle, eventMask, &event) ) {
-            if( XFilterEvent(&event, _handle) ) {
-                continue;
+        // TODO: XFilterEvent?
+
+        while( XCheckTypedEvent(
+                _display, GenericEvent, &event) ) {
+            if( event.xcookie.extension == _xinputOpcode ) {
+                const auto iterator =
+                    _eventHandlers.find( event.xcookie.evtype );
+
+                if( iterator != _eventHandlers.end() ) {
+                    XGetEventData( _display, &event.xcookie );
+
+                    const auto handler = iterator->second;
+                    (this->*handler)( event.xcookie.data );
+
+                    std::cout << "got ev.\n";
+
+                    XFreeEventData( _display, &event.xcookie );
+                }
             }
-            // TODO: handle
         }
 
         while( XCheckTypedWindowEvent(
@@ -190,9 +280,9 @@ public:
         _isPointerVisible = visible;
 
         if( _isPointerVisible ) {
-            XFixesShowCursor( _display, _handle );
+            XUndefineCursor( _display, _handle );
         } else {
-            XFixesHideCursor( _display, _handle );
+            XDefineCursor( _display, _handle, _transparentCursor );
         }
     }
 
@@ -202,6 +292,14 @@ public:
 
     void setPointerLocked( bool locked ) override {
         _isPointerLocked = locked;
+
+        if( hasFocus() ) {
+            if( !_isPointerLocked ) {
+                _pointerLockingRegion.reset();
+            } else {
+                _pointerLockingRegion.emplace( _display, _handle, Rectangle() );
+            }
+        }
     }
 
 private:
@@ -220,10 +318,80 @@ private:
         _atoms.wmDeleteWindow       = load( "WM_DELETE_WINDOW" );
     }
 
+    void queryRequiredExtensions() {
+        const char *missingXinputMessage =
+            "The display server doesn't support version 2.0 of the "
+            "'XInput' extension";
+        const char *missingXfixesMessage =
+            "The display server doesn't support version 5.0 of the "
+            "'XFixes' extension";
+
+        int firstEventCode = 0;
+        int firstErrorCode = 0;
+
+        if( !XQueryExtension(
+                _display,
+                "XInputExtension",
+                &_xinputOpcode,
+                &firstEventCode,
+                &firstErrorCode) ) {
+            throw SystemRequirementsNotMet() << missingXinputMessage;
+        }
+
+        if( !XFixesQueryVersion(
+                _display,
+                &firstEventCode,
+                &firstErrorCode) ) {
+            throw SystemRequirementsNotMet() << missingXfixesMessage;
+        }
+
+        int majorVersion = 2;
+        int minorVersion = 0;
+
+        if( XIQueryVersion(
+                _display, &majorVersion, &minorVersion) == BadRequest ) {
+            throw SystemRequirementsNotMet() << missingXinputMessage;
+        }
+
+        majorVersion = 5;
+        minorVersion = 0;
+
+        XFixesQueryVersion( _display, &majorVersion, &minorVersion );
+
+        if( majorVersion < 5 ) {
+            throw SystemRequirementsNotMet() << missingXfixesMessage;
+        }
+    }
+
+    void createTransparentCursor() {
+        const char transparentPixel = 0;
+
+        Pixmap pixmap = XCreateBitmapFromData(
+            _display,
+            XDefaultRootWindow(_display),
+            &transparentPixel,
+            1, // width
+            1  // height
+        );
+
+        XColor black = {};
+
+        _transparentCursor = XCreatePixmapCursor(
+            _display,
+            pixmap,
+            pixmap,
+            &black,
+            &black,
+            0,
+            0 );
+
+        XFreePixmap( _display, pixmap );
+    }
+
     void removeDecorations() const {
         // Note: see the 'Xm/MwmUtil.h' header file from the 'libmotif-dev'
         // package
-        std::array<uint32_t, 5> hints = {3, 0, 0, 0, 0};
+        std::array<uint32_t, 5> hints = {2, 0, 0, 0, 0};
 
         XChangeProperty(
             _display,
@@ -257,8 +425,45 @@ private:
             reinterpret_cast<XEvent*>(&event) );
     }
 
+    void selectInputEvents() const {
+        unsigned char mask[4] = {};
+
+        XISetMask( mask, XI_ButtonPress );
+        XISetMask( mask, XI_ButtonRelease );
+        XISetMask( mask, XI_FocusIn );
+        XISetMask( mask, XI_FocusOut );
+        XISetMask( mask, XI_KeyPress );
+        XISetMask( mask, XI_KeyRelease );
+        XISetMask( mask, XI_Motion );
+
+        XIEventMask eventMask;
+        eventMask.deviceid = XIAllDevices;
+        eventMask.mask_len = sizeof( mask );
+        eventMask.mask = mask;
+
+        XISelectEvents( _display, _handle, &eventMask, 1 );
+    }
+
+    void onFocusIn( const void* ) {
+        runCallback( _proxyObserver->onFocusReceived );
+    }
+
+    void onFocusOut( const void* ) {
+        // std::cout << event.xfocus.mode << std::endl;
+        // std::cout << event.xfocus.detail << std::endl;
+        runCallback( _proxyObserver->onFocusLost );
+    }
+
+    using EventHandlers =
+        std::unordered_map<int, void(WindowImplementation::*)(const void*)>;
+    EventHandlers _eventHandlers;
+
     DisplayConnection _display;
     ::Window _handle;
+
+    int _xinputOpcode = 0;
+
+    Cursor _transparentCursor;
 
     struct {
         Atom atom;
@@ -277,6 +482,8 @@ private:
 
     bool _isPointerVisible = true;
     bool _isPointerLocked = false;
+
+    std::optional<PointerLockingRegion> _pointerLockingRegion;
 };
 
 } // namespace

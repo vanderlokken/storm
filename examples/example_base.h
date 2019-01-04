@@ -32,6 +32,7 @@ void exampleMain() {
 
     window->addObserver( observer );
     window->setVisible( true );
+    window->setPointerVisible( false );
 
     while( isRunning ) {
         window->processEvents();
@@ -58,7 +59,7 @@ int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
 int main() {
     try {
         exampleMain();
-    } catch( const storm::Exception &error ) {
+    } catch( const std::exception &error ) {
         std::cerr << error.what() << std::endl;
         return 1;
     }

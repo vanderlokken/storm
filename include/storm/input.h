@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 namespace storm {
 
 enum class MouseButton {
@@ -127,5 +129,7 @@ enum class KeyboardKey {
     // The number of elements in the 'KeyboardKey' enumeration
     Count
 };
+
+std::string_view getKeyboardKeyName( KeyboardKey key );
 
 }

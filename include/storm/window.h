@@ -17,8 +17,10 @@ struct WindowObserver {
     std::function<void()> onFocusReceived;
     std::function<void()> onFocusLost;
 
-    // This function is called when the window is in the windowed fullscreen
-    // mode and the display resolution is changed.
+    // This function is called when the window dimensions are changed.
+    //
+    // It allows to handle display resolution changes when the window is in
+    // the windowed fullscreen mode.
     std::function<void()> onResized;
 
     std::function<void(IntVector2d)> onMouseMotion;
@@ -26,6 +28,8 @@ struct WindowObserver {
     std::function<void(MouseButton)> onMouseButtonReleased;
     std::function<void(float)> onMouseWheelRotated;
 
+    // This function is called when a pointer moves over the window.
+    // The argument stores client pointer coordinates in pixels.
     std::function<void(IntVector2d)> onPointerMotion;
 
     std::function<void(KeyboardKey)> onKeyboardKeyPressed;
@@ -42,6 +46,8 @@ public:
 
     virtual ~Window() {}
 
+    // This method can be called only from the thread where the window was
+    // created.
     virtual void processEvents() = 0;
 
     // The observer is automatically removed when the 'observer.expired()'

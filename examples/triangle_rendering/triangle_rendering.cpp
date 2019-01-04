@@ -45,9 +45,9 @@ public:
         createMesh();
     }
 
-    virtual void update() {}
+    void update() override {}
 
-    virtual void render() {
+    void render() override {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
 
