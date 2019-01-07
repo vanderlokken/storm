@@ -51,7 +51,7 @@ public:
     virtual void processEvents() = 0;
 
     // The observer is automatically removed when the 'observer.expired()'
-    // condition is true
+    // condition is true.
     virtual void addObserver( std::weak_ptr<WindowObserver> observer ) = 0;
 
     virtual void* getHandle() const = 0;

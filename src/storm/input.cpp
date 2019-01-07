@@ -53,7 +53,7 @@ std::string_view getKeyboardKeyName( KeyboardKey key ) {
         "X",
         "Y",
         "Z",
-        "~",
+        "`",
         "-",
         "=",
         "[",

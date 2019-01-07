@@ -66,9 +66,9 @@ enum class KeyboardKey {
     Y,
     Z,
     // Symbols
-    Tilde,
+    GraveAccent,
     Minus,
-    Plus,
+    Equals,
     LeftBracket,
     RightBracket,
     Semicolon,
