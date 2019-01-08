@@ -84,6 +84,9 @@ public:
                 "A keyboard key is released. The key is: " +
                     std::string(getKeyboardKeyName(value)) );
         };
+        _observer->onCharacterInput = []( char32_t character ) {
+            outputString( "Character input: " + std::to_string(character) );
+        };
     }
 
     void update() override {}

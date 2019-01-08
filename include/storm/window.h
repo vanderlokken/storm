@@ -35,6 +35,8 @@ struct WindowObserver {
     std::function<void(KeyboardKey)> onKeyboardKeyPressed;
     std::function<void(KeyboardKey)> onKeyboardKeyRepeated;
     std::function<void(KeyboardKey)> onKeyboardKeyReleased;
+
+    std::function<void(char32_t)> onCharacterInput;
 };
 
 class Window {

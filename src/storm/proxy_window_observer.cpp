@@ -103,6 +103,9 @@ void ProxyWindowObserver::update() {
     _observer.onKeyboardKeyReleased = [=]( KeyboardKey key ) {
         runCallback( *observers, &WindowObserver::onKeyboardKeyReleased, key );
     };
+    _observer.onCharacterInput = [=]( char32_t character ) {
+        runCallback( *observers, &WindowObserver::onCharacterInput, character );
+    };
 }
 
 }

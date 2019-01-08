@@ -32,7 +32,6 @@ void exampleMain() {
 
     window->addObserver( observer );
     window->setVisible( true );
-    window->setPointerVisible( false );
 
     while( isRunning ) {
         window->processEvents();

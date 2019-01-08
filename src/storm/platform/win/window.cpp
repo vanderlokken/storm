@@ -35,7 +35,7 @@ constexpr std::array<ScanCodeMapping, 95> scanCodeMappings = {
     /*0x0a*/ ScanCodeMapping {Key::Digit9,         std::nullopt},
     /*0x0b*/ ScanCodeMapping {Key::Digit0,         std::nullopt},
     /*0x0c*/ ScanCodeMapping {Key::Minus,          std::nullopt},
-    /*0x0d*/ ScanCodeMapping {Key::Plus,           std::nullopt},
+    /*0x0d*/ ScanCodeMapping {Key::Equals,         std::nullopt},
     /*0x0e*/ ScanCodeMapping {Key::Backspace,      std::nullopt},
     /*0x0f*/ ScanCodeMapping {Key::Tab,            std::nullopt},
     /*0x10*/ ScanCodeMapping {Key::Q,              std::nullopt},
@@ -63,7 +63,7 @@ constexpr std::array<ScanCodeMapping, 95> scanCodeMappings = {
     /*0x26*/ ScanCodeMapping {Key::L,              std::nullopt},
     /*0x27*/ ScanCodeMapping {Key::Semicolon,      std::nullopt},
     /*0x28*/ ScanCodeMapping {Key::Apostrophe,     std::nullopt},
-    /*0x29*/ ScanCodeMapping {Key::Tilde,          std::nullopt},
+    /*0x29*/ ScanCodeMapping {Key::GraveAccent,    std::nullopt},
     /*0x2a*/ ScanCodeMapping {Key::LeftShift,      std::nullopt},
     /*0x2b*/ ScanCodeMapping {Key::Backslash,      std::nullopt},
     /*0x2c*/ ScanCodeMapping {Key::Z,              std::nullopt},
@@ -135,6 +135,7 @@ public:
 
         _windowMessageHandlers = {
             {WM_ACTIVATEAPP,   &WindowImplementation::onWmActivateApp},
+            {WM_CHAR,          &WindowImplementation::onWmChar},
             {WM_CLOSE,         &WindowImplementation::onWmClose},
             {WM_DISPLAYCHANGE, &WindowImplementation::onWmDisplayChange},
             {WM_INPUT,         &WindowImplementation::onWmInput},
@@ -180,9 +181,14 @@ public:
     void processEvents() override {
         MSG message = {};
 
-        while( PeekMessage(&message, _handle, 0, 0, PM_REMOVE) ) {
-            TranslateMessage( &message );
-            DispatchMessage( &message );
+        // The special '-1' value is required to process messages which don't
+        // target any specific window. It's needed, for example, to correctly
+        // process keyboard layout changes.
+        for( HWND handle : {_handle, reinterpret_cast<HWND>(-1)} ) {
+            while( PeekMessage(&message, handle, 0, 0, PM_REMOVE) ) {
+                TranslateMessage( &message );
+                DispatchMessage( &message );
+            }
         }
     }
 
@@ -385,6 +391,12 @@ private:
         return std::nullopt;
     }
 
+    std::optional<LRESULT> onWmChar( WPARAM wParam, LPARAM ) {
+        runCallback( _proxyObserver->onCharacterInput, wParam );
+
+        return 0;
+    }
+
     std::optional<LRESULT> onWmClose( WPARAM, LPARAM ) {
         runCallback( _proxyObserver->onShutdownRequested );
 
@@ -431,12 +443,11 @@ private:
         return std::nullopt;
     }
 
-    std::optional<LRESULT> onWmSetCursor( WPARAM, LPARAM lParam ) {
-        if( LOWORD(lParam) == HTCLIENT ) {
-            if( !_isPointerVisible ) {
-                SetCursor( nullptr );
-                return TRUE;
-            }
+    std::optional<LRESULT> onWmSetCursor( WPARAM, LPARAM ) {
+        if( !_isPointerVisible ) {
+            SetCursor( nullptr );
+
+            return TRUE;
         }
 
         return std::nullopt;
