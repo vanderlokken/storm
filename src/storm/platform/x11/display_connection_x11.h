@@ -12,7 +12,7 @@ public:
         _display( XOpenDisplay(nullptr) )
     {
         if( !_display ) {
-            throw SystemRequirementsNotMet() << "X server is unavailable";
+            throw SystemRequirementsNotMet() << "An X server is unavailable";
         }
     }
 

@@ -1,5 +1,7 @@
 #include <storm/window.h>
 
+#include <iostream>
+
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -8,13 +10,17 @@
 #include <unordered_map>
 #include <vector>
 
-#include <X11/extensions/Xfixes.h>
-#include <X11/extensions/XInput2.h>
-#include <X11/Xutil.h>
+#include <xcb/xcb.h>
+#include <xcb/xfixes.h>
+#include <xcb/xinput.h>
 
-#include <storm/platform/x11/display_connection_x11.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
+
+#include <storm/platform/x11/pointer_locking_region.h>
+#include <storm/platform/x11/xcb_connection.h>
+#include <storm/platform/x11/xcb_pointer.h>
 #include <storm/proxy_window_observer.h>
-#include <storm/rectangle.h>
 
 namespace storm {
 
@@ -167,200 +173,140 @@ void runCallback( const std::function<T> &callback, Args&&... args ) {
     }
 }
 
-class PointerLockingRegion {
-public:
-    PointerLockingRegion(
-            ::Display *display, ::Window window, Rectangle area ) :
-        _display( display )
-    {
-        // The following code uses the 'INT_MIN' and 'INT_MAX' constants instead
-        // of making an exact bounding box due to the following bug in X.Org
-        // Server: https://gitlab.freedesktop.org/xorg/xserver/issues/606
-
-        _left = XFixesCreatePointerBarrier(
-            _display,
-            window,
-            area.x,
-            INT_MIN,
-            area.x,
-            INT_MAX,
-            BarrierPositiveX,
-            0,
-            nullptr );
-
-        _right = XFixesCreatePointerBarrier(
-            _display,
-            window,
-            area.getRight(),
-            INT_MIN,
-            area.getRight(),
-            INT_MAX,
-            BarrierNegativeX,
-            0,
-            nullptr );
-
-        _top = XFixesCreatePointerBarrier(
-            _display,
-            window,
-            INT_MIN,
-            area.y,
-            INT_MAX,
-            area.y,
-            BarrierPositiveY,
-            0,
-            nullptr );
-
-        _bottom = XFixesCreatePointerBarrier(
-            _display,
-            window,
-            INT_MIN,
-            area.getBottom(),
-            INT_MAX,
-            area.getBottom(),
-            BarrierNegativeY,
-            0,
-            nullptr );
-    }
-
-    PointerLockingRegion(
-        const PointerLockingRegion& ) = delete;
-    PointerLockingRegion& operator = (
-        const PointerLockingRegion& ) = delete;
-
-    ~PointerLockingRegion() {
-        XFixesDestroyPointerBarrier( _display, _left );
-        XFixesDestroyPointerBarrier( _display, _right );
-        XFixesDestroyPointerBarrier( _display, _top );
-        XFixesDestroyPointerBarrier( _display, _bottom );
-    }
-
-private:
-    ::Display *_display;
-
-    PointerBarrier _left   = 0;
-    PointerBarrier _right  = 0;
-    PointerBarrier _top    = 0;
-    PointerBarrier _bottom = 0;
-};
-
-// This function allows to distinguish between mouse motion events and mouse
-// wheel rotation events.
-bool isMouseMotion( const XIValuatorState &valuatorState ) {
-    return valuatorState.mask_len > 2 &&
-        XIMaskIsSet( valuatorState.mask, 0 ) &&
-        XIMaskIsSet( valuatorState.mask, 1 );
-}
-
 class WindowImplementation : public Window {
 public:
-    WindowImplementation() {
+    WindowImplementation() :
+        _connection( XcbConnection::create() ),
+        _handle( xcb_generate_id(_connection) ),
+        _transparentCursor( xcb_generate_id(_connection) )
+    {
         _eventHandlers = {
-            {XI_ButtonPress, &WindowImplementation::onButtonPress},
-            {XI_ButtonRelease, &WindowImplementation::onButtonRelease},
-            {XI_FocusIn, &WindowImplementation::onFocusIn},
-            {XI_FocusOut, &WindowImplementation::onFocusOut},
-            {XI_KeyPress, &WindowImplementation::onKeyPress},
-            {XI_KeyRelease, &WindowImplementation::onKeyRelease},
-            {XI_Motion, &WindowImplementation::onMotion},
-            {XI_RawMotion, &WindowImplementation::onRawMotion}
+            {XCB_INPUT_BUTTON_PRESS, &WindowImplementation::onButtonPress},
+            {XCB_INPUT_BUTTON_RELEASE, &WindowImplementation::onButtonRelease},
+            {XCB_INPUT_FOCUS_IN, &WindowImplementation::onFocusIn},
+            {XCB_INPUT_FOCUS_OUT, &WindowImplementation::onFocusOut},
+            {XCB_INPUT_KEY_PRESS, &WindowImplementation::onKeyPress},
+            {XCB_INPUT_KEY_RELEASE, &WindowImplementation::onKeyRelease},
+            {XCB_INPUT_MOTION, &WindowImplementation::onMotion},
+            {XCB_INPUT_RAW_MOTION, &WindowImplementation::onRawMotion}
         };
 
         loadAtoms();
         queryRequiredExtensions();
         createTransparentCursor();
 
-        Screen *screen = XDefaultScreenOfDisplay( _display );
+        _dimensions.width = _connection.getDefaultScreen()->width_in_pixels;
+        _dimensions.height = _connection.getDefaultScreen()->height_in_pixels;
 
-        _dimensions.width = XWidthOfScreen( screen );
-        _dimensions.height = XHeightOfScreen( screen );
+        const uint32_t attributeMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+        const uint32_t attributes[] = {
+            _connection.getDefaultScreen()->black_pixel,
+            XCB_EVENT_MASK_STRUCTURE_NOTIFY
+        };
 
-        _handle = XCreateSimpleWindow(
-            _display,
-            XDefaultRootWindow(_display), // parent
-            0,                            // x
-            0,                            // y
-            _dimensions.width,            // width
-            _dimensions.height,           // height
-            0,                            // border width
-            XBlackPixelOfScreen(screen),  // border color
-            XBlackPixelOfScreen(screen)   // background color
-        );
-
-        XSelectInput( _display, _handle, StructureNotifyMask );
+        xcb_create_window(
+            _connection,
+            XCB_COPY_FROM_PARENT,
+            _handle,
+            _connection.getDefaultScreen()->root,
+            0,
+            0,
+            _dimensions.width,
+            _dimensions.height,
+            0,
+            XCB_WINDOW_CLASS_INPUT_OUTPUT,
+            _connection.getDefaultScreen()->root_visual,
+            attributeMask,
+            attributes );
 
         selectXinputEvents(
             _handle,
             {
-                XI_ButtonPress,
-                XI_ButtonRelease,
-                XI_FocusIn,
-                XI_FocusOut,
-                XI_KeyPress,
-                XI_KeyRelease,
-                XI_Motion
+                XCB_INPUT_XI_EVENT_MASK_BUTTON_PRESS |
+                XCB_INPUT_XI_EVENT_MASK_BUTTON_RELEASE |
+                XCB_INPUT_XI_EVENT_MASK_FOCUS_IN |
+                XCB_INPUT_XI_EVENT_MASK_FOCUS_OUT |
+                XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
+                XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE |
+                XCB_INPUT_XI_EVENT_MASK_MOTION
             });
 
         selectXinputEvents(
-            XDefaultRootWindow(_display),
+            _connection.getDefaultScreen()->root,
             {
-                XI_RawMotion
+                XCB_INPUT_XI_EVENT_MASK_RAW_MOTION
             });
 
-        std::array<Atom, 1> protocols = { _atoms.wmDeleteWindow };
-        XSetWMProtocols(
-            _display,
-            _handle,
-            protocols.data(),
-            protocols.size() );
-
+        enableShutdownEvent();
         removeDecorations();
         setWindowedFullscreenMode();
     }
 
     ~WindowImplementation() {
-        XDestroyWindow( _display, _handle );
-        XFreeCursor( _display, _transparentCursor );
+        xcb_destroy_window( _connection, _handle );
+        xcb_free_cursor( _connection, _transparentCursor );
     }
 
     void processEvents() override {
-        XEvent event;
+        xcb_flush( _connection );
 
-        for( int index = 0; index < XPending(_display); ++index ) {
-            XNextEvent( _display, &event );
+        while(
+            const XcbPointer<xcb_generic_event_t> genericEvent =
+                xcb_poll_for_event(_connection) )
+        {
+            const uint8_t eventType = genericEvent->response_type & ~0x80;
 
-            if( XFilterEvent(&event, _handle) ) {
-                continue;
+            if( eventType == 0 ) {
+                const auto &error = reinterpret_cast<
+                    const xcb_generic_error_t&>( *genericEvent );
+
+                std::cerr
+                    << "XCB error"
+                    << "; code = "
+                    << static_cast<int32_t>(error.error_code)
+                    << "; sequence = "
+                    << static_cast<int32_t>(error.sequence)
+                    << "; resource_id = "
+                    << static_cast<int32_t>(error.resource_id)
+                    << "; major_code = "
+                    << static_cast<int32_t>(error.major_code)
+                    << "; minor_code = "
+                    << static_cast<int32_t>(error.minor_code)
+                    << std::endl;
             }
 
-            if( event.type == GenericEvent &&
-                    event.xcookie.extension == _xinputOpcode ) {
-                const auto iterator =
-                    _eventHandlers.find( event.xcookie.evtype );
+            if( eventType == XCB_GE_GENERIC ) {
+                const auto &event = reinterpret_cast<
+                    const xcb_ge_generic_event_t&>( *genericEvent );
 
-                if( iterator != _eventHandlers.end() ) {
-                    XGetEventData( _display, &event.xcookie );
+                if( event.extension == _xinputOpcode ) {
+                    const auto iterator =
+                        _eventHandlers.find( event.event_type );
 
-                    const auto handler = iterator->second;
-                    (this->*handler)( event.xcookie.data );
-
-                    XFreeEventData( _display, &event.xcookie );
+                    if( iterator != _eventHandlers.end() ) {
+                        const auto handler = iterator->second;
+                        (this->*handler)( &event );
+                    }
                 }
             }
 
-            if( event.type == ConfigureNotify ) {
-                updateDimensions(
-                    Dimensions(
-                        static_cast<unsigned>(event.xconfigure.width),
-                        static_cast<unsigned>(event.xconfigure.height)) );
+            if( eventType == XCB_CONFIGURE_NOTIFY ) {
+                const auto &event = reinterpret_cast<
+                    const xcb_configure_notify_event_t&>( *genericEvent );
 
+                updateDimensions( Dimensions(event.width, event.height) );
                 updatePointerLockingRegion();
             }
 
-            if( event.type == ClientMessage &&
-                    event.xclient.window == _handle &&
-                    event.xclient.data.l[0] ==
-                        static_cast<long>(_atoms.wmDeleteWindow) ) {
-                runCallback( _proxyObserver->onShutdownRequested );
+            if( eventType == XCB_CLIENT_MESSAGE ) {
+                const auto &event = reinterpret_cast<
+                    const xcb_client_message_event_t&>( *genericEvent );
+
+                if( event.window == _handle &&
+                    event.data.data32[0] == _atoms.wmDeleteWindow )
+                {
+                    runCallback( _proxyObserver->onShutdownRequested );
+                }
             }
         }
     }
@@ -380,50 +326,73 @@ public:
     void setWindowedFullscreenMode() override {
         setFullscreenModeEnabled( true );
 
-        Screen *screen = XDefaultScreenOfDisplay( _display );
-
         updateDimensions(
             Dimensions(
-                XWidthOfScreen(screen),
-                XHeightOfScreen(screen)) );
+                _connection.getDefaultScreen()->width_in_pixels,
+                _connection.getDefaultScreen()->height_in_pixels) );
     }
 
     void setWindowedMode( Dimensions dimensions ) override {
         setFullscreenModeEnabled( false );
 
-        Screen *screen = XDefaultScreenOfDisplay( _display );
+        const std::array<int32_t, 4> values = {
+            (_connection.getDefaultScreen()->width_in_pixels -
+                static_cast<int32_t>(dimensions.width)) / 2,
+            (_connection.getDefaultScreen()->height_in_pixels -
+                static_cast<int32_t>(dimensions.height)) / 2,
+            static_cast<int32_t>(dimensions.width),
+            static_cast<int32_t>(dimensions.height)
+        };
 
-        XMoveResizeWindow(
-            _display,
+        xcb_configure_window(
+            _connection,
             _handle,
-            (XWidthOfScreen(screen) - static_cast<int>(dimensions.width)) / 2,
-            (XHeightOfScreen(screen) - static_cast<int>(dimensions.height)) / 2,
-            dimensions.width,
-            dimensions.height );
+            XCB_CONFIG_WINDOW_X |
+            XCB_CONFIG_WINDOW_Y |
+            XCB_CONFIG_WINDOW_WIDTH |
+            XCB_CONFIG_WINDOW_HEIGHT,
+            values.data() );
 
         updateDimensions( dimensions );
     }
 
     bool isVisible() const override {
-        XWindowAttributes windowAttributes;
-        XGetWindowAttributes( _display, _handle, &windowAttributes );
-        return windowAttributes.map_state == IsViewable;
+        const xcb_get_window_attributes_cookie_t request =
+            xcb_get_window_attributes( _connection, _handle );
+
+        const xcb_get_window_attributes_reply_t *reply =
+            xcb_get_window_attributes_reply( _connection, request, nullptr );
+
+        return reply && reply->map_state == XCB_MAP_STATE_VIEWABLE;
     }
 
     void setVisible( bool visible ) override {
         if( visible ) {
-            XMapWindow( _display, _handle );
+            xcb_map_window( _connection, _handle );
+
+            const std::array<int32_t, 2> position = {
+                (_connection.getDefaultScreen()->width_in_pixels -
+                    static_cast<int32_t>(_dimensions.width)) / 2,
+                (_connection.getDefaultScreen()->height_in_pixels -
+                    static_cast<int32_t>(_dimensions.height)) / 2
+            };
+
+            xcb_configure_window(
+                _connection,
+                _handle,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                position.data() );
         } else {
-            XUnmapWindow( _display, _handle );
+            xcb_unmap_window( _connection, _handle );
         }
     }
 
     bool hasFocus() const override {
-        ::Window activeWindow = None;
-        int focusState = 0;
+        const XcbPointer<xcb_get_input_focus_reply_t> reply =
+            xcb_get_input_focus_reply(
+                _connection, xcb_get_input_focus(_connection), nullptr );
 
-        XGetInputFocus( _display, &activeWindow, &focusState );
-        return activeWindow == _handle;
+        return reply && reply->focus == _handle;
     }
 
     std::string_view getTitle() const override {
@@ -433,22 +402,15 @@ public:
     void setTitle( std::string title ) override {
         _title = std::move( title );
 
-        std::vector<unsigned char> buffer( _title.size() );
-
-        std::copy(
-            _title.begin(),
-            _title.end(),
-            buffer.begin() );
-
-        XChangeProperty(
-            _display,
+        xcb_change_property(
+            _connection,
+            XCB_PROP_MODE_REPLACE,
             _handle,
             _atoms.netWmName,
             _atoms.utf8String,
-            CHAR_BIT /* format, bits */,
-            PropModeReplace,
-            buffer.data(),
-            buffer.size() );
+            CHAR_BIT, // format, bits
+            _title.size(),
+            _title.data() );
     }
 
     bool isPointerVisible() const override {
@@ -458,11 +420,11 @@ public:
     void setPointerVisible( bool visible ) override {
         _isPointerVisible = visible;
 
-        if( _isPointerVisible ) {
-            XUndefineCursor( _display, _handle );
-        } else {
-            XDefineCursor( _display, _handle, _transparentCursor );
-        }
+        const xcb_cursor_t cursor =
+            _isPointerVisible ? XCB_CURSOR_NONE : _transparentCursor;
+
+        xcb_change_window_attributes(
+            _connection, _handle, XCB_CW_CURSOR, &cursor );
     }
 
     bool isPointerLocked() const override {
@@ -477,9 +439,21 @@ public:
 
 private:
     void loadAtoms() {
-        auto load = [this]( std::string_view name ) {
-            return XInternAtom(
-                _display, name.data(), /*onlyExisting = */ false );
+        auto load = [this]( std::string_view name ) -> xcb_atom_t {
+            const xcb_intern_atom_cookie_t request = xcb_intern_atom_unchecked(
+                _connection,
+                0, // only_if_exists
+                name.size(),
+                name.data() );
+
+            const XcbPointer<xcb_intern_atom_reply_t> reply =
+                xcb_intern_atom_reply( _connection, request, nullptr );
+
+            if( reply ) {
+                return reply->atom;
+            }
+
+            return XCB_ATOM_NONE;
         };
 
         _atoms.atom                 = load( "ATOM" );
@@ -489,6 +463,7 @@ private:
         _atoms.netWmStateFullscreen = load( "_NET_WM_STATE_FULLSCREEN" );
         _atoms.utf8String           = load( "UTF8_STRING" );
         _atoms.wmDeleteWindow       = load( "WM_DELETE_WINDOW" );
+        _atoms.wmProtocols          = load( "WM_PROTOCOLS" );
     }
 
     void queryRequiredExtensions() {
@@ -499,179 +474,219 @@ private:
             "The display server doesn't support version 5.0 of the "
             "'XFixes' extension";
 
-        int firstEventCode = 0;
-        int firstErrorCode = 0;
+        const xcb_query_extension_reply_t *xinputExtension =
+            xcb_get_extension_data( _connection, &xcb_input_id );
+        const xcb_query_extension_reply_t *xfixesExtension =
+            xcb_get_extension_data( _connection, &xcb_xfixes_id );
 
-        if( !XQueryExtension(
-                _display,
-                "XInputExtension",
-                &_xinputOpcode,
-                &firstEventCode,
-                &firstErrorCode) ) {
+        if( !xinputExtension->present ) {
             throw SystemRequirementsNotMet() << missingXinputMessage;
         }
-
-        if( !XFixesQueryVersion(
-                _display,
-                &firstEventCode,
-                &firstErrorCode) ) {
+        if( !xfixesExtension->present ) {
             throw SystemRequirementsNotMet() << missingXfixesMessage;
         }
 
-        int majorVersion = 2;
-        int minorVersion = 0;
+        _xinputOpcode = xinputExtension->major_opcode;
 
-        if( XIQueryVersion(
-                _display, &majorVersion, &minorVersion) == BadRequest ) {
+        const uint16_t requiredXinputVersion = 2;
+        const uint16_t requiredXfixesVersion = 5;
+
+        const XcbPointer<xcb_input_xi_query_version_reply_t> xinputReply =
+            xcb_input_xi_query_version_reply(
+                _connection,
+                xcb_input_xi_query_version_unchecked(
+                    _connection, requiredXinputVersion, 0),
+                nullptr );
+
+        const XcbPointer<xcb_xfixes_query_version_reply_t> xfixesReply =
+            xcb_xfixes_query_version_reply(
+                _connection,
+                xcb_xfixes_query_version_unchecked(
+                    _connection, requiredXfixesVersion, 0),
+                nullptr );
+
+        if( !xinputReply ||
+                xinputReply->major_version < requiredXinputVersion ) {
             throw SystemRequirementsNotMet() << missingXinputMessage;
         }
-
-        majorVersion = 5;
-        minorVersion = 0;
-
-        XFixesQueryVersion( _display, &majorVersion, &minorVersion );
-
-        if( majorVersion < 5 ) {
+        if( !xfixesReply ||
+                xfixesReply->major_version < requiredXfixesVersion ) {
             throw SystemRequirementsNotMet() << missingXfixesMessage;
         }
     }
 
     void createTransparentCursor() {
-        const char transparentPixel = 0;
+        const xcb_pixmap_t pixmap = xcb_generate_id( _connection );
 
-        Pixmap pixmap = XCreateBitmapFromData(
-            _display,
-            XDefaultRootWindow(_display),
-            &transparentPixel,
+        xcb_create_pixmap(
+            _connection,
+            1, // bits per pixel
+            pixmap,
+            _connection.getDefaultScreen()->root,
             1, // width
             1  // height
         );
 
-        XColor black = {};
-
-        _transparentCursor = XCreatePixmapCursor(
-            _display,
+        xcb_create_cursor(
+            _connection,
+            _transparentCursor,
             pixmap,
             pixmap,
-            &black,
-            &black,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0 );
 
-        XFreePixmap( _display, pixmap );
+        xcb_free_pixmap( _connection, pixmap );
+    }
+
+    void enableShutdownEvent() const {
+        const std::array<xcb_atom_t, 1> protocols = { _atoms.wmDeleteWindow };
+
+        xcb_change_property(
+            _connection,
+            XCB_PROP_MODE_REPLACE,
+            _handle,
+            _atoms.wmProtocols,
+            _atoms.atom,
+            sizeof(xcb_atom_t) * CHAR_BIT, // format, bits
+            protocols.size(),
+            protocols.data() );
     }
 
     void removeDecorations() const {
         // Note: see the 'Xm/MwmUtil.h' header file from the 'libmotif-dev'
         // package
-        std::array<uint32_t, 5> hints = {2, 0, 0, 0, 0};
+        const std::array<uint32_t, 5> hints = { 2, 0, 0, 0, 0 };
 
-        XChangeProperty(
-            _display,
+        xcb_change_property(
+            _connection,
+            XCB_PROP_MODE_REPLACE,
             _handle,
             _atoms.motifWmHints,
             _atoms.motifWmHints,
-            sizeof(int32_t) * CHAR_BIT /* format, bits */,
-            PropModeReplace,
-            reinterpret_cast<unsigned char*>(hints.data()),
-            hints.size() );
+            sizeof(int32_t) * CHAR_BIT, // format, bits
+            hints.size(),
+            hints.data() );
     }
 
     void setFullscreenModeEnabled( bool enabled ) const {
-        XClientMessageEvent event = {};
+        xcb_client_message_event_t event = {};
 
-        event.type = ClientMessage;
+        event.response_type = XCB_CLIENT_MESSAGE;
         event.window = _handle;
-        event.message_type = _atoms.netWmState;
+        event.type = _atoms.netWmState;
         event.format = 32;
-        event.data.l[0] = enabled ? 1 : 0;
-        event.data.l[1] = _atoms.netWmStateFullscreen;
-        event.data.l[2] = None;
-        event.data.l[3] = 1; // source indication, which means "normal app."
-        event.data.l[4] = 0;
+        event.data.data32[0] = enabled ? 1 : 0;
+        event.data.data32[1] = _atoms.netWmStateFullscreen;
+        event.data.data32[2] = XCB_ATOM_NONE;
+        event.data.data32[3] = 1; // source indication, that means "normal app."
+        event.data.data32[4] = 0;
 
-        XSendEvent(
-            _display,
-            XDefaultRootWindow(_display),
-            False,
-            SubstructureRedirectMask | SubstructureNotifyMask,
-            reinterpret_cast<XEvent*>(&event) );
+        xcb_send_event(
+            _connection,
+            0, // propagate
+            _connection.getDefaultScreen()->root,
+            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT |
+            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
+            reinterpret_cast<const char*>(&event) );
     }
 
-    void selectXinputEvents(
-        ::Window window, std::initializer_list<unsigned> events ) const
-    {
-        unsigned char mask[4] = {};
+    void selectXinputEvents( xcb_window_t window, uint32_t mask ) const {
+        constexpr size_t bufferSize =
+            sizeof( xcb_input_event_mask_t ) + sizeof( mask );
 
-        for( unsigned event : events ) {
-            XISetMask( mask, event );
-        }
+        std::array<unsigned char, bufferSize> buffer;
 
-        XIEventMask eventMask;
-        eventMask.deviceid = XIAllMasterDevices;
-        eventMask.mask_len = sizeof( mask );
-        eventMask.mask = mask;
+        xcb_input_event_mask_t *eventMask =
+            reinterpret_cast<xcb_input_event_mask_t*>( buffer.data() );
+        eventMask->deviceid = XCB_INPUT_DEVICE_ALL_MASTER;
+        eventMask->mask_len = 1;
 
-        XISelectEvents( _display, window, &eventMask, 1 );
+        *xcb_input_event_mask_mask( eventMask ) = mask;
+        xcb_input_xi_select_events( _connection, window, 1, eventMask );
     }
 
-    void onButtonPress( const void *data ) {
-        onButtonStateChanged( data, /* pressed */ true );
+    void onButtonPress( const xcb_ge_generic_event_t *genericEvent ) {
+        onButtonStateChanged( genericEvent, /* pressed */ true );
     }
 
-    void onButtonRelease( const void *data ) {
-        onButtonStateChanged( data, /* pressed */ false );
+    void onButtonRelease( const xcb_ge_generic_event_t *genericEvent ) {
+        onButtonStateChanged( genericEvent, /* pressed */ false );
     }
 
-    void onFocusIn( const void* ) {
+    void onFocusIn( const xcb_ge_generic_event_t* ) {
         runCallback( _proxyObserver->onFocusReceived );
 
         updatePointerLockingRegion();
     }
 
-    void onFocusOut( const void* ) {
+    void onFocusOut( const xcb_ge_generic_event_t* ) {
         runCallback( _proxyObserver->onFocusLost );
 
         _pointerLockingRegion.reset();
     }
 
-    void onKeyPress( const void *data ) {
-        onKeyStateChanged( data, /* pressed */ true );
+    void onKeyPress( const xcb_ge_generic_event_t *genericEvent ) {
+        onKeyStateChanged( genericEvent, /* pressed */ true );
     }
 
-    void onKeyRelease( const void *data ) {
-        onKeyStateChanged( data, /* pressed */ false );
+    void onKeyRelease( const xcb_ge_generic_event_t *genericEvent ) {
+        onKeyStateChanged( genericEvent, /* pressed */ false );
     }
 
-    void onMotion( const void *data ) {
-        const XIDeviceEvent *event =
-            reinterpret_cast<const XIDeviceEvent*>( data );
+    void onMotion( const xcb_ge_generic_event_t *genericEvent ) {
+        const auto *event = reinterpret_cast<
+            const xcb_input_motion_event_t*>( genericEvent );
 
-        if( isMouseMotion(event->valuators) ) {
+        // The following condition allows to distinguish between mouse motion
+        // events and mouse wheel rotation events.
+        const bool isMouseMotion =
+            xcb_input_button_press_valuator_mask_length( event ) > 0 &&
+            (*xcb_input_button_press_valuator_mask(event) & 0b11) == 0b11;
+
+        if( isMouseMotion ) {
             runCallback(
                 _proxyObserver->onPointerMotion,
                 IntVector2d(
-                    static_cast<int>(event->event_x),
-                    static_cast<int>(event->event_y)) );
+                    event->event_x >> 16,
+                    event->event_y >> 16) );
         }
     }
 
-    void onRawMotion( const void *data ) {
-        const XIRawEvent *event =
-            reinterpret_cast<const XIRawEvent*>( data );
+    void onRawMotion( const xcb_ge_generic_event_t *genericEvent ) {
+        const auto *event = reinterpret_cast<
+            const xcb_input_raw_motion_event_t*>( genericEvent );
 
-        if( hasFocus() && isMouseMotion(event->valuators) ) {
-            runCallback(
-                _proxyObserver->onMouseMotion,
-                IntVector2d(
-                    static_cast<int>(event->raw_values[0]),
-                    static_cast<int>(event->raw_values[1])) );
+        const bool isMouseMotion =
+            xcb_input_raw_button_press_valuator_mask_length( event ) > 0 &&
+            (*xcb_input_raw_button_press_valuator_mask(event) & 0b11) == 0b11;
+
+        if( hasFocus() && isMouseMotion ) {
+            IntVector2d delta;
+
+            xcb_input_fp3232_iterator_t iterator =
+                xcb_input_raw_button_press_axisvalues_raw_iterator( event );
+
+            delta.x = iterator.data->integral;
+
+            xcb_input_fp3232_next( &iterator );
+
+            delta.y = iterator.data->integral;
+
+            runCallback( _proxyObserver->onMouseMotion, delta );
         }
     }
 
-    void onButtonStateChanged( const void *data, bool pressed ) {
-        const XIDeviceEvent *event =
-            reinterpret_cast<const XIDeviceEvent*>( data );
+    void onButtonStateChanged(
+        const xcb_ge_generic_event_t *genericEvent, bool pressed )
+    {
+        const auto *event = reinterpret_cast<
+            const xcb_input_button_press_event_t*>( genericEvent );
 
         const std::array<std::optional<MouseButton>, 10> buttons = {
             std::nullopt,
@@ -706,9 +721,11 @@ private:
         }
     }
 
-    void onKeyStateChanged( const void *data, bool pressed ) {
-        const XIDeviceEvent *event =
-            reinterpret_cast<const XIDeviceEvent*>( data );
+    void onKeyStateChanged(
+        const xcb_ge_generic_event_t *genericEvent, bool pressed )
+    {
+        const auto *event = reinterpret_cast<
+            const xcb_input_key_press_event_t*>( genericEvent );
 
         const size_t keycode = event->detail;
 
@@ -716,7 +733,7 @@ private:
             if( const std::optional<KeyboardKey> &key =
                     keycodeMapping[keycode] ) {
                 if( pressed ) {
-                    if( event->flags & XIKeyRepeat ) {
+                    if( event->flags & XCB_INPUT_KEY_EVENT_FLAGS_KEY_REPEAT ) {
                         runCallback(
                             _proxyObserver->onKeyboardKeyRepeated, *key );
                     } else {
@@ -740,48 +757,57 @@ private:
     }
 
     void updatePointerLockingRegion() {
-        if( hasFocus() ) {
-            if( !_isPointerLocked ) {
-                _pointerLockingRegion.reset();
-            } else {
-                XWindowAttributes windowAttributes;
-                XGetWindowAttributes( _display, _handle, &windowAttributes );
+        if( !hasFocus() ) {
+            return;
+        }
 
+        if( !_isPointerLocked ) {
+            _pointerLockingRegion.reset();
+        } else {
+            const xcb_get_geometry_cookie_t request =
+                xcb_get_geometry_unchecked( _connection, _handle );
+
+            const xcb_get_geometry_reply_t *reply =
+                xcb_get_geometry_reply( _connection, request, nullptr );
+
+            if( reply ) {
                 _pointerLockingRegion.emplace(
-                    _display,
+                    _connection,
                     _handle,
                     Rectangle(
-                        windowAttributes.x,
-                        windowAttributes.y,
-                        windowAttributes.width,
-                        windowAttributes.height) );
+                        reply->x,
+                        reply->y,
+                        reply->width,
+                        reply->height
+                    ));
 
                 // TODO: do not move the pointer when it's already inside the
                 // window.
-                XWarpPointer( _display, None, _handle, 0, 0, 0, 0, 0, 0 );
+                // XWarpPointer( _display, None, _handle, 0, 0, 0, 0, 0, 0 );
             }
         }
     }
 
-    using EventHandlers =
-        std::unordered_map<int, void(WindowImplementation::*)(const void*)>;
-    EventHandlers _eventHandlers;
+    using EventHandler =
+        void (WindowImplementation::*)( const xcb_ge_generic_event_t* );
+    std::unordered_map<int, EventHandler> _eventHandlers;
 
-    DisplayConnection _display;
-    ::Window _handle = {};
+    XcbConnection _connection;
 
-    int _xinputOpcode = 0;
+    xcb_window_t _handle = XCB_WINDOW_NONE;
+    xcb_cursor_t _transparentCursor = XCB_CURSOR_NONE;
 
-    Cursor _transparentCursor = {};
+    uint8_t _xinputOpcode = 0;
 
     struct {
-        Atom atom                 = None;
-        Atom motifWmHints         = None;
-        Atom netWmName            = None;
-        Atom netWmState           = None;
-        Atom netWmStateFullscreen = None;
-        Atom utf8String           = None;
-        Atom wmDeleteWindow       = None;
+        xcb_atom_t atom                 = XCB_ATOM_NONE;
+        xcb_atom_t motifWmHints         = XCB_ATOM_NONE;
+        xcb_atom_t netWmName            = XCB_ATOM_NONE;
+        xcb_atom_t netWmState           = XCB_ATOM_NONE;
+        xcb_atom_t netWmStateFullscreen = XCB_ATOM_NONE;
+        xcb_atom_t utf8String           = XCB_ATOM_NONE;
+        xcb_atom_t wmDeleteWindow       = XCB_ATOM_NONE;
+        xcb_atom_t wmProtocols          = XCB_ATOM_NONE;
     } _atoms;
 
     ProxyWindowObserver _proxyObserver;
