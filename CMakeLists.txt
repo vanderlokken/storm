@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11.1)
 
 project(storm)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 find_package(OpenGL REQUIRED)
 
 option(storm_build_examples "Whether to build examples or not" ON)
@@ -22,14 +24,7 @@ target_include_directories(storm
 
 if(UNIX)
     find_package(X11 REQUIRED)
-
-    if(NOT X11_Xfixes_FOUND)
-        message(FATAL_ERROR "The 'Xfixes' library is not found")
-    endif()
-
-    if(NOT X11_Xi_FOUND)
-        message(FATAL_ERROR "The 'Xi' library is not found")
-    endif()
+    find_package(XCB REQUIRED COMPONENTS xcb xcb-xfixes xcb-xinput)
 
     if(NOT X11_Xrandr_FOUND)
         message(FATAL_ERROR "The 'Xrandr' library is not found")
@@ -37,15 +32,13 @@ if(UNIX)
 
     target_link_libraries(storm PRIVATE
         ${X11_X11_LIB}
-        ${X11_Xfixes_LIB}
-        ${X11_Xi_LIB}
         ${X11_Xrandr_LIB}
+        ${XCB_LIBRARIES}
     )
     target_include_directories(storm PRIVATE
         ${X11_X11_INCLUDE_PATH}
-        ${X11_Xfixes_INCLUDE_PATH}
-        ${X11_Xi_INCLUDE_PATH}
         ${X11_Xrandr_INCLUDE_PATH}
+        ${XCB_INCLUDE_DIRS}
     )
 endif()
 
@@ -166,8 +159,11 @@ elseif(UNIX)
     target_sources(storm PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/invisible_cursor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/pointer_locking_region.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/xcb_connection.cpp
     )
 endif()
 

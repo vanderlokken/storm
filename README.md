@@ -12,7 +12,9 @@ System requirements (Linux):
 * CMake
 * GCC 7
 * OpenGL 3.3
+* libxcb
+* libxcb-xfixes
+* libxcb-xinput
 * libX11
-* libXi
 * libXrandr
 * libGL

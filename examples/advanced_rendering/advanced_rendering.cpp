@@ -63,9 +63,7 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    explicit Example( storm::Window::Pointer window ) :
-        _frameDimensions( 640, 480 ), _meshRotationAngle( 0 )
-    {
+    explicit Example( storm::Window::Pointer window ) {
         window->setWindowedMode( _frameDimensions );
 
         storm::RenderingSystem::getInstance()->setOutputWindow(
@@ -163,7 +161,7 @@ private:
         storm::Matrix world;
     } _transformations;
 
-    storm::Dimensions _frameDimensions;
+    storm::Dimensions _frameDimensions = {640, 480};
 
     storm::Texture::Pointer _colorBufferTexture;
 
@@ -175,7 +173,7 @@ private:
 
     storm::Clock::TimePoint _timePoint;
 
-    float _meshRotationAngle;
+    float _meshRotationAngle = 0;
 };
 
 std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window ) {

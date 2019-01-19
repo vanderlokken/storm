@@ -6,17 +6,17 @@
 #include <array>
 #include <climits>
 #include <optional>
-#include <string_view>
 #include <unordered_map>
-#include <vector>
 
 #include <xcb/xcb.h>
 #include <xcb/xfixes.h>
 #include <xcb/xinput.h>
 
-#include <xkbcommon/xkbcommon.h>
-#include <xkbcommon/xkbcommon-x11.h>
+// #include <xkbcommon/xkbcommon.h>
+// #include <xkbcommon/xkbcommon-x11.h>
 
+#include <storm/exception.h>
+#include <storm/platform/x11/invisible_cursor.h>
 #include <storm/platform/x11/pointer_locking_region.h>
 #include <storm/platform/x11/xcb_connection.h>
 #include <storm/platform/x11/xcb_pointer.h>
@@ -177,8 +177,9 @@ class WindowImplementation : public Window {
 public:
     WindowImplementation() :
         _connection( XcbConnection::create() ),
+        _invisibleCursor( _connection, _connection.getDefaultScreen() ),
         _handle( xcb_generate_id(_connection) ),
-        _transparentCursor( xcb_generate_id(_connection) )
+        _wmDeleteWindow( _connection.getAtom("WM_DELETE_WINDOW") )
     {
         _eventHandlers = {
             {XCB_INPUT_BUTTON_PRESS, &WindowImplementation::onButtonPress},
@@ -191,9 +192,7 @@ public:
             {XCB_INPUT_RAW_MOTION, &WindowImplementation::onRawMotion}
         };
 
-        loadAtoms();
         queryRequiredExtensions();
-        createTransparentCursor();
 
         _dimensions.width = _connection.getDefaultScreen()->width_in_pixels;
         _dimensions.height = _connection.getDefaultScreen()->height_in_pixels;
@@ -244,7 +243,6 @@ public:
 
     ~WindowImplementation() {
         xcb_destroy_window( _connection, _handle );
-        xcb_free_cursor( _connection, _transparentCursor );
     }
 
     void processEvents() override {
@@ -255,25 +253,6 @@ public:
                 xcb_poll_for_event(_connection) )
         {
             const uint8_t eventType = genericEvent->response_type & ~0x80;
-
-            if( eventType == 0 ) {
-                const auto &error = reinterpret_cast<
-                    const xcb_generic_error_t&>( *genericEvent );
-
-                std::cerr
-                    << "XCB error"
-                    << "; code = "
-                    << static_cast<int32_t>(error.error_code)
-                    << "; sequence = "
-                    << static_cast<int32_t>(error.sequence)
-                    << "; resource_id = "
-                    << static_cast<int32_t>(error.resource_id)
-                    << "; major_code = "
-                    << static_cast<int32_t>(error.major_code)
-                    << "; minor_code = "
-                    << static_cast<int32_t>(error.minor_code)
-                    << std::endl;
-            }
 
             if( eventType == XCB_GE_GENERIC ) {
                 const auto &event = reinterpret_cast<
@@ -303,10 +282,29 @@ public:
                     const xcb_client_message_event_t&>( *genericEvent );
 
                 if( event.window == _handle &&
-                    event.data.data32[0] == _atoms.wmDeleteWindow )
+                    event.data.data32[0] == _wmDeleteWindow )
                 {
                     runCallback( _proxyObserver->onShutdownRequested );
                 }
+            }
+
+            if( eventType == 0 ) {
+                const auto &error = reinterpret_cast<
+                    const xcb_generic_error_t&>( *genericEvent );
+
+                std::cerr
+                    << "XCB error"
+                    << "; code = "
+                    << static_cast<int32_t>(error.error_code)
+                    << "; sequence = "
+                    << static_cast<int32_t>(error.sequence)
+                    << "; resource_id = "
+                    << static_cast<int32_t>(error.resource_id)
+                    << "; major_code = "
+                    << static_cast<int32_t>(error.major_code)
+                    << "; minor_code = "
+                    << static_cast<int32_t>(error.minor_code)
+                    << std::endl;
             }
         }
     }
@@ -406,9 +404,9 @@ public:
             _connection,
             XCB_PROP_MODE_REPLACE,
             _handle,
-            _atoms.netWmName,
-            _atoms.utf8String,
-            CHAR_BIT, // format, bits
+            _connection.getAtom("_NET_WM_NAME"),
+            _connection.getAtom("UTF8_STRING"),
+            CHAR_BIT,
             _title.size(),
             _title.data() );
     }
@@ -421,7 +419,7 @@ public:
         _isPointerVisible = visible;
 
         const xcb_cursor_t cursor =
-            _isPointerVisible ? XCB_CURSOR_NONE : _transparentCursor;
+            _isPointerVisible ? XCB_CURSOR_NONE : _invisibleCursor.getHandle();
 
         xcb_change_window_attributes(
             _connection, _handle, XCB_CW_CURSOR, &cursor );
@@ -438,34 +436,6 @@ public:
     }
 
 private:
-    void loadAtoms() {
-        auto load = [this]( std::string_view name ) -> xcb_atom_t {
-            const xcb_intern_atom_cookie_t request = xcb_intern_atom_unchecked(
-                _connection,
-                0, // only_if_exists
-                name.size(),
-                name.data() );
-
-            const XcbPointer<xcb_intern_atom_reply_t> reply =
-                xcb_intern_atom_reply( _connection, request, nullptr );
-
-            if( reply ) {
-                return reply->atom;
-            }
-
-            return XCB_ATOM_NONE;
-        };
-
-        _atoms.atom                 = load( "ATOM" );
-        _atoms.motifWmHints         = load( "_MOTIF_WM_HINTS" );
-        _atoms.netWmName            = load( "_NET_WM_NAME" );
-        _atoms.netWmState           = load( "_NET_WM_STATE" );
-        _atoms.netWmStateFullscreen = load( "_NET_WM_STATE_FULLSCREEN" );
-        _atoms.utf8String           = load( "UTF8_STRING" );
-        _atoms.wmDeleteWindow       = load( "WM_DELETE_WINDOW" );
-        _atoms.wmProtocols          = load( "WM_PROTOCOLS" );
-    }
-
     void queryRequiredExtensions() {
         const char *missingXinputMessage =
             "The display server doesn't support version 2.0 of the "
@@ -515,50 +485,23 @@ private:
         }
     }
 
-    void createTransparentCursor() {
-        const xcb_pixmap_t pixmap = xcb_generate_id( _connection );
-
-        xcb_create_pixmap(
-            _connection,
-            1, // bits per pixel
-            pixmap,
-            _connection.getDefaultScreen()->root,
-            1, // width
-            1  // height
-        );
-
-        xcb_create_cursor(
-            _connection,
-            _transparentCursor,
-            pixmap,
-            pixmap,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0 );
-
-        xcb_free_pixmap( _connection, pixmap );
-    }
-
     void enableShutdownEvent() const {
-        const std::array<xcb_atom_t, 1> protocols = { _atoms.wmDeleteWindow };
+        const std::array<xcb_atom_t, 1> protocols = { _wmDeleteWindow };
 
         xcb_change_property(
             _connection,
             XCB_PROP_MODE_REPLACE,
             _handle,
-            _atoms.wmProtocols,
-            _atoms.atom,
+            _connection.getAtom("WM_PROTOCOLS"),
+            XCB_ATOM_ATOM,
             sizeof(xcb_atom_t) * CHAR_BIT, // format, bits
             protocols.size(),
             protocols.data() );
     }
 
     void removeDecorations() const {
+        const xcb_atom_t atom = _connection.getAtom( "_MOTIF_WM_HINTS" );
+
         // Note: see the 'Xm/MwmUtil.h' header file from the 'libmotif-dev'
         // package
         const std::array<uint32_t, 5> hints = { 2, 0, 0, 0, 0 };
@@ -567,9 +510,9 @@ private:
             _connection,
             XCB_PROP_MODE_REPLACE,
             _handle,
-            _atoms.motifWmHints,
-            _atoms.motifWmHints,
-            sizeof(int32_t) * CHAR_BIT, // format, bits
+            atom,
+            atom,
+            sizeof(uint32_t) * CHAR_BIT, // format, bits
             hints.size(),
             hints.data() );
     }
@@ -579,10 +522,11 @@ private:
 
         event.response_type = XCB_CLIENT_MESSAGE;
         event.window = _handle;
-        event.type = _atoms.netWmState;
+        event.type = _connection.getAtom( "_NET_WM_STATE" );
         event.format = 32;
         event.data.data32[0] = enabled ? 1 : 0;
-        event.data.data32[1] = _atoms.netWmStateFullscreen;
+        event.data.data32[1] =
+            _connection.getAtom( "_NET_WM_STATE_FULLSCREEN" );
         event.data.data32[2] = XCB_ATOM_NONE;
         event.data.data32[3] = 1; // source indication, that means "normal app."
         event.data.data32[4] = 0;
@@ -783,7 +727,8 @@ private:
 
                 // TODO: do not move the pointer when it's already inside the
                 // window.
-                // XWarpPointer( _display, None, _handle, 0, 0, 0, 0, 0, 0 );
+                xcb_warp_pointer(
+                    _connection, XCB_WINDOW_NONE, _handle, 0, 0, 0, 0, 0, 0 );
             }
         }
     }
@@ -793,22 +738,12 @@ private:
     std::unordered_map<int, EventHandler> _eventHandlers;
 
     XcbConnection _connection;
+    InvisibleCursor _invisibleCursor;
 
     xcb_window_t _handle = XCB_WINDOW_NONE;
-    xcb_cursor_t _transparentCursor = XCB_CURSOR_NONE;
+    xcb_atom_t _wmDeleteWindow = XCB_ATOM_NONE;
 
     uint8_t _xinputOpcode = 0;
-
-    struct {
-        xcb_atom_t atom                 = XCB_ATOM_NONE;
-        xcb_atom_t motifWmHints         = XCB_ATOM_NONE;
-        xcb_atom_t netWmName            = XCB_ATOM_NONE;
-        xcb_atom_t netWmState           = XCB_ATOM_NONE;
-        xcb_atom_t netWmStateFullscreen = XCB_ATOM_NONE;
-        xcb_atom_t utf8String           = XCB_ATOM_NONE;
-        xcb_atom_t wmDeleteWindow       = XCB_ATOM_NONE;
-        xcb_atom_t wmProtocols          = XCB_ATOM_NONE;
-    } _atoms;
 
     ProxyWindowObserver _proxyObserver;
 
