@@ -1,8 +1,5 @@
 #include <storm/window.h>
 
-#include <iostream>
-
-#include <algorithm>
 #include <array>
 #include <climits>
 #include <optional>
@@ -12,11 +9,9 @@
 #include <xcb/xfixes.h>
 #include <xcb/xinput.h>
 
-// #include <xkbcommon/xkbcommon.h>
-// #include <xkbcommon/xkbcommon-x11.h>
-
 #include <storm/exception.h>
 #include <storm/platform/x11/invisible_cursor.h>
+#include <storm/platform/x11/keycode_mapping.h>
 #include <storm/platform/x11/pointer_locking_region.h>
 #include <storm/platform/x11/xcb_connection.h>
 #include <storm/platform/x11/xcb_pointer.h>
@@ -26,151 +21,39 @@ namespace storm {
 
 namespace {
 
-// The following mapping was obtained from the 'xmodmap -pke' command output.
-constexpr std::array<std::optional<KeyboardKey>, 136> keycodeMapping = {
-    /*   0 */ std::nullopt,
-    /*   1 */ std::nullopt,
-    /*   2 */ std::nullopt,
-    /*   3 */ std::nullopt,
-    /*   4 */ std::nullopt,
-    /*   5 */ std::nullopt,
-    /*   6 */ std::nullopt,
-    /*   7 */ std::nullopt,
-    /*   8 */ std::nullopt,
-    /*   9 */ KeyboardKey::Escape,
-    /*  10 */ KeyboardKey::Digit1,
-    /*  11 */ KeyboardKey::Digit2,
-    /*  12 */ KeyboardKey::Digit3,
-    /*  13 */ KeyboardKey::Digit4,
-    /*  14 */ KeyboardKey::Digit5,
-    /*  15 */ KeyboardKey::Digit6,
-    /*  16 */ KeyboardKey::Digit7,
-    /*  17 */ KeyboardKey::Digit8,
-    /*  18 */ KeyboardKey::Digit9,
-    /*  19 */ KeyboardKey::Digit0,
-    /*  20 */ KeyboardKey::Minus,
-    /*  21 */ KeyboardKey::Equals,
-    /*  22 */ KeyboardKey::Backspace,
-    /*  23 */ KeyboardKey::Tab,
-    /*  24 */ KeyboardKey::Q,
-    /*  25 */ KeyboardKey::W,
-    /*  26 */ KeyboardKey::E,
-    /*  27 */ KeyboardKey::R,
-    /*  28 */ KeyboardKey::T,
-    /*  29 */ KeyboardKey::Y,
-    /*  30 */ KeyboardKey::U,
-    /*  31 */ KeyboardKey::I,
-    /*  32 */ KeyboardKey::O,
-    /*  33 */ KeyboardKey::P,
-    /*  34 */ KeyboardKey::LeftBracket,
-    /*  35 */ KeyboardKey::RightBracket,
-    /*  36 */ KeyboardKey::Enter,
-    /*  37 */ KeyboardKey::LeftControl,
-    /*  38 */ KeyboardKey::A,
-    /*  39 */ KeyboardKey::S,
-    /*  40 */ KeyboardKey::D,
-    /*  41 */ KeyboardKey::F,
-    /*  42 */ KeyboardKey::G,
-    /*  43 */ KeyboardKey::H,
-    /*  44 */ KeyboardKey::J,
-    /*  45 */ KeyboardKey::K,
-    /*  46 */ KeyboardKey::L,
-    /*  47 */ KeyboardKey::Semicolon,
-    /*  48 */ KeyboardKey::Apostrophe,
-    /*  49 */ KeyboardKey::GraveAccent,
-    /*  50 */ KeyboardKey::LeftShift,
-    /*  51 */ KeyboardKey::Backslash,
-    /*  52 */ KeyboardKey::Z,
-    /*  53 */ KeyboardKey::X,
-    /*  54 */ KeyboardKey::C,
-    /*  55 */ KeyboardKey::V,
-    /*  56 */ KeyboardKey::B,
-    /*  57 */ KeyboardKey::N,
-    /*  58 */ KeyboardKey::M,
-    /*  59 */ KeyboardKey::Comma,
-    /*  60 */ KeyboardKey::Period,
-    /*  61 */ KeyboardKey::Slash,
-    /*  62 */ KeyboardKey::RightShift,
-    /*  63 */ KeyboardKey::KeypadAsterisk,
-    /*  64 */ KeyboardKey::LeftAlter,
-    /*  65 */ KeyboardKey::Space,
-    /*  66 */ KeyboardKey::CapsLock,
-    /*  67 */ KeyboardKey::F1,
-    /*  68 */ KeyboardKey::F2,
-    /*  69 */ KeyboardKey::F3,
-    /*  70 */ KeyboardKey::F4,
-    /*  71 */ KeyboardKey::F5,
-    /*  72 */ KeyboardKey::F6,
-    /*  73 */ KeyboardKey::F7,
-    /*  74 */ KeyboardKey::F8,
-    /*  75 */ KeyboardKey::F9,
-    /*  76 */ KeyboardKey::F10,
-    /*  77 */ KeyboardKey::NumLock,
-    /*  78 */ KeyboardKey::ScrollLock,
-    /*  79 */ KeyboardKey::Keypad7,
-    /*  80 */ KeyboardKey::Keypad8,
-    /*  81 */ KeyboardKey::Keypad9,
-    /*  82 */ KeyboardKey::KeypadMinus,
-    /*  83 */ KeyboardKey::Keypad4,
-    /*  84 */ KeyboardKey::Keypad5,
-    /*  85 */ KeyboardKey::Keypad6,
-    /*  86 */ KeyboardKey::KeypadPlus,
-    /*  87 */ KeyboardKey::Keypad1,
-    /*  88 */ KeyboardKey::Keypad2,
-    /*  89 */ KeyboardKey::Keypad3,
-    /*  90 */ KeyboardKey::Keypad0,
-    /*  91 */ KeyboardKey::KeypadDelete,
-    /*  92 */ std::nullopt,
-    /*  93 */ std::nullopt,
-    /*  94 */ std::nullopt,
-    /*  95 */ KeyboardKey::F11,
-    /*  96 */ KeyboardKey::F12,
-    /*  97 */ std::nullopt,
-    /*  98 */ std::nullopt,
-    /*  99 */ std::nullopt,
-    /* 100 */ std::nullopt,
-    /* 101 */ std::nullopt,
-    /* 102 */ std::nullopt,
-    /* 103 */ std::nullopt,
-    /* 104 */ KeyboardKey::KeypadEnter,
-    /* 105 */ KeyboardKey::RightControl,
-    /* 106 */ KeyboardKey::KeypadSlash,
-    /* 107 */ KeyboardKey::PrintScreen,
-    /* 108 */ KeyboardKey::RightAlter,
-    /* 109 */ std::nullopt,
-    /* 110 */ KeyboardKey::Home,
-    /* 111 */ KeyboardKey::Up,
-    /* 112 */ KeyboardKey::PageUp,
-    /* 113 */ KeyboardKey::Left,
-    /* 114 */ KeyboardKey::Right,
-    /* 115 */ KeyboardKey::End,
-    /* 116 */ KeyboardKey::Down,
-    /* 117 */ KeyboardKey::PageDown,
-    /* 118 */ KeyboardKey::Insert,
-    /* 119 */ KeyboardKey::Delete,
-    /* 120 */ std::nullopt,
-    /* 121 */ std::nullopt,
-    /* 122 */ std::nullopt,
-    /* 123 */ std::nullopt,
-    /* 124 */ std::nullopt,
-    /* 125 */ std::nullopt,
-    /* 126 */ std::nullopt,
-    /* 127 */ KeyboardKey::Pause,
-    /* 128 */ std::nullopt,
-    /* 129 */ std::nullopt,
-    /* 130 */ std::nullopt,
-    /* 131 */ std::nullopt,
-    /* 132 */ std::nullopt,
-    /* 133 */ KeyboardKey::LeftCommand,
-    /* 134 */ KeyboardKey::RightCommand,
-    /* 135 */ KeyboardKey::Menu
-};
-
 template <class T, class... Args>
 void runCallback( const std::function<T> &callback, Args&&... args ) {
     if( callback ) {
         callback( std::forward<Args>(args)... );
     }
+}
+
+Rectangle getWindowRectangle(
+    xcb_connection_t *connection, xcb_window_t window)
+{
+    const xcb_get_geometry_cookie_t request =
+        xcb_get_geometry_unchecked( connection, window );
+
+    const xcb_get_geometry_reply_t *reply =
+        xcb_get_geometry_reply( connection, request, nullptr );
+
+    if( reply ) {
+        return {
+            reply->x,
+            reply->y,
+            reply->width,
+            reply->height
+        };
+    }
+
+    return {};
+}
+
+Dimensions getWindowDimensions(
+    xcb_connection_t *connection, xcb_window_t window)
+{
+    const Rectangle rectangle = getWindowRectangle( connection, window );
+    return {rectangle.width, rectangle.height};
 }
 
 class WindowImplementation : public Window {
@@ -179,7 +62,11 @@ public:
         _connection( XcbConnection::create() ),
         _invisibleCursor( _connection, _connection.getDefaultScreen() ),
         _handle( xcb_generate_id(_connection) ),
-        _wmDeleteWindow( _connection.getAtom("WM_DELETE_WINDOW") )
+        _wmDeleteWindow( _connection.getAtom("WM_DELETE_WINDOW") ),
+        _dimensions(
+            getWindowDimensions(
+                _connection, _connection.getDefaultScreen()->root) ),
+        _keycodeMapping( createKeycodeMapping(_connection) )
     {
         _eventHandlers = {
             {XCB_INPUT_BUTTON_PRESS, &WindowImplementation::onButtonPress},
@@ -193,9 +80,6 @@ public:
         };
 
         queryRequiredExtensions();
-
-        _dimensions.width = _connection.getDefaultScreen()->width_in_pixels;
-        _dimensions.height = _connection.getDefaultScreen()->height_in_pixels;
 
         const uint32_t attributeMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
         const uint32_t attributes[] = {
@@ -288,23 +172,14 @@ public:
                 }
             }
 
+#ifndef NDEBUG
             if( eventType == 0 ) {
                 const auto &error = reinterpret_cast<
                     const xcb_generic_error_t&>( *genericEvent );
 
-                std::cerr
-                    << "XCB error"
-                    << "; code = "
-                    << static_cast<int32_t>(error.error_code)
-                    << "; sequence = "
-                    << static_cast<int32_t>(error.sequence)
-                    << "; resource_id = "
-                    << static_cast<int32_t>(error.resource_id)
-                    << "; major_code = "
-                    << static_cast<int32_t>(error.major_code)
-                    << "; minor_code = "
-                    << static_cast<int32_t>(error.minor_code)
-                    << std::endl;
+                throw Exception() << "XCB error (sequence = " <<
+                    std::to_string( error.sequence ) << ")";
+#endif
             }
         }
     }
@@ -324,33 +199,17 @@ public:
     void setWindowedFullscreenMode() override {
         setFullscreenModeEnabled( true );
 
-        updateDimensions(
-            Dimensions(
-                _connection.getDefaultScreen()->width_in_pixels,
-                _connection.getDefaultScreen()->height_in_pixels) );
+        const Dimensions dimensions = getWindowDimensions(
+            _connection, _connection.getDefaultScreen()->root );
+
+        placeCentered( dimensions );
+        updateDimensions( dimensions );
     }
 
     void setWindowedMode( Dimensions dimensions ) override {
         setFullscreenModeEnabled( false );
 
-        const std::array<int32_t, 4> values = {
-            (_connection.getDefaultScreen()->width_in_pixels -
-                static_cast<int32_t>(dimensions.width)) / 2,
-            (_connection.getDefaultScreen()->height_in_pixels -
-                static_cast<int32_t>(dimensions.height)) / 2,
-            static_cast<int32_t>(dimensions.width),
-            static_cast<int32_t>(dimensions.height)
-        };
-
-        xcb_configure_window(
-            _connection,
-            _handle,
-            XCB_CONFIG_WINDOW_X |
-            XCB_CONFIG_WINDOW_Y |
-            XCB_CONFIG_WINDOW_WIDTH |
-            XCB_CONFIG_WINDOW_HEIGHT,
-            values.data() );
-
+        placeCentered( dimensions );
         updateDimensions( dimensions );
     }
 
@@ -368,18 +227,9 @@ public:
         if( visible ) {
             xcb_map_window( _connection, _handle );
 
-            const std::array<int32_t, 2> position = {
-                (_connection.getDefaultScreen()->width_in_pixels -
-                    static_cast<int32_t>(_dimensions.width)) / 2,
-                (_connection.getDefaultScreen()->height_in_pixels -
-                    static_cast<int32_t>(_dimensions.height)) / 2
-            };
-
-            xcb_configure_window(
-                _connection,
-                _handle,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                position.data() );
+            // Some window managers change the position of a window only when
+            // it's visible.
+            placeCentered( _dimensions );
         } else {
             xcb_unmap_window( _connection, _handle );
         }
@@ -671,24 +521,51 @@ private:
         const auto *event = reinterpret_cast<
             const xcb_input_key_press_event_t*>( genericEvent );
 
-        const size_t keycode = event->detail;
+        const xcb_keycode_t keycode = event->detail;
 
-        if( keycode < keycodeMapping.size() ) {
-            if( const std::optional<KeyboardKey> &key =
-                    keycodeMapping[keycode] ) {
-                if( pressed ) {
-                    if( event->flags & XCB_INPUT_KEY_EVENT_FLAGS_KEY_REPEAT ) {
-                        runCallback(
-                            _proxyObserver->onKeyboardKeyRepeated, *key );
-                    } else {
-                        runCallback(
-                            _proxyObserver->onKeyboardKeyPressed, *key );
-                    }
+        if( const auto iterator = _keycodeMapping.find(keycode);
+                iterator != _keycodeMapping.end() ) {
+            const KeyboardKey key = iterator->second;
+
+            if( pressed ) {
+                if( event->flags & XCB_INPUT_KEY_EVENT_FLAGS_KEY_REPEAT ) {
+                    runCallback(
+                        _proxyObserver->onKeyboardKeyRepeated, key );
                 } else {
-                    runCallback( _proxyObserver->onKeyboardKeyReleased, *key );
+                    runCallback(
+                        _proxyObserver->onKeyboardKeyPressed, key );
                 }
+            } else {
+                runCallback( _proxyObserver->onKeyboardKeyReleased, key );
             }
         }
+    }
+
+    void placeCentered( Dimensions windowDimensions ) const {
+        const Dimensions screenDimensions = getWindowDimensions(
+            _connection, _connection.getDefaultScreen()->root );
+
+        const std::array<int32_t, 4> values = {
+            (
+                static_cast<int32_t>(screenDimensions.width) -
+                static_cast<int32_t>(windowDimensions.width)
+            ) / 2,
+            (
+                static_cast<int32_t>(screenDimensions.height) -
+                static_cast<int32_t>(windowDimensions.height)
+            ) / 2,
+            static_cast<int32_t>(windowDimensions.width),
+            static_cast<int32_t>(windowDimensions.height)
+        };
+
+        xcb_configure_window(
+            _connection,
+            _handle,
+            XCB_CONFIG_WINDOW_X |
+            XCB_CONFIG_WINDOW_Y |
+            XCB_CONFIG_WINDOW_WIDTH |
+            XCB_CONFIG_WINDOW_HEIGHT,
+            values.data() );
     }
 
     void updateDimensions( Dimensions dimensions ) {
@@ -708,28 +585,15 @@ private:
         if( !_isPointerLocked ) {
             _pointerLockingRegion.reset();
         } else {
-            const xcb_get_geometry_cookie_t request =
-                xcb_get_geometry_unchecked( _connection, _handle );
+            _pointerLockingRegion.emplace(
+                _connection,
+                _handle,
+                getWindowRectangle(_connection, _handle) );
 
-            const xcb_get_geometry_reply_t *reply =
-                xcb_get_geometry_reply( _connection, request, nullptr );
-
-            if( reply ) {
-                _pointerLockingRegion.emplace(
-                    _connection,
-                    _handle,
-                    Rectangle(
-                        reply->x,
-                        reply->y,
-                        reply->width,
-                        reply->height
-                    ));
-
-                // TODO: do not move the pointer when it's already inside the
-                // window.
-                xcb_warp_pointer(
-                    _connection, XCB_WINDOW_NONE, _handle, 0, 0, 0, 0, 0, 0 );
-            }
+            // TODO: do not move the pointer when it's already inside the
+            // window.
+            xcb_warp_pointer(
+                _connection, XCB_WINDOW_NONE, _handle, 0, 0, 0, 0, 0, 0 );
         }
     }
 
@@ -749,6 +613,8 @@ private:
 
     std::string _title;
     Dimensions _dimensions;
+
+    std::unordered_map<xcb_keycode_t, KeyboardKey> _keycodeMapping;
 
     bool _isPointerVisible = true;
     bool _isPointerLocked = false;

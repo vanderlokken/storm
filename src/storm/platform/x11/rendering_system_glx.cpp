@@ -1,7 +1,9 @@
-#include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
-#include <storm/platform/x11/display_connection_x11.h>
-#include <storm/throw_exception.h>
+
+#include <string_view>
+
+#include <storm/exception.h>
+#include <storm/platform/ogl/api_ogl.h>
 
 // To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
 #define __gl_h_
@@ -13,21 +15,45 @@ namespace storm {
 
 namespace {
 
+class DisplayConnection {
+public:
+    DisplayConnection() :
+        _display( XOpenDisplay(nullptr) )
+    {
+        if( !_display ) {
+            throw SystemRequirementsNotMet() << "An X server is unavailable";
+        }
+    }
+
+    ~DisplayConnection() {
+        XCloseDisplay( _display );
+    }
+
+    DisplayConnection(
+        const DisplayConnection& ) = delete;
+    DisplayConnection& operator = (
+        const DisplayConnection& ) = delete;
+
+    operator Display* () const {
+        return _display;
+    }
+
+private:
+    Display *_display;
+};
+
 class RenderingSystemGlx : public RenderingSystemOgl {
 public:
     RenderingSystemGlx() :
         _defaultWindow( Window::create() )
     {
-        const auto glXCreateContextAttribsARB =
-            reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
-                glXGetProcAddress(
-                    reinterpret_cast<const unsigned char*>(
-                        "glXCreateContextAttribsARB")) );
+        _glXCreateContextAttribsARB =
+            loadExtensionFunction<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
+                "glXCreateContextAttribsARB", "GLX_ARB_create_context" );
 
-        if( !glXCreateContextAttribsARB ) {
-            throw SystemRequirementsNotMet() <<
-                "The 'GLX_ARB_create_context' extension is not supported.";
-        }
+        _glXSwapIntervalEXT =
+            loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
+                "_glXSwapIntervalEXT", "GLX_EXT_swap_control" );
 
         const int contextAttributes[] = {
             GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -39,7 +65,7 @@ public:
             0
         };
 
-        _context = glXCreateContextAttribsARB(
+        _context = _glXCreateContextAttribsARB(
             _display,
             chooseFramebufferConfig(),
             0,    // shareListContext
@@ -87,12 +113,25 @@ public:
     }
 
     void setVsyncEnabled( bool enabled ) override {
-        // TODO: implement
+        _glXSwapIntervalEXT( _display, getWindowHandle(), enabled ? 1 : 0 );
     }
 
 private:
+    template <class FuntionPointer>
+    static FuntionPointer loadExtensionFunction(
+        std::string_view functionName, std::string_view extensionName )
+    {
+        if( const FuntionPointer function = reinterpret_cast<FuntionPointer>(
+                glXGetProcAddress(reinterpret_cast<const unsigned char*>(
+                    functionName.data()))) ) {
+            return function;
+        }
+
+        throw SystemRequirementsNotMet() <<
+            "The '" << extensionName << "' extension is not supported";
+    }
+
     GLXFBConfig chooseFramebufferConfig() const {
-        // TODO: figure out proper attributes
         const int attributes[] = {
             GLX_DOUBLEBUFFER, 1,
             0
@@ -122,6 +161,9 @@ private:
     Window::Pointer _outputWindow;
 
     GLXContext _context;
+
+    PFNGLXCREATECONTEXTATTRIBSARBPROC _glXCreateContextAttribsARB;
+    PFNGLXSWAPINTERVALEXTPROC _glXSwapIntervalEXT;
 };
 
 } // namespace

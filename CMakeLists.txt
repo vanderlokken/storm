@@ -24,20 +24,25 @@ target_include_directories(storm
 
 if(UNIX)
     find_package(X11 REQUIRED)
-    find_package(XCB REQUIRED COMPONENTS xcb xcb-xfixes xcb-xinput)
+    find_package(XCB REQUIRED COMPONENTS xcb xcb-randr xcb-xfixes xcb-xinput)
 
-    if(NOT X11_Xrandr_FOUND)
-        message(FATAL_ERROR "The 'Xrandr' library is not found")
-    endif()
+    # This library is not a part of default Ubuntu installation
+    string(REPLACE
+        "libxcb-xinput.so"
+        "libxcb-xinput.a"
+        XCB_XINPUT_STATIC_LIBRARY
+        ${XCB_XINPUT_LIBRARY}
+    )
 
     target_link_libraries(storm PRIVATE
         ${X11_X11_LIB}
-        ${X11_Xrandr_LIB}
-        ${XCB_LIBRARIES}
+        ${XCB_LIBRARY}
+        ${XCB_RANDR_LIBRARY}
+        ${XCB_XFIXES_LIBRARY}
+        ${XCB_XINPUT_STATIC_LIBRARY}
     )
     target_include_directories(storm PRIVATE
         ${X11_X11_INCLUDE_PATH}
-        ${X11_Xrandr_INCLUDE_PATH}
         ${XCB_INCLUDE_DIRS}
     )
 endif()
@@ -158,8 +163,9 @@ if(WIN32)
 elseif(UNIX)
     target_sources(storm PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/invisible_cursor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keycode_mapping.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/pointer_locking_region.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp
@@ -192,6 +198,7 @@ install(FILES storm-config.cmake DESTINATION lib/cmake/storm)
 
 if(storm_build_examples)
     add_subdirectory(examples/advanced_rendering)
+    add_subdirectory(examples/display_query)
     add_subdirectory(examples/triangle_rendering)
     add_subdirectory(examples/user_input)
 endif()

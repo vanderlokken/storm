@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 namespace storm {
@@ -12,7 +13,7 @@ public:
         unsigned int refreshRate;
     };
 
-    static Display* getInstance();
+    static std::unique_ptr<Display> create();
 
     virtual ~Display() {}
 

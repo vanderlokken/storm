@@ -28,6 +28,8 @@ public:
 
         _value = pointer._value;
         pointer._value = nullptr;
+
+        return *this;
     }
 
     ~XcbPointer() {

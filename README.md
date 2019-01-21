@@ -15,6 +15,6 @@ System requirements (Linux):
 * libxcb
 * libxcb-xfixes
 * libxcb-xinput
+* libxcb-xrandr
 * libX11
-* libXrandr
 * libGL
