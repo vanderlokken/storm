@@ -53,7 +53,7 @@ public:
 
         _glXSwapIntervalEXT =
             loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
-                "_glXSwapIntervalEXT", "GLX_EXT_swap_control" );
+                "glXSwapIntervalEXT", "GLX_EXT_swap_control" );
 
         const int contextAttributes[] = {
             GLX_CONTEXT_MAJOR_VERSION_ARB, 3,

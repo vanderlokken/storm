@@ -31,7 +31,7 @@ XcbConnection::XcbConnection( XcbConnection &&connection ) {
 }
 
 XcbConnection& XcbConnection::operator = ( XcbConnection &&connection ) {
-    xcb_disconnect( _connection );
+    this->~XcbConnection();
 
     _connection = connection._connection;
     _screen = connection._screen;

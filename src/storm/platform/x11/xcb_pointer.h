@@ -22,9 +22,7 @@ public:
     }
 
     XcbPointer<T>& operator = ( XcbPointer<T> &&pointer ) {
-        if( _value ) {
-            free( _value );
-        }
+        this->~XcbPointer();
 
         _value = pointer._value;
         pointer._value = nullptr;
