@@ -4,7 +4,6 @@
 #include <storm/blending_technique.h>
 #include <storm/buffer.h>
 #include <storm/camera.h>
-#include <storm/clock.h>
 #include <storm/color.h>
 #include <storm/common_vertex_types.h>
 #include <storm/dimensions.h>

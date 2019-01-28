@@ -1,3 +1,5 @@
+#include <clocale>
+#include <cuchar>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -13,6 +15,7 @@ void outputString( std::string_view string ) {
     OutputDebugStringA( string.data() );
     OutputDebugStringA( "\n" );
 #endif
+    std::setlocale( LC_ALL, "en_US.utf-8" );
     std::cout << string << std::endl;
 }
 
@@ -85,7 +88,12 @@ public:
                     std::string(getKeyboardKeyName(value)) );
         };
         _observer->onCharacterInput = []( char32_t character ) {
-            outputString( "Character input: " + std::to_string(character) );
+            std::mbstate_t state = {};
+            std::string buffer( MB_CUR_MAX, 0 );
+            std::c32rtomb( buffer.data(), character, &state );
+
+            outputString( "Character input: " + buffer +
+                " (" + std::to_string(character) + ")" );
         };
     }
 

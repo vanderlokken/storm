@@ -11,7 +11,7 @@
 
 #include <storm/exception.h>
 #include <storm/platform/x11/invisible_cursor.h>
-#include <storm/platform/x11/keycode_mapping.h>
+#include <storm/platform/x11/keyboard_state_xkb.h>
 #include <storm/platform/x11/pointer_locking_region.h>
 #include <storm/platform/x11/xcb_connection.h>
 #include <storm/platform/x11/xcb_pointer.h>
@@ -65,8 +65,7 @@ public:
         _wmDeleteWindow( _connection.getAtom("WM_DELETE_WINDOW") ),
         _dimensions(
             getWindowDimensions(
-                _connection, _connection.getDefaultScreen()->root) ),
-        _keycodeMapping( createKeycodeMapping(_connection) )
+                _connection, _connection.getDefaultScreen()->root) )
     {
         _eventHandlers = {
             {XCB_INPUT_BUTTON_PRESS, &WindowImplementation::onButtonPress},
@@ -80,6 +79,8 @@ public:
         };
 
         queryRequiredExtensions();
+
+        _keyboardState = std::make_unique<KeyboardStateXkb>( _connection );
 
         const uint32_t attributeMask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
         const uint32_t attributes[] = {
@@ -169,6 +170,22 @@ public:
                     event.data.data32[0] == _wmDeleteWindow )
                 {
                     runCallback( _proxyObserver->onShutdownRequested );
+                }
+            }
+
+            if( eventType == _xkbEvent ) {
+                struct AnyXkbEvent {
+                    uint8_t responseType;
+                    uint8_t xkbType;
+                };
+
+                const auto &event =
+                    reinterpret_cast<const AnyXkbEvent&>( *genericEvent );
+
+                if( event.xkbType == XCB_XKB_STATE_NOTIFY ) {
+                    _keyboardState->update(
+                        reinterpret_cast<const xcb_xkb_state_notify_event_t&>(
+                            *genericEvent) );
                 }
             }
 
@@ -293,6 +310,9 @@ private:
         const char *missingXfixesMessage =
             "The display server doesn't support version 5.0 of the "
             "'XFixes' extension";
+        const char *missingXkbMessage =
+            "The display server doesn't support version 1.0 of the "
+            "'XKB' extension";
 
         const xcb_query_extension_reply_t *xinputExtension =
             xcb_get_extension_data( _connection, &xcb_input_id );
@@ -310,6 +330,7 @@ private:
 
         const uint16_t requiredXinputVersion = 2;
         const uint16_t requiredXfixesVersion = 5;
+        const uint16_t requiredXkbVersion = 1;
 
         const XcbPointer<xcb_input_xi_query_version_reply_t> xinputReply =
             xcb_input_xi_query_version_reply(
@@ -332,6 +353,19 @@ private:
         if( !xfixesReply ||
                 xfixesReply->major_version < requiredXfixesVersion ) {
             throw SystemRequirementsNotMet() << missingXfixesMessage;
+        }
+
+
+        if( !xkb_x11_setup_xkb_extension(
+                _connection,
+                requiredXkbVersion,
+                0,
+                XKB_X11_SETUP_XKB_EXTENSION_NO_FLAGS,
+                nullptr,
+                nullptr,
+                &_xkbEvent,
+                nullptr) ) {
+            throw SystemRequirementsNotMet() << missingXkbMessage;
         }
     }
 
@@ -523,20 +557,25 @@ private:
 
         const xcb_keycode_t keycode = event->detail;
 
-        if( const auto iterator = _keycodeMapping.find(keycode);
-                iterator != _keycodeMapping.end() ) {
-            const KeyboardKey key = iterator->second;
-
+        if( const std::optional<KeyboardKey> key =
+                _keyboardState->getKey(keycode) ) {
             if( pressed ) {
                 if( event->flags & XCB_INPUT_KEY_EVENT_FLAGS_KEY_REPEAT ) {
                     runCallback(
-                        _proxyObserver->onKeyboardKeyRepeated, key );
+                        _proxyObserver->onKeyboardKeyRepeated, *key );
                 } else {
                     runCallback(
-                        _proxyObserver->onKeyboardKeyPressed, key );
+                        _proxyObserver->onKeyboardKeyPressed, *key );
                 }
             } else {
-                runCallback( _proxyObserver->onKeyboardKeyReleased, key );
+                runCallback( _proxyObserver->onKeyboardKeyReleased, *key );
+            }
+        }
+
+        if( pressed ) {
+            if( const std::optional<char32_t> character =
+                    _keyboardState->getCharacter(keycode) ) {
+                runCallback( _proxyObserver->onCharacterInput, *character );
             }
         }
     }
@@ -608,13 +647,14 @@ private:
     xcb_atom_t _wmDeleteWindow = XCB_ATOM_NONE;
 
     uint8_t _xinputOpcode = 0;
+    uint8_t _xkbEvent = 255;
 
     ProxyWindowObserver _proxyObserver;
 
     std::string _title;
     Dimensions _dimensions;
 
-    std::unordered_map<xcb_keycode_t, KeyboardKey> _keycodeMapping;
+    std::unique_ptr<KeyboardStateXkb> _keyboardState;
 
     bool _isPointerVisible = true;
     bool _isPointerLocked = false;

@@ -1,5 +1,7 @@
+#include <chrono>
+#include <iostream>
+
 #include <storm/camera.h>
-#include <storm/clock.h>
 #include <storm/exception.h>
 #include <storm/matrix.h>
 #include <storm/quaternion.h>
@@ -63,8 +65,22 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    explicit Example( storm::Window::Pointer window ) {
+    explicit Example( storm::Window::Pointer window ) :
+        _observer( std::make_shared<storm::WindowObserver>() )
+    {
         window->setWindowedMode( _frameDimensions );
+        window->addObserver( _observer );
+
+        _observer->onKeyboardKeyPressed = []( storm::KeyboardKey key ) {
+            if( key == storm::KeyboardKey::V ) {
+                storm::RenderingSystem *renderingSystem =
+                    storm::RenderingSystem::getInstance();
+                renderingSystem->setVsyncEnabled(
+                    !renderingSystem->isVsyncEnabled() );
+                std::cout << "Vsync enabled: " <<
+                    renderingSystem->isVsyncEnabled() << std::endl;
+            }
+        };
 
         storm::RenderingSystem::getInstance()->setOutputWindow(
             std::move(window) );
@@ -79,11 +95,13 @@ public:
     }
 
     void update() override {
-        const storm::Clock::TimePoint timePoint = storm::Clock::now();
-        const storm::Clock::TimeDelta timeDelta = timePoint - _timePoint;
+        const std::chrono::steady_clock::time_point timePoint =
+            std::chrono::steady_clock::now();
+        const std::chrono::duration<float> timeDelta( timePoint - _timePoint );
+
         _timePoint = timePoint;
 
-        const float rotationSpeed = 0.001f;
+        const float rotationSpeed = 1.f;
         _meshRotationAngle += timeDelta.count() * rotationSpeed;
 
         const storm::Quaternion rotationQuaternion =
@@ -171,9 +189,11 @@ private:
 
     storm::Buffer::Pointer _constantBuffer;
 
-    storm::Clock::TimePoint _timePoint;
+    std::chrono::steady_clock::time_point _timePoint;
 
     float _meshRotationAngle = 0;
+
+    std::shared_ptr<storm::WindowObserver> _observer;
 };
 
 std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window ) {

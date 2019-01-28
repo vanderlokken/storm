@@ -24,7 +24,15 @@ target_include_directories(storm
 
 if(UNIX)
     find_package(X11 REQUIRED)
-    find_package(XCB REQUIRED COMPONENTS xcb xcb-randr xcb-xfixes xcb-xinput)
+    find_package(XCB REQUIRED
+        COMPONENTS
+            xcb
+            xcb-randr
+            xcb-xfixes
+            xcb-xinput
+            xcb-xkb
+    )
+    find_package(XkbCommon REQUIRED)
 
     # This library is not a part of default Ubuntu installation
     string(REPLACE
@@ -40,10 +48,15 @@ if(UNIX)
         ${XCB_RANDR_LIBRARY}
         ${XCB_XFIXES_LIBRARY}
         ${XCB_XINPUT_STATIC_LIBRARY}
+        ${XCB_XKB_LIBRARY}
+        ${XKBCOMMON_LIBRARY}
+        ${XKBCOMMON_X11_LIBRARY}
     )
     target_include_directories(storm PRIVATE
         ${X11_X11_INCLUDE_PATH}
         ${XCB_INCLUDE_DIRS}
+        ${XKBCOMMON_INCLUDE_DIR}
+        ${XKBCOMMON_X11_INCLUDE_DIR}
     )
 endif()
 
@@ -155,17 +168,15 @@ target_sources(storm PRIVATE
 
 if(WIN32)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/clock_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window.cpp
     )
 elseif(UNIX)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/invisible_cursor.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keycode_mapping.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_state_xkb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/pointer_locking_region.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp

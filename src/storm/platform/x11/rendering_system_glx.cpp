@@ -51,9 +51,21 @@ public:
             loadExtensionFunction<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
                 "glXCreateContextAttribsARB", "GLX_ARB_create_context" );
 
-        _glXSwapIntervalEXT =
-            loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
-                "glXSwapIntervalEXT", "GLX_EXT_swap_control" );
+        try {
+            _glXSwapIntervalEXT =
+                loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
+                    "glXSwapIntervalEXT", "GLX_EXT_swap_control" );
+        } catch( const SystemRequirementsNotMet& ) {
+            // Ignore
+        }
+
+        try {
+            _glXSwapIntervalMESA =
+                loadExtensionFunction<PFNGLXSWAPINTERVALMESAPROC>(
+                    "glXSwapIntervalMESA", "GLX_MESA_swap_control" );
+        } catch( const SystemRequirementsNotMet& ) {
+            // Ignore
+        }
 
         const int contextAttributes[] = {
             GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -94,6 +106,10 @@ public:
         _outputWindow = std::move( window );
 
         glXMakeCurrent( _display, getWindowHandle(), _context );
+
+        if( _outputWindow ) {
+            applyVsyncSettings();
+        }
     }
 
     void presentBackbuffer() override {
@@ -101,29 +117,43 @@ public:
     }
 
     bool isVsyncEnabled() const override {
-        unsigned int interval = 0;
-
-        glXQueryDrawable(
-            glXGetCurrentDisplay(),
-            glXGetCurrentDrawable(),
-            GLX_SWAP_INTERVAL_EXT,
-            &interval );
-
-        return interval != 0;
+        return _isVsyncEnabled;
     }
 
     void setVsyncEnabled( bool enabled ) override {
-        _glXSwapIntervalEXT( _display, getWindowHandle(), enabled ? 1 : 0 );
+        _isVsyncEnabled = enabled;
+
+        if( _outputWindow ) {
+            applyVsyncSettings();
+        }
     }
 
 private:
     template <class FuntionPointer>
-    static FuntionPointer loadExtensionFunction(
-        std::string_view functionName, std::string_view extensionName )
+    FuntionPointer loadExtensionFunction(
+        std::string_view functionName, std::string_view extensionName ) const
     {
-        if( const FuntionPointer function = reinterpret_cast<FuntionPointer>(
-                glXGetProcAddress(reinterpret_cast<const unsigned char*>(
-                    functionName.data()))) ) {
+        std::string_view extensions =
+            glXQueryExtensionsString( _display, XDefaultScreen(_display) );
+
+        bool extensionFound = false;
+        while( !extensionFound && !extensions.empty() ) {
+            const std::string_view extension =
+                extensions.substr( 0, extensions.find(" ") );
+
+            const bool hasSubsequentSpace =
+                extension.size() != extensions.size();
+
+            extensionFound = extension == extensionName;
+            extensions = extensions.substr(
+                extension.size() + (hasSubsequentSpace ? 1 : 0) );
+        }
+
+        const FuntionPointer function = reinterpret_cast<FuntionPointer>(
+            glXGetProcAddress(
+                reinterpret_cast<const unsigned char*>(functionName.data())) );
+
+        if( extensionFound && function ) {
             return function;
         }
 
@@ -140,7 +170,7 @@ private:
         int size;
 
         if( GLXFBConfig *configs = glXChooseFBConfig(
-                _display, /* screen = */ 0, attributes, &size) ) {
+                _display, XDefaultScreen(_display), attributes, &size) ) {
             const GLXFBConfig result = *configs;
             XFree( configs );
             return result;
@@ -155,15 +185,27 @@ private:
             reinterpret_cast<::Window>( _defaultWindow->getHandle() );
     }
 
+    void applyVsyncSettings() const {
+        if( _glXSwapIntervalMESA ) {
+            _glXSwapIntervalMESA( _isVsyncEnabled ? 1 : 0 );
+        } else if( _glXSwapIntervalEXT ) {
+            _glXSwapIntervalEXT(
+                _display, getWindowHandle(), _isVsyncEnabled ? 1 : 0 );
+        }
+    }
+
     DisplayConnection _display;
 
     Window::Pointer _defaultWindow;
     Window::Pointer _outputWindow;
 
-    GLXContext _context;
+    GLXContext _context = {};
 
-    PFNGLXCREATECONTEXTATTRIBSARBPROC _glXCreateContextAttribsARB;
-    PFNGLXSWAPINTERVALEXTPROC _glXSwapIntervalEXT;
+    bool _isVsyncEnabled = true;
+
+    PFNGLXCREATECONTEXTATTRIBSARBPROC _glXCreateContextAttribsARB = nullptr;
+    PFNGLXSWAPINTERVALEXTPROC _glXSwapIntervalEXT = nullptr;
+    PFNGLXSWAPINTERVALMESAPROC _glXSwapIntervalMESA = nullptr;
 };
 
 } // namespace

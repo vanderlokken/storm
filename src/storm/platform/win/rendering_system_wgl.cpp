@@ -28,6 +28,8 @@ public:
     }
 
     DeviceContextHandle& operator = ( DeviceContextHandle &&context ) {
+        this->~DeviceContextHandle();
+
         _contextHandle = context._contextHandle;
         _windowHandle = context._windowHandle;
 
@@ -90,12 +92,14 @@ public:
         _wglCreateContextAttribsARB =
             loadExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
                 "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
-        _wglGetSwapIntervalEXT =
-            loadExtensionFunction<PFNWGLGETSWAPINTERVALEXTPROC>(
-                "wglGetSwapIntervalEXT", "WGL_EXT_swap_control" );
-        _wglSwapIntervalEXT =
-            loadExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
-                "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
+
+        try {
+            _wglSwapIntervalEXT =
+                loadExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
+                    "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
+        } catch( const SystemRequirementsNotMet& ) {
+            // Ignore
+        }
 
         const int contextAttributes[] = {
             WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -128,6 +132,10 @@ public:
 
         const DeviceContextHandle deviceContext = getDeviceContext();
         wglMakeCurrent( deviceContext, *_renderingContext );
+
+        if( _outputWindow ) {
+            applyVsyncSettings();
+        }
     }
 
     void presentBackbuffer() override {
@@ -136,18 +144,14 @@ public:
     }
 
     bool isVsyncEnabled() const override {
-        return _wglGetSwapIntervalEXT() != 0;
+        return _isVsyncEnabled;
     }
 
     void setVsyncEnabled( bool enabled ) override {
-        SetLastError( 0 );
+        _isVsyncEnabled = enabled;
 
-        // -1 is used when the 'WGL_EXT_swap_control_tear' is supported;
-        // otherwise 1 is used.
-        _wglSwapIntervalEXT( enabled ? -1 : 0 );
-
-        if( GetLastError() == ERROR_INVALID_DATA ) {
-            _wglSwapIntervalEXT( enabled ? 1 : 0 );
+        if( _outputWindow ) {
+            applyVsyncSettings();
         }
     }
 
@@ -170,11 +174,26 @@ private:
             _outputWindow ? *_outputWindow : *_defaultWindow );
     }
 
+    void applyVsyncSettings() const {
+        if( _wglSwapIntervalEXT ) {
+            SetLastError( 0 );
+
+            // -1 is used when the 'WGL_EXT_swap_control_tear' is supported;
+            // otherwise 1 is used.
+            _wglSwapIntervalEXT( enabled ? -1 : 0 );
+
+            if( GetLastError() == ERROR_INVALID_DATA ) {
+                _wglSwapIntervalEXT( enabled ? 1 : 0 );
+            }
+        }
+    }
+
     Window::Pointer _defaultWindow;
     Window::Pointer _outputWindow;
 
+    bool _isVsyncEnabled = true;
+
     PFNWGLCREATECONTEXTATTRIBSARBPROC _wglCreateContextAttribsARB = nullptr;
-    PFNWGLGETSWAPINTERVALEXTPROC _wglGetSwapIntervalEXT = nullptr;
     PFNWGLSWAPINTERVALEXTPROC _wglSwapIntervalEXT = nullptr;
 
     std::unique_ptr<RenderingContextHandle> _renderingContext;
