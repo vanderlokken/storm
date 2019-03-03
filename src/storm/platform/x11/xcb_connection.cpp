@@ -50,7 +50,7 @@ xcb_screen_t* XcbConnection::getDefaultScreen() const {
     return _screen;
 }
 
-xcb_atom_t XcbConnection::getAtom(std::string_view id) const {
+xcb_atom_t XcbConnection::getAtom( std::string_view id ) const {
     const xcb_intern_atom_cookie_t request = xcb_intern_atom_unchecked(
         _connection, /* only_if_exists */ 0, id.size(), id.data() );
 

@@ -1,6 +1,7 @@
+#include <storm/platform/win/api_win.h>
+
 #include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/ogl/rendering_system_ogl.h>
-#include <storm/platform/win/api_win.h>
 #include <storm/throw_exception.h>
 
 // Unpacked from contrib/wglext-*.tar.gz

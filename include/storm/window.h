@@ -12,6 +12,7 @@
 namespace storm {
 
 struct WindowObserver {
+    // This function is called in response to an attempt to close the window.
     std::function<void()> onShutdownRequested;
 
     std::function<void()> onFocusReceived;
@@ -23,14 +24,20 @@ struct WindowObserver {
     // the windowed fullscreen mode.
     std::function<void()> onResized;
 
+    // This function is called in response to mouse movements when the window
+    // is active.
+    //
+    // The argument stores mouse coordinate offsets in device-specific units.
     std::function<void(IntVector2d)> onMouseMotion;
+
+    // This function is called when a pointer moves over the window.
+    //
+    // The argument stores client pointer coordinates in pixels.
+    std::function<void(IntVector2d)> onPointerMotion;
+
     std::function<void(MouseButton)> onMouseButtonPressed;
     std::function<void(MouseButton)> onMouseButtonReleased;
     std::function<void(float)> onMouseWheelRotated;
-
-    // This function is called when a pointer moves over the window.
-    // The argument stores client pointer coordinates in pixels.
-    std::function<void(IntVector2d)> onPointerMotion;
 
     std::function<void(KeyboardKey)> onKeyboardKeyPressed;
     std::function<void(KeyboardKey)> onKeyboardKeyRepeated;
@@ -39,6 +46,7 @@ struct WindowObserver {
     std::function<void(char32_t)> onCharacterInput;
 };
 
+// TODO: support windows with decorations
 class Window {
 public:
     using Pointer = std::shared_ptr<Window>;
@@ -48,7 +56,7 @@ public:
 
     virtual ~Window() {}
 
-    // This method can be called only from the thread where the window was
+    // This method should be called only from the thread where the window was
     // created.
     virtual void processEvents() = 0;
 

@@ -3,7 +3,7 @@
 namespace storm {
 
 InvisibleCursor::InvisibleCursor(
-        xcb_connection_t *connection, xcb_screen_t *screen) :
+        xcb_connection_t *connection, xcb_screen_t *screen ) :
     _connection( connection ),
     _handle( xcb_generate_id(_connection) )
 {

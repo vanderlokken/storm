@@ -25,7 +25,7 @@ public:
     operator xcb_connection_t* () const;
 
     xcb_screen_t* getDefaultScreen() const;
-    xcb_atom_t getAtom(std::string_view id) const;
+    xcb_atom_t getAtom( std::string_view id ) const;
 
 private:
     XcbConnection();

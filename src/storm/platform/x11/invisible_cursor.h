@@ -6,7 +6,7 @@ namespace storm {
 
 class InvisibleCursor {
 public:
-    InvisibleCursor(xcb_connection_t *connection, xcb_screen_t *screen);
+    InvisibleCursor( xcb_connection_t *connection, xcb_screen_t *screen );
     ~InvisibleCursor();
 
     InvisibleCursor(

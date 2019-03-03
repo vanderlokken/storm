@@ -80,6 +80,9 @@ void ProxyWindowObserver::update() {
     _observer.onMouseMotion = [=]( IntVector2d delta ) {
         runCallback( *observers, &WindowObserver::onMouseMotion, delta );
     };
+    _observer.onPointerMotion = [=]( IntVector2d delta ) {
+        runCallback( *observers, &WindowObserver::onPointerMotion, delta );
+    };
     _observer.onMouseButtonPressed = [=]( MouseButton button ) {
         runCallback(
             *observers, &WindowObserver::onMouseButtonPressed, button );
@@ -90,9 +93,6 @@ void ProxyWindowObserver::update() {
     };
     _observer.onMouseWheelRotated = [=]( float delta ) {
         runCallback( *observers, &WindowObserver::onMouseWheelRotated, delta );
-    };
-    _observer.onPointerMotion = [=]( IntVector2d delta ) {
-        runCallback( *observers, &WindowObserver::onPointerMotion, delta );
     };
     _observer.onKeyboardKeyPressed = [=]( KeyboardKey key ) {
         runCallback( *observers, &WindowObserver::onKeyboardKeyPressed, key );

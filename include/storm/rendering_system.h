@@ -26,8 +26,6 @@ public:
 
     // By default V-sync is enabled unless video driver overrides application
     // settings.
-    //
-    // TODO: apply vsync settings after output window changes
     virtual bool isVsyncEnabled() const = 0;
     virtual void setVsyncEnabled( bool enabled ) = 0;
 

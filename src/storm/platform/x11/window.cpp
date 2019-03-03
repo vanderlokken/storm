@@ -29,7 +29,7 @@ void runCallback( const std::function<T> &callback, Args&&... args ) {
 }
 
 Rectangle getWindowRectangle(
-    xcb_connection_t *connection, xcb_window_t window)
+    xcb_connection_t *connection, xcb_window_t window )
 {
     const xcb_get_geometry_cookie_t request =
         xcb_get_geometry_unchecked( connection, window );
@@ -50,7 +50,7 @@ Rectangle getWindowRectangle(
 }
 
 Dimensions getWindowDimensions(
-    xcb_connection_t *connection, xcb_window_t window)
+    xcb_connection_t *connection, xcb_window_t window )
 {
     const Rectangle rectangle = getWindowRectangle( connection, window );
     return {rectangle.width, rectangle.height};
@@ -647,7 +647,7 @@ private:
     xcb_atom_t _wmDeleteWindow = XCB_ATOM_NONE;
 
     uint8_t _xinputOpcode = 0;
-    uint8_t _xkbEvent = 255;
+    uint8_t _xkbEvent = 0xff;
 
     ProxyWindowObserver _proxyObserver;
 

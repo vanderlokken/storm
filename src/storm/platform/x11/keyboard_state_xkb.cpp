@@ -2,35 +2,29 @@
 
 #include <xkbcommon/xkbcommon-keysyms.h>
 
+#include <storm/exception.h>
+
 namespace storm {
 
 KeyboardStateXkb::KeyboardStateXkb( xcb_connection_t *connection ) :
     _connection( connection ),
     _context( xkb_context_new(XKB_CONTEXT_NO_FLAGS) )
 {
-    if( !_context ) {
-        // TODO: handle errors
-    }
-
     const int32_t deviceId =
         xkb_x11_get_core_keyboard_device_id( _connection );
 
-    if( deviceId == -1 ) {
-        // TODO: handle errors
+    if( _context && deviceId != -1 ) {
+        _keymap = xkb_x11_keymap_new_from_device(
+            _context, _connection, deviceId, XKB_KEYMAP_COMPILE_NO_FLAGS );
     }
 
-    _keymap = xkb_x11_keymap_new_from_device(
-        _context, _connection, deviceId, XKB_KEYMAP_COMPILE_NO_FLAGS );
-
-    if( !_keymap ) {
-        // TODO: handle errors
+    if( _keymap ) {
+        _state = xkb_x11_state_new_from_device(
+            _keymap, _connection, deviceId );
     }
-
-    _state = xkb_x11_state_new_from_device(
-        _keymap, _connection, deviceId );
 
     if( !_state ) {
-        // TODO: handle errors
+        throw Exception() << "Couldn't initialize a keyboard state";
     }
 
     selectEvents( deviceId );

@@ -14,9 +14,9 @@ PointerLockingRegion::PointerLockingRegion(
     _top( xcb_generate_id(_connection) ),
     _bottom( xcb_generate_id(_connection) )
 {
-    // The following code uses the 'INT_MIN' and 'INT_MAX' constants instead
-    // of making an exact bounding box due to the following bug in X.Org
-    // Server: https://gitlab.freedesktop.org/xorg/xserver/issues/606
+    // The following code uses the 'INT16_MIN' and 'INT16_MAX' constants
+    // instead of making an exact bounding box due to the following bug in
+    // X.Org Server: https://gitlab.freedesktop.org/xorg/xserver/issues/606
 
     xcb_xfixes_create_pointer_barrier(
         _connection,
