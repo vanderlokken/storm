@@ -18,9 +18,6 @@ class VertexArrayHandleOgl;
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
-    virtual void beginFrameRendering();
-    virtual void endFrameRendering();
-
     virtual void renderMesh( Mesh::Pointer mesh, unsigned count );
     virtual void renderGenerated(
         unsigned int vertexCount, Mesh::PrimitiveTopology );

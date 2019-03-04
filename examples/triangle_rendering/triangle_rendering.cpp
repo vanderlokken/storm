@@ -22,10 +22,20 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    Example() {
-        storm::RenderingWindow *renderingWindow =
-            storm::RenderingWindow::getInstance();
-        renderingWindow->setWindowed( {640, 480} );
+    explicit Example( storm::Window::Pointer window ) {
+        const storm::Dimensions outputWindowDimensions( 640, 480 );
+
+        window->setWindowedMode( outputWindowDimensions );
+
+        storm::RenderingSystem *renderingSystem =
+            storm::RenderingSystem::getInstance();
+        renderingSystem->setOutputWindow( std::move(window) );
+        renderingSystem->setOutputRectangle(
+            storm::Rectangle(
+                0,
+                0,
+                outputWindowDimensions.width,
+                outputWindowDimensions.height) );
 
         _vertexShader = storm::Shader::create(
             vertexShaderSource, storm::Shader::Type::Vertex );
@@ -35,19 +45,17 @@ public:
         createMesh();
     }
 
-    virtual void update() {}
+    void update() override {}
 
-    virtual void render() {
+    void render() override {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
-
-        renderingSystem->beginFrameRendering();
 
         renderingSystem->setShader( _vertexShader );
         renderingSystem->setShader( _pixelShader );
         renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->endFrameRendering();
+        renderingSystem->presentBackbuffer();
     }
 
 private:
@@ -74,6 +82,6 @@ private:
     storm::Shader::Pointer _pixelShader;
 };
 
-std::unique_ptr<ExampleBase> createExample() {
-    return std::unique_ptr<ExampleBase>( new Example );
+std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window ) {
+    return std::make_unique<Example>( std::move(window) );
 }

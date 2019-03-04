@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11.1)
 
 project(storm)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 find_package(OpenGL REQUIRED)
 
 option(storm_build_examples "Whether to build examples or not" ON)
@@ -22,24 +24,39 @@ target_include_directories(storm
 
 if(UNIX)
     find_package(X11 REQUIRED)
+    find_package(XCB REQUIRED
+        COMPONENTS
+            xcb
+            xcb-randr
+            xcb-xfixes
+            xcb-xinput
+            xcb-xkb
+    )
+    find_package(XkbCommon REQUIRED)
 
-    if(NOT X11_Xi_FOUND)
-        message(FATAL_ERROR "The 'Xi' library is not found")
-    endif()
-
-    if(NOT X11_Xrandr_FOUND)
-        message(FATAL_ERROR "The 'Xrandr' library is not found")
-    endif()
+    # This library is not a part of default Ubuntu installation
+    string(REPLACE
+        "libxcb-xinput.so"
+        "libxcb-xinput.a"
+        XCB_XINPUT_STATIC_LIBRARY
+        ${XCB_XINPUT_LIBRARY}
+    )
 
     target_link_libraries(storm PRIVATE
         ${X11_X11_LIB}
-        ${X11_Xi_LIB}
-        ${X11_Xrandr_LIB}
+        ${XCB_LIBRARY}
+        ${XCB_RANDR_LIBRARY}
+        ${XCB_XFIXES_LIBRARY}
+        ${XCB_XINPUT_STATIC_LIBRARY}
+        ${XCB_XKB_LIBRARY}
+        ${XKBCOMMON_LIBRARY}
+        ${XKBCOMMON_X11_LIBRARY}
     )
     target_include_directories(storm PRIVATE
         ${X11_X11_INCLUDE_PATH}
-        ${X11_Xi_INCLUDE_PATH}
-        ${X11_Xrandr_INCLUDE_PATH}
+        ${XCB_INCLUDE_DIRS}
+        ${XKBCOMMON_INCLUDE_DIR}
+        ${XKBCOMMON_X11_INCLUDE_DIR}
     )
 endif()
 
@@ -53,7 +70,7 @@ if(MSVC)
     target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4 /GR-)
     target_compile_definitions(storm PRIVATE UNICODE _UNICODE)
 elseif(CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(storm PRIVATE -Wall)
+    target_compile_options(storm PRIVATE -Wall $<$<CONFIG:Debug>:-g>)
 endif()
 
 macro(storm_contrib archive output_directory)
@@ -84,6 +101,12 @@ storm_contrib(
 )
 
 storm_contrib(
+    ${CMAKE_CURRENT_SOURCE_DIR}/contrib/wglext-20181130.tar.gz
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
+)
+
+storm_contrib(
     ${CMAKE_CURRENT_SOURCE_DIR}/contrib/lodepng-20180326.tar.gz
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
@@ -105,10 +128,11 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/exception.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/framebuffer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/keyboard_common.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/input.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/output_technique.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/proxy_window_observer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rasterization_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rendering_system_common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/sampler.cpp
@@ -121,6 +145,7 @@ target_sources(storm PRIVATE
 
 target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
+    ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
@@ -143,27 +168,19 @@ target_sources(storm PRIVATE
 
 if(WIN32)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/clock_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/event_loop_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/input_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/keyboard_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/mouse_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_window_win.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window_procedure_win.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window.cpp
     )
 elseif(UNIX)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/posix/clock_posix.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display_connection_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/event_loop_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/input_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_x11.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/mouse_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/invisible_cursor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_state_xkb.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/pointer_locking_region.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_window_x11.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/xcb_connection.cpp
     )
 endif()
 
@@ -192,5 +209,7 @@ install(FILES storm-config.cmake DESTINATION lib/cmake/storm)
 
 if(storm_build_examples)
     add_subdirectory(examples/advanced_rendering)
+    add_subdirectory(examples/display_query)
     add_subdirectory(examples/triangle_rendering)
+    add_subdirectory(examples/user_input)
 endif()

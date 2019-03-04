@@ -1,176 +1,211 @@
-#include <storm/platform/win/rendering_system_wgl.h>
+#include <storm/platform/win/api_win.h>
 
 #include <storm/platform/ogl/api_ogl.h>
-#include <storm/platform/win/rendering_window_win.h>
+#include <storm/platform/ogl/rendering_system_ogl.h>
 #include <storm/throw_exception.h>
 
-// ----------------------------------------------------------------------------
-//  WGL_EXT_swap_control extension
-// ----------------------------------------------------------------------------
-
-typedef BOOL (APIENTRYP PFNWGLSWAPINTERVALEXTPROC) (int interval);
-typedef int (APIENTRYP PFNWGLGETSWAPINTERVALEXTPROC) ();
-
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-//  WGL_ARB_create_context extension
-// ----------------------------------------------------------------------------
-
-#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
-#define WGL_CONTEXT_FLAGS_ARB         0x2094
-#define WGL_CONTEXT_PROFILE_MASK_ARB  0x9126
-
-#define WGL_CONTEXT_DEBUG_BIT_ARB 0x0001
-
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB          0x00000001
-#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
-
-typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (
-    HDC hDC, HGLRC hShareContext, const int *attribList);
-
-// ----------------------------------------------------------------------------
+// Unpacked from contrib/wglext-*.tar.gz
+#include <GL/wglext.h>
 
 namespace storm {
 
 namespace {
 
-template<class FuntionPointer>
-FuntionPointer loadWglExtensionFunction(
-    const std::string &functionName, const std::string &extensionName )
-{
-    const FuntionPointer function = reinterpret_cast<FuntionPointer>(
-        ::wglGetProcAddress(functionName.c_str()) );
-    if( function )
-        return function;
-    else
+class DeviceContextHandle {
+public:
+    explicit DeviceContextHandle( const Window& window ) :
+        _windowHandle( static_cast<HWND>(window.getHandle()) ),
+        _contextHandle( GetDC(_windowHandle) )
+    {
+    }
+
+    DeviceContextHandle(
+        const DeviceContextHandle& ) = delete;
+    DeviceContextHandle& operator = (
+        const DeviceContextHandle& ) = delete;
+
+    DeviceContextHandle( DeviceContextHandle &&context ) {
+        *this = std::move( context );
+    }
+
+    DeviceContextHandle& operator = ( DeviceContextHandle &&context ) {
+        this->~DeviceContextHandle();
+
+        _contextHandle = context._contextHandle;
+        _windowHandle = context._windowHandle;
+
+        context._contextHandle = nullptr;
+
+        return *this;
+    }
+
+    ~DeviceContextHandle() {
+        if( _contextHandle ) {
+            ReleaseDC( _windowHandle, _contextHandle );
+        }
+    }
+
+    operator HDC() const {
+        return _contextHandle;
+    }
+
+private:
+    HWND _windowHandle;
+    HDC _contextHandle;
+};
+
+class RenderingContextHandle {
+public:
+    explicit RenderingContextHandle( HGLRC handle ) :
+        _handle( handle )
+    {
+    }
+
+    RenderingContextHandle(
+        const RenderingContextHandle& ) = delete;
+    RenderingContextHandle& operator = (
+        const RenderingContextHandle& ) = delete;
+
+    ~RenderingContextHandle() {
+        wglDeleteContext( _handle );
+    }
+
+    operator HGLRC() const {
+        return _handle;
+    }
+
+private:
+    HGLRC _handle;
+};
+
+class RenderingSystemWgl : public RenderingSystemOgl {
+public:
+    RenderingSystemWgl() :
+        _defaultWindow( Window::create() )
+    {
+        const DeviceContextHandle deviceContext = getDeviceContext();
+
+        const RenderingContextHandle renderingContext(
+            wglCreateContext(deviceContext) );
+
+        wglMakeCurrent( deviceContext, renderingContext );
+
+        _wglCreateContextAttribsARB =
+            loadExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
+                "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
+
+        try {
+            _wglSwapIntervalEXT =
+                loadExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
+                    "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
+        } catch( const SystemRequirementsNotMet& ) {
+            // Ignore
+        }
+
+        const int contextAttributes[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+            WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+    #ifndef NDEBUG
+            WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+    #endif
+            0
+        };
+
+        _renderingContext = std::make_unique<RenderingContextHandle>(
+            _wglCreateContextAttribsARB(deviceContext, 0, contextAttributes) );
+
+        if( !*_renderingContext ) {
+            throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+        }
+
+        wglMakeCurrent( deviceContext, *_renderingContext );
+
+        initialize();
+    }
+
+    Window::Pointer getOutputWindow() const override {
+        return _outputWindow;
+    }
+
+    void setOutputWindow( Window::Pointer window ) override {
+        _outputWindow = std::move( window );
+
+        const DeviceContextHandle deviceContext = getDeviceContext();
+        wglMakeCurrent( deviceContext, *_renderingContext );
+
+        if( _outputWindow ) {
+            applyVsyncSettings();
+        }
+    }
+
+    void presentBackbuffer() override {
+        const DeviceContextHandle deviceContext = getDeviceContext();
+        SwapBuffers( deviceContext );
+    }
+
+    bool isVsyncEnabled() const override {
+        return _isVsyncEnabled;
+    }
+
+    void setVsyncEnabled( bool enabled ) override {
+        _isVsyncEnabled = enabled;
+
+        if( _outputWindow ) {
+            applyVsyncSettings();
+        }
+    }
+
+private:
+    template <class FuntionPointer>
+    static FuntionPointer loadExtensionFunction(
+        std::string_view functionName, std::string_view extensionName )
+    {
+        if( const FuntionPointer function = reinterpret_cast<FuntionPointer>(
+                wglGetProcAddress(functionName.data())) ) {
+            return function;
+        }
+
         throw SystemRequirementsNotMet() <<
-            "The '" + extensionName + "' extension is not supported";
-}
+            "The '" << extensionName << "' extension is not supported";
+    }
+
+    DeviceContextHandle getDeviceContext() const {
+        return DeviceContextHandle(
+            _outputWindow ? *_outputWindow : *_defaultWindow );
+    }
+
+    void applyVsyncSettings() const {
+        if( _wglSwapIntervalEXT ) {
+            SetLastError( 0 );
+
+            // -1 is used when the 'WGL_EXT_swap_control_tear' is supported;
+            // otherwise 1 is used.
+            _wglSwapIntervalEXT( enabled ? -1 : 0 );
+
+            if( GetLastError() == ERROR_INVALID_DATA ) {
+                _wglSwapIntervalEXT( enabled ? 1 : 0 );
+            }
+        }
+    }
+
+    Window::Pointer _defaultWindow;
+    Window::Pointer _outputWindow;
+
+    bool _isVsyncEnabled = true;
+
+    PFNWGLCREATECONTEXTATTRIBSARBPROC _wglCreateContextAttribsARB = nullptr;
+    PFNWGLSWAPINTERVALEXTPROC _wglSwapIntervalEXT = nullptr;
+
+    std::unique_ptr<RenderingContextHandle> _renderingContext;
+};
 
 } // namespace
 
-DeviceContextHandle::DeviceContextHandle( HWND windowHandle ) :
-    _windowHandle( windowHandle ),
-    _handle( ::GetDC(windowHandle) )
-{
-    if( !_handle )
-        throwRuntimeError( "::GetDC has failed" );
-}
-
-DeviceContextHandle::~DeviceContextHandle() {
-    ::ReleaseDC( _windowHandle, _handle );
-}
-
-RenderingContextHandle::RenderingContextHandle( HGLRC handle ) :
-    _handle( handle )
-{
-}
-
-RenderingContextHandle::~RenderingContextHandle() {
-    ::wglDeleteContext( _handle );
-}
-
-void RenderingContextHandle::install( HDC deviceContextHandle ) const {
-    if( !::wglMakeCurrent(deviceContextHandle, _handle) )
-        throwRuntimeError( "::wglMakeCurrent has failed" );
-}
-
-RenderingSystemWgl::RenderingSystemWgl( HWND windowHandle ) :
-    _deviceContextHandle( windowHandle )
-{
-    selectPixelFormat();
-
-    RenderingContextHandle compatibilityContext(
-        ::wglCreateContext(_deviceContextHandle) );
-    if( !compatibilityContext )
-        throwRuntimeError( "::wglCreateContext has failed" );
-
-    compatibilityContext.install( _deviceContextHandle );
-
-    const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
-        loadWglExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
-            "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
-
-    const int openGl_3_3_ContextAttributes[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-#ifndef NDEBUG
-        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
-#endif
-        0
-    };
-
-    _renderingContextHandle.reset( new RenderingContextHandle(
-        wglCreateContextAttribsARB(
-            _deviceContextHandle, 0, openGl_3_3_ContextAttributes)) );
-    if( !_renderingContextHandle )
-        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
-
-    _renderingContextHandle->install( _deviceContextHandle );
-
-    initialize();
-}
-
-void RenderingSystemWgl::endFrameRendering() {
-    RenderingSystemOgl::endFrameRendering();
-
-    if( !::SwapBuffers(_deviceContextHandle) )
-        throwRuntimeError( "::SwapBuffers has failed" );
-}
-
-bool RenderingSystemWgl::isVsyncEnabled() const {
-    static const PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT =
-        loadWglExtensionFunction<PFNWGLGETSWAPINTERVALEXTPROC>(
-            "wglGetSwapIntervalEXT", "WGL_EXT_swap_control" );
-    return wglGetSwapIntervalEXT() != 0;
-}
-
-void RenderingSystemWgl::setVsyncEnabled( bool enabled ) {
-    static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
-        loadWglExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
-            "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
-
-    // -1 is used when the 'WGL_EXT_swap_control_tear' is supported; otherwise
-    // 1 is used.
-    ::SetLastError( 0 );
-    wglSwapIntervalEXT( enabled ? -1 : 0 );
-
-    if( ::GetLastError() == ERROR_INVALID_DATA ) {
-        wglSwapIntervalEXT( enabled ? 1 : 0 );
-    }
-}
-
-void RenderingSystemWgl::selectPixelFormat() {
-    PIXELFORMATDESCRIPTOR pixelFormatDescriptor = {};
-    pixelFormatDescriptor.nSize = sizeof( pixelFormatDescriptor );
-    pixelFormatDescriptor.nVersion = 1;
-    pixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
-        PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
-    pixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
-    pixelFormatDescriptor.cColorBits = 24;
-    pixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
-
-    const int pixelFormat =
-        ::ChoosePixelFormat( _deviceContextHandle, &pixelFormatDescriptor );
-    if( !pixelFormat )
-        throwRuntimeError( "::ChoosePixelFormat has failed" );
-
-    if( !::SetPixelFormat(
-            _deviceContextHandle, pixelFormat, &pixelFormatDescriptor) )
-        throwRuntimeError( "::SetPixelFormat has failed" );
-}
-
-RenderingSystemWgl* RenderingSystemWgl::getInstance() {
-    static const std::unique_ptr<RenderingSystemWgl> instance(
-        new RenderingSystemWgl(RenderingWindowWin::getInstance()->getHandle()) );
-    return instance.get();
-}
-
 RenderingSystem* RenderingSystem::getInstance() {
-    return RenderingSystemWgl::getInstance();
+    static const std::unique_ptr<RenderingSystemWgl> instance =
+        std::make_unique<RenderingSystemWgl>();
+    return instance.get();
 }
 
 }

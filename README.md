@@ -10,9 +10,13 @@ System requirements (Windows):
 
 System requirements (Linux):
 * CMake
-* GCC 7
+* GCC 8
 * OpenGL 3.3
+* libxcb
+* libxcb-xfixes
+* libxcb-xinput
+* libxcb-xrandr
+* libxkbcommon
+* libxkbcommon-x11
 * libX11
-* libXi
-* libXrandr
 * libGL

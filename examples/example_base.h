@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-#include <storm/event_loop.h>
+#include <storm/window.h>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -18,16 +18,27 @@ public:
     virtual void render() = 0;
 };
 
-std::unique_ptr<ExampleBase> createExample();
+std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window );
 
 void exampleMain() {
-    std::unique_ptr<ExampleBase> example = createExample();
+    storm::Window::Pointer window = storm::Window::create();
 
-    storm::EventLoop *eventLoop = storm::EventLoop::getInstance();
-    eventLoop->run( [&example]() {
+    std::unique_ptr<ExampleBase> example = createExample( window );
+
+    bool isRunning = true;
+
+    const auto observer = std::make_shared<storm::WindowObserver>();
+    observer->onShutdownRequested = [&] { isRunning = false; };
+
+    window->addObserver( observer );
+    window->setVisible( true );
+
+    while( isRunning ) {
+        window->processEvents();
+
         example->update();
         example->render();
-    });
+    }
 }
 
 #ifdef _WIN32
@@ -47,7 +58,7 @@ int CALLBACK WinMain( HINSTANCE, HINSTANCE, LPSTR, int ) {
 int main() {
     try {
         exampleMain();
-    } catch( const storm::Exception &error ) {
+    } catch( const std::exception &error ) {
         std::cerr << error.what() << std::endl;
         return 1;
     }

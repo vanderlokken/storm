@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 namespace storm {
@@ -15,7 +16,7 @@ public:
 
     explicit Exception( const std::string &description );
 
-    void appendMessage( const std::string &message ) {
+    void appendMessage( std::string_view message ) {
         _message += message;
     }
 
@@ -33,7 +34,7 @@ class ResourceLoadingError : public Exception {};
 template<class ExceptionType>
 typename std::enable_if<
         std::is_base_of<Exception, ExceptionType>::value, ExceptionType>::type
-    operator << ( ExceptionType exception, const std::string &message )
+    operator << ( ExceptionType exception, std::string_view message )
 {
     exception.appendMessage( message );
     return std::move( exception );

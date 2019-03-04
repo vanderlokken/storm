@@ -11,6 +11,7 @@
 #include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
 #include <storm/shader.h>
+#include <storm/window.h>
 
 namespace storm {
 
@@ -20,8 +21,8 @@ public:
 
     virtual ~RenderingSystem() { }
 
-    virtual void beginFrameRendering() = 0;
-    virtual void endFrameRendering() = 0;
+    virtual Window::Pointer getOutputWindow() const = 0;
+    virtual void setOutputWindow( Window::Pointer window ) = 0;
 
     // By default V-sync is enabled unless video driver overrides application
     // settings.
@@ -61,6 +62,7 @@ public:
     virtual void clearStencilBuffer( unsigned int stencil = 0 ) = 0;
 
     virtual Backbuffer::Pointer getBackbuffer() const = 0;
+    virtual void presentBackbuffer() = 0;
 
     virtual std::string getDebugMessageLog() const = 0;
 };

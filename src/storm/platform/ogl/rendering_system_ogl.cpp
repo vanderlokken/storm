@@ -1,6 +1,7 @@
 #include <storm/platform/ogl/rendering_system_ogl.h>
 
 #include <algorithm>
+#include <string_view>
 
 #include <storm/platform/ogl/api_ogl.h>
 
@@ -14,27 +15,23 @@
 #include <storm/platform/ogl/rasterization_technique_ogl.h>
 #include <storm/platform/ogl/shader_ogl.h>
 
-#include <storm/rendering_window.h>
-
 namespace storm {
 
 namespace {
 
 bool isSeamlessCubemapSupported() {
     // There's a bug in the official drivers for the following GPU.
-    const std::string unacceptableRenderers[] = {
+    const std::string_view unacceptableRenderers[] = {
         "GeForce GTS 250/PCIe/SSE2/3DNOW!",
         "GeForce GTS 250/PCIe/SSE2"
     };
 
-    const std::string renderer =
+    const std::string_view renderer =
         reinterpret_cast<const char*>( ::glGetString(GL_RENDERER) );
 
     const auto iterator = std::find(
-        std::begin(
-            unacceptableRenderers),
-        std::end(
-            unacceptableRenderers),
+        std::begin(unacceptableRenderers),
+        std::end(unacceptableRenderers),
         renderer
     );
 
@@ -66,14 +63,11 @@ void RenderingSystemOgl::initialize() {
 
     setVsyncEnabled( true );
 
+    // TODO: set output and clipping rectangles
+
     setRasterizationTechnique( RasterizationTechnique::getDefault() );
     setOutputTechnique( OutputTechnique::getDefault() );
     setBlendingTechnique( BlendingTechnique::getDefault() );
-
-    const Dimensions dimensions =
-        RenderingWindow::getInstance()->getDimensions();
-    _clippingRectangle.width = _outputRectangle.width = dimensions.width;
-    _clippingRectangle.height = _outputRectangle.height = dimensions.height;
 
     _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
     _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();
@@ -98,14 +92,6 @@ void RenderingSystemOgl::initialize() {
 
     const size_t rootBufferSize = 128;
     _rootBufferData.resize( rootBufferSize );
-}
-
-void RenderingSystemOgl::beginFrameRendering() {
-    return;
-}
-
-void RenderingSystemOgl::endFrameRendering() {
-    return;
 }
 
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
@@ -441,10 +427,15 @@ void RenderingSystemOgl::setFramebuffer(
             width = mipLevelDimensions.width;
             height = mipLevelDimensions.height;
         } else {
-            const Dimensions windowDimensions =
-                RenderingWindow::getInstance()->getDimensions();
-            width = windowDimensions.width;
-            height = windowDimensions.height;
+            if( const Window::Pointer window = getOutputWindow() ) {
+                const Dimensions windowDimensions = window->getDimensions();
+
+                width = windowDimensions.width;
+                height = windowDimensions.height;
+            } else {
+                width = 0;
+                height = 0;
+            }
         }
 
         setOutputRectangle( {0, 0, width, height} );

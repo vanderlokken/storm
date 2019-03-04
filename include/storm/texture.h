@@ -195,7 +195,7 @@ public:
     enum class FileFormat {
         DdsStrict,
         Dds,
-        Png // libpng support is optional and disabled by default
+        Png
     };
 
     enum class ColorSpace {

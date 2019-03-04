@@ -1,10 +1,12 @@
+#include <chrono>
+#include <iostream>
+
 #include <storm/camera.h>
-#include <storm/clock.h>
 #include <storm/exception.h>
 #include <storm/matrix.h>
 #include <storm/quaternion.h>
 #include <storm/rendering_system.h>
-#include <storm/rendering_window.h>
+#include <storm/window.h>
 
 #include "../example_base.h"
 #include "resources.h"
@@ -63,8 +65,25 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    Example() : _frameDimensions( 640, 480 ), _meshRotationAngle( 0 ) {
-        storm::RenderingWindow::getInstance()->setWindowed( _frameDimensions );
+    explicit Example( storm::Window::Pointer window ) :
+        _observer( std::make_shared<storm::WindowObserver>() )
+    {
+        window->setWindowedMode( _frameDimensions );
+        window->addObserver( _observer );
+
+        _observer->onKeyboardKeyPressed = []( storm::KeyboardKey key ) {
+            if( key == storm::KeyboardKey::V ) {
+                storm::RenderingSystem *renderingSystem =
+                    storm::RenderingSystem::getInstance();
+                renderingSystem->setVsyncEnabled(
+                    !renderingSystem->isVsyncEnabled() );
+                std::cout << "Vsync enabled: " <<
+                    renderingSystem->isVsyncEnabled() << std::endl;
+            }
+        };
+
+        storm::RenderingSystem::getInstance()->setOutputWindow(
+            std::move(window) );
 
         _mesh = createTexturedCubeMesh();
         _texture = createCheckboardPatternTexture();
@@ -75,12 +94,14 @@ public:
         installCamera();
     }
 
-    virtual void update() {
-        const storm::Clock::TimePoint timePoint = storm::Clock::now();
-        const storm::Clock::TimeDelta timeDelta = timePoint - _timePoint;
+    void update() override {
+        const std::chrono::steady_clock::time_point timePoint =
+            std::chrono::steady_clock::now();
+        const std::chrono::duration<float> timeDelta( timePoint - _timePoint );
+
         _timePoint = timePoint;
 
-        const float rotationSpeed = 0.001f;
+        const float rotationSpeed = 1.f;
         _meshRotationAngle += timeDelta.count() * rotationSpeed;
 
         const storm::Quaternion rotationQuaternion =
@@ -93,20 +114,17 @@ public:
         _constantBuffer->setData( &_transformations );
     }
 
-    virtual void render() {
+    void render() override {
         storm::RenderingSystem *renderingSystem =
             storm::RenderingSystem::getInstance();
-
-        renderingSystem->beginFrameRendering();
 
         renderingSystem->clearColorBuffer();
         renderingSystem->clearDepthBuffer();
 
         renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->endFrameRendering();
-
         renderingSystem->getBackbuffer()->renderTexture( _colorBufferTexture );
+        renderingSystem->presentBackbuffer();
     }
 
 private:
@@ -161,7 +179,7 @@ private:
         storm::Matrix world;
     } _transformations;
 
-    storm::Dimensions _frameDimensions;
+    storm::Dimensions _frameDimensions = {640, 480};
 
     storm::Texture::Pointer _colorBufferTexture;
 
@@ -171,11 +189,13 @@ private:
 
     storm::Buffer::Pointer _constantBuffer;
 
-    storm::Clock::TimePoint _timePoint;
+    std::chrono::steady_clock::time_point _timePoint;
 
-    float _meshRotationAngle;
+    float _meshRotationAngle = 0;
+
+    std::shared_ptr<storm::WindowObserver> _observer;
 };
 
-std::unique_ptr<ExampleBase> createExample() {
-    return std::unique_ptr<ExampleBase>( new Example );
+std::unique_ptr<ExampleBase> createExample( storm::Window::Pointer window ) {
+    return std::make_unique<Example>( std::move(window) );
 }
