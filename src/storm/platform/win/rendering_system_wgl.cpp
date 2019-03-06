@@ -181,10 +181,10 @@ private:
 
             // -1 is used when the 'WGL_EXT_swap_control_tear' is supported;
             // otherwise 1 is used.
-            _wglSwapIntervalEXT( enabled ? -1 : 0 );
+            _wglSwapIntervalEXT( _isVsyncEnabled ? -1 : 0 );
 
             if( GetLastError() == ERROR_INVALID_DATA ) {
-                _wglSwapIntervalEXT( enabled ? 1 : 0 );
+                _wglSwapIntervalEXT( _isVsyncEnabled ? 1 : 0 );
             }
         }
     }
