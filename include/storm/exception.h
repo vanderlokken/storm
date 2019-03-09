@@ -12,9 +12,9 @@ public:
     Exception() = default;
     Exception(
         const char *fileName, long line, const char *functionName,
-        const std::string &description );
+        std::string_view description );
 
-    explicit Exception( const std::string &description );
+    explicit Exception( std::string_view description );
 
     void appendMessage( std::string_view message ) {
         _message += message;

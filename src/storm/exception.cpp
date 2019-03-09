@@ -6,7 +6,7 @@ namespace storm {
 
 Exception::Exception(
     const char *fileName, long line, const char *functionName,
-    const std::string &description )
+    std::string_view description )
 {
     std::stringstream messageStream;
 
@@ -16,7 +16,7 @@ Exception::Exception(
     _message = messageStream.str();
 }
 
-Exception::Exception( const std::string &description ) :
+Exception::Exception( std::string_view description ) :
     _message( description )
 {
 }

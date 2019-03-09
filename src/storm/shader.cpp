@@ -33,12 +33,13 @@ Shader::Pointer Shader::load(
 }
 
 Shader::Pointer Shader::load(
-    const std::string &filename, Type type, Format format )
+    std::string_view filename, Type type, Format format )
 {
-    std::ifstream stream( filename, std::ios::in | std::ios::binary );
+    std::ifstream stream( filename.data(), std::ios::in | std::ios::binary );
 
-    if( !stream )
+    if( !stream ) {
         throw ResourceLoadingError() << "Couldn't open " << filename;
+    }
 
     return Shader::load( stream, type, format );
 }

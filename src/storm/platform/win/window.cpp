@@ -392,7 +392,8 @@ private:
     }
 
     std::optional<LRESULT> onWmChar( WPARAM wParam, LPARAM ) {
-        runCallback( _proxyObserver->onCharacterInput, wParam );
+        runCallback(
+            _proxyObserver->onCharacterInput, static_cast<char32_t>(wParam) );
 
         return 0;
     }

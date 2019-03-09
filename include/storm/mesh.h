@@ -1,8 +1,8 @@
 #pragma once
 
-#include <istream>
+#include <iosfwd>
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include <storm/buffer.h>
 #include <storm/vertex_format.h>
@@ -30,7 +30,7 @@ public:
 
     static Pointer create( const Description& );
     static Pointer load( std::istream &stream );
-    static Pointer load( const std::string &filename );
+    static Pointer load( std::string_view filename );
 
     // Returns a mesh that covers entire screen in normalized device
     // coordinates. Vertices have no attributes besides positions.

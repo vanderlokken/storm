@@ -27,9 +27,9 @@ Texture::Pointer Texture::load(
 }
 
 Texture::Pointer Texture::load(
-    const std::string &filename, const LoadingParameters &parameters )
+    std::string_view filename, const LoadingParameters &parameters )
 {
-    std::ifstream stream( filename, std::ios::in | std::ios::binary );
+    std::ifstream stream( filename.data(), std::ios::in | std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;

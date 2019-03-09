@@ -1,8 +1,8 @@
 #pragma once
 
-#include <istream>
+#include <iosfwd>
 #include <memory>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include <storm/buffer.h>
@@ -29,7 +29,7 @@ public:
 
     typedef std::shared_ptr<void> ValueHandle;
 
-    static Shader::Pointer create( const std::string &sourceCode, Type type );
+    static Shader::Pointer create( std::string_view sourceCode, Type type );
 
     // This method can create a shader from binary representation, returned by
     // the 'getBinaryRepresentation' method. A change in hardware or software
@@ -40,7 +40,7 @@ public:
 
     static Shader::Pointer load( std::istream &stream, Type type,
         Format format = Format::Source );
-    static Shader::Pointer load( const std::string &filename, Type type,
+    static Shader::Pointer load( std::string_view filename, Type type,
         Format format = Format::Source );
 
     virtual ~Shader() { }
@@ -61,8 +61,7 @@ public:
     // '_root_0', '_root_1', '_root_2', etc., are bound to the root buffer with
     // offsets 0, 16, 32, etc. Use the 'RenderingSystem::setRootBufferData'
     // method to set their values.
-    virtual ValueHandle getValueHandle(
-        const std::string &identifier ) const = 0;
+    virtual ValueHandle getValueHandle( std::string_view identifier ) const = 0;
 
     // The following methods throw 'ShaderValueLookupError'-typed exceptions
     // when the specified value handle is invalid.
@@ -70,15 +69,15 @@ public:
     virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;
 
-    void setValue( const std::string &identifier, Buffer::Pointer buffer ) {
+    void setValue( std::string_view identifier, Buffer::Pointer buffer ) {
         setValue( getValueHandle(identifier), buffer );
     }
 
-    void setValue( const std::string &identifier, Sampler::Pointer sampler ) {
+    void setValue( std::string_view identifier, Sampler::Pointer sampler ) {
         setValue( getValueHandle(identifier), sampler );
     }
 
-    void setValue( const std::string &identifier, Texture::Pointer texture ) {
+    void setValue( std::string_view identifier, Texture::Pointer texture ) {
         setValue( getValueHandle(identifier), texture );
     }
 };

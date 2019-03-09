@@ -19,14 +19,14 @@ public:
 class ShaderOgl : public Shader {
     NONCOPYABLE( ShaderOgl );
 public:
-    ShaderOgl( const std::string &sourceCode, Type type );
+    ShaderOgl( std::string_view sourceCode, Type type );
     ShaderOgl( const std::vector<unsigned char> &binary, Type type );
 
     virtual Type getType() const;
 
     virtual std::vector<unsigned char> getBinaryRepresentation() const;
 
-    virtual ValueHandle getValueHandle( const std::string &identifier ) const;
+    virtual ValueHandle getValueHandle( std::string_view identifier ) const;
 
     virtual void setValue( ValueHandle handle, Buffer::Pointer );
     virtual void setValue( ValueHandle handle, Sampler::Pointer );

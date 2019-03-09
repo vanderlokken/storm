@@ -1,8 +1,8 @@
 #pragma once
 
-#include <istream>
+#include <iosfwd>
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include <storm/resource_type.h>
 
@@ -213,7 +213,7 @@ public:
     static Pointer load(
         std::istream &stream, const LoadingParameters &parameters );
     static Pointer load(
-        const std::string &filename, const LoadingParameters &parameters );
+        std::string_view filename, const LoadingParameters &parameters );
 
     virtual ~Texture() {}
 

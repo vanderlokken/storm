@@ -74,8 +74,8 @@ Mesh::Pointer Mesh::load( std::istream &stream ) {
     }
 }
 
-Mesh::Pointer Mesh::load( const std::string &filename ) {
-    std::ifstream stream( filename, std::ios::binary );
+Mesh::Pointer Mesh::load( std::string_view filename ) {
+    std::ifstream stream( filename.data(), std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;

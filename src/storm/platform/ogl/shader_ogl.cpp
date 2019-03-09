@@ -127,9 +127,9 @@ ProgramHandleOgl::~ProgramHandleOgl() {
 
 // ShaderOgl
 
-ShaderOgl::ShaderOgl( const std::string &sourceCode, Type type ) :
+ShaderOgl::ShaderOgl( std::string_view sourceCode, Type type ) :
     _type( type ),
-    _handle( convertType(type), sourceCode.c_str() )
+    _handle( convertType(type), sourceCode.data() )
 {
     if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE ) {
         std::string log( getProgramParameter(GL_INFO_LOG_LENGTH), 0 );
@@ -218,10 +218,10 @@ std::vector<unsigned char> ShaderOgl::getBinaryRepresentation() const {
 }
 
 Shader::ValueHandle ShaderOgl::getValueHandle(
-    const std::string &identifier ) const
+    std::string_view identifier ) const
 {
     const GLint location =
-        ::glGetUniformLocation( _handle, identifier.c_str() );
+        ::glGetUniformLocation( _handle, identifier.data() );
     checkResult( "::glGetUniformLocation" );
 
     if( location != -1 ) {
@@ -242,11 +242,12 @@ Shader::ValueHandle ShaderOgl::getValueHandle(
     }
 
     const GLuint blockIndex =
-        ::glGetUniformBlockIndex( _handle, identifier.c_str() );
+        ::glGetUniformBlockIndex( _handle, identifier.data() );
     checkResult( "::glGetUniformBlockIndex" );
 
-    if( blockIndex == GL_INVALID_INDEX )
+    if( blockIndex == GL_INVALID_INDEX ) {
         return nullptr;
+    }
 
     const auto valueHandle = std::make_shared<ValueHandleImplementation>();
     valueHandle->shader = this;
@@ -390,9 +391,9 @@ void ShaderOgl::setupSamplersBinding() {
         _handle, activeUniforms, indices.data(), GL_UNIFORM_SIZE, &sizes[0] );
     checkResult( "::glGetActiveUniformsiv" );
 
-    auto mapUniform = [this]( const std::string &identifier ) {
+    auto mapUniform = [this]( std::string_view identifier ) {
         const GLint location =
-            ::glGetUniformLocation( _handle, identifier.c_str() );
+            ::glGetUniformLocation( _handle, identifier.data() );
         checkResult( "::glGetUniformLocation" );
 
         const size_t textureUnit = _textures.size();
@@ -432,7 +433,7 @@ void ShaderOgl::setupSamplersBinding() {
                 // returned
 
                 // Copy identifier characters before the first '\0' occurrence
-                std::string elementIdentifier( identifier.c_str() );
+                std::string elementIdentifier( identifier.data() );
 
                 // Replace zero in "identifier[0]" with an actual element index
                 elementIdentifier.replace(
@@ -472,7 +473,7 @@ void ShaderOgl::setupRootUniformsBinding() {
         const std::string identifier =
             "_root_" + std::to_string( rootUniformIndex );
         _rootUniformLocations[rootUniformIndex] =
-            ::glGetUniformLocation( _handle, identifier.c_str() );
+            ::glGetUniformLocation( _handle, identifier.data() );
         checkResult( "::glGetUniformLocation" );
     }
 }
@@ -500,7 +501,7 @@ GLenum ShaderOgl::convertType( Type type ) {
     }
 }
 
-Shader::Pointer Shader::create( const std::string &sourceCode, Type type ) {
+Shader::Pointer Shader::create( std::string_view sourceCode, Type type ) {
     RenderingSystemOgl::installOpenGlContext();
 
     return std::make_shared< ShaderOgl >( sourceCode, type );
