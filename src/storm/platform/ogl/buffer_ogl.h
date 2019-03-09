@@ -12,7 +12,6 @@ public:
 };
 
 class BufferOgl : public Buffer {
-    NONCOPYABLE( BufferOgl );
 public:
     BufferOgl( const Description&, const void *data );
 

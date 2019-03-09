@@ -12,7 +12,6 @@ public:
 };
 
 class TextureOgl : public Texture {
-    NONCOPYABLE( TextureOgl );
 public:
     TextureOgl( const Description& );
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <storm/noncopyable.h>
 #include <storm/platform/ogl/api_ogl.h>
 #include <storm/platform/ogl/handle_ogl.h>
 #include <storm/sampler.h>
@@ -14,7 +13,6 @@ public:
 };
 
 class SamplerOgl : public Sampler {
-    NONCOPYABLE( SamplerOgl );
 public:
     SamplerOgl( const Description& );
 

@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <storm/noncopyable.h>
 #include <storm/platform/ogl/handle_ogl.h>
 #include <storm/shader.h>
 
@@ -19,7 +18,6 @@ public:
 };
 
 class ShaderOgl : public Shader {
-    NONCOPYABLE( ShaderOgl );
 public:
     ShaderOgl( std::string_view sourceCode, Type type );
     ShaderOgl( const std::vector<unsigned char> &binary, Type type );

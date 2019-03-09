@@ -1,16 +1,19 @@
 #pragma once
 
-#include <storm/noncopyable.h>
 #include <storm/platform/ogl/api_ogl.h>
 
 namespace storm {
 
 class HandleOgl {
-    NONCOPYABLE( HandleOgl );
 public:
     HandleOgl() : _handle( 0 ) {
         return;
     }
+
+    HandleOgl(
+        const HandleOgl& ) = delete;
+    HandleOgl& operator = (
+        const HandleOgl& ) = delete;
 
     virtual ~HandleOgl() {
         return;
