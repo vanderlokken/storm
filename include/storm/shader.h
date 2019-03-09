@@ -7,6 +7,7 @@
 
 #include <storm/buffer.h>
 #include <storm/exception.h>
+#include <storm/identifier.h>
 #include <storm/sampler.h>
 #include <storm/texture.h>
 
@@ -61,13 +62,17 @@ public:
     // '_root_0', '_root_1', '_root_2', etc., are bound to the root buffer with
     // offsets 0, 16, 32, etc. Use the 'RenderingSystem::setRootBufferData'
     // method to set their values.
-    virtual ValueHandle getValueHandle( std::string_view identifier ) const = 0;
+    virtual ValueHandle getValueHandle( Identifier identifier ) const = 0;
 
     // The following methods throw 'ShaderValueLookupError'-typed exceptions
     // when the specified value handle is invalid.
     virtual void setValue( ValueHandle handle, Buffer::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Sampler::Pointer ) = 0;
     virtual void setValue( ValueHandle handle, Texture::Pointer ) = 0;
+
+    ValueHandle getValueHandle( std::string_view identifier ) const {
+        return getValueHandle( Identifier::fromStringView(identifier) );
+    }
 
     void setValue( std::string_view identifier, Buffer::Pointer buffer ) {
         setValue( getValueHandle(identifier), buffer );

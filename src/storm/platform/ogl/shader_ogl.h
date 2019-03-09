@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <storm/noncopyable.h>
@@ -26,7 +28,7 @@ public:
 
     virtual std::vector<unsigned char> getBinaryRepresentation() const;
 
-    virtual ValueHandle getValueHandle( std::string_view identifier ) const;
+    virtual ValueHandle getValueHandle( Identifier identifier ) const;
 
     virtual void setValue( ValueHandle handle, Buffer::Pointer );
     virtual void setValue( ValueHandle handle, Sampler::Pointer );
@@ -50,6 +52,8 @@ private:
 
     void validateValueHandle( ValueHandle handle ) const;
 
+    bool isInstalled() const;
+
     static GLenum convertType( Type );
 
     Type _type;
@@ -65,6 +69,8 @@ private:
     std::vector<Buffer::Pointer> _buffers;
 
     std::vector<GLint> _rootUniformLocations;
+
+    std::unordered_map<Identifier, ValueHandle> _valueHandles;
 };
 
 }
