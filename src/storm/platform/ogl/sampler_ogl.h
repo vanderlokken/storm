@@ -18,7 +18,7 @@ class SamplerOgl : public Sampler {
 public:
     SamplerOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     const SamplerHandleOgl& getHandle() const;
 

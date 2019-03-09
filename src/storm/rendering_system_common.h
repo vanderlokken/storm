@@ -6,9 +6,9 @@ namespace storm {
 
 class RenderingSystemCommon : public RenderingSystem {
 public:
-    virtual Shader::Pointer getShader( Shader::Type ) const override;
-    virtual void setShader( Shader::Pointer ) override;
-    virtual void resetShader( Shader::Type ) override;
+    Shader::Pointer getShader( Shader::Type ) const override;
+    void setShader( Shader::Pointer ) override;
+    void resetShader( Shader::Type ) override;
 
 protected:
     Shader::Pointer _vertexShader;

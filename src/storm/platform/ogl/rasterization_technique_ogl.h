@@ -9,7 +9,7 @@ class RasterizationTechniqueOgl : public RasterizationTechnique {
 public:
     RasterizationTechniqueOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     GLenum getCullMode() const;
     GLenum getFillMode() const;

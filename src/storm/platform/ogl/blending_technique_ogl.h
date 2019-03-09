@@ -15,7 +15,7 @@ public:
 
     BlendingTechniqueOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     EquationOgl getColorEquation() const;
     EquationOgl getAlphaEquation() const;

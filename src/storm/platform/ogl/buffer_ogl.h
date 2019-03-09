@@ -16,10 +16,10 @@ class BufferOgl : public Buffer {
 public:
     BufferOgl( const Description&, const void *data );
 
-    virtual void getData( size_t offset, size_t size, void *data ) const;
-    virtual void setData( size_t offset, size_t size, const void *data );
+    void getData( size_t offset, size_t size, void *data ) const override;
+    void setData( size_t offset, size_t size, const void *data ) override;
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     const BufferHandleOgl& getHandle() const;
 

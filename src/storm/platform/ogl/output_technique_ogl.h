@@ -34,8 +34,8 @@ public:
 
     OutputTechniqueOgl( const OutputTechnique::Description& );
 
-    virtual const OutputTechnique::Description& getDescription() const;
-    virtual const Description& getNativeDescription() const;
+    const OutputTechnique::Description& getDescription() const override;
+    const Description& getNativeDescription() const;
 
 private:
     static GLenum convertStencilOperation( StencilOperation );

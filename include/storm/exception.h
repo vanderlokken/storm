@@ -20,7 +20,7 @@ public:
         _message += message;
     }
 
-    virtual const char* what() const noexcept( true );
+    const char* what() const noexcept( true ) override;
 
 private:
     std::string _message;

@@ -16,25 +16,25 @@ class TextureOgl : public Texture {
 public:
     TextureOgl( const Description& );
 
-    virtual void getTexels(
-        unsigned int mipLevel, size_t size, void *texels ) const;
+    void getTexels(
+        unsigned int mipLevel, size_t size, void *texels ) const override;
 
-    virtual void setTexels(
-        const Separate1dRegion &region, const void *texels );
-    virtual void setTexels(
-        const Separate2dRegion &region, const void *texels );
-    virtual void setTexels(
-        const Separate3dRegion &region, const void *texels );
-    virtual void setTexels(
-        const Layered1dRegion &region, const void *texels );
-    virtual void setTexels(
-        const Layered2dRegion &region, const void *texels );
-    virtual void setTexels(
-        const CubeMapRegion &region, const void *texels );
+    void setTexels(
+        const Separate1dRegion &region, const void *texels ) override;
+    void setTexels(
+        const Separate2dRegion &region, const void *texels ) override;
+    void setTexels(
+        const Separate3dRegion &region, const void *texels ) override;
+    void setTexels(
+        const Layered1dRegion &region, const void *texels ) override;
+    void setTexels(
+        const Layered2dRegion &region, const void *texels ) override;
+    void setTexels(
+        const CubeMapRegion &region, const void *texels ) override;
 
-    virtual void generateMipMap();
+    void generateMipMap() override;
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     const TextureHandleOgl& getHandle() const;
 

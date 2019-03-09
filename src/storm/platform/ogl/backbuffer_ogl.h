@@ -7,8 +7,8 @@ namespace storm {
 
 class BackbufferOgl : public Backbuffer {
 public:
-    virtual void renderTexture(
-        Texture::Pointer, unsigned int mipLevel, unsigned int layer );
+    void renderTexture(
+        Texture::Pointer, unsigned int mipLevel, unsigned int layer ) override;
 
 private:
     FramebufferHandleOgl _copyFramebuffer;

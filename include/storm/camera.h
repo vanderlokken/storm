@@ -64,7 +64,7 @@ public:
 
     float getVerticalFieldOfView() const;
 
-    virtual Matrix getProjectionTransformation() const;
+    Matrix getProjectionTransformation() const override;
 
 private:
     float _frameAspectRatio;
@@ -78,7 +78,7 @@ public:
     Vector2d getFrameDimensions() const;
     void setFrameDimensions( Vector2d );
 
-    virtual Matrix getProjectionTransformation() const;
+    Matrix getProjectionTransformation() const override;
 
 private:
     Vector2d _frameDimensions;

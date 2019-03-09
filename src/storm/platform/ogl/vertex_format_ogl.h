@@ -9,7 +9,7 @@ class VertexFormatOgl : public VertexFormat {
 public:
     VertexFormatOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     void install() const;
 

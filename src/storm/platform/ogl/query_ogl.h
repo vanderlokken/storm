@@ -15,12 +15,12 @@ class GpuTimeIntervalQueryOgl : public GpuTimeIntervalQuery {
 public:
     GpuTimeIntervalQueryOgl();
 
-    virtual void begin();
-    virtual void end();
+    void begin() override;
+    void end() override;
 
-    virtual bool isResultReady() const;
+    bool isResultReady() const override;
 
-    virtual std::chrono::nanoseconds getResult() const;
+    std::chrono::nanoseconds getResult() const override;
 
 private:
     QueryHandleOgl _beginTimestampQueryHandle;

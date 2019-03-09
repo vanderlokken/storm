@@ -18,42 +18,42 @@ class VertexArrayHandleOgl;
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
-    virtual void renderMesh( Mesh::Pointer mesh, unsigned count );
-    virtual void renderGenerated(
-        unsigned int vertexCount, Mesh::PrimitiveTopology );
+    void renderMesh( Mesh::Pointer mesh, unsigned count ) override;
+    void renderGenerated(
+        unsigned int vertexCount, Mesh::PrimitiveTopology ) override;
 
-    virtual void setShader( Shader::Pointer );
-    virtual void resetShader( Shader::Type );
+    void setShader( Shader::Pointer ) override;
+    void resetShader( Shader::Type ) override;
 
-    virtual size_t getRootBufferSize() const;
-    virtual void setRootBufferData(
-        size_t offset, size_t size, const void *data );
+    size_t getRootBufferSize() const override;
+    void setRootBufferData(
+        size_t offset, size_t size, const void *data ) override;
 
-    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const;
-    virtual OutputTechnique::Pointer getOutputTechnique() const;
-    virtual BlendingTechnique::Pointer getBlendingTechnique() const;
+    RasterizationTechnique::Pointer getRasterizationTechnique() const override;
+    OutputTechnique::Pointer getOutputTechnique() const override;
+    BlendingTechnique::Pointer getBlendingTechnique() const override;
 
-    virtual void setRasterizationTechnique( RasterizationTechnique::Pointer );
-    virtual void setOutputTechnique( OutputTechnique::Pointer );
-    virtual void setBlendingTechnique( BlendingTechnique::Pointer );
+    void setRasterizationTechnique( RasterizationTechnique::Pointer ) override;
+    void setOutputTechnique( OutputTechnique::Pointer ) override;
+    void setBlendingTechnique( BlendingTechnique::Pointer ) override;
 
-    virtual const Rectangle& getClippingRectangle() const;
-    virtual const Rectangle& getOutputRectangle() const;
+    const Rectangle& getClippingRectangle() const override;
+    const Rectangle& getOutputRectangle() const override;
 
-    virtual void setClippingRectangle( const Rectangle& );
-    virtual void setOutputRectangle( const Rectangle& );
+    void setClippingRectangle( const Rectangle& ) override;
+    void setOutputRectangle( const Rectangle& ) override;
 
-    virtual Framebuffer::Pointer getFramebuffer() const;
-    virtual void setFramebuffer(
-        Framebuffer::Pointer, bool preserveOutputRectangle );
+    Framebuffer::Pointer getFramebuffer() const override;
+    void setFramebuffer(
+        Framebuffer::Pointer, bool preserveOutputRectangle ) override;
 
-    virtual void clearColorBuffer( const Color &color = Color::Black );
-    virtual void clearDepthBuffer( float depth = 1.0f );
-    virtual void clearStencilBuffer( unsigned int stencil = 0 );
+    void clearColorBuffer( const Color &color = Color::Black ) override;
+    void clearDepthBuffer( float depth = 1.0f ) override;
+    void clearStencilBuffer( unsigned int stencil = 0 ) override;
 
-    virtual Backbuffer::Pointer getBackbuffer() const;
+    Backbuffer::Pointer getBackbuffer() const override;
 
-    virtual std::string getDebugMessageLog() const;
+    std::string getDebugMessageLog() const override;
 
     // This method should be called to prevent situations when OpenGL API is
     // being accessed with no context being installed.

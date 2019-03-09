@@ -24,7 +24,7 @@ class FramebufferOgl : public Framebuffer {
 public:
     FramebufferOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     const FramebufferHandleOgl& getHandle() const;
 

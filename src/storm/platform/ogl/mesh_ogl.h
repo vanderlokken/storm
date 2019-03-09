@@ -15,7 +15,7 @@ class MeshOgl : public Mesh {
 public:
     MeshOgl( const Description& );
 
-    virtual const Description& getDescription() const;
+    const Description& getDescription() const override;
 
     GLenum getPrimitiveTopology() const;
     const VertexArrayHandleOgl& getHandle() const;

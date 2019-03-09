@@ -24,15 +24,15 @@ public:
     ShaderOgl( std::string_view sourceCode, Type type );
     ShaderOgl( const std::vector<unsigned char> &binary, Type type );
 
-    virtual Type getType() const;
+    Type getType() const override;
 
-    virtual std::vector<unsigned char> getBinaryRepresentation() const;
+    std::vector<unsigned char> getBinaryRepresentation() const override;
 
-    virtual ValueHandle getValueHandle( Identifier identifier ) const;
+    ValueHandle getValueHandle( Identifier identifier ) const override;
 
-    virtual void setValue( ValueHandle handle, Buffer::Pointer );
-    virtual void setValue( ValueHandle handle, Sampler::Pointer );
-    virtual void setValue( ValueHandle handle, Texture::Pointer );
+    void setValue( ValueHandle handle, Buffer::Pointer ) override;
+    void setValue( ValueHandle handle, Sampler::Pointer ) override;
+    void setValue( ValueHandle handle, Texture::Pointer ) override;
 
     const ProgramHandleOgl& getHandle() const;
 
