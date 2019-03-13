@@ -15,6 +15,9 @@ struct Color {
     static const Color Black;
     static const Color White;
 
+    static const Color BlackTransparent;
+    static const Color WhiteTransparent;
+
     float r;
     float g;
     float b;
@@ -54,6 +57,9 @@ public:
 
     static const CompressedColor Black;
     static const CompressedColor White;
+
+    static const CompressedColor BlackTransparent;
+    static const CompressedColor WhiteTransparent;
 
     operator Color() const;
 
