@@ -1,7 +1,7 @@
 #include <storm/platform/ogl/api_ogl.h>
 
-#include <map>
-#include <string>
+#include <string_view>
+#include <unordered_map>
 
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/texture_storage_ogl.h>
@@ -1244,7 +1244,7 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
         ::glGetIntegerv( GL_NUM_EXTENSIONS, &extensionsNumber );
         checkResult( "::glGetIntegerv" );
 
-        const std::map< std::string, bool* > extensionSupport = {
+        const std::unordered_map<std::string_view, bool*> extensionSupport = {
             {
                 "GL_ARB_buffer_storage",
                 &status.ARB_buffer_storage
@@ -1252,6 +1252,10 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
             {
                 "GL_ARB_get_program_binary",
                 &status.ARB_get_program_binary
+            },
+            {
+                "GL_ARB_invalidate_subdata",
+                &status.ARB_invalidate_subdata
             },
             {
                 "GL_ARB_multi_bind",

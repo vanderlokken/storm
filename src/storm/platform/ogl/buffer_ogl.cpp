@@ -55,6 +55,11 @@ void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
     checkResult( "::glBindBuffer" );
 
+    if( getOpenGlSupportStatus().ARB_invalidate_subdata ) {
+        ::glInvalidateBufferSubData( _handle, offset, size );
+        checkResult( "::glInvalidateBufferSubData" );
+    }
+
     ::glBufferSubData( GL_COPY_WRITE_BUFFER, offset, size, data );
     checkResult( "::glBufferSubData" );
 }
