@@ -47,24 +47,27 @@ public:
     RenderingSystemGlx() :
         _defaultWindow( Window::create() )
     {
-        _glXCreateContextAttribsARB =
-            loadExtensionFunction<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
-                "glXCreateContextAttribsARB", "GLX_ARB_create_context" );
-
-        try {
-            _glXSwapIntervalEXT =
-                loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
-                    "glXSwapIntervalEXT", "GLX_EXT_swap_control" );
-        } catch( const SystemRequirementsNotMet& ) {
-            // Ignore
+        if( getGlxSupportStatus().ARB_create_context ) {
+            _glXCreateContextAttribsARB =
+                loadExtensionFunction<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
+                    "glXCreateContextAttribsARB" );
         }
 
-        try {
+        if( getGlxSupportStatus().EXT_swap_control ) {
+            _glXSwapIntervalEXT =
+                loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
+                    "glXSwapIntervalEXT" );
+        }
+
+        if( getGlxSupportStatus().MESA_swap_control ) {
             _glXSwapIntervalMESA =
                 loadExtensionFunction<PFNGLXSWAPINTERVALMESAPROC>(
-                    "glXSwapIntervalMESA", "GLX_MESA_swap_control" );
-        } catch( const SystemRequirementsNotMet& ) {
-            // Ignore
+                    "glXSwapIntervalMESA" );
+        }
+
+        if( !_glXCreateContextAttribsARB ) {
+            throw SystemRequirementsNotMet() << "Required OpenGL extension"
+                "'GLX_ARB_create_context' is not supported";
         }
 
         const int contextAttributes[] = {
@@ -130,35 +133,12 @@ public:
 
 private:
     template <class FuntionPointer>
-    FuntionPointer loadExtensionFunction(
-        std::string_view functionName, std::string_view extensionName ) const
+    static FuntionPointer loadExtensionFunction(
+        std::string_view functionName )
     {
-        std::string_view extensions =
-            glXQueryExtensionsString( _display, XDefaultScreen(_display) );
-
-        bool extensionFound = false;
-        while( !extensionFound && !extensions.empty() ) {
-            const std::string_view extension =
-                extensions.substr( 0, extensions.find(" ") );
-
-            const bool hasSubsequentSpace =
-                extension.size() != extensions.size();
-
-            extensionFound = extension == extensionName;
-            extensions = extensions.substr(
-                extension.size() + (hasSubsequentSpace ? 1 : 0) );
-        }
-
-        const FuntionPointer function = reinterpret_cast<FuntionPointer>(
+        return reinterpret_cast<FuntionPointer>(
             glXGetProcAddress(
                 reinterpret_cast<const unsigned char*>(functionName.data())) );
-
-        if( extensionFound && function ) {
-            return function;
-        }
-
-        throw SystemRequirementsNotMet() <<
-            "The '" << extensionName << "' extension is not supported";
     }
 
     GLXFBConfig chooseFramebufferConfig() const {

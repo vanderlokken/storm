@@ -90,16 +90,24 @@ public:
 
         wglMakeCurrent( deviceContext, renderingContext );
 
-        _wglCreateContextAttribsARB =
-            loadExtensionFunction<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
-                "wglCreateContextAttribsARB", "WGL_ARB_create_context" );
-
-        try {
+        if( getWglSupportStatus().ARB_create_context ) {
+            _wglCreateContextAttribsARB =
+                reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
+                    wglGetProcAddress("wglCreateContextAttribsARB") );
+        }
+        if( getWglSupportStatus().EXT_swap_control ) {
             _wglSwapIntervalEXT =
-                loadExtensionFunction<PFNWGLSWAPINTERVALEXTPROC>(
-                    "wglSwapIntervalEXT", "WGL_EXT_swap_control" );
-        } catch( const SystemRequirementsNotMet& ) {
-            // Ignore
+                reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(
+                    wglGetProcAddress("wglSwapIntervalEXT") );
+        }
+
+        if( !getWglSupportStatus().ARB_extensions_string ) {
+            throw SystemRequirementsNotMet() << "Required OpenGL extension"
+                "'WGL_ARB_extensions_string' is not supported";
+        }
+        if( !_wglCreateContextAttribsARB ) {
+            throw SystemRequirementsNotMet() << "Required OpenGL extension"
+                "'WGL_ARB_create_context' is not supported";
         }
 
         const int contextAttributes[] = {
@@ -157,19 +165,6 @@ public:
     }
 
 private:
-    template <class FuntionPointer>
-    static FuntionPointer loadExtensionFunction(
-        std::string_view functionName, std::string_view extensionName )
-    {
-        if( const FuntionPointer function = reinterpret_cast<FuntionPointer>(
-                wglGetProcAddress(functionName.data())) ) {
-            return function;
-        }
-
-        throw SystemRequirementsNotMet() <<
-            "The '" << extensionName << "' extension is not supported";
-    }
-
     DeviceContextHandle getDeviceContext() const {
         return DeviceContextHandle(
             _outputWindow ? *_outputWindow : *_defaultWindow );
@@ -177,13 +172,9 @@ private:
 
     void applyVsyncSettings() const {
         if( _wglSwapIntervalEXT ) {
-            SetLastError( 0 );
-
-            // -1 is used when the 'WGL_EXT_swap_control_tear' is supported;
-            // otherwise 1 is used.
-            _wglSwapIntervalEXT( _isVsyncEnabled ? -1 : 0 );
-
-            if( GetLastError() == ERROR_INVALID_DATA ) {
+            if( getWglSupportStatus().EXT_swap_control_tear ) {
+                _wglSwapIntervalEXT( _isVsyncEnabled ? -1 : 0 );
+            } else {
                 _wglSwapIntervalEXT( _isVsyncEnabled ? 1 : 0 );
             }
         }

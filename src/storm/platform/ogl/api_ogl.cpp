@@ -6,6 +6,11 @@
 #include <storm/platform/ogl/check_result_ogl.h>
 #include <storm/platform/ogl/texture_storage_ogl.h>
 
+#ifdef _WIN32
+// Unpacked from contrib/wglext-*.tar.gz
+#include <GL/wglext.h>
+#endif
+
 #ifdef __linux__
 // To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
 #define __gl_h_
@@ -27,7 +32,7 @@ openGlFunction load( const char *functionName ) {
 
 #elif __linux__
 
-typedef void (*openGlFunction)();
+using openGlFunction = void (*)();
 
 openGlFunction load( const char *functionName ) {
     return ::glXGetProcAddress(
@@ -35,6 +40,27 @@ openGlFunction load( const char *functionName ) {
 }
 
 #endif
+
+void getSupportedExtensions(
+    std::string_view extensions,
+    const std::unordered_map<std::string_view, bool*> &extensionSupportFlags )
+{
+    while( !extensions.empty() ) {
+        const std::string_view extension =
+            extensions.substr( 0, extensions.find(" ") );
+
+        if( const auto iterator = extensionSupportFlags.find(extension);
+                iterator != extensionSupportFlags.end() ) {
+            *(iterator->second) = true;
+        }
+
+        const bool hasSubsequentSpace =
+            extension.size() != extensions.size();
+
+        extensions = extensions.substr(
+            extension.size() + (hasSubsequentSpace ? 1 : 0) );
+    }
+}
 
 } // namespace
 
@@ -1232,7 +1258,7 @@ void loadOpenGlApi() {
 }
 
 const OpenGlSupportStatus& getOpenGlSupportStatus() {
-    auto loadStatus = []() {
+    auto loadStatus = [] {
         OpenGlSupportStatus status = { OpenGlVersion(0, 0) };
 
         ::glGetIntegerv( GL_MAJOR_VERSION, &status.version.first );
@@ -1288,13 +1314,11 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
         };
 
         for( GLint index = 0; index < extensionsNumber; ++index ) {
-            const char *extensionName = reinterpret_cast< const char* >(
+            const char *extensionName = reinterpret_cast<const char*>(
                 ::glGetStringi(GL_EXTENSIONS, index) );
             checkResult( "::glGetStringi" );
 
-            auto searchResult = extensionSupport.find( extensionName );
-            if( searchResult != extensionSupport.end() )
-                *(searchResult->second) = true;
+            getSupportedExtensions( extensionName, extensionSupport );
         }
 
         return status;
@@ -1303,5 +1327,89 @@ const OpenGlSupportStatus& getOpenGlSupportStatus() {
     static const OpenGlSupportStatus openGlSupportStatus = loadStatus();
     return openGlSupportStatus;
 }
+
+#ifdef _WIN32
+
+const WglSupportStatus& getWglSupportStatus() {
+    auto loadStatus = [] {
+        WglSupportStatus status = {};
+
+        const auto wglGetExtensionsStringARB =
+            reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(
+                load("wglGetExtensionsStringARB") );
+
+        const std::string_view extensions =
+            wglGetExtensionsStringARB ?
+            wglGetExtensionsStringARB( wglGetCurrentDC() ) :
+            nullptr;
+
+        getSupportedExtensions(
+            extensions,
+            {
+                {
+                    "WGL_ARB_create_context",
+                    &status.ARB_create_context
+                },
+                {
+                    "WGL_ARB_extensions_string",
+                    &status.ARB_extensions_string
+                },
+                {
+                    "WGL_EXT_swap_control",
+                    &status.EXT_swap_control
+                },
+                {
+                    "WGL_EXT_swap_control_tear",
+                    &status.EXT_swap_control_tear
+                }
+            });
+
+        return status;
+    };
+
+    static const WglSupportStatus wglSupportStatus = loadStatus();
+    return wglSupportStatus;
+}
+
+#endif
+
+#ifdef __linux__
+
+const GlxSupportStatus& getGlxSupportStatus() {
+    auto loadStatus = [] {
+        GlxSupportStatus status = {};
+
+        Display *display = XOpenDisplay( nullptr );
+
+        const std::string_view extensions =
+            glXQueryExtensionsString( display, XDefaultScreen(display) );
+
+        getSupportedExtensions(
+            extensions,
+            {
+                {
+                    "GLX_ARB_create_context",
+                    &status.ARB_create_context
+                },
+                {
+                    "GLX_EXT_swap_control",
+                    &status.EXT_swap_control
+                },
+                {
+                    "GLX_MESA_swap_control",
+                    &status.MESA_swap_control
+                }
+            });
+
+        XCloseDisplay( display );
+
+        return status;
+    };
+
+    static const GlxSupportStatus glxSupportStatus = loadStatus();
+    return glxSupportStatus;
+}
+
+#endif
 
 } // namespace storm

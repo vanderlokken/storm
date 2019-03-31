@@ -31,6 +31,27 @@ struct OpenGlSupportStatus {
 
 const OpenGlSupportStatus& getOpenGlSupportStatus();
 
+#ifdef _WIN32
+struct WglSupportStatus {
+    bool ARB_create_context;
+    bool ARB_extensions_string;
+    bool EXT_swap_control;
+    bool EXT_swap_control_tear;
+};
+
+const WglSupportStatus& getWglSupportStatus();
+#endif
+
+#ifdef __linux__
+struct GlxSupportStatus {
+    bool ARB_create_context;
+    bool EXT_swap_control;
+    bool MESA_swap_control;
+};
+
+const GlxSupportStatus& getGlxSupportStatus();
+#endif
+
 }
 
 extern PFNGLCULLFACEPROC glCullFace;
