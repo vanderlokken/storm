@@ -541,10 +541,10 @@ private:
             }
         } else if( pressed ) {
             if( buttonIndex == 4 ) {
-                runCallback( _proxyObserver->onMouseWheelRotated, -1.0 );
+                runCallback( _proxyObserver->onMouseWheelRotated, 1.0 );
             }
             if( buttonIndex == 5 ) {
-                runCallback( _proxyObserver->onMouseWheelRotated, 1.0 );
+                runCallback( _proxyObserver->onMouseWheelRotated, -1.0 );
             }
         }
     }
