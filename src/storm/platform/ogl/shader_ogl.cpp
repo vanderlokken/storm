@@ -148,6 +148,9 @@ ShaderOgl::ShaderOgl( std::string_view sourceCode, Type type ) :
 ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
     _type( type )
 {
+    ::glProgramParameteri( _handle, GL_PROGRAM_SEPARABLE, GL_TRUE );
+    checkResult( "::glProgramParameteri" );
+
     const size_t headerSize = 2 * sizeof( GLenum );
 
     if( binary.size() > headerSize &&
