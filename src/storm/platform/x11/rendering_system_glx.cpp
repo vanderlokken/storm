@@ -164,6 +164,7 @@ private:
     GLXFBConfig chooseFramebufferConfig() const {
         const int attributes[] = {
             GLX_DOUBLEBUFFER, 1,
+            GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, 1,
             0
         };
 
