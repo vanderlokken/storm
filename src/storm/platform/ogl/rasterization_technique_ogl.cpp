@@ -4,15 +4,16 @@
 
 namespace storm {
 
-RasterizationTechniqueOgl::RasterizationTechniqueOgl( const Description &description )
-    : _description( description ),
-      _cullMode( convertCullMode(description.cullMode) ),
-      _fillMode( convertFillMode(description.fillMode) )
+RasterizationTechniqueOgl::RasterizationTechniqueOgl(
+        const Description &description ) :
+    _description( description ),
+    _cullMode( convertCullMode(description.cullMode) ),
+    _fillMode( convertFillMode(description.fillMode) )
 {
-    return;
 }
 
-const RasterizationTechnique::Description& RasterizationTechniqueOgl::getDescription() const {
+const RasterizationTechnique::Description&
+RasterizationTechniqueOgl::getDescription() const {
     return _description;
 }
 
@@ -53,7 +54,9 @@ GLenum RasterizationTechniqueOgl::convertFillMode( FillMode fillMode ) {
     }
 }
 
-RasterizationTechnique::Pointer RasterizationTechnique::create( const Description &description ) {
+RasterizationTechnique::Pointer RasterizationTechnique::create(
+    const Description &description )
+{
     return std::make_shared< RasterizationTechniqueOgl >( description );
 }
 

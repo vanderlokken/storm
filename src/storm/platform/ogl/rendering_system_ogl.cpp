@@ -148,8 +148,9 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
 
     const Shader::Type shaderType = shader->getType();
 
-    if( getShader(shaderType) == shader )
+    if( getShader(shaderType) == shader ) {
         return;
+    }
 
     RenderingSystemCommon::setShader( shader );
 
@@ -166,8 +167,9 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
 }
 
 void RenderingSystemOgl::resetShader( Shader::Type shaderType ) {
-    if( getShader(shaderType) == nullptr )
+    if( getShader(shaderType) == nullptr ) {
         return;
+    }
 
     ::glUseProgramStages( *_programPipeline, selectShaderStage(shaderType), 0 );
     checkResult( "::glUseProgramStages" );
@@ -218,7 +220,9 @@ void RenderingSystemOgl::setRasterizationTechnique(
     RasterizationTechnique::Pointer technique )
 {
     storm_assert( technique );
-    if( _rasterizationTechnique == technique ) return;
+    if( _rasterizationTechnique == technique ) {
+        return;
+    }
 
     auto nativeTechnique = std::static_pointer_cast< RasterizationTechniqueOgl >( technique );
 
@@ -266,14 +270,15 @@ void RenderingSystemOgl::setRasterizationTechnique(
     }
 
     _rasterizationTechnique = technique;
-    return;
 }
 
 void RenderingSystemOgl::setOutputTechnique(
     OutputTechnique::Pointer technique )
 {
     storm_assert( technique );
-    if( _outputTechnique == technique ) return;
+    if( _outputTechnique == technique ) {
+        return;
+    }
 
     auto nativeTechnique =
         std::static_pointer_cast< OutputTechniqueOgl >( technique );
@@ -325,14 +330,15 @@ void RenderingSystemOgl::setOutputTechnique(
     checkResult( "::glDepthMask" );
 
     _outputTechnique = technique;
-    return;
 }
 
 void RenderingSystemOgl::setBlendingTechnique(
     BlendingTechnique::Pointer technique )
 {
     storm_assert( technique );
-    if( _blendingTechnique == technique ) return;
+    if( _blendingTechnique == technique ) {
+        return;
+    }
 
     auto nativeTechnique = std::static_pointer_cast< BlendingTechniqueOgl >( technique );
 
@@ -418,8 +424,9 @@ Framebuffer::Pointer RenderingSystemOgl::getFramebuffer() const {
 void RenderingSystemOgl::setFramebuffer(
     Framebuffer::Pointer framebuffer, bool preserveOutputRectangle )
 {
-    if( _framebuffer == framebuffer )
+    if( _framebuffer == framebuffer ) {
         return;
+    }
 
     auto nativeFramebuffer =
         std::static_pointer_cast< FramebufferOgl >( framebuffer );
@@ -466,7 +473,6 @@ void RenderingSystemOgl::clearColorBuffer( const Color &color ) {
 
     ::glClear( GL_COLOR_BUFFER_BIT );
     checkResult( "::glClear" );
-    return;
 }
 
 void RenderingSystemOgl::clearDepthBuffer( float depth ) {
@@ -492,7 +498,6 @@ void RenderingSystemOgl::clearDepthBuffer( float depth ) {
         ::glDepthMask( GL_FALSE );
         checkResult( "::glDepthMask" );
     }
-    return;
 }
 
 void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
@@ -501,7 +506,6 @@ void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
 
     ::glClear( GL_STENCIL_BUFFER_BIT );
     checkResult( "::glClear" );
-    return;
 }
 
 Backbuffer::Pointer RenderingSystemOgl::getBackbuffer() const {

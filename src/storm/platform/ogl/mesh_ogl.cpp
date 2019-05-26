@@ -11,12 +11,10 @@ namespace storm {
 VertexArrayHandleOgl::VertexArrayHandleOgl() {
     ::glGenVertexArrays( 1, &_handle );
     checkResult( "::glGenVertexArrays" );
-    return;
 }
 
 VertexArrayHandleOgl::~VertexArrayHandleOgl() {
     ::glDeleteVertexArrays( 1, &_handle );
-    return;
 }
 
 MeshOgl::MeshOgl( const Description &description ) :
@@ -41,8 +39,6 @@ MeshOgl::MeshOgl( const Description &description ) :
     checkResult( "::glBindBuffer" );
 
     vertexFormat->install();
-
-    return;
 }
 
 const Mesh::Description& MeshOgl::getDescription() const {

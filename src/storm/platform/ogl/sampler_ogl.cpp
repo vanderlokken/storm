@@ -10,12 +10,10 @@ namespace storm {
 SamplerHandleOgl::SamplerHandleOgl() {
     ::glGenSamplers( 1, &_handle );
     checkResult( "::glGenSamplers" );
-    return;
 }
 
 SamplerHandleOgl::~SamplerHandleOgl() {
     ::glDeleteSamplers( 1, &_handle );
-    return;
 }
 
 SamplerOgl::SamplerOgl( const Description &description ) :

@@ -6,8 +6,9 @@ namespace storm {
 
 class HandleOgl {
 public:
-    HandleOgl() : _handle( 0 ) {
-        return;
+    HandleOgl() :
+        _handle( 0 )
+    {
     }
 
     HandleOgl(
@@ -15,9 +16,7 @@ public:
     HandleOgl& operator = (
         const HandleOgl& ) = delete;
 
-    virtual ~HandleOgl() {
-        return;
-    }
+    virtual ~HandleOgl() {}
 
     operator GLuint () const {
         return _handle;
