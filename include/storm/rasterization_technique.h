@@ -26,6 +26,7 @@ public:
         bool depthClippingEnabled;
         int depthBias;
         float slopeScaleDepthBias;
+        size_t clippingDistanceArraySize;
     };
 
     static RasterizationTechnique::Pointer create( const Description& );

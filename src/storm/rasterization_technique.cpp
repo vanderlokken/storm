@@ -10,6 +10,7 @@ RasterizationTechnique::Pointer RasterizationTechnique::getDefault() {
     description.depthClippingEnabled = true;
     description.depthBias = 0;
     description.slopeScaleDepthBias = 0;
+    description.clippingDistanceArraySize = 0;
 
     static const RasterizationTechnique::Pointer technique =
         create( description );

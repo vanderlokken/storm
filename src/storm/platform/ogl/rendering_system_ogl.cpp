@@ -249,6 +249,22 @@ void RenderingSystemOgl::setRasterizationTechnique(
         static_cast<GLfloat>(description.depthBias) );
     checkResult( "::glPolygonOffset" );
 
+    for( size_t index = 0;
+            index < description.clippingDistanceArraySize; ++index ) {
+        ::glEnable( static_cast<GLenum>(GL_CLIP_DISTANCE0 + index) );
+    }
+
+    if( _rasterizationTechnique ) {
+        const size_t previousClippingDistanceArraySize =
+            _rasterizationTechnique->getDescription().clippingDistanceArraySize;
+
+        for( size_t index = description.clippingDistanceArraySize;
+                index < previousClippingDistanceArraySize;
+                ++index ) {
+            ::glDisable( static_cast<GLenum>(GL_CLIP_DISTANCE0 + index) );
+        }
+    }
+
     _rasterizationTechnique = technique;
     return;
 }
