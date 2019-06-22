@@ -100,15 +100,15 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
     bindVertexArray( nativeMesh->getHandle() );
 
-    const auto &indexBufferDescription =
-        mesh->getDescription().indexBuffer->getDescription();
+    const size_t indexSize = mesh->getDescription().indexSize;
 
     storm_assert(
-        indexBufferDescription.elementSize == 2 ||
-        indexBufferDescription.elementSize == 4 );
+        indexSize == 2 ||
+        indexSize == 4 );
 
-    const GLuint primitiveRestartIndex =
-        (indexBufferDescription.elementSize == 2) ? 0xffff : 0xffffffff;
+    const GLuint primitiveRestartIndex = (indexSize == 2) ?
+        0xffff :
+        0xffffffff;
 
     if( _primitiveRestartIndex != primitiveRestartIndex ) {
         _primitiveRestartIndex = primitiveRestartIndex;
@@ -117,9 +117,10 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
 
     const GLenum primitiveTopology = nativeMesh->getPrimitiveTopology();
     const GLsizei indexCount = static_cast<GLsizei>(
-        indexBufferDescription.size / indexBufferDescription.elementSize );
-    const GLenum indexFormat = (indexBufferDescription.elementSize == 2) ?
-        GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+        mesh->getDescription().indexBuffer->getDescription().size / indexSize );
+    const GLenum indexFormat = (indexSize == 2) ?
+        GL_UNSIGNED_SHORT :
+        GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
 
     if( count == 1 ) {

@@ -150,7 +150,7 @@ private:
             pixelShaderSource, storm::Shader::Type::Pixel );
 
         _constantBuffer = storm::Buffer::create(
-            {sizeof(Transformations), 1, storm::ResourceType::Dynamic} );
+            {sizeof(Transformations), storm::ResourceType::Dynamic} );
 
         vertexShader->setValue( "transformations", _constantBuffer );
         pixelShader->setValue( "colorTexture", _texture );

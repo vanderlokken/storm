@@ -12,7 +12,6 @@ public:
 
     struct Description {
         size_t size;
-        size_t elementSize;
         ResourceType resourceType;
     };
 
@@ -42,7 +41,6 @@ Buffer::Pointer Buffer::create( const Container &container ) {
     Description description;
     description.size =
         sizeof( typename Container::value_type ) * container.size();
-    description.elementSize = sizeof( typename Container::value_type );
     description.resourceType = ResourceType::Static;
 
     return create( description, container.data() );

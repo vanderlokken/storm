@@ -73,6 +73,7 @@ private:
         meshDescription.vertexFormat = storm::PositionedVertex::getFormat();
         meshDescription.primitiveTopology =
             storm::Mesh::PrimitiveTopology::TriangleStrip;
+        meshDescription.indexSize = sizeof( indices.front() );
 
         _mesh = storm::Mesh::create( meshDescription );
     }

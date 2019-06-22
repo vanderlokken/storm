@@ -44,12 +44,10 @@ Mesh::Pointer parse( BinaryInputStream &stream ) {
 
     Buffer::Description vertexBufferDescription;
     vertexBufferDescription.size = vertexDataSize;
-    vertexBufferDescription.elementSize = vertexSize;
     vertexBufferDescription.resourceType = ResourceType::Static;
 
     Buffer::Description indexBufferDescription;
     indexBufferDescription.size = indexDataSize;
-    indexBufferDescription.elementSize = indexSize;
     indexBufferDescription.resourceType = ResourceType::Static;
 
     Mesh::Description meshDescription;
@@ -59,6 +57,7 @@ Mesh::Pointer parse( BinaryInputStream &stream ) {
     meshDescription.indexBuffer =
         Buffer::create( indexBufferDescription, indexData.data() );
     meshDescription.primitiveTopology = Mesh::PrimitiveTopology::TriangleList;
+    meshDescription.indexSize = indexSize;
 
     return Mesh::create( meshDescription );
 }
@@ -98,6 +97,7 @@ Mesh::Pointer Mesh::getFullscreen() {
         description.indexBuffer = Buffer::create( indices );
         description.vertexBuffer = Buffer::create( vertices );
         description.primitiveTopology = Mesh::PrimitiveTopology::TriangleStrip;
+        description.indexSize = sizeof( indices.front() );
         return Mesh::create( description );
     };
     static const Mesh::Pointer mesh = create();

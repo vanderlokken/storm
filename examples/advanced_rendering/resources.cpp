@@ -103,5 +103,6 @@ storm::Mesh::Pointer createTexturedCubeMesh() {
     description.vertexFormat = storm::OrientedTexturedVertex::getFormat();
     description.primitiveTopology =
         storm::Mesh::PrimitiveTopology::TriangleStrip;
+    description.indexSize = sizeof( indices.front() );
     return storm::Mesh::create( description );
 }

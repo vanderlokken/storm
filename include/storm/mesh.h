@@ -21,11 +21,13 @@ public:
         TriangleStrip
     };
 
+    // The allowed values for the 'indexSize' field are 2 and 4.
     struct Description {
         Buffer::Pointer indexBuffer;
         Buffer::Pointer vertexBuffer;
         VertexFormat::Pointer vertexFormat;
         PrimitiveTopology primitiveTopology;
+        size_t indexSize;
     };
 
     static Pointer create( const Description& );
