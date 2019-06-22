@@ -82,26 +82,4 @@ Mesh::Pointer Mesh::load( std::string_view filename ) {
     return Mesh::load( stream );
 }
 
-Mesh::Pointer Mesh::getFullscreen() {
-    auto create = [] {
-        const std::vector<PositionedVertex> vertices = {
-            PositionedVertex {Vector(-1.0f, -3.0f,  0.0f)},
-            PositionedVertex {Vector(-1.0f,  1.0f,  0.0f)},
-            PositionedVertex {Vector( 3.0f,  1.0f,  0.0f)}
-        };
-
-        const std::vector<uint16_t> indices = {0, 1, 2};
-
-        Mesh::Description description;
-        description.vertexFormat = PositionedVertex::getFormat();
-        description.indexBuffer = Buffer::create( indices );
-        description.vertexBuffer = Buffer::create( vertices );
-        description.primitiveTopology = Mesh::PrimitiveTopology::TriangleStrip;
-        description.indexSize = sizeof( indices.front() );
-        return Mesh::create( description );
-    };
-    static const Mesh::Pointer mesh = create();
-    return mesh;
-}
-
 }
