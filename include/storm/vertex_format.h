@@ -47,7 +47,7 @@ public:
 
     static Pointer create( const Description& );
 
-    virtual ~VertexFormat() { }
+    virtual ~VertexFormat() = default;
 
     virtual const Description& getDescription() const = 0;
 };

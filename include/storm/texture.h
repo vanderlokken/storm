@@ -215,7 +215,7 @@ public:
     static Pointer load(
         std::string_view filename, const LoadingParameters &parameters );
 
-    virtual ~Texture() {}
+    virtual ~Texture() = default;
 
     // The following structure defines cube map face order. To use specific
     // cube map face as a rendering target assign corresponding value to the

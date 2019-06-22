@@ -19,7 +19,7 @@ class RenderingSystem {
 public:
     static RenderingSystem* getInstance();
 
-    virtual ~RenderingSystem() { }
+    virtual ~RenderingSystem() = default;
 
     virtual Window::Pointer getOutputWindow() const = 0;
     virtual void setOutputWindow( Window::Pointer window ) = 0;

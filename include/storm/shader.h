@@ -44,7 +44,7 @@ public:
     static Shader::Pointer load( std::string_view filename, Type type,
         Format format = Format::Source );
 
-    virtual ~Shader() { }
+    virtual ~Shader() = default;
 
     virtual Type getType() const = 0;
 

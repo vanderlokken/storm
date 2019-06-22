@@ -36,7 +36,7 @@ public:
     // coordinates. Vertices have no attributes besides positions.
     static Pointer getFullscreen();
 
-    virtual ~Mesh() { }
+    virtual ~Mesh() = default;
 
     virtual const Description& getDescription() const = 0;
 };

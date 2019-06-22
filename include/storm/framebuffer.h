@@ -28,7 +28,7 @@ public:
     static Pointer create( Dimensions dimensions, unsigned int texelSamples,
         const std::vector<Texture::Format> &bufferFormats );
 
-    virtual ~Framebuffer() { }
+    virtual ~Framebuffer() = default;
 
     virtual const Description& getDescription() const = 0;
 };

@@ -72,7 +72,7 @@ public:
     static BlendingTechnique::Pointer getDefaultAdditive();
     static BlendingTechnique::Pointer getDefaultOverriding();
 
-    virtual ~BlendingTechnique() { }
+    virtual ~BlendingTechnique() = default;
 
     virtual const Description& getDescription() const = 0;
 };

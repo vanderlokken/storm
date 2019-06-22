@@ -34,7 +34,7 @@ public:
     static RasterizationTechnique::Pointer getDefaultWithoutCulling();
     static RasterizationTechnique::Pointer getDefaultWithoutDepthClipping();
 
-    virtual ~RasterizationTechnique() { }
+    virtual ~RasterizationTechnique() = default;
 
     virtual const Description& getDescription() const = 0;
 };

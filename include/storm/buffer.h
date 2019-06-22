@@ -21,7 +21,7 @@ public:
     template <class Container>
     static Pointer create( const Container &container );
 
-    virtual ~Buffer() { }
+    virtual ~Buffer() = default;
 
     virtual void getData( size_t offset, size_t size, void *data ) const = 0;
     virtual void setData( size_t offset, size_t size, const void *data ) = 0;

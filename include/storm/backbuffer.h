@@ -10,7 +10,7 @@ class Backbuffer {
 public:
     typedef std::shared_ptr<Backbuffer> Pointer;
 
-    virtual ~Backbuffer() { }
+    virtual ~Backbuffer() = default;
 
     // Texture requirements:
     //   * layout must be "Separate2d", "Separate2dMsaa", "Layered2d" or "Layered2dMsaa"

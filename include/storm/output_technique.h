@@ -52,7 +52,7 @@ public:
     static OutputTechnique::Pointer getDefaultWithoutDepthOutput();
     static OutputTechnique::Pointer getDefaultWithoutDepthInputOutput();
 
-    virtual ~OutputTechnique() { }
+    virtual ~OutputTechnique() = default;
 
     virtual const Description& getDescription() const = 0;
 };

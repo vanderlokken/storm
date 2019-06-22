@@ -11,7 +11,7 @@ public:
 
     static Pointer create();
 
-    virtual ~GpuTimeIntervalQuery() {}
+    virtual ~GpuTimeIntervalQuery() = default;
 
     virtual void begin() = 0;
     virtual void end() = 0;

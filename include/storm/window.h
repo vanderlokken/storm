@@ -54,7 +54,7 @@ public:
     // A created window is invisible and set to the windowed fullscreen mode.
     static Pointer create();
 
-    virtual ~Window() {}
+    virtual ~Window() = default;
 
     // This method should be called only from the thread where the window was
     // created.

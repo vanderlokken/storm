@@ -15,7 +15,7 @@ public:
 
     static std::unique_ptr<Display> create();
 
-    virtual ~Display() {}
+    virtual ~Display() = default;
 
     virtual Mode getDefaultMode() const = 0;
     virtual std::vector<Mode> getSupportedModes() const = 0;

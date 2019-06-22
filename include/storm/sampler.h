@@ -49,7 +49,7 @@ public:
     static Sampler::Pointer getDefaultWithTiling();
     static Sampler::Pointer getDefaultWithNearestFilters();
 
-    virtual ~Sampler() { }
+    virtual ~Sampler() = default;
 
     virtual const Description& getDescription() const = 0;
 };
