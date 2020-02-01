@@ -76,16 +76,20 @@ namespace storm {
 Texture::Pointer parsePng(
     BinaryInputStream &stream, const Texture::LoadingParameters &parameters )
 {
-    const std::vector<uint8_t> buffer(
-        std::istream_iterator<uint8_t> {*stream},
-        std::istream_iterator<uint8_t> {} );
+    const std::vector<char> buffer(
+        std::istreambuf_iterator<char> {*stream},
+        std::istreambuf_iterator<char> {} );
 
     uint8_t *texels = nullptr;
     unsigned width = 0;
     unsigned height = 0;
 
     if( const unsigned error = lodepng_decode32(
-            &texels, &width, &height, buffer.data(), buffer.size()) ) {
+            &texels,
+            &width,
+            &height,
+            reinterpret_cast<const uint8_t*>(buffer.data()),
+            buffer.size()) ) {
         if( texels ) {
             lodepng_free( texels );
         }
