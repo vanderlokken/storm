@@ -30,6 +30,18 @@ Sampler::Pointer Sampler::getDefaultWithTiling() {
     return sampler;
 }
 
+Sampler::Pointer Sampler::getDefaultWithMirroring() {
+    Description description = getDefault()->getDescription();
+    description.wrapModes = {
+        WrapMode::Mirrored,
+        WrapMode::Mirrored,
+        WrapMode::Mirrored
+    };
+
+    static const Sampler::Pointer sampler = create( description );
+    return sampler;
+}
+
 Sampler::Pointer Sampler::getDefaultWithNearestFilters() {
     Description description = getDefault()->getDescription();
     description.minifyingFilter = MinifyingFilter::Nearest;
