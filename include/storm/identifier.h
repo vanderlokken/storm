@@ -6,7 +6,7 @@
 
 namespace storm {
 
-// The 'Identifier' class holds either a string of a string view. It is used
+// The 'Identifier' class holds either a string or a string view. It is used
 // to implement string lookup in associative containers without making
 // temporary string copies.
 //
