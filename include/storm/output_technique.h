@@ -9,7 +9,7 @@ namespace storm {
 
 class OutputTechnique {
 public:
-    typedef std::shared_ptr<OutputTechnique> Pointer;
+    using Pointer = std::shared_ptr<OutputTechnique>;
 
     enum class StencilOperation {
         Zero,

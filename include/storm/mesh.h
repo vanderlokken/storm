@@ -11,7 +11,7 @@ namespace storm {
 
 class Mesh {
 public:
-    typedef std::shared_ptr<Mesh> Pointer;
+    using Pointer = std::shared_ptr<Mesh>;
 
     enum class PrimitiveTopology {
         PointList,

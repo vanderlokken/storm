@@ -14,7 +14,7 @@ namespace {
 Mesh::Pointer parse( BinaryInputStream &stream ) {
     const uint32_t attributeCount = stream.read<uint32_t>();
 
-    typedef VertexFormat::Attribute VertexAttribute;
+    using VertexAttribute = VertexFormat::Attribute;
 
     std::vector<VertexAttribute> attributes( attributeCount );
     for( auto &attribute : attributes ) {

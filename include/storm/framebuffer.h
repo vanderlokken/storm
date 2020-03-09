@@ -10,7 +10,7 @@ namespace storm {
 
 class Framebuffer {
 public:
-    typedef std::shared_ptr<Framebuffer> Pointer;
+    using Pointer = std::shared_ptr<Framebuffer>;
 
     struct Buffer {
         Texture::Pointer texture;

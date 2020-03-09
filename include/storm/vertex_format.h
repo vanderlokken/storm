@@ -7,7 +7,7 @@ namespace storm {
 
 class VertexFormat {
 public:
-    typedef std::shared_ptr<VertexFormat> Pointer;
+    using Pointer = std::shared_ptr<VertexFormat>;
 
     struct Attribute {
         enum class Semantics {

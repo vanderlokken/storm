@@ -8,7 +8,7 @@ namespace storm {
 
 class Backbuffer {
 public:
-    typedef std::shared_ptr<Backbuffer> Pointer;
+    using Pointer = std::shared_ptr<Backbuffer>;
 
     virtual ~Backbuffer() = default;
 

@@ -15,7 +15,7 @@ namespace storm {
 
 class Shader {
 public:
-    typedef std::shared_ptr<Shader> Pointer;
+    using Pointer = std::shared_ptr<Shader>;
 
     enum class Type {
         Vertex,
@@ -28,7 +28,7 @@ public:
         Binary
     };
 
-    typedef std::shared_ptr<void> ValueHandle;
+    using ValueHandle = std::shared_ptr<void>;
 
     static Shader::Pointer create( std::string_view sourceCode, Type type );
 

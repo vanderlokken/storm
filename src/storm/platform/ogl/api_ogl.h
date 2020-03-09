@@ -13,7 +13,7 @@ namespace storm {
 
 void loadOpenGlApi();
 
-typedef std::pair<int, int> OpenGlVersion;
+using OpenGlVersion = std::pair<int, int>;
 
 struct OpenGlSupportStatus {
     OpenGlVersion version;

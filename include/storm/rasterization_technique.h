@@ -6,7 +6,7 @@ namespace storm {
 
 class RasterizationTechnique {
 public:
-    typedef std::shared_ptr<RasterizationTechnique> Pointer;
+    using Pointer = std::shared_ptr<RasterizationTechnique>;
 
     enum class CullMode {
         Nothing,

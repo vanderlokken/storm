@@ -7,7 +7,7 @@ namespace storm {
 
 class GpuTimeIntervalQuery {
 public:
-    typedef std::shared_ptr<GpuTimeIntervalQuery> Pointer;
+    using Pointer = std::shared_ptr<GpuTimeIntervalQuery>;
 
     static Pointer create();
 

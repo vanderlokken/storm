@@ -6,7 +6,7 @@ namespace storm {
 
 class BlendingTechnique {
 public:
-    typedef std::shared_ptr<BlendingTechnique> Pointer;
+    using Pointer = std::shared_ptr<BlendingTechnique>;
 
     enum class Operation {
         // sourceColor * sourceFactor + destinationColor * destinationFactor

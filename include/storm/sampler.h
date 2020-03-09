@@ -11,7 +11,7 @@ namespace storm {
 
 class Sampler {
 public:
-    typedef std::shared_ptr<Sampler> Pointer;
+    using Pointer = std::shared_ptr<Sampler>;
 
     enum class MinifyingFilter {
         Nearest,

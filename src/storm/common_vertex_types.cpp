@@ -2,7 +2,7 @@
 
 namespace storm {
 
-typedef VertexFormat::Attribute VertexAttribute;
+using VertexAttribute = VertexFormat::Attribute;
 
 VertexFormat::Pointer PositionedVertex::getFormat() {
     static const std::vector<VertexAttribute> attributes = {

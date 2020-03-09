@@ -8,7 +8,7 @@ namespace storm {
 
 class Buffer {
 public:
-    typedef std::shared_ptr<Buffer> Pointer;
+    using Pointer = std::shared_ptr<Buffer>;
 
     struct Description {
         size_t size;

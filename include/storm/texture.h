@@ -12,7 +12,7 @@ namespace storm {
 // binary data and information how to interpret it.
 class Texture {
 public:
-    typedef std::shared_ptr<Texture> Pointer;
+    using Pointer = std::shared_ptr<Texture>;
 
     enum class Layout {
         // One-dimensional texture.
