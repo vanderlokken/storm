@@ -147,40 +147,40 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/api_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/backbuffer_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/blending_technique_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/buffer_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/condition_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/framebuffer_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/mesh_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/output_technique_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/query_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rasterization_technique_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/rendering_system_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/resource_type_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/sampler_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/shader_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/texture_storage_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/texture_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/ogl/vertex_format_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/api_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/backbuffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/blending_technique_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/buffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/condition_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/framebuffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/mesh_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/output_technique_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/query_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/rasterization_technique_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/rendering_system_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/resource_type_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/sampler_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/shader_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/texture_storage_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/texture_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/vertex_format_ogl.cpp
 )
 
 if(WIN32)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/display.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/rendering_system_wgl.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/win/window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/win/display.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/win/rendering_system_wgl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/win/window.cpp
     )
 elseif(UNIX)
     target_sources(storm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/display.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/invisible_cursor.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/keyboard_state_xkb.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/pointer_locking_region.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/rendering_system_glx.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/window.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/platform/x11/xcb_connection.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/display.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/invisible_cursor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/keyboard_state_xkb.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/pointer_locking_region.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/rendering_system_glx.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/x11/xcb_connection.cpp
     )
 endif()
 
