@@ -122,7 +122,6 @@ set_source_files_properties(
 target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/lodepng/lodepng.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/blending_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/common_vertex_types.cpp
@@ -131,9 +130,8 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/input.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/matrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/mesh.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/output_technique.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/pipeline_state.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/proxy_window_observer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rasterization_technique.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/rendering_system_common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/sampler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/shader.cpp
@@ -149,20 +147,18 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/backbuffer_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/blending_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/buffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/condition_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/framebuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/mesh_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/output_technique_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/pipeline_state_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/query_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/rasterization_technique_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/rendering_system_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/resource_type_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/sampler_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/shader_ogl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/texture_storage_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/texture_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/texture_storage_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/vertex_format_ogl.cpp
 )
 

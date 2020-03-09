@@ -29,13 +29,8 @@ public:
     void setRootBufferData(
         size_t offset, size_t size, const void *data ) override;
 
-    RasterizationTechnique::Pointer getRasterizationTechnique() const override;
-    OutputTechnique::Pointer getOutputTechnique() const override;
-    BlendingTechnique::Pointer getBlendingTechnique() const override;
-
-    void setRasterizationTechnique( RasterizationTechnique::Pointer ) override;
-    void setOutputTechnique( OutputTechnique::Pointer ) override;
-    void setBlendingTechnique( BlendingTechnique::Pointer ) override;
+    PipelineState::Pointer getPipelineState() const override;
+    void setPipelineState( PipelineState::Pointer ) override;
 
     const Rectangle& getClippingRectangle() const override;
     const Rectangle& getOutputRectangle() const override;
@@ -63,7 +58,7 @@ protected:
     void initialize();
 
 private:
-    static void setBooleanGlState( GLenum state, bool value );
+    static PipelineState::Pointer createDefaultOpenGlPipelineState();
     static GLbitfield selectShaderStage( Shader::Type shaderType );
 
     void bindVertexArray( GLuint vertexArray );
@@ -73,9 +68,7 @@ private:
     std::shared_ptr<ProgramPipelineHandleOgl> _programPipeline;
     std::shared_ptr<VertexArrayHandleOgl> _vertexArrayWithoutData;
 
-    RasterizationTechnique::Pointer _rasterizationTechnique;
-    OutputTechnique::Pointer _outputTechnique;
-    BlendingTechnique::Pointer _blendingTechnique;
+    PipelineState::Pointer _pipelineState;
 
     Rectangle _clippingRectangle;
     Rectangle _outputRectangle;
@@ -88,5 +81,7 @@ private:
 
     std::vector<uint8_t> _rootBufferData;
 };
+
+void setBooleanOpenGlState( GLenum state, bool value );
 
 }

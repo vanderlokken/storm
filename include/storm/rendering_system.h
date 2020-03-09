@@ -3,12 +3,10 @@
 #include <string>
 
 #include <storm/backbuffer.h>
-#include <storm/blending_technique.h>
 #include <storm/color.h>
 #include <storm/framebuffer.h>
 #include <storm/mesh.h>
-#include <storm/output_technique.h>
-#include <storm/rasterization_technique.h>
+#include <storm/pipeline_state.h>
 #include <storm/rectangle.h>
 #include <storm/shader.h>
 #include <storm/window.h>
@@ -40,13 +38,8 @@ public:
     virtual size_t getRootBufferSize() const = 0;
     virtual void setRootBufferData( size_t offset, size_t size, const void *data ) = 0;
 
-    virtual RasterizationTechnique::Pointer getRasterizationTechnique() const = 0;
-    virtual OutputTechnique::Pointer getOutputTechnique() const = 0;
-    virtual BlendingTechnique::Pointer getBlendingTechnique() const = 0;
-
-    virtual void setRasterizationTechnique( RasterizationTechnique::Pointer ) = 0;
-    virtual void setOutputTechnique( OutputTechnique::Pointer ) = 0;
-    virtual void setBlendingTechnique( BlendingTechnique::Pointer ) = 0;
+    virtual PipelineState::Pointer getPipelineState() const = 0;
+    virtual void setPipelineState( PipelineState::Pointer ) = 0;
 
     virtual const Rectangle& getClippingRectangle() const = 0;
     virtual const Rectangle& getOutputRectangle() const = 0;

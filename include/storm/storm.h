@@ -1,7 +1,6 @@
 #pragma once
 
 #include <storm/backbuffer.h>
-#include <storm/blending_technique.h>
 #include <storm/buffer.h>
 #include <storm/camera.h>
 #include <storm/color.h>
@@ -13,9 +12,8 @@
 #include <storm/input.h>
 #include <storm/matrix.h>
 #include <storm/mesh.h>
-#include <storm/output_technique.h>
+#include <storm/pipeline_state.h>
 #include <storm/quaternion.h>
-#include <storm/rasterization_technique.h>
 #include <storm/rectangle.h>
 #include <storm/rendering_system.h>
 #include <storm/resource_type.h>

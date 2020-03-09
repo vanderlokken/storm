@@ -6,13 +6,11 @@
 #include <storm/ogl/api_ogl.h>
 
 #include <storm/ogl/backbuffer_ogl.h>
-#include <storm/ogl/blending_technique_ogl.h>
 #include <storm/ogl/buffer_ogl.h>
 #include <storm/ogl/check_result_ogl.h>
 #include <storm/ogl/framebuffer_ogl.h>
 #include <storm/ogl/mesh_ogl.h>
-#include <storm/ogl/output_technique_ogl.h>
-#include <storm/ogl/rasterization_technique_ogl.h>
+#include <storm/ogl/pipeline_state_ogl.h>
 #include <storm/ogl/shader_ogl.h>
 
 namespace storm {
@@ -65,9 +63,9 @@ void RenderingSystemOgl::initialize() {
 
     // TODO: set output and clipping rectangles
 
-    setRasterizationTechnique( RasterizationTechnique::getDefault() );
-    setOutputTechnique( OutputTechnique::getDefault() );
-    setBlendingTechnique( BlendingTechnique::getDefault() );
+    // Replace OpenGL defaults with library defaults
+    _pipelineState = createDefaultOpenGlPipelineState();
+    setPipelineState( PipelineStateBuilder().build() );
 
     _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
     _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();
@@ -83,11 +81,14 @@ void RenderingSystemOgl::initialize() {
     _primitiveRestartIndex = 0xffff;
     ::glPrimitiveRestartIndex( _primitiveRestartIndex );
 
-    setBooleanGlState(
+    ::glFrontFace( GL_CW );
+    checkResult( "::glFrontFace" );
+
+    setBooleanOpenGlState(
         GL_PRIMITIVE_RESTART, true );
-    setBooleanGlState(
+    setBooleanOpenGlState(
         GL_TEXTURE_CUBE_MAP_SEAMLESS, isSeamlessCubemapSupported() );
-    setBooleanGlState(
+    setBooleanOpenGlState(
         GL_FRAMEBUFFER_SRGB, true );
 
     const size_t rootBufferSize = 128;
@@ -205,189 +206,19 @@ void RenderingSystemOgl::setRootBufferData(
     }
 }
 
-RasterizationTechnique::Pointer RenderingSystemOgl::getRasterizationTechnique() const {
-    return _rasterizationTechnique;
+PipelineState::Pointer RenderingSystemOgl::getPipelineState() const {
+    return _pipelineState;
 }
 
-OutputTechnique::Pointer RenderingSystemOgl::getOutputTechnique() const {
-    return _outputTechnique;
-}
-
-BlendingTechnique::Pointer RenderingSystemOgl::getBlendingTechnique() const {
-    return _blendingTechnique;
-}
-
-void RenderingSystemOgl::setRasterizationTechnique(
-    RasterizationTechnique::Pointer technique )
+void RenderingSystemOgl::setPipelineState(
+    PipelineState::Pointer pipelineState )
 {
-    storm_assert( technique );
-    if( _rasterizationTechnique == technique ) {
-        return;
+    storm_assert( pipelineState );
+
+    if( _pipelineState != pipelineState ) {
+        switchOpenGlPipelineState( *_pipelineState, *pipelineState );
+        _pipelineState = std::move( pipelineState );
     }
-
-    auto nativeTechnique = std::static_pointer_cast< RasterizationTechniqueOgl >( technique );
-
-    GLenum cullMode = nativeTechnique->getCullMode();
-    GLenum fillMode = nativeTechnique->getFillMode();
-
-    const bool cullingEnabled = (cullMode != GL_NONE);
-    setBooleanGlState( GL_CULL_FACE, cullingEnabled );
-
-    if( cullingEnabled ) {
-        ::glFrontFace( GL_CW );
-        checkResult( "::glFrontFace" );
-
-        ::glCullFace( cullMode );
-        checkResult( "::glCullFace" );
-    }
-
-    ::glPolygonMode( GL_FRONT_AND_BACK, fillMode );
-    checkResult( "::glPolygonMode" );
-
-    const auto &description = nativeTechnique->getDescription();
-
-    setBooleanGlState( GL_SCISSOR_TEST, description.rectangleClippingEnabled );
-    setBooleanGlState( GL_DEPTH_CLAMP, !description.depthClippingEnabled );
-
-    ::glPolygonOffset(
-        static_cast<GLfloat>(description.slopeScaleDepthBias),
-        static_cast<GLfloat>(description.depthBias) );
-    checkResult( "::glPolygonOffset" );
-
-    for( size_t index = 0;
-            index < description.clippingDistanceArraySize; ++index ) {
-        ::glEnable( static_cast<GLenum>(GL_CLIP_DISTANCE0 + index) );
-    }
-
-    if( _rasterizationTechnique ) {
-        const size_t previousClippingDistanceArraySize =
-            _rasterizationTechnique->getDescription().clippingDistanceArraySize;
-
-        for( size_t index = description.clippingDistanceArraySize;
-                index < previousClippingDistanceArraySize;
-                ++index ) {
-            ::glDisable( static_cast<GLenum>(GL_CLIP_DISTANCE0 + index) );
-        }
-    }
-
-    _rasterizationTechnique = technique;
-}
-
-void RenderingSystemOgl::setOutputTechnique(
-    OutputTechnique::Pointer technique )
-{
-    storm_assert( technique );
-    if( _outputTechnique == technique ) {
-        return;
-    }
-
-    auto nativeTechnique =
-        std::static_pointer_cast< OutputTechniqueOgl >( technique );
-
-    const auto &description = nativeTechnique->getNativeDescription();
-
-    const auto &depthTest = description.depthTest;
-    const auto &stencilTest = description.stencilTest;
-
-    setBooleanGlState( GL_DEPTH_TEST, depthTest.has_value() );
-    setBooleanGlState( GL_STENCIL_TEST, stencilTest.has_value() );
-
-    if( depthTest ) {
-        ::glDepthFunc( depthTest->passCondition );
-        checkResult( "::glDepthFunc" );
-    }
-
-    if( stencilTest ) {
-        ::glStencilOpSeparate(
-            GL_FRONT,
-            stencilTest->algorithmForFrontFaces.operationOnStencilTestFail,
-            stencilTest->algorithmForFrontFaces.operationOnDepthTestFail,
-            stencilTest->algorithmForFrontFaces.operationOnDepthTestPass );
-        checkResult( "::glStencilOpSeparate" );
-
-        ::glStencilOpSeparate(
-            GL_BACK,
-            stencilTest->algorithmForBackFaces.operationOnStencilTestFail,
-            stencilTest->algorithmForBackFaces.operationOnDepthTestFail,
-            stencilTest->algorithmForBackFaces.operationOnDepthTestPass );
-        checkResult( "::glStencilOpSeparate" );
-
-        ::glStencilFuncSeparate(
-            GL_FRONT,
-            stencilTest->algorithmForFrontFaces.passCondition,
-            stencilTest->referenceValue,
-            stencilTest->mask );
-        checkResult( "::glStencilFuncSeparate" );
-
-        ::glStencilFuncSeparate(
-            GL_BACK,
-            stencilTest->algorithmForBackFaces.passCondition,
-            stencilTest->referenceValue,
-            stencilTest->mask );
-        checkResult( "::glStencilFuncSeparate" );
-    }
-
-    ::glDepthMask( description.writeDepthValues );
-    checkResult( "::glDepthMask" );
-
-    _outputTechnique = technique;
-}
-
-void RenderingSystemOgl::setBlendingTechnique(
-    BlendingTechnique::Pointer technique )
-{
-    storm_assert( technique );
-    if( _blendingTechnique == technique ) {
-        return;
-    }
-
-    auto nativeTechnique = std::static_pointer_cast< BlendingTechniqueOgl >( technique );
-
-    const BlendingTechniqueOgl::EquationOgl colorEquation =
-        nativeTechnique->getColorEquation();
-    const BlendingTechniqueOgl::EquationOgl alphaEquation =
-        nativeTechnique->getAlphaEquation();
-
-    const bool blendingDisabled =
-        colorEquation.operation == GL_FUNC_ADD &&
-        alphaEquation.operation == GL_FUNC_ADD &&
-        colorEquation.sourceFactor == GL_ONE &&
-        alphaEquation.sourceFactor == GL_ONE &&
-        colorEquation.destinationFactor == GL_ZERO &&
-        alphaEquation.destinationFactor == GL_ZERO;
-    const bool blendingEnabled = !blendingDisabled;
-
-    setBooleanGlState( GL_BLEND, blendingEnabled );
-
-    if( blendingEnabled ) {
-        if( colorEquation.operation == alphaEquation.operation ) {
-            ::glBlendEquation( colorEquation.operation );
-            checkResult( "::glBlendEquation" );
-        } else {
-            ::glBlendEquationSeparate(
-                colorEquation.operation,
-                alphaEquation.operation );
-            checkResult( "::glBlendEquationSeparate" );
-        }
-
-        if( colorEquation.sourceFactor == alphaEquation.sourceFactor &&
-            colorEquation.destinationFactor == alphaEquation.destinationFactor )
-        {
-            ::glBlendFunc(
-                colorEquation.sourceFactor,
-                colorEquation.destinationFactor );
-            checkResult( "::glBlendFunc" );
-        } else {
-            ::glBlendFuncSeparate(
-                colorEquation.sourceFactor,
-                colorEquation.destinationFactor,
-                alphaEquation.sourceFactor,
-                alphaEquation.destinationFactor );
-            checkResult( "::glBlendFuncSeparate" );
-        }
-    }
-
-    _blendingTechnique = technique;
 }
 
 const Rectangle& RenderingSystemOgl::getClippingRectangle() const {
@@ -478,7 +309,7 @@ void RenderingSystemOgl::clearColorBuffer( const Color &color ) {
 
 void RenderingSystemOgl::clearDepthBuffer( float depth ) {
     const bool depthWritingEnabled =
-        _outputTechnique->getDescription().writeDepthValues;
+        _pipelineState->getDescription().writeDepthValues;
 
     if( !depthWritingEnabled ) {
         // Depth buffer writing must be temporarily enabled
@@ -566,14 +397,11 @@ void RenderingSystemOgl::bindVertexArray( GLuint vertexArray ) {
     }
 }
 
-void RenderingSystemOgl::setBooleanGlState( GLenum state, bool value ) {
-    if( value ) {
-        ::glEnable( state );
-        checkResult( "::glEnable" );
-    } else {
-        ::glDisable( state );
-        checkResult( "::glDisable" );
-    }
+PipelineState::Pointer RenderingSystemOgl::createDefaultOpenGlPipelineState() {
+    PipelineState::Description description = {};
+    description.writeDepthValues = true;
+
+    return PipelineState::create( description );
 }
 
 GLbitfield RenderingSystemOgl::selectShaderStage( Shader::Type shaderType ) {
@@ -587,6 +415,16 @@ GLbitfield RenderingSystemOgl::selectShaderStage( Shader::Type shaderType ) {
     }
     storm_assert_unreachable( "Unexpected shader type value" );
     return 0;
+}
+
+void setBooleanOpenGlState( GLenum state, bool value ) {
+    if( value ) {
+        ::glEnable( state );
+        checkResult( "::glEnable" );
+    } else {
+        ::glDisable( state );
+        checkResult( "::glDisable" );
+    }
 }
 
 }
