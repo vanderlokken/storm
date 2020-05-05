@@ -119,6 +119,9 @@ private:
             }
             _isFullscreenMode = !_isFullscreenMode;
             break;
+
+        default:
+            break;
         }
     }
 

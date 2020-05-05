@@ -105,7 +105,7 @@ public:
 
         selectXinputEvents(
             _handle,
-            {
+            (
                 XCB_INPUT_XI_EVENT_MASK_BUTTON_PRESS |
                 XCB_INPUT_XI_EVENT_MASK_BUTTON_RELEASE |
                 XCB_INPUT_XI_EVENT_MASK_FOCUS_IN |
@@ -113,13 +113,13 @@ public:
                 XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                 XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE |
                 XCB_INPUT_XI_EVENT_MASK_MOTION
-            });
+            ));
 
         selectXinputEvents(
             _connection.getDefaultScreen()->root,
-            {
+            (
                 XCB_INPUT_XI_EVENT_MASK_RAW_MOTION
-            });
+            ));
 
         enableShutdownEvent();
         removeDecorations();

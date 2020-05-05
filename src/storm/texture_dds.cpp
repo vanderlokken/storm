@@ -188,9 +188,11 @@ struct DdsFlags {
     static const uint32_t Dds = 1 << 0;
     static const uint32_t Width = 1 << 1;
     static const uint32_t Height = 1 << 2;
+    [[maybe_unused]]
     static const uint32_t Pitch = 1 << 3;
     static const uint32_t PixelFormat = 1 << 12;
     static const uint32_t MipMapCount = 1 << 17;
+    [[maybe_unused]]
     static const uint32_t LinearSize = 1 << 19;
     static const uint32_t Depth = 1 << 23;
 };
@@ -210,10 +212,13 @@ struct DdsSurfaceFlags {
 
 struct DdsPixelFormatFlags {
     static const uint32_t Alpha = 1 << 0;
+    [[maybe_unused]]
     static const uint32_t AlphaOnly = 1 << 1;
     static const uint32_t FourCC = 1 << 2;
     static const uint32_t Rgb = 1 << 6;
+    [[maybe_unused]]
     static const uint32_t Yuv = 1 << 9;
+    [[maybe_unused]]
     static const uint32_t Luminiance = 1 << 17;
 
     static const uint32_t Rgba = Alpha | Rgb;

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.1)
+cmake_minimum_required(VERSION 3.17.2)
 
 project(storm)
 
@@ -10,7 +10,7 @@ option(storm_build_examples "Whether to build examples or not" ON)
 
 add_library(storm STATIC)
 
-target_compile_features(storm PUBLIC cxx_std_17)
+target_compile_features(storm PUBLIC cxx_std_20)
 target_link_libraries(storm PRIVATE OpenGL::GL)
 target_include_directories(storm
     PUBLIC
@@ -32,7 +32,7 @@ if(UNIX)
             xcb-xinput
             xcb-xkb
     )
-    find_package(XkbCommon REQUIRED)
+    find_package(XKBCOMMON REQUIRED)
 
     # This library is not a part of default Ubuntu installation
     string(REPLACE
@@ -65,11 +65,13 @@ set_target_properties(storm PROPERTIES
     COMPILE_PDB_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(storm PROPERTIES DEBUG_POSTFIX d)
     target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4 /GR-)
     target_compile_definitions(storm PRIVATE UNICODE _UNICODE)
-elseif(CMAKE_COMPILER_IS_GNUCXX)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(storm PRIVATE -Wall $<$<CONFIG:Debug>:-g>)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(storm PRIVATE -Wall $<$<CONFIG:Debug>:-g>)
 endif()
 

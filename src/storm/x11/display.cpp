@@ -28,8 +28,8 @@ public:
             xcb_randr_get_screen_resources_unchecked(
                 _connection, _connection.getDefaultScreen()->root );
 
-        if( _screenResources = xcb_randr_get_screen_resources_reply(
-                _connection, request, nullptr) ) {
+        if( (_screenResources = xcb_randr_get_screen_resources_reply(
+                _connection, request, nullptr)) ) {
             findConnectedOutput();
         }
 
