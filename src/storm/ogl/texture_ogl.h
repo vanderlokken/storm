@@ -1,19 +1,17 @@
 #pragma once
 
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/handle_ogl.h>
 #include <storm/texture.h>
 
 namespace storm {
 
-class TextureHandleOgl : public HandleOgl {
-public:
-    TextureHandleOgl();
-    ~TextureHandleOgl();
-};
+using TextureHandleOgl = HandleOgl<GlGenTextures, GlDeleteTextures>;
 
 class TextureOgl : public Texture {
 public:
-    TextureOgl( const Description& );
+    TextureOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description );
 
     void getTexels(
         unsigned int mipLevel, size_t size, void *texels ) const override;
@@ -44,8 +42,10 @@ public:
 private:
     void validateDescription() const;
 
-    void setTexelTransferAlignment( unsigned int width ) const;
-    void resetTexelTransferAlignment() const;
+    void setTexelTransferAlignment(
+        const GpuContextOgl &gpuContext, unsigned int width ) const;
+    void resetTexelTransferAlignment(
+        const GpuContextOgl &gpuContext ) const;
 
     struct CompressedRegion {
         GLenum target;
@@ -59,7 +59,9 @@ private:
     };
 
     void setTexelsCompressed(
-        const CompressedRegion &region, const void *texels );
+        const GpuContextOgl &gpuContext,
+        const CompressedRegion &region,
+        const void *texels );
 
     static GLenum selectTarget( Layout );
 

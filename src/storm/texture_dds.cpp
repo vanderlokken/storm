@@ -477,7 +477,9 @@ DdsHeader parseDdsHeader( BinaryInputStream &stream, bool strict ) {
 }
 
 Texture::Pointer createTexture(
-    const DdsHeader &ddsHeader, const Texture::LoadingParameters &parameters )
+    GpuContext::Pointer gpuContext,
+    const DdsHeader &ddsHeader,
+    const Texture::LoadingParameters &parameters )
 {
     const DdsBasicHeader &basicHeader = ddsHeader.basicHeader;
 
@@ -498,7 +500,7 @@ Texture::Pointer createTexture(
         description.mipLevels = mipLevels;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     auto createLayered1dTexture = [&] {
@@ -510,7 +512,7 @@ Texture::Pointer createTexture(
         description.layers = ddsHeader.extendedHeader.arraySize;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     auto createSeparate2dTexture = [&] {
@@ -522,7 +524,7 @@ Texture::Pointer createTexture(
         description.mipLevels = mipLevels;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     auto createLayered2dTexture = [&] {
@@ -535,7 +537,7 @@ Texture::Pointer createTexture(
         description.layers = ddsHeader.extendedHeader.arraySize;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     auto createSeparate3dTexture = [&] {
@@ -548,7 +550,7 @@ Texture::Pointer createTexture(
         description.mipLevels = mipLevels;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     auto createCubeMapTexture = [&] {
@@ -559,7 +561,7 @@ Texture::Pointer createTexture(
         description.mipLevels = mipLevels;
         description.resourceType = ResourceType::Static;
 
-        return Texture::create( description );
+        return Texture::create( gpuContext, description );
     };
 
     if( ddsHeader.hasExtendedHeader ) {
@@ -764,7 +766,9 @@ void parseDdsTextureLayer(
 } // namespace
 
 Texture::Pointer parseDds(
-    BinaryInputStream &stream, const Texture::LoadingParameters &parameters )
+    GpuContext::Pointer gpuContext,
+    BinaryInputStream &stream,
+    const Texture::LoadingParameters &parameters )
 {
     try {
         const bool strict =
@@ -772,7 +776,8 @@ Texture::Pointer parseDds(
 
         const DdsHeader ddsHeader = parseDdsHeader( stream, strict );
 
-        const Texture::Pointer texture = createTexture( ddsHeader, parameters );
+        const Texture::Pointer texture =
+            createTexture( gpuContext, ddsHeader, parameters );
 
         if( texture->getDescription().layout != Texture::Layout::CubeMap ) {
             for( unsigned int layer = 0;

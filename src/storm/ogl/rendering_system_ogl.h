@@ -3,21 +3,26 @@
 #include <cstdint>
 #include <vector>
 
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/handle_ogl.h>
 #include <storm/rendering_system_common.h>
 
 namespace storm {
 
-class ProgramPipelineHandleOgl : public HandleOgl {
-public:
-    ProgramPipelineHandleOgl();
-    ~ProgramPipelineHandleOgl();
-};
+constexpr size_t RootBufferSize = 128;
 
-class VertexArrayHandleOgl;
+using ProgramPipelineHandleOgl =
+    HandleOgl<GlGenProgramPipelines, GlDeleteProgramPipelines>;
+
+using VertexArrayHandleOgl =
+    HandleOgl<GlGenVertexArrays, GlDeleteVertexArrays>;
 
 class RenderingSystemOgl : public RenderingSystemCommon {
 public:
+    RenderingSystemOgl();
+
+    GpuContext::Pointer getGpuContext() const override;
+
     void renderMesh( Mesh::Pointer mesh, unsigned count ) override;
     void renderGenerated(
         unsigned int vertexCount, Mesh::PrimitiveTopology ) override;
@@ -50,10 +55,6 @@ public:
 
     std::string getDebugMessageLog() const override;
 
-    // This method should be called to prevent situations when OpenGL API is
-    // being accessed with no context being installed.
-    static void installOpenGlContext();
-
 protected:
     void initialize();
 
@@ -62,6 +63,9 @@ private:
     static GLbitfield selectShaderStage( Shader::Type shaderType );
 
     void bindVertexArray( GLuint vertexArray );
+    void updateShaderBindings();
+
+    GpuContextOgl::Pointer _gpuContext;
 
     // These objects should be constructed after OpenGL context creation. To
     // ensure this we're using heap allocation instead of stack allocation.
@@ -81,7 +85,5 @@ private:
 
     std::vector<uint8_t> _rootBufferData;
 };
-
-void setBooleanOpenGlState( GLenum state, bool value );
 
 }

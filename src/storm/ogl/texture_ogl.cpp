@@ -5,10 +5,10 @@
 #include <initializer_list>
 #include <map>
 
-#include <storm/ogl/check_result_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
+#include <storm/ogl/texture_storage_ogl.h>
+#include <storm/throw_exception.h>
 
-//  EXT_texture_compression_s3tc extension
+// EXT_texture_compression_s3tc extension
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
@@ -22,18 +22,11 @@
 
 namespace storm {
 
-TextureHandleOgl::TextureHandleOgl() {
-    ::glGenTextures( 1, &_handle );
-    checkResult( "::glGenTextures" );
-}
-
-TextureHandleOgl::~TextureHandleOgl() {
-    ::glDeleteTextures( 1, &_handle );
-}
-
 class ScopeTextureBinding {
 public:
-    ScopeTextureBinding( GLenum target, GLuint binding ) :
+    ScopeTextureBinding(
+            const GpuContextOgl &gpuContext, GLenum target, GLuint binding ) :
+        _gpuContext( gpuContext ),
         _target( target )
     {
         GLenum bindingEnumeration = 0;
@@ -69,30 +62,33 @@ public:
             storm_assert_unreachable( "Unexpected target value" );
         }
 
-        ::glGetIntegerv( bindingEnumeration, &_previousBinding );
-        checkResult( "::glGetIntegerv" );
-
-        ::glBindTexture( target, binding );
-        checkResult( "::glBindTexture" );
+        _gpuContext.call<GlGetIntegerv>(
+            bindingEnumeration, &_previousBinding );
+        _gpuContext.call<GlBindTexture>(
+            target, binding );
     }
 
     ~ScopeTextureBinding() {
-        ::glBindTexture( _target, _previousBinding );
+        _gpuContext.callUnchecked<GlBindTexture>( _target, _previousBinding );
     }
 
 private:
+    const GpuContextOgl &_gpuContext;
     GLenum _target;
     GLint _previousBinding;
 };
 
-TextureOgl::TextureOgl( const Description &description ) :
+TextureOgl::TextureOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description ) :
     _description( description ),
     _texelDescription( selectTexelDescription(description.format) ),
+    _texture( gpuContext ),
     _target( selectTarget(description.layout) )
 {
     validateDescription();
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const ScopeTextureBinding scopeTextureBinding(
+        *gpuContext, _target, _texture );
 
     const unsigned int levelsMaximum = getMipLevelsMaximum( _description );
     const unsigned int levels = _description.mipLevels == CompleteMipMap ?
@@ -104,60 +100,60 @@ TextureOgl::TextureOgl( const Description &description ) :
 
     switch( _description.layout ) {
     case Layout::Separate1d:
-        ::glTexStorage1D(
+        glTexStorage1D(
+            *gpuContext,
             _target, levels, _texelDescription.internalFormat,
             description.width );
-        checkResult( "::glTexStorage1D" );
         break;
     case Layout::Separate2d:
     case Layout::CubeMap:
-        ::glTexStorage2D(
+        glTexStorage2D(
+            *gpuContext,
             _target, levels, _texelDescription.internalFormat,
             description.width,
             description.height );
-        checkResult( "::glTexStorage2D" );
         break;
     case Layout::Separate3d:
-        ::glTexStorage3D(
+        glTexStorage3D(
+            *gpuContext,
             _target, levels, _texelDescription.internalFormat,
             description.width,
             description.height,
             description.depth );
-        checkResult( "::glTexStorage3D" );
         break;
     case Layout::Layered1d:
-        ::glTexStorage2D(
+        glTexStorage2D(
+            *gpuContext,
             _target, levels, _texelDescription.internalFormat,
             description.width,
             description.layers );
-        checkResult( "::glTexStorage2D" );
         break;
     case Layout::Layered2d:
-        ::glTexStorage3D(
+        glTexStorage3D(
+            *gpuContext,
             _target, levels, _texelDescription.internalFormat,
             description.width,
             description.height,
             description.layers );
-        checkResult( "::glTexStorage3D" );
         break;
     case Layout::Separate2dMsaa:
-        ::glTexStorage2DMultisample(
+        glTexStorage2DMultisample(
+            *gpuContext,
             _target, description.texelSamples,
             _texelDescription.internalFormat,
             description.width,
             description.height,
             GL_TRUE );
-        checkResult( "::glTexStorage2DMultisample" );
         break;
     case Layout::Layered2dMsaa:
-        ::glTexStorage3DMultisample(
+        glTexStorage3DMultisample(
+            *gpuContext,
             _target, description.texelSamples,
             _texelDescription.internalFormat,
             description.width,
             description.height,
             description.layers,
             GL_TRUE );
-        checkResult( "::glTexStorage3DMultisample" );
         break;
     default:
         throwNotImplemented();
@@ -174,7 +170,10 @@ void TextureOgl::getTexels(
 
     // TODO: check size
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
+
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
 
     if( _description.layout == Layout::CubeMap ) {
 
@@ -184,7 +183,7 @@ void TextureOgl::getTexels(
         const MipLevelDimensions mipLevelDimensions =
             getMipLevelDimensions( mipLevel );
 
-        setTexelTransferAlignment( mipLevelDimensions.width );
+        setTexelTransferAlignment( gpuContext, mipLevelDimensions.width );
 
         const GLenum targets[] = {
             GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -196,9 +195,8 @@ void TextureOgl::getTexels(
         };
 
         for( GLenum target : targets ) {
-            ::glGetTexImage( target, mipLevel,
+            gpuContext.call<GlGetTexImage>( target, mipLevel,
                 _texelDescription.format, _texelDescription.type, texels );
-            checkResult( "::glGetTexImage" );
 
             texels = static_cast<unsigned char*>( texels ) +
                 _texelDescription.size *
@@ -206,21 +204,20 @@ void TextureOgl::getTexels(
                 mipLevelDimensions.height;
         }
 
-        resetTexelTransferAlignment();
+        resetTexelTransferAlignment( gpuContext );
         return;
     }
 
     if( !_texelDescription.compressed ) {
-        setTexelTransferAlignment( getMipLevelDimensions(mipLevel).width );
+        setTexelTransferAlignment(
+            gpuContext, getMipLevelDimensions(mipLevel).width );
 
-        ::glGetTexImage( _target, mipLevel,
+        gpuContext.call<GlGetTexImage>( _target, mipLevel,
             _texelDescription.format, _texelDescription.type, texels );
-        checkResult( "::glGetTexImage" );
 
-        resetTexelTransferAlignment();
+        resetTexelTransferAlignment( gpuContext );
     } else {
-        ::glGetCompressedTexImage( _target, mipLevel, texels );
-        checkResult( "::glGetCompressedTexImage" );
+        gpuContext.call<GlGetCompressedTexImage>( _target, mipLevel, texels );
     }
 }
 
@@ -231,19 +228,22 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
 
-    ::glTexSubImage1D(
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
+
+    gpuContext.call<GlTexSubImage1D>(
         _target,
         region.mipLevel,
         region.x,
         region.width,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage1D" );
 }
 
 void TextureOgl::setTexels(
@@ -253,12 +253,16 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
     storm_assert( region.y + region.height <= mipLevelDimensions.height );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
+
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
 
     if( _texelDescription.compressed ) {
         CompressedRegion compressedRegion;
@@ -272,13 +276,13 @@ void TextureOgl::setTexels(
         compressedRegion.height = region.height;
         compressedRegion.depth = 1;
 
-        setTexelsCompressed( compressedRegion, data );
+        setTexelsCompressed( gpuContext, compressedRegion, data );
         return;
     }
 
-    setTexelTransferAlignment( region.width );
+    setTexelTransferAlignment( gpuContext, region.width );
 
-    ::glTexSubImage2D(
+    gpuContext.call<GlTexSubImage2D>(
         _target,
         region.mipLevel,
         region.x,
@@ -286,9 +290,8 @@ void TextureOgl::setTexels(
         region.width,
         region.height,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage2D" );
 
-    resetTexelTransferAlignment();
+    resetTexelTransferAlignment( gpuContext );
 }
 
 void TextureOgl::setTexels(
@@ -298,17 +301,21 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
     storm_assert( region.y + region.height <= mipLevelDimensions.height );
     storm_assert( region.z + region.depth <= mipLevelDimensions.depth );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
 
-    setTexelTransferAlignment( region.width );
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
 
-    ::glTexSubImage3D(
+    setTexelTransferAlignment( gpuContext, region.width );
+
+    gpuContext.call<GlTexSubImage3D>(
         _target,
         region.mipLevel,
         region.x,
@@ -318,9 +325,8 @@ void TextureOgl::setTexels(
         region.height,
         region.depth,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage3D" );
 
-    resetTexelTransferAlignment();
+    resetTexelTransferAlignment( gpuContext );
 }
 
 void TextureOgl::setTexels(
@@ -330,14 +336,18 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.layer < _description.layers );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
 
-    ::glTexSubImage2D(
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
+
+    gpuContext.call<GlTexSubImage2D>(
         _target,
         region.mipLevel,
         region.x,
@@ -345,7 +355,6 @@ void TextureOgl::setTexels(
         region.width,
         /* depth = */ 1,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage2D" );
 }
 
 void TextureOgl::setTexels(
@@ -355,13 +364,17 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.layer < _description.layers );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
     storm_assert( region.y + region.height <= mipLevelDimensions.height );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
+
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
 
     if( _texelDescription.compressed ) {
         CompressedRegion compressedRegion;
@@ -375,13 +388,13 @@ void TextureOgl::setTexels(
         compressedRegion.height = region.height;
         compressedRegion.depth = 1;
 
-        setTexelsCompressed( compressedRegion, data );
+        setTexelsCompressed( gpuContext, compressedRegion, data );
         return;
     }
 
-    setTexelTransferAlignment( region.width );
+    setTexelTransferAlignment( gpuContext, region.width );
 
-    ::glTexSubImage3D(
+    gpuContext.call<GlTexSubImage3D>(
         _target,
         region.mipLevel,
         region.x,
@@ -391,9 +404,8 @@ void TextureOgl::setTexels(
         region.height,
         /* depth = */ 1,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage3D" );
 
-    resetTexelTransferAlignment();
+    resetTexelTransferAlignment( gpuContext );
 }
 
 void TextureOgl::setTexels(
@@ -403,12 +415,16 @@ void TextureOgl::setTexels(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( region.mipLevel < _description.mipLevels );
     storm_assert( region.x + region.width <= mipLevelDimensions.width );
     storm_assert( region.y + region.height <= mipLevelDimensions.height );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
+
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
 
     if( _texelDescription.compressed ) {
         CompressedRegion compressedRegion;
@@ -422,13 +438,13 @@ void TextureOgl::setTexels(
         compressedRegion.height = region.height;
         compressedRegion.depth = 1;
 
-        setTexelsCompressed( compressedRegion, data );
+        setTexelsCompressed( gpuContext, compressedRegion, data );
         return;
     }
 
-    setTexelTransferAlignment( region.width );
+    setTexelTransferAlignment( gpuContext, region.width );
 
-    ::glTexSubImage2D(
+    gpuContext.call<GlTexSubImage2D>(
         convertCubeMapFace( region.face ),
         region.mipLevel,
         region.x,
@@ -436,19 +452,20 @@ void TextureOgl::setTexels(
         region.width,
         region.height,
         _texelDescription.format, _texelDescription.type, data );
-    checkResult( "::glTexSubImage2D" );
 
-    resetTexelTransferAlignment();
+    resetTexelTransferAlignment( gpuContext );
 }
 
 void TextureOgl::generateMipMap() {
     storm_assert( _description.layout != Layout::Separate2dMsaa );
     storm_assert( _description.layout != Layout::Layered2dMsaa );
 
-    ScopeTextureBinding scopeTextureBinding( _target, _texture );
+    const GpuContextOgl &gpuContext = *_texture.getGpuContext();
 
-    ::glGenerateMipmap( _target );
-    checkResult( "::glGenerateMipmap" );
+    const ScopeTextureBinding scopeTextureBinding(
+        gpuContext, _target, _texture );
+
+    gpuContext.call<GlGenerateMipmap>( _target );
 }
 
 const Texture::Description& TextureOgl::getDescription() const {
@@ -495,7 +512,9 @@ void TextureOgl::validateDescription() const {
     }
 }
 
-void TextureOgl::setTexelTransferAlignment( unsigned int width ) const {
+void TextureOgl::setTexelTransferAlignment(
+    const GpuContextOgl &gpuContext, unsigned int width ) const
+{
     const std::initializer_list<unsigned int> alignments = {4, 2, 1};
 
     auto isSuitable = [=]( unsigned int alignment ) {
@@ -507,23 +526,21 @@ void TextureOgl::setTexelTransferAlignment( unsigned int width ) const {
         alignments.end(),
         isSuitable );
 
-    ::glPixelStorei( GL_PACK_ALIGNMENT, *alignment );
-    checkResult( "::glPixelStorei" );
-
-    ::glPixelStorei( GL_UNPACK_ALIGNMENT, *alignment );
-    checkResult( "::glPixelStorei" );
+    gpuContext.call<GlPixelStorei>( GL_PACK_ALIGNMENT, *alignment );
+    gpuContext.call<GlPixelStorei>( GL_UNPACK_ALIGNMENT, *alignment );
 }
 
-void TextureOgl::resetTexelTransferAlignment() const {
-    ::glPixelStorei( GL_PACK_ALIGNMENT, 4 );
-    checkResult( "::glPixelStorei" );
-
-    ::glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );
-    checkResult( "::glPixelStorei" );
+void TextureOgl::resetTexelTransferAlignment(
+    const GpuContextOgl &gpuContext ) const
+{
+    gpuContext.call<GlPixelStorei>( GL_PACK_ALIGNMENT, 4 );
+    gpuContext.call<GlPixelStorei>( GL_UNPACK_ALIGNMENT, 4 );
 }
 
 void TextureOgl::setTexelsCompressed(
-    const CompressedRegion &region, const void *texels )
+    const GpuContextOgl &gpuContext,
+    const CompressedRegion &region,
+    const void *texels )
 {
     struct BlockDescription {
         GLsizei width;
@@ -547,6 +564,7 @@ void TextureOgl::setTexelsCompressed(
 
     const MipLevelDimensions mipLevelDimensions =
         getMipLevelDimensions( region.mipLevel );
+    (void)mipLevelDimensions;
 
     storm_assert( (region.x % block.width) == 0 );
     storm_assert( (region.y % block.height) == 0 );
@@ -561,7 +579,7 @@ void TextureOgl::setTexelsCompressed(
         static_cast<GLsizei>( region.depth ) * block.size;
 
     if( region.target != GL_TEXTURE_2D_ARRAY ) {
-        ::glCompressedTexSubImage2D(
+        gpuContext.call<GlCompressedTexSubImage2D>(
             region.target,
             region.mipLevel,
             region.x,
@@ -571,9 +589,8 @@ void TextureOgl::setTexelsCompressed(
             _texelDescription.internalFormat,
             dataSize,
             texels );
-        checkResult( "::glCompressedTexSubImage2D" );
     } else {
-        ::glCompressedTexSubImage3D(
+        gpuContext.call<GlCompressedTexSubImage3D>(
             region.target,
             region.mipLevel,
             region.x,
@@ -585,7 +602,6 @@ void TextureOgl::setTexelsCompressed(
             _texelDescription.internalFormat,
             dataSize,
             texels );
-        checkResult( "::glCompressedTexSubImage3D" );
     }
 }
 
@@ -750,9 +766,10 @@ unsigned int TextureOgl::getMipLevelsMaximum( const Description &description ) {
     return static_cast<unsigned int>( log2(dimensionsMaximum) ) + 1;
 }
 
-Texture::Pointer Texture::create( const Separate1dDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const Separate1dDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::Separate1d;
     generalDescription.format = description.format;
@@ -764,12 +781,15 @@ Texture::Pointer Texture::create( const Separate1dDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
-Texture::Pointer Texture::create( const Separate2dDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const Separate2dDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::Separate2d;
     generalDescription.format = description.format;
@@ -781,12 +801,15 @@ Texture::Pointer Texture::create( const Separate2dDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
-Texture::Pointer Texture::create( const Separate3dDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const Separate3dDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::Separate3d;
     generalDescription.format = description.format;
@@ -798,12 +821,15 @@ Texture::Pointer Texture::create( const Separate3dDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
-Texture::Pointer Texture::create( const Layered1dDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const Layered1dDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::Layered1d;
     generalDescription.format = description.format;
@@ -815,12 +841,15 @@ Texture::Pointer Texture::create( const Layered1dDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
-Texture::Pointer Texture::create( const Layered2dDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const Layered2dDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::Layered2d;
     generalDescription.format = description.format;
@@ -832,12 +861,15 @@ Texture::Pointer Texture::create( const Layered2dDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
-Texture::Pointer Texture::create( const CubeMapDescription &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
+Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
+    const CubeMapDescription &description )
+{
     Description generalDescription;
     generalDescription.layout = Layout::CubeMap;
     generalDescription.format = description.format;
@@ -849,14 +881,15 @@ Texture::Pointer Texture::create( const CubeMapDescription &description ) {
     generalDescription.texelSamples = 1;
     generalDescription.resourceType = description.resourceType;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
 Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
     const Separate2dMsaaDescription &description )
 {
-    RenderingSystemOgl::installOpenGlContext();
-
     Description generalDescription;
     generalDescription.layout = Layout::Separate2dMsaa;
     generalDescription.format = description.format;
@@ -868,14 +901,15 @@ Texture::Pointer Texture::create(
     generalDescription.texelSamples = description.texelSamples;
     generalDescription.resourceType = ResourceType::Dynamic;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
 Texture::Pointer Texture::create(
+    GpuContext::Pointer gpuContext,
     const Layered2dMsaaDescription &description )
 {
-    RenderingSystemOgl::installOpenGlContext();
-
     Description generalDescription;
     generalDescription.layout = Layout::Layered2dMsaa;
     generalDescription.format = description.format;
@@ -887,7 +921,9 @@ Texture::Pointer Texture::create(
     generalDescription.texelSamples = description.texelSamples;
     generalDescription.resourceType = ResourceType::Dynamic;
 
-    return std::make_shared< TextureOgl >( generalDescription );
+    return std::make_shared<TextureOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        generalDescription );
 }
 
 }

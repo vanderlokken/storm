@@ -1,11 +1,11 @@
 #include <storm/ogl/vertex_format_ogl.h>
 
-#include <storm/ogl/check_result_ogl.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
-VertexFormatOgl::VertexFormatOgl( const Description &description )
-    : _description( description )
+VertexFormatOgl::VertexFormatOgl( const Description &description ) :
+    _description( description )
 {
 }
 
@@ -15,7 +15,7 @@ const VertexFormat::Description&
     return _description;
 }
 
-void VertexFormatOgl::install() const {
+void VertexFormatOgl::install( const GpuContextOgl &gpuContext ) const {
     GLuint index = 0;
     const GLbyte *offset = 0;
 
@@ -23,16 +23,14 @@ void VertexFormatOgl::install() const {
         const AttributeFormatDescription formatDescription =
             getAttributeFormatDescription( attribute.format );
 
-        ::glVertexAttribPointer(
+        gpuContext.call<GlVertexAttribPointer>(
             index,
             formatDescription.componentCount,
             formatDescription.componentType,
             formatDescription.componentNormalized,
             static_cast<GLsizei>(_description.size) /* stride */, offset );
-        checkResult( "::glVertexAttribPointer" );
 
-        ::glEnableVertexAttribArray( index++ );
-        checkResult( "::glEnableVertexAttribArray" );
+        gpuContext.call<GlEnableVertexAttribArray>( index++ );
 
         offset += formatDescription.size;
     }

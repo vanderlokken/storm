@@ -6,6 +6,7 @@
 
 #include <storm/color.h>
 #include <storm/condition.h>
+#include <storm/gpu_context.h>
 
 namespace storm {
 
@@ -44,15 +45,30 @@ public:
         std::optional<Condition> comparisonCondition;
     };
 
-    static Sampler::Pointer create( const Description& );
-    static Sampler::Pointer getDefault();
-    static Sampler::Pointer getDefaultWithTiling();
-    static Sampler::Pointer getDefaultWithMirroring();
-    static Sampler::Pointer getDefaultWithNearestFilters();
+    static Sampler::Pointer create(
+        GpuContext::Pointer gpuContext, const Description &description );
 
     virtual ~Sampler() = default;
 
     virtual const Description& getDescription() const = 0;
+};
+
+class SamplerBuilder {
+public:
+    SamplerBuilder();
+
+    SamplerBuilder& useTiling();
+    SamplerBuilder& useMirroring();
+
+    SamplerBuilder& useNearestNeighbourFilters();
+    SamplerBuilder& useTrilinearFilter();
+
+    Sampler::Pointer build( GpuContext::Pointer gpuContext ) const;
+
+    const Sampler::Description& getSamplerDescription() const;
+
+private:
+    Sampler::Description _description = {};
 };
 
 }

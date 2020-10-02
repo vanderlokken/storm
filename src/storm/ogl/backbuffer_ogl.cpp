@@ -2,17 +2,24 @@
 
 #include <algorithm>
 
-#include <storm/ogl/check_result_ogl.h>
 #include <storm/ogl/texture_ogl.h>
 
 #include <storm/rendering_system.h>
+#include <storm/throw_exception.h>
 #include <storm/window.h>
 
 namespace storm {
 
+BackbufferOgl::BackbufferOgl( GpuContextOgl::Pointer gpuContext ) :
+    _copyFramebuffer( gpuContext )
+{
+}
+
 void BackbufferOgl::renderTexture(
     Texture::Pointer texture, unsigned int mipLevel, unsigned int layer)
 {
+    const GpuContextOgl &gpuContext = *_copyFramebuffer.getGpuContext();
+
     const Texture::Layout textureLayout = texture->getDescription().layout;
     storm_assert(
         textureLayout == Texture::Layout::Separate2d ||
@@ -23,48 +30,45 @@ void BackbufferOgl::renderTexture(
         texture->getDescription().format == Texture::Format::RgbaNormUint8 ||
         texture->getDescription().format == Texture::Format::SrgbaNormUint8 );
 
-    ScopeFramebufferBinding scopedFramebufferBinding( _copyFramebuffer );
+    const ScopeFramebufferBinding scopeFramebufferBinding(
+        gpuContext, _copyFramebuffer );
 
-    const auto nativeTexture = std::static_pointer_cast<TextureOgl>( texture );
+    const auto nativeTexture = std::dynamic_pointer_cast<TextureOgl>( texture );
+
+    storm_assert(
+        &gpuContext == nativeTexture->getHandle().getGpuContext().get() );
 
     if( textureLayout == Texture::Layout::Separate2d ||
         textureLayout == Texture::Layout::Separate2dMsaa )
     {
-        ::glFramebufferTexture( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            nativeTexture->getHandle(), mipLevel );
-        checkResult( "::glFramebufferTexture" );
+        gpuContext.call<GlFramebufferTexture>(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            nativeTexture->getHandle(),
+            mipLevel );
     } else {
-        ::glFramebufferTextureLayer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            nativeTexture->getHandle(), mipLevel, layer );
-        checkResult( "::glFramebufferTextureLayer" );
+        gpuContext.call<GlFramebufferTextureLayer>(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            nativeTexture->getHandle(),
+            mipLevel,
+            layer );
     }
 
-    ::glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-    checkResult( "::glBindFramebuffer" );
+    gpuContext.call<GlBindFramebuffer>( GL_DRAW_FRAMEBUFFER, 0 );
+    gpuContext.call<GlDrawBuffer>( GL_BACK );
+    gpuContext.call<GlReadBuffer>( GL_COLOR_ATTACHMENT0 );
 
-    ::glDrawBuffer( GL_BACK );
-    checkResult( "::glDrawBuffer" );
+    const Texture::MipLevelDimensions mipLevelDimensions =
+        texture->getMipLevelDimensions( mipLevel );
 
-    ::glReadBuffer( GL_COLOR_ATTACHMENT0 );
-    checkResult( "::glReadBuffer" );
+    const GLuint width = mipLevelDimensions.width;
+    const GLuint height = mipLevelDimensions.height;
 
-    if( const Window::Pointer window =
-            RenderingSystem::getInstance()->getOutputWindow() ) {
-        const Dimensions dimensions = window->getDimensions();
-        const GLuint width = dimensions.width;
-        const GLuint height = dimensions.height;
-
-        const Texture::MipLevelDimensions mipLevelDimensions =
-            texture->getMipLevelDimensions( mipLevel );
-        storm_assert( mipLevelDimensions.width == width );
-        storm_assert( mipLevelDimensions.height == height );
-
-        ::glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height,
-            GL_COLOR_BUFFER_BIT, GL_NEAREST );
-        checkResult( "::glBlitFramebuffer" );
-    } else {
-        storm_assert( !"The output window is not set" );
-    }
+    gpuContext.call<GlBlitFramebuffer>(
+        0, 0, width, height,
+        0, 0, width, height,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST );
 }
 
 }

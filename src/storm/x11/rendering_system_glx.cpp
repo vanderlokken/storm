@@ -3,13 +3,11 @@
 #include <string_view>
 
 #include <storm/exception.h>
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/api_functions_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 
-// To prevent <GL/gl.h> inclusion. glcorearb.h is used instead.
-#define __gl_h_
-
-#include <GL/glx.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 namespace storm {
 
@@ -17,6 +15,8 @@ namespace {
 
 class DisplayConnection {
 public:
+    using Pointer = std::shared_ptr<DisplayConnection>;
+
     DisplayConnection() :
         _display( XOpenDisplay(nullptr) )
     {
@@ -42,63 +42,90 @@ private:
     Display *_display;
 };
 
+GLXFBConfig chooseFramebufferConfig( Display* display ) {
+    const int attributes[] = {
+        GLX_DOUBLEBUFFER, 1,
+        GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, 1,
+        0
+    };
+
+    int size;
+
+    if( GLXFBConfig *configs = glXChooseFBConfig(
+            display, XDefaultScreen(display), attributes, &size) ) {
+        const GLXFBConfig result = *configs;
+        XFree( configs );
+        return result;
+    }
+
+    throw Exception() << "glXChooseFBConfig has failed";
+}
+
+class GpuContextGlx : public GpuContextOgl {
+public:
+    GpuContextGlx(
+            GLXContext context, DisplayConnection::Pointer display ) :
+        _display( std::move(display) ),
+        _outputWindow( Window::create() ),
+        _context( context )
+    {
+        activate();
+
+        loadApiFunctions(
+            [](std::string_view name) {
+                return reinterpret_cast<void*>(
+                    glXGetProcAddress(
+                        reinterpret_cast<const unsigned char*>(name.data())) );
+            });
+    }
+
+    ~GpuContextGlx() {
+        glXMakeCurrent( *_display, None, 0 );
+        glXDestroyContext( *_display, _context );
+    }
+
+    DisplayConnection::Pointer getDisplayConnection() const {
+        return _display;
+    }
+
+    void activate() const override {
+        if( glXGetCurrentContext() != _context ) {
+            doActivate();
+        }
+    }
+
+    void setOutputWindow( Window::Pointer outputWindow ) {
+        if( _outputWindow != outputWindow ) {
+            _outputWindow = std::move( outputWindow );
+            assertThreadCompatibility();
+            doActivate();
+        }
+    }
+
+private:
+    void doActivate() const {
+        glXMakeCurrent(
+            *_display,
+            reinterpret_cast<::Window>(_outputWindow->getHandle()),
+            _context );
+    }
+
+    DisplayConnection::Pointer _display;
+    Window::Pointer _outputWindow;
+    GLXContext _context = {};
+};
+
 class RenderingSystemGlx : public RenderingSystemOgl {
 public:
     RenderingSystemGlx() :
+        _display(
+            std::dynamic_pointer_cast<GpuContextGlx>(getGpuContext())
+                ->getDisplayConnection() ),
         _defaultWindow( Window::create() )
     {
-        if( getGlxSupportStatus().ARB_create_context ) {
-            _glXCreateContextAttribsARB =
-                loadExtensionFunction<PFNGLXCREATECONTEXTATTRIBSARBPROC>(
-                    "glXCreateContextAttribsARB" );
-        }
-
-        if( getGlxSupportStatus().EXT_swap_control ) {
-            _glXSwapIntervalEXT =
-                loadExtensionFunction<PFNGLXSWAPINTERVALEXTPROC>(
-                    "glXSwapIntervalEXT" );
-        }
-
-        if( getGlxSupportStatus().MESA_swap_control ) {
-            _glXSwapIntervalMESA =
-                loadExtensionFunction<PFNGLXSWAPINTERVALMESAPROC>(
-                    "glXSwapIntervalMESA" );
-        }
-
-        if( !_glXCreateContextAttribsARB ) {
-            throw SystemRequirementsNotMet() << "Required OpenGL extension"
-                "'GLX_ARB_create_context' is not supported";
-        }
-
-        const int contextAttributes[] = {
-            GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-            GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-            GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-    #ifndef NDEBUG
-            GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
-    #endif
-            0
-        };
-
-        _context = _glXCreateContextAttribsARB(
-            _display,
-            chooseFramebufferConfig(),
-            0,    // shareListContext
-            true, // useDirectRendering
-            contextAttributes );
-
-        if( !_context ) {
-            throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
-        }
-
-        glXMakeCurrent( _display, getWindowHandle(), _context );
+        setOutputWindow( nullptr );
 
         initialize();
-    }
-
-    ~RenderingSystemGlx() {
-        glXMakeCurrent( _display, None, 0 );
-        glXDestroyContext( _display, _context );
     }
 
     Window::Pointer getOutputWindow() const override {
@@ -108,7 +135,11 @@ public:
     void setOutputWindow( Window::Pointer window ) override {
         _outputWindow = std::move( window );
 
-        glXMakeCurrent( _display, getWindowHandle(), _context );
+        const auto context =
+            std::dynamic_pointer_cast<GpuContextGlx>( getGpuContext() );
+
+        context->setOutputWindow(
+            _outputWindow ? _outputWindow : _defaultWindow );
 
         if( _outputWindow ) {
             applyVsyncSettings();
@@ -116,7 +147,7 @@ public:
     }
 
     void presentBackbuffer() override {
-        glXSwapBuffers( _display, getWindowHandle() );
+        glXSwapBuffers( *_display, getWindowHandle() );
     }
 
     bool isVsyncEnabled() const override {
@@ -132,34 +163,6 @@ public:
     }
 
 private:
-    template <class FuntionPointer>
-    static FuntionPointer loadExtensionFunction(
-        std::string_view functionName )
-    {
-        return reinterpret_cast<FuntionPointer>(
-            glXGetProcAddress(
-                reinterpret_cast<const unsigned char*>(functionName.data())) );
-    }
-
-    GLXFBConfig chooseFramebufferConfig() const {
-        const int attributes[] = {
-            GLX_DOUBLEBUFFER, 1,
-            GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB, 1,
-            0
-        };
-
-        int size;
-
-        if( GLXFBConfig *configs = glXChooseFBConfig(
-                _display, XDefaultScreen(_display), attributes, &size) ) {
-            const GLXFBConfig result = *configs;
-            XFree( configs );
-            return result;
-        }
-
-        throw Exception() << "glXChooseFBConfig has failed";
-    }
-
     ::Window getWindowHandle() const {
         return _outputWindow ?
             reinterpret_cast<::Window>( _outputWindow->getHandle() ) :
@@ -167,34 +170,72 @@ private:
     }
 
     void applyVsyncSettings() const {
-        if( _glXSwapIntervalMESA ) {
-            _glXSwapIntervalMESA( _isVsyncEnabled ? 1 : 0 );
-        } else if( _glXSwapIntervalEXT ) {
-            _glXSwapIntervalEXT(
-                _display, getWindowHandle(), _isVsyncEnabled ? 1 : 0 );
+        const auto context =
+            std::dynamic_pointer_cast<GpuContextOgl>( getGpuContext() );
+
+        if( context->isFunctionAvailable<GlXSwapIntervalMESA>() ) {
+            context->callUnchecked<GlXSwapIntervalMESA>(
+                _isVsyncEnabled ? 1 : 0 );
+        } else if( context->isFunctionAvailable<GlXSwapIntervalEXT>() ) {
+            context->callUnchecked<GlXSwapIntervalEXT>(
+                *_display, getWindowHandle(), _isVsyncEnabled ? 1 : 0 );
         }
     }
 
-    DisplayConnection _display;
+    DisplayConnection::Pointer _display;
 
     Window::Pointer _defaultWindow;
     Window::Pointer _outputWindow;
 
-    GLXContext _context = {};
-
     bool _isVsyncEnabled = true;
-
-    PFNGLXCREATECONTEXTATTRIBSARBPROC _glXCreateContextAttribsARB = nullptr;
-    PFNGLXSWAPINTERVALEXTPROC _glXSwapIntervalEXT = nullptr;
-    PFNGLXSWAPINTERVALMESAPROC _glXSwapIntervalMESA = nullptr;
 };
 
 } // namespace
 
-RenderingSystem* RenderingSystem::getInstance() {
-    static const std::unique_ptr<RenderingSystemGlx> instance =
-        std::make_unique<RenderingSystemGlx>();
-    return instance.get();
+RenderingSystem::Pointer RenderingSystem::create() {
+    return std::make_shared<RenderingSystemGlx>();
+}
+
+GpuContext::Pointer GpuContext::create() {
+    const auto display = std::make_shared<DisplayConnection>();
+
+    const GpuContextGlx legacyContext(
+        glXCreateContext(
+            *display,
+            glXGetVisualFromFBConfig(
+                *display, chooseFramebufferConfig(*display)),
+            nullptr, // shareListContext
+            true     // useDirectRendering
+        ),
+        display );
+
+    const int contextAttributes[] = {
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+#ifndef NDEBUG
+        GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
+#endif
+        0
+    };
+
+    if( !legacyContext.isFunctionAvailable<GlXCreateContextAttribsARB>() ) {
+        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+    }
+
+    const GLXContext context =
+        legacyContext.callUnchecked<GlXCreateContextAttribsARB>(
+            *display,
+            chooseFramebufferConfig(*display),
+            nullptr, // shareListContext
+            true,    // useDirectRendering
+            contextAttributes );
+
+    if( !context ) {
+        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+    }
+
+    return std::make_shared<GpuContextGlx>( context, display );
 }
 
 }

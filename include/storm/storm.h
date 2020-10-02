@@ -9,6 +9,7 @@
 #include <storm/display.h>
 #include <storm/exception.h>
 #include <storm/framebuffer.h>
+#include <storm/gpu_context.h>
 #include <storm/input.h>
 #include <storm/matrix.h>
 #include <storm/mesh.h>

@@ -7,6 +7,7 @@
 
 #include <storm/buffer.h>
 #include <storm/exception.h>
+#include <storm/gpu_context.h>
 #include <storm/identifier.h>
 #include <storm/sampler.h>
 #include <storm/texture.h>
@@ -30,18 +31,30 @@ public:
 
     using ValueHandle = std::shared_ptr<void>;
 
-    static Shader::Pointer create( std::string_view sourceCode, Type type );
+    static Shader::Pointer create(
+        GpuContext::Pointer gpuContext,
+        std::string_view sourceCode,
+        Type type );
 
     // This method can create a shader from binary representation, returned by
     // the 'getBinaryRepresentation' method. A change in hardware or software
     // configuration can make binary representation invalid. In such cases this
     // method returns 'nullptr'.
     static Shader::Pointer create(
-        const std::vector<unsigned char> &binaryRepresentation, Type type );
+        GpuContext::Pointer gpuContext,
+        const std::vector<unsigned char> &binaryRepresentation,
+        Type type );
 
-    static Shader::Pointer load( std::istream &stream, Type type,
+    static Shader::Pointer load(
+        GpuContext::Pointer gpuContext,
+        std::istream &stream,
+        Type type,
         Format format = Format::Source );
-    static Shader::Pointer load( std::string_view filename, Type type,
+
+    static Shader::Pointer load(
+        GpuContext::Pointer gpuContext,
+        std::string_view filename,
+        Type type,
         Format format = Format::Source );
 
     virtual ~Shader() = default;

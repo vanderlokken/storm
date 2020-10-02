@@ -1,9 +1,9 @@
 #include <storm/ogl/pipeline_state_ogl.h>
 
-#include <storm/ogl/api_ogl.h>
-#include <storm/ogl/check_result_ogl.h>
+#include <algorithm>
+
+#include <storm/ogl/api_functions_ogl.h>
 #include <storm/ogl/condition_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 
 namespace storm {
 
@@ -79,11 +79,12 @@ GLenum convert( StencilOperation operation ) {
 }
 
 void switchBlendingState(
+    const GpuContextOgl &gpuContext,
     const std::optional<BlendingState> &previousState,
     const std::optional<BlendingState> &state )
 {
     if( previousState.has_value() != state.has_value() ) {
-        setBooleanOpenGlState( GL_BLEND, state.has_value() );
+        setBooleanOpenGlState( gpuContext, GL_BLEND, state.has_value() );
     }
 
     if( state ) {
@@ -95,10 +96,9 @@ void switchBlendingState(
                 state->alphaBlending.operation;
 
         if( !operationsPreserved ) {
-            ::glBlendEquationSeparate(
+            gpuContext.call<GlBlendEquationSeparate>(
                 convert(state->colorBlending.operation),
                 convert(state->alphaBlending.operation) );
-            checkResult( "::glBlendEquationSeparate" );
         }
 
         const bool factorsPreserved =
@@ -113,17 +113,17 @@ void switchBlendingState(
                 state->alphaBlending.targetFactor;
 
         if( !factorsPreserved ) {
-            ::glBlendFuncSeparate(
+            gpuContext.call<GlBlendFuncSeparate>(
                 convert(state->colorBlending.sourceFactor),
                 convert(state->colorBlending.targetFactor),
                 convert(state->alphaBlending.sourceFactor),
                 convert(state->alphaBlending.targetFactor) );
-            checkResult( "::glBlendFuncSeparate" );
         }
     }
 }
 
 void switchRasterizationState(
+    const GpuContextOgl &gpuContext,
     const StateDescription &previousState,
     const StateDescription &state )
 {
@@ -133,37 +133,35 @@ void switchRasterizationState(
 
     if( isUpdateRequired(&StateDescription::primitiveCullMode) ) {
         if( state.primitiveCullMode != PrimitiveCullMode::Nothing ) {
-            setBooleanOpenGlState( GL_CULL_FACE, true );
+            setBooleanOpenGlState( gpuContext, GL_CULL_FACE, true );
 
-            ::glCullFace( convert(state.primitiveCullMode) );
-            checkResult( "::glCullFace" );
+            gpuContext.call<GlCullFace>( convert(state.primitiveCullMode) );
         } else {
-            setBooleanOpenGlState( GL_CULL_FACE, false );
+            setBooleanOpenGlState( gpuContext, GL_CULL_FACE, false );
         }
     }
 
     if( isUpdateRequired(&StateDescription::primitiveFillMode) ) {
-        ::glPolygonMode( GL_FRONT_AND_BACK, convert(state.primitiveFillMode) );
-        checkResult( "::glPolygonMode" );
+        gpuContext.call<GlPolygonMode>(
+            GL_FRONT_AND_BACK, convert(state.primitiveFillMode) );
     }
 
     if( isUpdateRequired(&StateDescription::rectangleClippingEnabled) ) {
         setBooleanOpenGlState(
-            GL_SCISSOR_TEST, state.rectangleClippingEnabled );
+            gpuContext, GL_SCISSOR_TEST, state.rectangleClippingEnabled );
     }
 
     if( isUpdateRequired(&StateDescription::depthClippingEnabled) ) {
         setBooleanOpenGlState(
-            GL_DEPTH_CLAMP, !state.depthClippingEnabled );
+            gpuContext, GL_DEPTH_CLAMP, !state.depthClippingEnabled );
     }
 
     if( isUpdateRequired(&StateDescription::depthBiasSlopeFactor) ||
         isUpdateRequired(&StateDescription::depthBiasConstantFactor) )
     {
-        ::glPolygonOffset(
+        gpuContext.call<GlPolygonOffset>(
             static_cast<GLfloat>(state.depthBiasSlopeFactor),
             static_cast<GLfloat>(state.depthBiasConstantFactor) );
-        checkResult( "::glPolygonOffset" );
     }
 
     if( isUpdateRequired(&StateDescription::clippingDistanceArraySize) ) {
@@ -180,23 +178,27 @@ void switchRasterizationState(
             const bool enabled = index < state.clippingDistanceArraySize;
 
             setBooleanOpenGlState(
+                gpuContext,
                 static_cast<GLenum>(GL_CLIP_DISTANCE0 + index), enabled );
         }
     }
 }
 
 void switchDepthStencilState(
+    const GpuContextOgl &gpuContext,
     const StateDescription &previousState,
     const StateDescription &state )
 {
     if( state.depthTest.has_value() !=
             previousState.depthTest.has_value() ) {
-        setBooleanOpenGlState( GL_DEPTH_TEST, state.depthTest.has_value() );
+        setBooleanOpenGlState(
+            gpuContext, GL_DEPTH_TEST, state.depthTest.has_value() );
     }
 
     if( state.stencilTest.has_value() !=
             previousState.stencilTest.has_value() ) {
-        setBooleanOpenGlState( GL_STENCIL_TEST, state.stencilTest.has_value() );
+        setBooleanOpenGlState(
+            gpuContext, GL_STENCIL_TEST, state.stencilTest.has_value() );
     }
 
     if( state.depthTest ) {
@@ -206,51 +208,47 @@ void switchDepthStencilState(
                 state.depthTest->passCondition;
 
         if( !conditionPreserved ) {
-            ::glDepthFunc( convertCondition(state.depthTest->passCondition) );
-            checkResult( "::glDepthFunc" );
+            gpuContext.call<GlDepthFunc>(
+                convertCondition(state.depthTest->passCondition) );
         }
     }
 
     // TODO: track unnecessary state changes
     if( const std::optional<StencilTest> &test = state.stencilTest ) {
-        ::glStencilOpSeparate(
+        gpuContext.call<GlStencilOpSeparate>(
             GL_FRONT,
             convert(test->algorithmForFrontFaces.operationOnStencilTestFail),
             convert(test->algorithmForFrontFaces.operationOnDepthTestFail),
             convert(test->algorithmForFrontFaces.operationOnDepthTestPass) );
-        checkResult( "::glStencilOpSeparate" );
 
-        ::glStencilOpSeparate(
+        gpuContext.call<GlStencilOpSeparate>(
             GL_BACK,
             convert(test->algorithmForBackFaces.operationOnStencilTestFail),
             convert(test->algorithmForBackFaces.operationOnDepthTestFail),
             convert(test->algorithmForBackFaces.operationOnDepthTestPass) );
-        checkResult( "::glStencilOpSeparate" );
 
-        ::glStencilFuncSeparate(
+        gpuContext.call<GlStencilFuncSeparate>(
             GL_FRONT,
             convertCondition(test->algorithmForFrontFaces.passCondition),
             test->referenceValue,
             test->mask );
-        checkResult( "::glStencilFuncSeparate" );
 
-        ::glStencilFuncSeparate(
+        gpuContext.call<GlStencilFuncSeparate>(
             GL_BACK,
             convertCondition(test->algorithmForBackFaces.passCondition),
             test->referenceValue,
             test->mask );
-        checkResult( "::glStencilFuncSeparate" );
     }
 
     if( previousState.writeDepthValues != state.writeDepthValues ) {
-        ::glDepthMask( state.writeDepthValues );
-        checkResult( "::glDepthMask" );
+        gpuContext.call<GlDepthMask>( state.writeDepthValues );
     }
 }
 
 } // namespace
 
 void switchOpenGlPipelineState(
+    const GpuContextOgl &gpuContext,
     const PipelineState &previousState,
     const PipelineState &nextState )
 {
@@ -260,12 +258,13 @@ void switchOpenGlPipelineState(
         nextState.getDescription();
 
     switchBlendingState(
+        gpuContext,
         previousStateDescription.blendingState,
         nextStateDescription.blendingState );
     switchRasterizationState(
-        previousStateDescription, nextStateDescription );
+        gpuContext, previousStateDescription, nextStateDescription );
     switchDepthStencilState(
-        previousStateDescription, nextStateDescription );
+        gpuContext, previousStateDescription, nextStateDescription );
 }
 
 PipelineStateOgl::PipelineStateOgl( const Description &description ) :

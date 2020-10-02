@@ -2,53 +2,53 @@
 
 namespace storm {
 
-Sampler::Pointer Sampler::getDefault() {
-    Description description;
-    description.minifyingFilter = MinifyingFilter::Bilinear;
-    description.magnifyingFilter = MagnifyingFilter::Linear;
-    description.maximalAnisotropyDegree = 1;
-    description.wrapModes = {
-        WrapMode::Clamped,
-        WrapMode::Clamped,
-        WrapMode::Clamped
+SamplerBuilder::SamplerBuilder() {
+    _description.minifyingFilter = Sampler::MinifyingFilter::Bilinear;
+    _description.magnifyingFilter = Sampler::MagnifyingFilter::Linear;
+    _description.maximalAnisotropyDegree = 1;
+    _description.wrapModes = {
+        Sampler::WrapMode::Clamped,
+        Sampler::WrapMode::Clamped,
+        Sampler::WrapMode::Clamped
     };
-    description.borderColor = Color::Black;
-
-    static const Sampler::Pointer sampler = create( description );
-    return sampler;
+    _description.borderColor = Color::Black;
 }
 
-Sampler::Pointer Sampler::getDefaultWithTiling() {
-    Description description = getDefault()->getDescription();
-    description.wrapModes = {
-        WrapMode::Repeated,
-        WrapMode::Repeated,
-        WrapMode::Repeated
+SamplerBuilder& SamplerBuilder::useTiling() {
+    _description.wrapModes = {
+        Sampler::WrapMode::Repeated,
+        Sampler::WrapMode::Repeated,
+        Sampler::WrapMode::Repeated
     };
-
-    static const Sampler::Pointer sampler = create( description );
-    return sampler;
+    return *this;
 }
 
-Sampler::Pointer Sampler::getDefaultWithMirroring() {
-    Description description = getDefault()->getDescription();
-    description.wrapModes = {
-        WrapMode::Mirrored,
-        WrapMode::Mirrored,
-        WrapMode::Mirrored
+SamplerBuilder& SamplerBuilder::useMirroring() {
+    _description.wrapModes = {
+        Sampler::WrapMode::Mirrored,
+        Sampler::WrapMode::Mirrored,
+        Sampler::WrapMode::Mirrored
     };
-
-    static const Sampler::Pointer sampler = create( description );
-    return sampler;
+    return *this;
 }
 
-Sampler::Pointer Sampler::getDefaultWithNearestFilters() {
-    Description description = getDefault()->getDescription();
-    description.minifyingFilter = MinifyingFilter::Nearest;
-    description.magnifyingFilter = MagnifyingFilter::Nearest;
+SamplerBuilder& SamplerBuilder::useNearestNeighbourFilters() {
+    _description.minifyingFilter = Sampler::MinifyingFilter::Nearest;
+    _description.magnifyingFilter = Sampler::MagnifyingFilter::Nearest;
+    return *this;
+}
 
-    static const Sampler::Pointer sampler = create( description );
-    return sampler;
+SamplerBuilder& SamplerBuilder::useTrilinearFilter() {
+    _description.minifyingFilter = Sampler::MinifyingFilter::Trilinear;
+    return *this;
+}
+
+Sampler::Pointer SamplerBuilder::build( GpuContext::Pointer gpuContext ) const {
+    return Sampler::create( gpuContext, _description );
+}
+
+const Sampler::Description& SamplerBuilder::getSamplerDescription() const {
+    return _description;
 }
 
 }

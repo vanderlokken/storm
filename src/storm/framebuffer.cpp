@@ -2,7 +2,9 @@
 
 namespace storm {
 
-Framebuffer::Pointer Framebuffer::create( Texture::Pointer texture ) {
+Framebuffer::Pointer Framebuffer::create(
+    GpuContext::Pointer gpuContext, Texture::Pointer texture )
+{
     Framebuffer::Buffer buffer;
     buffer.texture = texture;
     buffer.mipLevel = 0;
@@ -11,11 +13,14 @@ Framebuffer::Pointer Framebuffer::create( Texture::Pointer texture ) {
     Framebuffer::Description description;
     description.buffers = {buffer};
 
-    return Framebuffer::create( description );
+    return Framebuffer::create( gpuContext, description );
 }
 
-Framebuffer::Pointer Framebuffer::create( Dimensions dimensions,
-    unsigned int texelSamples, const std::vector<Texture::Format> &bufferFormats )
+Framebuffer::Pointer Framebuffer::create(
+    GpuContext::Pointer gpuContext,
+    Dimensions dimensions,
+    unsigned int texelSamples,
+    const std::vector<Texture::Format> &bufferFormats )
 {
     Framebuffer::Description description;
 
@@ -30,7 +35,7 @@ Framebuffer::Pointer Framebuffer::create( Dimensions dimensions,
             textureDescription.mipLevels = 1;
             textureDescription.resourceType = ResourceType::Dynamic;
 
-            texture = Texture::create( textureDescription );
+            texture = Texture::create( gpuContext, textureDescription );
         } else {
             Texture::Separate2dMsaaDescription textureDescription;
             textureDescription.format = bufferFormat;
@@ -38,7 +43,7 @@ Framebuffer::Pointer Framebuffer::create( Dimensions dimensions,
             textureDescription.height = dimensions.height;
             textureDescription.texelSamples = texelSamples;
 
-            texture = Texture::create( textureDescription );
+            texture = Texture::create( gpuContext, textureDescription );
         }
 
         Buffer buffer;
@@ -49,7 +54,7 @@ Framebuffer::Pointer Framebuffer::create( Dimensions dimensions,
         description.buffers.push_back( buffer );
     }
 
-    return Framebuffer::create( description );
+    return Framebuffer::create( gpuContext, description );
 }
 
 }

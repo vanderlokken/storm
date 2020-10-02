@@ -1,44 +1,39 @@
 #include <storm/ogl/mesh_ogl.h>
 
 #include <storm/ogl/buffer_ogl.h>
-#include <storm/ogl/check_result_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 #include <storm/ogl/vertex_format_ogl.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-VertexArrayHandleOgl::VertexArrayHandleOgl() {
-    ::glGenVertexArrays( 1, &_handle );
-    checkResult( "::glGenVertexArrays" );
-}
-
-VertexArrayHandleOgl::~VertexArrayHandleOgl() {
-    ::glDeleteVertexArrays( 1, &_handle );
-}
-
-MeshOgl::MeshOgl( const Description &description ) :
+MeshOgl::MeshOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description ) :
     _description( description ),
     _primitiveTopology(
-        convertPrimitiveTopology(description.primitiveTopology) )
+        convertPrimitiveTopology(description.primitiveTopology) ),
+    _handle( gpuContext )
 {
-    ::glBindVertexArray( _handle );
-    checkResult( "::glBindVertexArray" );
+    gpuContext->call<GlBindVertexArray>( _handle );
 
     const auto indexBuffer =
-        std::static_pointer_cast<BufferOgl>( _description.indexBuffer );
+        std::dynamic_pointer_cast<BufferOgl>( _description.indexBuffer );
     const auto vertexBuffer =
-        std::static_pointer_cast<BufferOgl>( _description.vertexBuffer );
+        std::dynamic_pointer_cast<BufferOgl>( _description.vertexBuffer );
     const auto vertexFormat =
-        std::static_pointer_cast<VertexFormatOgl>( _description.vertexFormat );
+        std::dynamic_pointer_cast<VertexFormatOgl>( _description.vertexFormat );
 
-    ::glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer->getHandle() );
-    checkResult( "::glBindBuffer" );
+    storm_assert(
+        gpuContext == indexBuffer->getHandle().getGpuContext() );
+    storm_assert(
+        gpuContext == vertexBuffer->getHandle().getGpuContext() );
 
-    ::glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer->getHandle() );
-    checkResult( "::glBindBuffer" );
+    gpuContext->call<GlBindBuffer>(
+        GL_ELEMENT_ARRAY_BUFFER, indexBuffer->getHandle() );
 
-    vertexFormat->install();
+    gpuContext->call<GlBindBuffer>(
+        GL_ARRAY_BUFFER, vertexBuffer->getHandle() );
+
+    vertexFormat->install( *gpuContext );
 }
 
 const Mesh::Description& MeshOgl::getDescription() const {
@@ -73,10 +68,12 @@ GLenum MeshOgl::convertPrimitiveTopology(
     }
 }
 
-std::shared_ptr<Mesh> Mesh::create( const Description &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
-    return std::make_shared< MeshOgl >( description );
+std::shared_ptr<Mesh> Mesh::create(
+    GpuContext::Pointer gpuContext, const Description &description )
+{
+    return std::make_shared<MeshOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        description );
 }
 
 }

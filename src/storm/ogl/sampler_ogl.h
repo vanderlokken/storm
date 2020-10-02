@@ -1,20 +1,17 @@
 #pragma once
 
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/handle_ogl.h>
 #include <storm/sampler.h>
 
 namespace storm {
 
-class SamplerHandleOgl : public HandleOgl {
-public:
-    SamplerHandleOgl();
-    ~SamplerHandleOgl();
-};
+using SamplerHandleOgl = HandleOgl<GlGenSamplers, GlDeleteSamplers>;
 
 class SamplerOgl : public Sampler {
 public:
-    SamplerOgl( const Description& );
+    SamplerOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description );
 
     const Description& getDescription() const override;
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <string_view>
 
+#include <storm/gpu_context.h>
 #include <storm/resource_type.h>
 
 namespace storm {
@@ -180,17 +181,25 @@ public:
     // created mipmap levels.
     static const unsigned int CompleteMipMap = ~0u;
 
-    static Pointer create( const Separate1dDescription &description );
-    static Pointer create( const Separate2dDescription &description );
-    static Pointer create( const Separate3dDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Separate1dDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Separate2dDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Separate3dDescription &description );
 
-    static Pointer create( const Layered1dDescription &description );
-    static Pointer create( const Layered2dDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Layered1dDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Layered2dDescription &description );
 
-    static Pointer create( const CubeMapDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const CubeMapDescription &description );
 
-    static Pointer create( const Separate2dMsaaDescription &description );
-    static Pointer create( const Layered2dMsaaDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Separate2dMsaaDescription &description );
+    static Pointer create(
+        GpuContext::Pointer, const Layered2dMsaaDescription &description );
 
     enum class FileFormat {
         DdsStrict,
@@ -211,9 +220,12 @@ public:
     };
 
     static Pointer load(
-        std::istream &stream, const LoadingParameters &parameters );
+        GpuContext::Pointer gpuContext, std::istream &stream,
+        const LoadingParameters &parameters );
+
     static Pointer load(
-        std::string_view filename, const LoadingParameters &parameters );
+        GpuContext::Pointer gpuContext, std::string_view filename,
+        const LoadingParameters &parameters );
 
     virtual ~Texture() = default;
 

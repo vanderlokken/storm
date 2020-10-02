@@ -6,6 +6,8 @@
 namespace storm {
 
 Texture::Pointer parseDds(
-    BinaryInputStream &stream, const Texture::LoadingParameters &parameters );
+    GpuContext::Pointer gpuContext,
+    BinaryInputStream &stream,
+    const Texture::LoadingParameters &parameters );
 
 }

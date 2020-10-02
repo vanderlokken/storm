@@ -1,27 +1,24 @@
 #include <storm/ogl/query_ogl.h>
 
-#include <storm/ogl/check_result_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-QueryHandleOgl::QueryHandleOgl() {
-    ::glGenQueries( 1, &_handle );
-    checkResult( "::glGenQueries" );
+GpuTimeIntervalQueryOgl::GpuTimeIntervalQueryOgl(
+        GpuContextOgl::Pointer gpuContext ) :
+    _beginTimestampQueryHandle( gpuContext ),
+    _endTimestampQueryHandle( gpuContext )
+{
 }
-
-QueryHandleOgl::~QueryHandleOgl() {
-    ::glDeleteQueries( 1, &_handle );
-}
-
-GpuTimeIntervalQueryOgl::GpuTimeIntervalQueryOgl() : _running( false ) {}
 
 void GpuTimeIntervalQueryOgl::begin() {
     storm_assert( !_running );
 
-    ::glQueryCounter( _beginTimestampQueryHandle, GL_TIMESTAMP );
-    checkResult( "::glQueryCounter" );
+    const GpuContextOgl &gpuContext =
+        *_beginTimestampQueryHandle.getGpuContext();
+
+    gpuContext.call<GlQueryCounter>(
+        _beginTimestampQueryHandle, GL_TIMESTAMP );
 
     _running = true;
 }
@@ -29,8 +26,11 @@ void GpuTimeIntervalQueryOgl::begin() {
 void GpuTimeIntervalQueryOgl::end() {
     storm_assert( _running );
 
-    ::glQueryCounter( _endTimestampQueryHandle, GL_TIMESTAMP );
-    checkResult( "::glQueryCounter" );
+    const GpuContextOgl &gpuContext =
+        *_endTimestampQueryHandle.getGpuContext();
+
+    gpuContext.call<GlQueryCounter>(
+        _endTimestampQueryHandle, GL_TIMESTAMP );
 
     _running = false;
 }
@@ -38,17 +38,18 @@ void GpuTimeIntervalQueryOgl::end() {
 bool GpuTimeIntervalQueryOgl::isResultReady() const {
     storm_assert( !_running );
 
+    const GpuContextOgl &gpuContext =
+        *_beginTimestampQueryHandle.getGpuContext();
+
     GLint beginQueryReady;
     GLint endQueryReady;
 
-    ::glGetQueryObjectiv(
+    gpuContext.call<GlGetQueryObjectiv>(
         _beginTimestampQueryHandle, GL_QUERY_RESULT_AVAILABLE,
         &beginQueryReady );
-    checkResult( "::glGetQueryObjectiv" );
 
-    ::glGetQueryObjectiv(
+    gpuContext.call<GlGetQueryObjectiv>(
         _endTimestampQueryHandle, GL_QUERY_RESULT_AVAILABLE, &endQueryReady );
-    checkResult( "::glGetQueryObjectiv" );
 
     return beginQueryReady && endQueryReady;
 }
@@ -56,28 +57,33 @@ bool GpuTimeIntervalQueryOgl::isResultReady() const {
 std::chrono::nanoseconds GpuTimeIntervalQueryOgl::getResult() const {
     storm_assert( !_running );
 
+    const GpuContextOgl &gpuContext =
+        *_beginTimestampQueryHandle.getGpuContext();
+
     GLuint64 begin;
     GLuint64 end;
 
-    ::glGetQueryObjectui64v(
+    gpuContext.call<GlGetQueryObjectui64v>(
         _beginTimestampQueryHandle, GL_QUERY_RESULT, &begin );
-    checkResult( "::glGetQueryObjectui64v" );
 
-    ::glGetQueryObjectui64v(
+    gpuContext.call<GlGetQueryObjectui64v>(
         _endTimestampQueryHandle, GL_QUERY_RESULT, &end );
-    checkResult( "::glGetQueryObjectui64v" );
 
     return std::chrono::nanoseconds( end - begin );
 }
 
-GpuTimeIntervalQuery::Pointer GpuTimeIntervalQuery::create() {
-    RenderingSystemOgl::installOpenGlContext();
+GpuTimeIntervalQuery::Pointer GpuTimeIntervalQuery::create(
+    GpuContext::Pointer gpuContext )
+{
+    auto context =
+        std::dynamic_pointer_cast<GpuContextOgl>( std::move(gpuContext) );
 
-    if( !getOpenGlSupportStatus().ARB_timer_query )
+    if( !context->getExtensionSupportStatus().arbTimerQuery ) {
         throw SystemRequirementsNotMet() <<
             "Video driver doesn't support 'ARB_timer_query' OpenGL extension.";
+    }
 
-    return std::make_shared<GpuTimeIntervalQueryOgl>();
+    return std::make_shared<GpuTimeIntervalQueryOgl>( std::move(context) );
 }
 
 }

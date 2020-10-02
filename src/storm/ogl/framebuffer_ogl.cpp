@@ -2,44 +2,42 @@
 
 #include <numeric>
 
-#include <storm/ogl/check_result_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 #include <storm/ogl/texture_ogl.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
-FramebufferHandleOgl::FramebufferHandleOgl() {
-    ::glGenFramebuffers( 1, &_handle );
-    checkResult( "::glGenFramebuffers" );
-}
-
-FramebufferHandleOgl::~FramebufferHandleOgl() {
-    ::glDeleteFramebuffers( 1, &_handle );
-}
-
-ScopeFramebufferBinding::ScopeFramebufferBinding( GLuint binding ) {
-    ::glGetIntegerv( GL_FRAMEBUFFER_BINDING, &_previousBinding );
-    checkResult( "::glGetIntegerv" );
-
-    ::glBindFramebuffer( GL_FRAMEBUFFER, binding );
-    checkResult( "::glBindFramebuffer" );
+ScopeFramebufferBinding::ScopeFramebufferBinding(
+        const GpuContextOgl &gpuContext, GLuint binding ) :
+    _gpuContext( gpuContext )
+{
+    _gpuContext.call<GlGetIntegerv>(
+        GL_FRAMEBUFFER_BINDING, &_previousBinding );
+    _gpuContext.call<GlBindFramebuffer>(
+        GL_FRAMEBUFFER, binding );
 }
 
 ScopeFramebufferBinding::~ScopeFramebufferBinding() {
-    ::glBindFramebuffer( GL_FRAMEBUFFER, _previousBinding );
+    _gpuContext.callUnchecked<GlBindFramebuffer>(
+        GL_FRAMEBUFFER, _previousBinding );
 }
 
-FramebufferOgl::FramebufferOgl( const Description &description ) :
-    _description( description )
+FramebufferOgl::FramebufferOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description ) :
+    _description( description ),
+    _handle( gpuContext )
 {
-    ScopeFramebufferBinding scopeFramebufferBinding( _handle );
+    ScopeFramebufferBinding scopeFramebufferBinding( *gpuContext, _handle );
 
     size_t colorAttachmentsNumber = 0;
     size_t depthAttachmentsNumber = 0;
 
     for( const auto &buffer : description.buffers ) {
         const auto nativeTexture =
-            std::static_pointer_cast<TextureOgl>( buffer.texture );
+            std::dynamic_pointer_cast<TextureOgl>( buffer.texture );
+
+        storm_assert(
+            gpuContext == nativeTexture->getHandle().getGpuContext() );
 
         GLenum attachment;
         switch( nativeTexture->getDescription().format ) {
@@ -68,23 +66,30 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
         case Texture::Layout::Separate1d:
         case Texture::Layout::Separate2d:
         case Texture::Layout::Separate2dMsaa:
-            ::glFramebufferTexture( GL_FRAMEBUFFER, attachment,
-                nativeTexture->getHandle(), buffer.mipLevel );
-            checkResult( "::glFramebufferTexture" );
+            gpuContext->call<GlFramebufferTexture>(
+                GL_FRAMEBUFFER,
+                attachment,
+                nativeTexture->getHandle(),
+                buffer.mipLevel );
             break;
         case Texture::Layout::Layered1d:
         case Texture::Layout::Layered2d:
         case Texture::Layout::Layered2dMsaa:
         case Texture::Layout::Separate3d:
-            ::glFramebufferTextureLayer( GL_FRAMEBUFFER, attachment,
-                nativeTexture->getHandle(), buffer.mipLevel, buffer.layer );
-            checkResult( "::glFramebufferTextureLayer" );
+            gpuContext->call<GlFramebufferTextureLayer>(
+                GL_FRAMEBUFFER,
+                attachment,
+                nativeTexture->getHandle(),
+                buffer.mipLevel,
+                buffer.layer );
             break;
         case Texture::Layout::CubeMap:
-            ::glFramebufferTexture2D( GL_FRAMEBUFFER, attachment,
+            gpuContext->call<GlFramebufferTexture2D>(
+                GL_FRAMEBUFFER,
+                attachment,
                 TextureOgl::convertCubeMapFace(buffer.layer),
-                nativeTexture->getHandle(), buffer.mipLevel );
-            checkResult( "::glFramebufferTexture2D" );
+                nativeTexture->getHandle(),
+                buffer.mipLevel );
             break;
         default:
             throwNotImplemented();
@@ -92,13 +97,14 @@ FramebufferOgl::FramebufferOgl( const Description &description ) :
     }
 
     storm_assert(
-        ::glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE );
+        gpuContext->callUnchecked<GlCheckFramebufferStatus>(GL_FRAMEBUFFER) ==
+            GL_FRAMEBUFFER_COMPLETE );
 
     std::vector<GLenum> buffers( colorAttachmentsNumber );
     std::iota( buffers.begin(), buffers.end(), GL_COLOR_ATTACHMENT0 );
 
-    ::glDrawBuffers( static_cast<GLsizei>(buffers.size()), buffers.data() );
-    checkResult( "::glDrawBuffers" );
+    gpuContext->call<GlDrawBuffers>(
+        static_cast<GLsizei>(buffers.size()), buffers.data() );
 }
 
 const Framebuffer::Description& FramebufferOgl::getDescription() const {
@@ -109,10 +115,12 @@ const FramebufferHandleOgl& FramebufferOgl::getHandle() const {
     return _handle;
 }
 
-Framebuffer::Pointer Framebuffer::create( const Description &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
-    return std::make_shared< FramebufferOgl >( description );
+Framebuffer::Pointer Framebuffer::create(
+    GpuContext::Pointer gpuContext, const Description &description )
+{
+    return std::make_shared<FramebufferOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        description );
 }
 
 }

@@ -1,14 +1,16 @@
 #pragma once
 
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 
 namespace storm {
 
+template <class CreationApiFunction, class DestructionApiFunction>
 class HandleOgl {
 public:
-    HandleOgl() :
-        _handle( 0 )
+    explicit HandleOgl( const GpuContextOgl::Pointer &gpuContext ) :
+        _gpuContext( gpuContext )
     {
+        gpuContext->call<CreationApiFunction>( 1, &_handle );
     }
 
     HandleOgl(
@@ -16,14 +18,27 @@ public:
     HandleOgl& operator = (
         const HandleOgl& ) = delete;
 
-    virtual ~HandleOgl() {}
+    ~HandleOgl() {
+        if( const GpuContextOgl::Pointer gpuContext = _gpuContext.tryLock() ) {
+            gpuContext->callUnchecked<DestructionApiFunction>( 1, &_handle );
+        }
+    }
+
+    GpuContextOgl::Pointer getGpuContext() const {
+        return _gpuContext.locked();
+    }
+
+    const WeakGpuContextOgl& getWeakGpuContext() const {
+        return _gpuContext;
+    }
 
     operator GLuint () const {
         return _handle;
     }
 
-protected:
-    GLuint _handle;
+private:
+    WeakGpuContextOgl _gpuContext;
+    GLuint _handle = 0;
 };
 
 }

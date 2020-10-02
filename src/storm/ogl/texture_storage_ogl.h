@@ -1,29 +1,49 @@
 #pragma once
 
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 
-// Replacement functions for the 'ARB_texture_storage' and
-// 'ARB_texture_storage_multisample' extensions.
+// The following functions handle cases when the 'ARB_texture_storage' and
+// 'ARB_texture_storage_multisample' extensions are not available. When these
+// extensions are available these functions act as a proxy.
 
 namespace storm {
 
-void APIENTRY glTexStorage1D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width );
+void glTexStorage1D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width );
 
-void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width, GLsizei height );
+void glTexStorage2D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width,
+    GLsizei height );
 
-void APIENTRY glTexStorage3D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth );
+void glTexStorage3D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth );
 
-void APIENTRY glTexStorage2DMultisample( GLenum target,
+void glTexStorage2DMultisample(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,
     GLsizei height,
     GLboolean fixedSampleLocations );
 
-void APIENTRY glTexStorage3DMultisample( GLenum target,
+void glTexStorage3DMultisample(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,

@@ -1,19 +1,19 @@
 #pragma once
 
 #include <storm/buffer.h>
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/handle_ogl.h>
 
 namespace storm {
 
-class BufferHandleOgl : public HandleOgl {
-public:
-    BufferHandleOgl();
-    ~BufferHandleOgl();
-};
+using BufferHandleOgl = HandleOgl<GlGenBuffers, GlDeleteBuffers>;
 
 class BufferOgl : public Buffer {
 public:
-    BufferOgl( const Description&, const void *data );
+    BufferOgl(
+        GpuContextOgl::Pointer gpuContext,
+        const Description &description,
+        const void *data );
 
     void getData( size_t offset, size_t size, void *data ) const override;
     void setData( size_t offset, size_t size, const void *data ) override;

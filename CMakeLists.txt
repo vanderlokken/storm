@@ -67,7 +67,7 @@ set_target_properties(storm PROPERTIES
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_target_properties(storm PROPERTIES DEBUG_POSTFIX d)
-    target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4 /GR-)
+    target_compile_options(storm PRIVATE $<$<CONFIG:Debug>:/Zi> /W4)
     target_compile_definitions(storm PRIVATE UNICODE _UNICODE)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(storm PRIVATE -Wall $<$<CONFIG:Debug>:-g>)
@@ -147,11 +147,11 @@ target_sources(storm PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/glcorearb.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/GL/wglext.h
     ${CMAKE_CURRENT_BINARY_DIR}/contrib/KHR/khrplatform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/api_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/backbuffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/buffer_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/condition_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/framebuffer_ogl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/gpu_context_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/mesh_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/pipeline_state_ogl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/storm/ogl/query_ogl.cpp

@@ -22,44 +22,44 @@ void main() {
 
 class Example : public ExampleBase {
 public:
-    explicit Example( storm::Window::Pointer window ) {
+    explicit Example( storm::Window::Pointer window ) :
+        _renderingSystem( storm::RenderingSystem::create() )
+    {
         const storm::Dimensions outputWindowDimensions( 640, 480 );
 
         window->setWindowedMode( outputWindowDimensions );
 
-        storm::RenderingSystem *renderingSystem =
-            storm::RenderingSystem::getInstance();
-        renderingSystem->setOutputWindow( std::move(window) );
-        renderingSystem->setOutputRectangle(
+        _renderingSystem->setOutputWindow( std::move(window) );
+        _renderingSystem->setOutputRectangle(
             storm::Rectangle(
                 0,
                 0,
                 outputWindowDimensions.width,
                 outputWindowDimensions.height) );
 
-        _vertexShader = storm::Shader::create(
-            vertexShaderSource, storm::Shader::Type::Vertex );
-        _pixelShader = storm::Shader::create(
-            pixelShaderSource, storm::Shader::Type::Pixel );
+        const storm::GpuContext::Pointer gpuContext =
+            _renderingSystem->getGpuContext();
 
-        createMesh();
+        _vertexShader = storm::Shader::create(
+            gpuContext, vertexShaderSource, storm::Shader::Type::Vertex );
+        _pixelShader = storm::Shader::create(
+            gpuContext, pixelShaderSource, storm::Shader::Type::Pixel );
+
+        createMesh( gpuContext );
     }
 
     void update() override {}
 
     void render() override {
-        storm::RenderingSystem *renderingSystem =
-            storm::RenderingSystem::getInstance();
+        _renderingSystem->setShader( _vertexShader );
+        _renderingSystem->setShader( _pixelShader );
+        _renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->setShader( _vertexShader );
-        renderingSystem->setShader( _pixelShader );
-        renderingSystem->renderMesh( _mesh );
-
-        renderingSystem->presentBackbuffer();
+        _renderingSystem->presentBackbuffer();
     }
 
 private:
-    void createMesh() {
+    void createMesh( storm::GpuContext::Pointer gpuContext ) {
         const std::array<storm::PositionedVertex, 3> vertices = {
             storm::Vector(-0.5f, -0.5f, 0.0f),
             storm::Vector( 0.0f,  0.5f, 0.0f),
@@ -68,15 +68,20 @@ private:
         const std::array<uint16_t, 3> indices = { 0, 1, 2 };
 
         storm::Mesh::Description meshDescription;
-        meshDescription.vertexBuffer = storm::Buffer::create( vertices );
-        meshDescription.indexBuffer = storm::Buffer::create( indices );
-        meshDescription.vertexFormat = storm::PositionedVertex::getFormat();
+        meshDescription.vertexBuffer =
+            storm::Buffer::create( gpuContext, vertices );
+        meshDescription.indexBuffer =
+            storm::Buffer::create( gpuContext, indices );
+        meshDescription.vertexFormat =
+            storm::PositionedVertex::getFormat();
         meshDescription.primitiveTopology =
             storm::Mesh::PrimitiveTopology::TriangleStrip;
         meshDescription.indexSize = sizeof( indices.front() );
 
-        _mesh = storm::Mesh::create( meshDescription );
+        _mesh = storm::Mesh::create( gpuContext, meshDescription );
     }
+
+    storm::RenderingSystem::Pointer _renderingSystem;
 
     storm::Mesh::Pointer _mesh;
     storm::Shader::Pointer _vertexShader;

@@ -9,7 +9,10 @@
 namespace storm {
 
 Shader::Pointer Shader::load(
-    std::istream &stream, Type type, Format format )
+    GpuContext::Pointer gpuContext,
+    std::istream &stream,
+    Type type,
+    Format format )
 {
     std::ostringstream bufferStream;
 
@@ -20,20 +23,25 @@ Shader::Pointer Shader::load(
 
     switch( format ) {
     case Format::Source:
-        return Shader::create( buffer, type );
+        return Shader::create( gpuContext, buffer, type );
     case Format::Binary:
         return Shader::create(
+            gpuContext,
             std::vector<uint8_t>(
                 reinterpret_cast<const uint8_t*>(buffer.data()),
                 reinterpret_cast<const uint8_t*>(buffer.data()) + buffer.size()
-            ), type );
+            ),
+            type );
     default:
         throwNotImplemented();
     }
 }
 
 Shader::Pointer Shader::load(
-    std::string_view filename, Type type, Format format )
+    GpuContext::Pointer gpuContext,
+    std::string_view filename,
+    Type type,
+    Format format )
 {
     std::ifstream stream( filename.data(), std::ios::in | std::ios::binary );
 
@@ -41,7 +49,7 @@ Shader::Pointer Shader::load(
         throw ResourceLoadingError() << "Couldn't open " << filename;
     }
 
-    return Shader::load( stream, type, format );
+    return Shader::load( gpuContext, stream, type, format );
 }
 
 }

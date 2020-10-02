@@ -3,13 +3,15 @@
 #include <chrono>
 #include <memory>
 
+#include <storm/gpu_context.h>
+
 namespace storm {
 
 class GpuTimeIntervalQuery {
 public:
     using Pointer = std::shared_ptr<GpuTimeIntervalQuery>;
 
-    static Pointer create();
+    static Pointer create( GpuContext::Pointer gpuContext );
 
     virtual ~GpuTimeIntervalQuery() = default;
 

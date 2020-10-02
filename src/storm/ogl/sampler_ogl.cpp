@@ -1,27 +1,17 @@
 #include <storm/ogl/sampler_ogl.h>
 
-#include <storm/ogl/check_result_ogl.h>
 #include <storm/ogl/condition_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 #include <storm/throw_exception.h>
 
 namespace storm {
 
-SamplerHandleOgl::SamplerHandleOgl() {
-    ::glGenSamplers( 1, &_handle );
-    checkResult( "::glGenSamplers" );
-}
-
-SamplerHandleOgl::~SamplerHandleOgl() {
-    ::glDeleteSamplers( 1, &_handle );
-}
-
-SamplerOgl::SamplerOgl( const Description &description ) :
-    _description( description )
+SamplerOgl::SamplerOgl(
+        GpuContextOgl::Pointer gpuContext, const Description &description ) :
+    _description( description ),
+    _handle( gpuContext )
 {
-    auto setParameter = [this](GLenum parameter, GLint value) {
-        ::glSamplerParameteri( _handle, parameter, value );
-        checkResult( "::glSamplerParameteri" );
+    auto setParameter = [&](GLenum parameter, GLint value) {
+        gpuContext->call<GlSamplerParameteri>( _handle, parameter, value );
     };
 
     setParameter( GL_TEXTURE_MIN_FILTER,
@@ -35,9 +25,8 @@ SamplerOgl::SamplerOgl( const Description &description ) :
     setParameter( GL_TEXTURE_WRAP_R,
         convertWrapMode(description.wrapModes[2]) );
 
-    ::glSamplerParameterfv(
+    gpuContext->call<GlSamplerParameterfv>(
         _handle, GL_TEXTURE_BORDER_COLOR, &description.borderColor.r );
-    checkResult( "::glSamplerParameterfv" );
 
     if( _description.comparisonCondition ) {
         setParameter( GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
@@ -47,13 +36,14 @@ SamplerOgl::SamplerOgl( const Description &description ) :
 
     storm_assert( description.maximalAnisotropyDegree >= 1 );
 
-    if( getOpenGlSupportStatus().EXT_texture_filter_anisotropic ) {
+    if( gpuContext->getExtensionSupportStatus().extTextureFilterAnisotropic ) {
         // http://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
         #define TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 
-        ::glSamplerParameterf( _handle, TEXTURE_MAX_ANISOTROPY_EXT,
+        gpuContext->call<GlSamplerParameterf>(
+            _handle,
+            TEXTURE_MAX_ANISOTROPY_EXT,
             static_cast<float>(description.maximalAnisotropyDegree) );
-        checkResult( "::glSamplerParameterf" );
     }
 }
 
@@ -109,10 +99,12 @@ GLenum SamplerOgl::convertWrapMode( WrapMode wrapMode ) {
     }
 }
 
-Sampler::Pointer Sampler::create( const Description &description ) {
-    RenderingSystemOgl::installOpenGlContext();
-
-    return std::make_shared<SamplerOgl>( description );
+Sampler::Pointer Sampler::create(
+    GpuContext::Pointer gpuContext, const Description &description )
+{
+    return std::make_shared<SamplerOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        description );
 }
 
 }

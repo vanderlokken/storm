@@ -11,15 +11,17 @@
 namespace storm {
 
 Texture::Pointer Texture::load(
-    std::istream &stream, const LoadingParameters &parameters )
+    GpuContext::Pointer gpuContext,
+    std::istream &stream,
+    const LoadingParameters &parameters )
 {
     BinaryInputStream binaryInputStream( stream );
     switch( parameters.fileFormat ) {
     case FileFormat::Dds:
     case FileFormat::DdsStrict:
-        return parseDds( binaryInputStream, parameters );
+        return parseDds( gpuContext, binaryInputStream, parameters );
     case FileFormat::Png:
-        return parsePng( binaryInputStream, parameters );
+        return parsePng( gpuContext, binaryInputStream, parameters );
     default:
         storm_assert_unreachable( "Unexpected file format value" );
         return nullptr;
@@ -27,14 +29,16 @@ Texture::Pointer Texture::load(
 }
 
 Texture::Pointer Texture::load(
-    std::string_view filename, const LoadingParameters &parameters )
+    GpuContext::Pointer gpuContext,
+    std::string_view filename,
+    const LoadingParameters &parameters )
 {
     std::ifstream stream( filename.data(), std::ios::in | std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;
 
-    return Texture::load( stream, parameters );
+    return Texture::load( gpuContext, stream, parameters );
 }
 
 Texture::MipLevelDimensions

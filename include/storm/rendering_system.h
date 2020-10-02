@@ -5,6 +5,7 @@
 #include <storm/backbuffer.h>
 #include <storm/color.h>
 #include <storm/framebuffer.h>
+#include <storm/gpu_context.h>
 #include <storm/mesh.h>
 #include <storm/pipeline_state.h>
 #include <storm/rectangle.h>
@@ -15,9 +16,13 @@ namespace storm {
 
 class RenderingSystem {
 public:
-    static RenderingSystem* getInstance();
+    using Pointer = std::shared_ptr<RenderingSystem>;
+
+    static Pointer create();
 
     virtual ~RenderingSystem() = default;
+
+    virtual GpuContext::Pointer getGpuContext() const = 0;
 
     virtual Window::Pointer getOutputWindow() const = 0;
     virtual void setOutputWindow( Window::Pointer window ) = 0;

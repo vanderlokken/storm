@@ -196,8 +196,8 @@ public:
 
                 throw Exception() << "XCB error (sequence = " <<
                     std::to_string( error.sequence ) << ")";
-#endif
             }
+#endif
         }
     }
 

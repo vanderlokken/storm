@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include <storm/buffer.h>
+#include <storm/gpu_context.h>
 #include <storm/vertex_format.h>
 
 namespace storm {
@@ -30,9 +31,12 @@ public:
         size_t indexSize;
     };
 
-    static Pointer create( const Description& );
-    static Pointer load( std::istream &stream );
-    static Pointer load( std::string_view filename );
+    static Pointer create(
+        GpuContext::Pointer gpuContext, const Description &description );
+    static Pointer load(
+        GpuContext::Pointer gpuContext, std::istream &stream );
+    static Pointer load(
+        GpuContext::Pointer gpuContext, std::string_view filename );
 
     virtual ~Mesh() = default;
 

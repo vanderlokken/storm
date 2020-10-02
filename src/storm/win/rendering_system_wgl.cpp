@@ -1,11 +1,8 @@
 #include <storm/win/api_win.h>
 
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/rendering_system_ogl.h>
 #include <storm/throw_exception.h>
-
-// Unpacked from contrib/wglext-*.tar.gz
-#include <GL/wglext.h>
 
 namespace storm {
 
@@ -14,8 +11,7 @@ namespace {
 class DeviceContextHandle {
 public:
     explicit DeviceContextHandle( const Window& window ) :
-        _windowHandle( static_cast<HWND>(window.getHandle()) ),
-        _contextHandle( GetDC(_windowHandle) )
+        _handle( GetDC(static_cast<HWND>(window.getHandle())) )
     {
     }
 
@@ -31,50 +27,81 @@ public:
     DeviceContextHandle& operator = ( DeviceContextHandle &&context ) {
         this->~DeviceContextHandle();
 
-        _contextHandle = context._contextHandle;
-        _windowHandle = context._windowHandle;
-
-        context._contextHandle = nullptr;
+        _handle = nullptr;
+        std::swap( _handle, context._handle );
 
         return *this;
     }
 
     ~DeviceContextHandle() {
-        if( _contextHandle ) {
-            ReleaseDC( _windowHandle, _contextHandle );
+        if( _handle ) {
+            ReleaseDC( WindowFromDC(_handle), _handle );
         }
     }
 
     operator HDC() const {
-        return _contextHandle;
-    }
-
-private:
-    HWND _windowHandle;
-    HDC _contextHandle;
-};
-
-class RenderingContextHandle {
-public:
-    explicit RenderingContextHandle( HGLRC handle ) :
-        _handle( handle )
-    {
-    }
-
-    RenderingContextHandle(
-        const RenderingContextHandle& ) = delete;
-    RenderingContextHandle& operator = (
-        const RenderingContextHandle& ) = delete;
-
-    ~RenderingContextHandle() {
-        wglDeleteContext( _handle );
-    }
-
-    operator HGLRC() const {
         return _handle;
     }
 
 private:
+    HDC _handle;
+};
+
+class GpuContextWgl final : public GpuContextOgl {
+public:
+    GpuContextWgl( HGLRC handle, Window::Pointer outputWindow ) :
+        _outputWindow( std::move(outputWindow) ),
+        _handle( handle )
+    {
+        activate();
+
+        // 'wglGetProcAddress' doesn't return pointers to OpenGL 1.1 functions,
+        // so we obtain these pointers from a shared library.
+        const HMODULE moduleHandle = GetModuleHandle( L"opengl32.dll" );
+
+        loadApiFunctions(
+            [&](std::string_view name) {
+                const PROC result = wglGetProcAddress( name.data() );
+
+                return result ?
+                    result : GetProcAddress( moduleHandle, name.data() );
+            });
+    }
+
+    GpuContextWgl(
+        const GpuContextWgl& ) = delete;
+    GpuContextWgl& operator = (
+        const GpuContextWgl& ) = delete;
+
+    ~GpuContextWgl() {
+        const DeviceContextHandle deviceContext( *_outputWindow );
+
+        wglMakeCurrent( deviceContext, nullptr );
+        wglDeleteContext( _handle );
+    }
+
+    void activate() const override {
+        if( wglGetCurrentContext() != _handle ) {
+            doActivate();
+        }
+    }
+
+    void setOutputWindow( Window::Pointer outputWindow ) {
+        if( _outputWindow != outputWindow ) {
+            _outputWindow = std::move( outputWindow );
+            assertThreadCompatibility();
+            doActivate();
+        }
+    }
+
+private:
+    void doActivate() const {
+        const DeviceContextHandle deviceContext( *_outputWindow );
+
+        wglMakeCurrent( deviceContext, _handle );
+    }
+
+    Window::Pointer _outputWindow;
     HGLRC _handle;
 };
 
@@ -83,51 +110,7 @@ public:
     RenderingSystemWgl() :
         _defaultWindow( Window::create() )
     {
-        const DeviceContextHandle deviceContext = getDeviceContext();
-
-        const RenderingContextHandle renderingContext(
-            wglCreateContext(deviceContext) );
-
-        wglMakeCurrent( deviceContext, renderingContext );
-
-        if( getWglSupportStatus().ARB_create_context ) {
-            _wglCreateContextAttribsARB =
-                reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
-                    wglGetProcAddress("wglCreateContextAttribsARB") );
-        }
-        if( getWglSupportStatus().EXT_swap_control ) {
-            _wglSwapIntervalEXT =
-                reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(
-                    wglGetProcAddress("wglSwapIntervalEXT") );
-        }
-
-        if( !getWglSupportStatus().ARB_extensions_string ) {
-            throw SystemRequirementsNotMet() << "Required OpenGL extension"
-                "'WGL_ARB_extensions_string' is not supported";
-        }
-        if( !_wglCreateContextAttribsARB ) {
-            throw SystemRequirementsNotMet() << "Required OpenGL extension"
-                "'WGL_ARB_create_context' is not supported";
-        }
-
-        const int contextAttributes[] = {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-            WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-            WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-    #ifndef NDEBUG
-            WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
-    #endif
-            0
-        };
-
-        _renderingContext = std::make_unique<RenderingContextHandle>(
-            _wglCreateContextAttribsARB(deviceContext, 0, contextAttributes) );
-
-        if( !*_renderingContext ) {
-            throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
-        }
-
-        wglMakeCurrent( deviceContext, *_renderingContext );
+        setOutputWindow( nullptr );
 
         initialize();
     }
@@ -139,8 +122,11 @@ public:
     void setOutputWindow( Window::Pointer window ) override {
         _outputWindow = std::move( window );
 
-        const DeviceContextHandle deviceContext = getDeviceContext();
-        wglMakeCurrent( deviceContext, *_renderingContext );
+        const auto context =
+            std::dynamic_pointer_cast<GpuContextWgl>( getGpuContext() );
+
+        context->setOutputWindow(
+            _outputWindow ? _outputWindow : _defaultWindow );
 
         if( _outputWindow ) {
             applyVsyncSettings();
@@ -171,12 +157,16 @@ private:
     }
 
     void applyVsyncSettings() const {
-        if( _wglSwapIntervalEXT ) {
-            if( getWglSupportStatus().EXT_swap_control_tear ) {
-                _wglSwapIntervalEXT( _isVsyncEnabled ? -1 : 0 );
-            } else {
-                _wglSwapIntervalEXT( _isVsyncEnabled ? 1 : 0 );
-            }
+        const auto context =
+            std::dynamic_pointer_cast<GpuContextOgl>( getGpuContext() );
+
+        if( context->getExtensionSupportStatus().wglExtSwapControl ) {
+            const int intervalForVsync =
+                context->getExtensionSupportStatus().wglExtSwapControlTear ?
+                    -1 : 1;
+
+            context->callUnchecked<WglSwapIntervalEXT>(
+                _isVsyncEnabled ? intervalForVsync : 0 );
         }
     }
 
@@ -184,19 +174,44 @@ private:
     Window::Pointer _outputWindow;
 
     bool _isVsyncEnabled = true;
-
-    PFNWGLCREATECONTEXTATTRIBSARBPROC _wglCreateContextAttribsARB = nullptr;
-    PFNWGLSWAPINTERVALEXTPROC _wglSwapIntervalEXT = nullptr;
-
-    std::unique_ptr<RenderingContextHandle> _renderingContext;
 };
 
 } // namespace
 
-RenderingSystem* RenderingSystem::getInstance() {
-    static const std::unique_ptr<RenderingSystemWgl> instance =
-        std::make_unique<RenderingSystemWgl>();
-    return instance.get();
+RenderingSystem::Pointer RenderingSystem::create() {
+    return std::make_shared<RenderingSystemWgl>();
+}
+
+GpuContext::Pointer GpuContext::create() {
+    const Window::Pointer window = Window::create();
+    const DeviceContextHandle deviceContext( *window );
+
+    const GpuContextWgl legacyContext(
+        wglCreateContext(deviceContext), window );
+
+    const int contextAttributes[] = {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+#ifndef NDEBUG
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+#endif
+        0
+    };
+
+    if( !legacyContext.isFunctionAvailable<WglCreateContextAttribsARB>() ) {
+        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+    }
+
+    const HGLRC coreContextHandle =
+        legacyContext.callUnchecked<WglCreateContextAttribsARB>(
+            deviceContext, nullptr, contextAttributes );
+
+    if( !coreContextHandle ) {
+        throw SystemRequirementsNotMet() << "OpenGL 3.3 is not supported";
+    }
+
+    return std::make_shared<GpuContextWgl>( coreContextHandle, window );
 }
 
 }

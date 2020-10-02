@@ -5,7 +5,6 @@
 #include <set>
 
 #include <storm/ogl/buffer_ogl.h>
-#include <storm/ogl/check_result_ogl.h>
 #include <storm/ogl/rendering_system_ogl.h>
 #include <storm/ogl/sampler_ogl.h>
 #include <storm/ogl/texture_ogl.h>
@@ -28,39 +27,59 @@ struct ValueHandleImplementation {
     size_t index;
 };
 
-void bindTexture( const Texture *texture, size_t textureUnit ) {
+void bindTexture(
+    const GpuContextOgl &gpuContext,
+    const Texture *texture,
+    size_t textureUnit )
+{
     const auto nativeTexture = static_cast<const TextureOgl*>( texture );
 
-    ::glActiveTexture( static_cast<GLuint>(GL_TEXTURE0 + textureUnit) );
-    checkResult( "::glActiveTexture" );
+    storm_assert(
+        !nativeTexture ||
+        nativeTexture->getHandle().getGpuContext().get() == &gpuContext );
+
+    gpuContext.call<GlActiveTexture>(
+        static_cast<GLuint>(GL_TEXTURE0 + textureUnit) );
 
     if( nativeTexture ) {
-        ::glBindTexture(
+        gpuContext.call<GlBindTexture>(
             nativeTexture->getTarget(), nativeTexture->getHandle() );
     } else {
-        ::glBindTexture( GL_TEXTURE_2D, 0 );
+        gpuContext.call<GlBindTexture>( GL_TEXTURE_2D, 0 );
     }
-    checkResult( "::glBindTexture" );
 }
 
-void bindSampler( const Sampler *sampler, size_t textureUnit ) {
+void bindSampler(
+    const GpuContextOgl &gpuContext,
+    const Sampler *sampler,
+    size_t textureUnit )
+{
     const auto nativeSampler = static_cast<const SamplerOgl*>( sampler );
 
     storm_assert( nativeSampler, "Shader texture sampler is not set" );
+    storm_assert(
+        nativeSampler->getHandle().getGpuContext().get() == &gpuContext );
 
-    ::glBindSampler(
+    gpuContext.call<GlBindSampler>(
         static_cast<GLuint>(textureUnit), nativeSampler->getHandle() );
-    checkResult( "::glBindSampler" );
 }
 
-void bindUniformBuffer( const Buffer *buffer, size_t bindingPoint ) {
+void bindUniformBuffer(
+    const GpuContextOgl &gpuContext,
+    const Buffer *buffer,
+    size_t bindingPoint )
+{
     const auto nativeBuffer = static_cast<const BufferOgl*>( buffer );
+
+    storm_assert(
+        &gpuContext == nativeBuffer->getHandle().getGpuContext().get() );
 
     storm_assert( nativeBuffer, "Shader uniform buffer is not set" );
 
-    ::glBindBufferBase( GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingPoint),
+    gpuContext.call<GlBindBufferBase>(
+        GL_UNIFORM_BUFFER,
+        static_cast<GLuint>(bindingPoint),
         nativeBuffer->getHandle() );
-    checkResult( "::glBindBufferBase" );
 }
 
 bool isSupportedSamplerType( GLenum uniformType ) {
@@ -108,53 +127,64 @@ const size_t rootUniformDataSize = 16;
 
 } // namespace
 
-// ProgramHandleOgl
-
-ProgramHandleOgl::ProgramHandleOgl() {
-    _handle = ::glCreateProgram();
-    checkResult( "::glCreateProgram" );
+ProgramHandleOgl::ProgramHandleOgl( const GpuContextOgl::Pointer &gpuContext ) :
+    _gpuContext( gpuContext )
+{
+    _handle = gpuContext->call<GlCreateProgram>();
 }
 
 ProgramHandleOgl::ProgramHandleOgl(
-    GLenum shaderType, const char *sourceCode )
+        const GpuContextOgl::Pointer &gpuContext,
+        GLenum shaderType,
+        std::string_view sourceCode ) :
+    _gpuContext( gpuContext )
 {
-    _handle = ::glCreateShaderProgramv( shaderType, 1, &sourceCode );
-    checkResult( "::glCreateShaderProgramv" );
+    const char *sourceCodeData = sourceCode.data();
+
+    _handle = gpuContext->call<GlCreateShaderProgramv>(
+        shaderType, 1, &sourceCodeData );
 }
 
 ProgramHandleOgl::~ProgramHandleOgl() {
-    ::glDeleteProgram( _handle );
+    if( const GpuContextOgl::Pointer gpuContext = _gpuContext.tryLock() ) {
+        gpuContext->callUnchecked<GlDeleteProgram>( _handle );
+    }
 }
 
-// ShaderOgl
-
-ShaderOgl::ShaderOgl( std::string_view sourceCode, Type type ) :
+ShaderOgl::ShaderOgl(
+        GpuContextOgl::Pointer gpuContext,
+        std::string_view sourceCode,
+        Type type ) :
     _type( type ),
-    _handle( convertType(type), sourceCode.data() )
+    _handle( gpuContext, convertType(type), sourceCode )
 {
-    if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE ) {
-        std::string log( getProgramParameter(GL_INFO_LOG_LENGTH), 0 );
+    if( getProgramParameter(*gpuContext, GL_LINK_STATUS) == GL_FALSE ) {
+        std::string log(
+            getProgramParameter(*gpuContext, GL_INFO_LOG_LENGTH), 0 );
 
-        ::glGetProgramInfoLog(
+        gpuContext->call<GlGetProgramInfoLog>(
             _handle, static_cast<GLsizei>(log.size()), nullptr, &log[0] );
-        checkResult( "::glGetProgramInfoLog" );
 
         throw ShaderCompilationError() << "Shader compilation failed:\n" << log;
     }
 
-    setupBindings();
+    setupBindings( *gpuContext );
 }
 
-ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
-    _type( type )
+ShaderOgl::ShaderOgl(
+        GpuContextOgl::Pointer gpuContext,
+        const std::vector<unsigned char> &binary,
+        Type type ) :
+    _type( type ),
+    _handle( gpuContext )
 {
-    ::glProgramParameteri( _handle, GL_PROGRAM_SEPARABLE, GL_TRUE );
-    checkResult( "::glProgramParameteri" );
+    gpuContext->call<GlProgramParameteri>(
+        _handle, GL_PROGRAM_SEPARABLE, GL_TRUE );
 
     const size_t headerSize = 2 * sizeof( GLenum );
 
     if( binary.size() > headerSize &&
-            getOpenGlSupportStatus().ARB_get_program_binary ) {
+            gpuContext->getExtensionSupportStatus().arbGetProgramBinary ) {
         const GLenum shaderType =
             *reinterpret_cast<const GLenum*>( binary.data() );
         const GLenum binaryFormat =
@@ -168,7 +198,7 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
         const GLsizei binaryRepresentationLength =
             static_cast<GLsizei>( binary.size() - headerSize );
 
-        ::glProgramBinary(
+        gpuContext->callUnchecked<GlProgramBinary>(
             _handle,
             binaryFormat,
             binaryData,
@@ -178,15 +208,15 @@ ShaderOgl::ShaderOgl( const std::vector<unsigned char> &binary, Type type ) :
         // We intentionally ignore shader binary loading errors and set the
         // error flag to the 'GL_NO_ERROR' value. We will detect loading result
         // using the 'GL_LINK_STATUS' value.
-        ::glGetError();
+        gpuContext->callUnchecked<GlGetError>();
 #endif
     }
 
-    if( getProgramParameter(GL_LINK_STATUS) == GL_FALSE ) {
+    if( getProgramParameter(*gpuContext, GL_LINK_STATUS) == GL_FALSE ) {
         throw ShaderBinaryLoadingError();
     }
 
-    setupBindings();
+    setupBindings( *gpuContext );
 }
 
 Shader::Type ShaderOgl::getType() const {
@@ -194,11 +224,13 @@ Shader::Type ShaderOgl::getType() const {
 }
 
 std::vector<unsigned char> ShaderOgl::getBinaryRepresentation() const {
+    const GpuContextOgl::Pointer gpuContext = _handle.getGpuContext();
+
     std::vector<unsigned char> result;
 
-    if( getOpenGlSupportStatus().ARB_get_program_binary ) {
+    if( gpuContext->getExtensionSupportStatus().arbGetProgramBinary ) {
         const GLint binaryRepresentationLength =
-            getProgramParameter( GL_PROGRAM_BINARY_LENGTH );
+            getProgramParameter( *gpuContext, GL_PROGRAM_BINARY_LENGTH );
 
         const size_t headerSize = 2 * sizeof( GLenum );
         result.resize( headerSize + binaryRepresentationLength );
@@ -211,12 +243,11 @@ std::vector<unsigned char> ShaderOgl::getBinaryRepresentation() const {
 
         *shaderType = convertType( _type );
 
-        ::glGetProgramBinary(
+        gpuContext->call<GlGetProgramBinary>(
             _handle,
             binaryRepresentationLength, nullptr,
             binaryFormat,
             binaryData );
-        checkResult( "::glGetProgramBinary" );
     }
 
     return result;
@@ -240,14 +271,12 @@ void ShaderOgl::setValue( ValueHandle handle, Buffer::Pointer buffer ) {
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::UniformBlock );
 
-    const size_t index = handleImplementation->index;
+    Binding<Buffer::Pointer>& binding =
+        _buffers.at( handleImplementation->index );
 
-    if( _buffers.at(index) != buffer ) {
-        _buffers.at( index ) = buffer;
-
-        if( isInstalled() ) {
-            bindUniformBuffer( buffer.get(), _baseBufferBinding + index );
-        }
+    if( binding.value != buffer ) {
+        binding.value = buffer;
+        binding.isChanged = true;
     }
 }
 
@@ -260,14 +289,12 @@ void ShaderOgl::setValue( ValueHandle handle, Texture::Pointer texture ) {
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::Sampler );
 
-    const size_t index = handleImplementation->index;
+    Binding<Texture::Pointer>& binding =
+        _textures.at( handleImplementation->index );
 
-    if( _textures.at(index) != texture ) {
-        _textures.at( index ) = texture;
-
-        if( isInstalled() ) {
-            bindTexture( texture.get(), _baseSamplerBinding + index );
-        }
+    if( binding.value != texture ) {
+        binding.value = texture;
+        binding.isChanged = true;
     }
 }
 
@@ -280,14 +307,12 @@ void ShaderOgl::setValue( ValueHandle handle, Sampler::Pointer sampler ) {
     storm_assert( handleImplementation->type ==
         ValueHandleImplementation::Type::Sampler );
 
-    const size_t index = handleImplementation->index;
+    Binding<Sampler::Pointer>& binding =
+        _samplers.at( handleImplementation->index );
 
-    if( _samplers.at(index) != sampler ) {
-        _samplers.at( index ) = sampler;
-
-        if( isInstalled() ) {
-            bindSampler( sampler.get(), _baseSamplerBinding + index );
-        }
+    if( binding.value != sampler ) {
+        binding.value = sampler;
+        binding.isChanged = true;
     }
 }
 
@@ -295,19 +320,57 @@ const ProgramHandleOgl& ShaderOgl::getHandle() const {
     return _handle;
 }
 
-void ShaderOgl::install() const {
-    for( size_t index = 0; index < _textures.size(); ++index ) {
-        bindTexture( _textures[index].get(), _baseSamplerBinding + index );
-        bindSampler( _samplers[index].get(), _baseSamplerBinding + index );
+void ShaderOgl::markAllBindingsChanged() {
+    for( Binding<Texture::Pointer>& binding : _textures ) {
+        binding.isChanged = true;
     }
+    for( Binding<Sampler::Pointer>& binding : _samplers ) {
+        binding.isChanged = true;
+    }
+    for( Binding<Buffer::Pointer>& binding : _buffers ) {
+        binding.isChanged = true;
+    }
+}
+
+void ShaderOgl::updateChangedBindings() {
+    const GpuContextOgl& gpuContext = *_handle.getGpuContext();
+
+    for( size_t index = 0; index < _textures.size(); ++index ) {
+        Binding<Texture::Pointer>& binding = _textures[index];
+
+        if( binding.isChanged ) {
+            binding.isChanged = false;
+            bindTexture(
+                gpuContext, binding.value.get(), _baseSamplerBinding + index );
+        }
+    }
+
+    for( size_t index = 0; index < _samplers.size(); ++index ) {
+        Binding<Sampler::Pointer>& binding = _samplers[index];
+
+        if( binding.isChanged ) {
+            binding.isChanged = false;
+            bindSampler(
+                gpuContext, binding.value.get(), _baseSamplerBinding + index );
+        }
+    }
+
     for( size_t index = 0; index < _buffers.size(); ++index ) {
-        bindUniformBuffer( _buffers[index].get(), _baseBufferBinding + index );
+        Binding<Buffer::Pointer>& binding = _buffers[index];
+
+        if( binding.isChanged ) {
+            binding.isChanged = false;
+            bindUniformBuffer(
+                gpuContext, binding.value.get(), _baseBufferBinding + index );
+        }
     }
 }
 
 void ShaderOgl::handleRootBufferUpdate(
     const std::vector<uint8_t> &rootBuffer, size_t offset, size_t size )
 {
+    const GpuContextOgl &gpuContext = *_handle.getGpuContext();
+
     for( size_t rootUniformIndex = offset / rootUniformDataSize;
             rootUniformIndex * rootUniformDataSize < offset + size;
             ++rootUniformIndex ) {
@@ -318,39 +381,41 @@ void ShaderOgl::handleRootBufferUpdate(
             const GLsizei count = 1;
             const GLfloat *value = reinterpret_cast<const GLfloat*>(
                 rootBuffer.data() + rootUniformIndex * rootUniformDataSize );
-            ::glProgramUniform4fv( _handle, uniformLocation, count, value );
+            gpuContext.callUnchecked<GlProgramUniform4fv>(
+                _handle, uniformLocation, count, value );
 #ifndef NDEBUG
             // We intentionally ignore type mismatch errors and set the error
             // flag to the 'GL_NO_ERROR' value.
-            ::glGetError();
+            gpuContext.callUnchecked<GlGetError>();
 #endif
         }
     }
 }
 
-GLint ShaderOgl::getProgramParameter( GLenum parameter ) const {
+GLint ShaderOgl::getProgramParameter(
+    const GpuContextOgl &gpuContext, GLenum parameter ) const
+{
     GLint value = 0;
-
-    ::glGetProgramiv( _handle, parameter, &value );
-    checkResult( "::glGetProgramiv" );
+    gpuContext.call<GlGetProgramiv>( _handle, parameter, &value );
 
     return value;
 }
 
-void ShaderOgl::setupBindings() {
+void ShaderOgl::setupBindings( const GpuContextOgl &gpuContext ) {
     // Shaders of different types use different binding point ranges. Note:
     // MAX_COMBINED_TEXTURE_IMAGE_UNITS = 3 * MAX_<stage>_TEXTURE_IMAGE_UNITS
     // MAX_COMBINED_UNIFORM_BLOCKS      = 3 * MAX_<stage>_UNIFORM_BLOCKS
     _baseSamplerBinding = shaderTextureUnits * static_cast<GLuint>( _type );
     _baseBufferBinding = shaderUniformBlocks * static_cast<GLuint>( _type );
 
-    setupSamplersBinding();
-    setupUniformBlocksBinding();
-    setupRootUniformsBinding();
+    setupSamplersBinding( gpuContext );
+    setupUniformBlocksBinding( gpuContext );
+    setupRootUniformsBinding( gpuContext );
 }
 
-void ShaderOgl::setupSamplersBinding() {
-    const GLsizei activeUniforms = getProgramParameter( GL_ACTIVE_UNIFORMS );
+void ShaderOgl::setupSamplersBinding( const GpuContextOgl &gpuContext ) {
+    const GLsizei activeUniforms =
+        getProgramParameter( gpuContext, GL_ACTIVE_UNIFORMS );
 
     if( !activeUniforms ) {
         return;
@@ -362,31 +427,29 @@ void ShaderOgl::setupSamplersBinding() {
     std::vector<GLint> types( activeUniforms );
     std::vector<GLint> sizes( activeUniforms );
 
-    ::glGetActiveUniformsiv(
+    gpuContext.call<GlGetActiveUniformsiv>(
         _handle, activeUniforms, indices.data(), GL_UNIFORM_TYPE, &types[0] );
-    checkResult( "::glGetActiveUniformsiv" );
 
-    ::glGetActiveUniformsiv(
+    gpuContext.call<GlGetActiveUniformsiv>(
         _handle, activeUniforms, indices.data(), GL_UNIFORM_SIZE, &sizes[0] );
-    checkResult( "::glGetActiveUniformsiv" );
 
-    auto mapUniform = [this]( std::string identifier ) {
+    auto mapUniform = [&]( std::string identifier ) {
         const GLint location =
-            ::glGetUniformLocation( _handle, identifier.data() );
-        checkResult( "::glGetUniformLocation" );
+            gpuContext.call<GlGetUniformLocation>( _handle, identifier.data() );
 
         const size_t textureUnit = _textures.size();
 
-        ::glProgramUniform1i(
+        gpuContext.call<GlProgramUniform1i>(
             _handle,
             location,
             static_cast<GLint>(_baseSamplerBinding + textureUnit) );
-        checkResult( "::glProgramUniform1i" );
 
         _samplerUniformLocations.push_back( location );
 
-        _textures.push_back( nullptr );
-        _samplers.push_back( Sampler::getDefault() );
+        _textures.emplace_back();
+        _samplers.emplace_back();
+        _samplers.back().value =
+            SamplerBuilder().build( _handle.getGpuContext() );
 
         auto valueHandle = std::make_shared<ValueHandleImplementation>();
         valueHandle->shader = this;
@@ -399,7 +462,7 @@ void ShaderOgl::setupSamplersBinding() {
     };
 
     std::string identifier(
-        getProgramParameter(GL_ACTIVE_UNIFORM_MAX_LENGTH), 0 );
+        getProgramParameter(gpuContext, GL_ACTIVE_UNIFORM_MAX_LENGTH), 0 );
 
     for( GLsizei index = 0; index < activeUniforms; ++index ) {
         if( !isSupportedSamplerType(types[index]) ) {
@@ -407,13 +470,12 @@ void ShaderOgl::setupSamplersBinding() {
         }
 
         GLsizei identifierSize = 0;
-        ::glGetActiveUniformName(
+        gpuContext.call<GlGetActiveUniformName>(
             _handle,
             index,
             static_cast<GLsizei>(identifier.size()),
             &identifierSize,
             identifier.data() );
-        checkResult( "::glGetActiveUniformName" );
 
         if( sizes[index] == 1 ) {
             mapUniform( identifier.substr(0, identifierSize) );
@@ -438,25 +500,23 @@ void ShaderOgl::setupSamplersBinding() {
     }
 }
 
-void ShaderOgl::setupUniformBlocksBinding() {
+void ShaderOgl::setupUniformBlocksBinding( const GpuContextOgl &gpuContext ) {
     const GLsizei activeUniformBlocks = getProgramParameter(
-        GL_ACTIVE_UNIFORM_BLOCKS );
+        gpuContext, GL_ACTIVE_UNIFORM_BLOCKS );
 
     const GLsizei maxNameLength = getProgramParameter(
-        GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH );
+        gpuContext, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH );
 
     std::string name( maxNameLength, 0 );
 
     for( GLsizei index = 0; index < activeUniformBlocks; ++index ) {
         const GLuint bindingPoint = _baseBufferBinding + index;
 
-        ::glUniformBlockBinding( _handle, index, bindingPoint );
-        checkResult( "::glUniformBlockBinding" );
+        gpuContext.call<GlUniformBlockBinding>( _handle, index, bindingPoint );
 
         GLsizei nameLength = 0;
-        ::glGetActiveUniformBlockName(
+        gpuContext.call<GlGetActiveUniformBlockName>(
             _handle, index, maxNameLength, &nameLength, name.data() );
-        checkResult( "::glGetActiveUniformBlockName" );
 
         auto valueHandle = std::make_shared<ValueHandleImplementation>();
         valueHandle->shader = this;
@@ -472,10 +532,8 @@ void ShaderOgl::setupUniformBlocksBinding() {
     storm_assert( _buffers.size() <= shaderUniformBlocks );
 }
 
-void ShaderOgl::setupRootUniformsBinding() {
-    const size_t rootBufferSize =
-        RenderingSystem::getInstance()->getRootBufferSize();
-    _rootUniformLocations.resize( rootBufferSize / rootUniformDataSize, -1 );
+void ShaderOgl::setupRootUniformsBinding( const GpuContextOgl &gpuContext ) {
+    _rootUniformLocations.resize( RootBufferSize / rootUniformDataSize, -1 );
 
     for( size_t rootUniformIndex = 0;
             rootUniformIndex < _rootUniformLocations.size();
@@ -483,8 +541,7 @@ void ShaderOgl::setupRootUniformsBinding() {
         const std::string identifier =
             "_root_" + std::to_string( rootUniformIndex );
         _rootUniformLocations[rootUniformIndex] =
-            ::glGetUniformLocation( _handle, identifier.data() );
-        checkResult( "::glGetUniformLocation" );
+            gpuContext.call<GlGetUniformLocation>( _handle, identifier.data() );
     }
 }
 
@@ -497,10 +554,6 @@ void ShaderOgl::validateValueHandle( ValueHandle handle ) const {
     {
         throw ShaderValueLookupError() << "Invalid value handle";
     }
-}
-
-bool ShaderOgl::isInstalled() const {
-    return RenderingSystemOgl::getInstance()->getShader( _type ).get() == this;
 }
 
 GLenum ShaderOgl::convertType( Type type ) {
@@ -517,19 +570,27 @@ GLenum ShaderOgl::convertType( Type type ) {
     }
 }
 
-Shader::Pointer Shader::create( std::string_view sourceCode, Type type ) {
-    RenderingSystemOgl::installOpenGlContext();
-
-    return std::make_shared< ShaderOgl >( sourceCode, type );
+Shader::Pointer Shader::create(
+    GpuContext::Pointer gpuContext,
+    std::string_view sourceCode,
+    Type type )
+{
+    return std::make_shared<ShaderOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        sourceCode,
+        type );
 }
 
 Shader::Pointer Shader::create(
-    const std::vector<unsigned char> &binaryRepresentation, Type type )
+    GpuContext::Pointer gpuContext,
+    const std::vector<unsigned char> &binaryRepresentation,
+    Type type )
 {
-    RenderingSystemOgl::installOpenGlContext();
-
     try {
-        return std::make_shared< ShaderOgl >( binaryRepresentation, type );
+        return std::make_shared<ShaderOgl>(
+            std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+            binaryRepresentation,
+            type );
     } catch( const ShaderBinaryLoadingError& ) {
         return nullptr;
     }

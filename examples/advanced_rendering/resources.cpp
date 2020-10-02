@@ -6,7 +6,9 @@
 #include <storm/color.h>
 #include <storm/common_vertex_types.h>
 
-storm::Texture::Pointer createCheckboardPatternTexture() {
+storm::Texture::Pointer createCheckboardPatternTexture(
+    storm::GpuContext::Pointer gpuContext )
+{
     storm::Texture::Separate2dDescription description;
     description.format = storm::Texture::Format::RgbaNormUint8;
     description.width = 2;
@@ -15,7 +17,7 @@ storm::Texture::Pointer createCheckboardPatternTexture() {
     description.resourceType = storm::ResourceType::Static;
 
     const storm::Texture::Pointer texture =
-        storm::Texture::create( description );
+        storm::Texture::create( gpuContext, description );
 
     storm::Texture::Separate2dRegion region;
     region.mipLevel = 0;
@@ -36,7 +38,9 @@ storm::Texture::Pointer createCheckboardPatternTexture() {
     return texture;
 }
 
-storm::Sampler::Pointer createCheckboardPatternSampler() {
+storm::Sampler::Pointer createCheckboardPatternSampler(
+    storm::GpuContext::Pointer gpuContext )
+{
     storm::Sampler::Description description;
     description.minifyingFilter = storm::Sampler::MinifyingFilter::Nearest;
     description.magnifyingFilter = storm::Sampler::MagnifyingFilter::Nearest;
@@ -47,10 +51,12 @@ storm::Sampler::Pointer createCheckboardPatternSampler() {
         storm::Sampler::WrapMode::Repeated
     };
     description.borderColor = storm::Color::Black;
-    return storm::Sampler::create( description );
+    return storm::Sampler::create( gpuContext, description );
 }
 
-storm::Mesh::Pointer createTexturedCubeMesh() {
+storm::Mesh::Pointer createTexturedCubeMesh(
+    storm::GpuContext::Pointer gpuContext )
+{
     using storm::Vector2d;
     using storm::Vector;
 
@@ -98,11 +104,11 @@ storm::Mesh::Pointer createTexturedCubeMesh() {
     };
 
     storm::Mesh::Description description;
-    description.vertexBuffer = storm::Buffer::create( vertices );
-    description.indexBuffer = storm::Buffer::create( indices );
+    description.vertexBuffer = storm::Buffer::create( gpuContext, vertices );
+    description.indexBuffer = storm::Buffer::create( gpuContext, indices );
     description.vertexFormat = storm::OrientedTexturedVertex::getFormat();
     description.primitiveTopology =
         storm::Mesh::PrimitiveTopology::TriangleStrip;
     description.indexSize = sizeof( indices.front() );
-    return storm::Mesh::create( description );
+    return storm::Mesh::create( gpuContext, description );
 }

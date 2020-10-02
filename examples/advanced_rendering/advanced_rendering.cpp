@@ -66,28 +66,29 @@ void main() {
 class Example : public ExampleBase {
 public:
     explicit Example( storm::Window::Pointer window ) :
-        _observer( std::make_shared<storm::WindowObserver>() )
+        _observer( std::make_shared<storm::WindowObserver>() ),
+        _renderingSystem( storm::RenderingSystem::create() )
     {
         window->setWindowedMode( _frameDimensions );
         window->addObserver( _observer );
 
-        _observer->onKeyboardKeyPressed = []( storm::KeyboardKey key ) {
+        _observer->onKeyboardKeyPressed = [this]( storm::KeyboardKey key ) {
             if( key == storm::KeyboardKey::V ) {
-                storm::RenderingSystem *renderingSystem =
-                    storm::RenderingSystem::getInstance();
-                renderingSystem->setVsyncEnabled(
-                    !renderingSystem->isVsyncEnabled() );
+                _renderingSystem->setVsyncEnabled(
+                    !_renderingSystem->isVsyncEnabled() );
                 std::cout << "Vsync enabled: " <<
-                    renderingSystem->isVsyncEnabled() << std::endl;
+                    _renderingSystem->isVsyncEnabled() << std::endl;
             }
         };
 
-        storm::RenderingSystem::getInstance()->setOutputWindow(
-            std::move(window) );
+        _renderingSystem->setOutputWindow( std::move(window) );
 
-        _mesh = createTexturedCubeMesh();
-        _texture = createCheckboardPatternTexture();
-        _sampler = createCheckboardPatternSampler();
+        storm::GpuContext::Pointer gpuContext =
+            _renderingSystem->getGpuContext();
+
+        _mesh = createTexturedCubeMesh( gpuContext );
+        _texture = createCheckboardPatternTexture( gpuContext );
+        _sampler = createCheckboardPatternSampler( gpuContext );
 
         installFramebuffer();
         installShaders();
@@ -115,16 +116,13 @@ public:
     }
 
     void render() override {
-        storm::RenderingSystem *renderingSystem =
-            storm::RenderingSystem::getInstance();
+        _renderingSystem->clearColorBuffer();
+        _renderingSystem->clearDepthBuffer();
 
-        renderingSystem->clearColorBuffer();
-        renderingSystem->clearDepthBuffer();
+        _renderingSystem->renderMesh( _mesh );
 
-        renderingSystem->renderMesh( _mesh );
-
-        renderingSystem->getBackbuffer()->renderTexture( _colorBufferTexture );
-        renderingSystem->presentBackbuffer();
+        _renderingSystem->getBackbuffer()->renderTexture( _colorBufferTexture );
+        _renderingSystem->presentBackbuffer();
     }
 
 private:
@@ -132,32 +130,42 @@ private:
         const unsigned int texelSamples = 1;
 
         storm::Framebuffer::Pointer framebuffer = storm::Framebuffer::create(
-            _frameDimensions, texelSamples, {
+            _renderingSystem->getGpuContext(),
+            _frameDimensions,
+            texelSamples,
+            {
                 storm::Texture::Format::RgbaNormUint8,
                 storm::Texture::Format::DepthNormUint24
             });
 
-        storm::RenderingSystem::getInstance()->setFramebuffer( framebuffer );
+        _renderingSystem->setFramebuffer( framebuffer );
 
         _colorBufferTexture =
             framebuffer->getDescription().buffers[0].texture;
     }
 
     void installShaders() {
+        const storm::GpuContext::Pointer gpuContext =
+            _renderingSystem->getGpuContext();
+
         const storm::Shader::Pointer vertexShader = storm::Shader::create(
-            vertexShaderSource, storm::Shader::Type::Vertex );
+            gpuContext, vertexShaderSource, storm::Shader::Type::Vertex );
         const storm::Shader::Pointer pixelShader = storm::Shader::create(
-            pixelShaderSource, storm::Shader::Type::Pixel );
+            gpuContext, pixelShaderSource, storm::Shader::Type::Pixel );
 
         _constantBuffer = storm::Buffer::create(
-            {sizeof(Transformations), storm::ResourceType::Dynamic} );
+            gpuContext,
+            {
+                sizeof(Transformations),
+                storm::ResourceType::Dynamic
+            });
 
         vertexShader->setValue( "transformations", _constantBuffer );
         pixelShader->setValue( "colorTexture", _texture );
         pixelShader->setValue( "colorTexture", _sampler );
 
-        storm::RenderingSystem::getInstance()->setShader( vertexShader );
-        storm::RenderingSystem::getInstance()->setShader( pixelShader );
+        _renderingSystem->setShader( vertexShader );
+        _renderingSystem->setShader( pixelShader );
     }
 
     void installCamera() {
@@ -173,6 +181,8 @@ private:
             camera.getViewTransformation() *
             camera.getProjectionTransformation();
     }
+
+    storm::RenderingSystem::Pointer _renderingSystem;
 
     struct Transformations {
         storm::Matrix viewProjection;

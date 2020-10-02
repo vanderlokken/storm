@@ -1,6 +1,6 @@
 #pragma once
 
-#include <storm/ogl/api_ogl.h>
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/vertex_format.h>
 
 namespace storm {
@@ -11,7 +11,7 @@ public:
 
     const Description& getDescription() const override;
 
-    void install() const;
+    void install( const GpuContextOgl &gpuContext ) const;
 
 private:
     struct AttributeFormatDescription {

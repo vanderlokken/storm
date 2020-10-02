@@ -1,67 +1,60 @@
 #include <storm/ogl/buffer_ogl.h>
 
-#include <storm/ogl/api_ogl.h>
-#include <storm/ogl/check_result_ogl.h>
-#include <storm/ogl/rendering_system_ogl.h>
 #include <storm/ogl/resource_type_ogl.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
-
-BufferHandleOgl::BufferHandleOgl() {
-    ::glGenBuffers( 1, &_handle );
-    checkResult( "::glGenBuffers" );
-}
-
-BufferHandleOgl::~BufferHandleOgl() {
-    ::glDeleteBuffers( 1, &_handle );
-}
 
 // GL_COPY_WRITE_BUFFER and GL_COPY_READ_BUFFER are not used in the rendering
 // process so it's safe to overwrite these targets and to use them in the data
 // transfer operations.
 
-BufferOgl::BufferOgl( const Description &description, const void *data ) :
-    _description( description )
+BufferOgl::BufferOgl(
+        GpuContextOgl::Pointer gpuContext,
+        const Description &description,
+        const void *data ) :
+    _description( description ),
+    _handle( gpuContext )
 {
-    ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
-    checkResult( "::glBindBuffer" );
+    gpuContext->call<GlBindBuffer>( GL_COPY_WRITE_BUFFER, _handle );
 
-    if( getOpenGlSupportStatus().ARB_buffer_storage ) {
+    if( gpuContext->getExtensionSupportStatus().arbBufferStorage ) {
         const GLbitfield flags = GL_DYNAMIC_STORAGE_BIT;
 
-        ::glBufferStorage(
+        gpuContext->call<GlBufferStorage>(
             GL_COPY_WRITE_BUFFER, _description.size, data, flags );
-        checkResult( "::glBufferStorage" );
 
     } else {
         const GLenum usage = getResourceUsage( _description.resourceType );
 
-        ::glBufferData( GL_COPY_WRITE_BUFFER, _description.size, data, usage );
-        checkResult( "::glBufferData" );
+        gpuContext->call<GlBufferData>(
+            GL_COPY_WRITE_BUFFER, _description.size, data, usage );
     }
 }
 
 void BufferOgl::getData( size_t offset, size_t size, void *data ) const {
-    ::glBindBuffer( GL_COPY_READ_BUFFER, _handle );
-    checkResult( "::glBindBuffer" );
+    const GpuContextOgl &gpuContext = *_handle.getGpuContext();
 
-    ::glGetBufferSubData( GL_COPY_READ_BUFFER, offset, size, data );
-    checkResult( "::glGetBufferSubData" );
+    gpuContext.call<GlBindBuffer>(
+        GL_COPY_READ_BUFFER, _handle );
+    gpuContext.call<GlGetBufferSubData>(
+        GL_COPY_READ_BUFFER, offset, size, data );
 }
 
 void BufferOgl::setData( size_t offset, size_t size, const void *data ) {
     storm_assert( offset + size <= _description.size );
 
-    ::glBindBuffer( GL_COPY_WRITE_BUFFER, _handle );
-    checkResult( "::glBindBuffer" );
+    const GpuContextOgl &gpuContext = *_handle.getGpuContext();
 
-    if( getOpenGlSupportStatus().ARB_invalidate_subdata ) {
-        ::glInvalidateBufferSubData( _handle, offset, size );
-        checkResult( "::glInvalidateBufferSubData" );
+    gpuContext.call<GlBindBuffer>(
+        GL_COPY_WRITE_BUFFER, _handle );
+
+    if( gpuContext.getExtensionSupportStatus().arbInvalidateSubdata ) {
+        gpuContext.call<GlInvalidateBufferSubData>( _handle, offset, size );
     }
 
-    ::glBufferSubData( GL_COPY_WRITE_BUFFER, offset, size, data );
-    checkResult( "::glBufferSubData" );
+    gpuContext.call<GlBufferSubData>(
+        GL_COPY_WRITE_BUFFER, offset, size, data );
 }
 
 const Buffer::Description& BufferOgl::getDescription() const {
@@ -73,11 +66,14 @@ const BufferHandleOgl& BufferOgl::getHandle() const {
 }
 
 Buffer::Pointer Buffer::create(
-    const Description &description, const void *data )
+    GpuContext::Pointer gpuContext,
+    const Description &description,
+    const void *data )
 {
-    RenderingSystemOgl::installOpenGlContext();
-
-    return std::make_shared<BufferOgl>( description, data );
+    return std::make_shared<BufferOgl>(
+        std::dynamic_pointer_cast<GpuContextOgl>(std::move(gpuContext)),
+        description,
+        data );
 }
 
 }

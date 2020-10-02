@@ -1,9 +1,8 @@
 #include <storm/ogl/texture_storage_ogl.h>
 
 #include <algorithm>
-#include <map>
 
-#include <storm/ogl/check_result_ogl.h>
+#include <storm/throw_exception.h>
 
 //  EXT_texture_compression_s3tc extension
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT  0x83F0
@@ -30,90 +29,164 @@ struct PixelDescription {
 };
 
 PixelDescription getCompatiblePixelDescription( GLenum internalFormat ) {
-    static const std::map<GLenum, PixelDescription> mapping = {
-        {GL_R8, {GL_RED, GL_UNSIGNED_BYTE}},
-        {GL_R8_SNORM, {GL_RED, GL_BYTE}},
-        {GL_R16, {GL_RED, GL_UNSIGNED_SHORT}},
-        {GL_R16_SNORM, {GL_RED, GL_SHORT}},
-        {GL_RG8, {GL_RG, GL_UNSIGNED_BYTE}},
-        {GL_RG8_SNORM, {GL_RG, GL_BYTE}},
-        {GL_RG16, {GL_RG, GL_UNSIGNED_SHORT}},
-        {GL_RG16_SNORM, {GL_RG, GL_SHORT}},
-        {GL_R3_G3_B2, {GL_RGB, GL_UNSIGNED_BYTE_3_3_2}},
-        {GL_RGB4, {GL_RGB, GL_UNSIGNED_SHORT_5_6_5}},
-        {GL_RGB5, {GL_RGB, GL_UNSIGNED_SHORT_5_6_5}},
-        {GL_RGB8, {GL_RGB, GL_UNSIGNED_BYTE}},
-        {GL_RGB8_SNORM, {GL_RGB, GL_BYTE}},
-        {GL_RGB10, {GL_RGB, GL_UNSIGNED_SHORT}},
-        {GL_RGB12, {GL_RGB, GL_UNSIGNED_SHORT}},
-        {GL_RGB16_SNORM, {GL_RGB, GL_SHORT}},
-        {GL_RGBA2, {GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4}},
-        {GL_RGBA4, {GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4}},
-        {GL_RGB5_A1, {GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1}},
-        {GL_RGBA8, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_RGBA8_SNORM, {GL_RGBA, GL_BYTE}},
-        {GL_RGB10_A2, {GL_RGBA, GL_UNSIGNED_INT_10_10_10_2}},
-        {GL_RGB10_A2UI, {GL_RGBA_INTEGER, GL_UNSIGNED_INT_10_10_10_2}},
-        {GL_RGBA12, {GL_RGBA, GL_UNSIGNED_SHORT}},
-        {GL_RGBA16, {GL_RGBA, GL_UNSIGNED_SHORT}},
-        {GL_SRGB8, {GL_RGB, GL_UNSIGNED_BYTE}},
-        {GL_SRGB8_ALPHA8, {GL_RGBA, GL_UNSIGNED_BYTE}},
+    switch( internalFormat ) {
+    case GL_R8:
+        return {GL_RED, GL_UNSIGNED_BYTE};
+    case GL_R8_SNORM:
+        return {GL_RED, GL_BYTE};
+    case GL_R16:
+        return {GL_RED, GL_UNSIGNED_SHORT};
+    case GL_R16_SNORM:
+        return {GL_RED, GL_SHORT};
+    case GL_RG8:
+        return {GL_RG, GL_UNSIGNED_BYTE};
+    case GL_RG8_SNORM:
+        return {GL_RG, GL_BYTE};
+    case GL_RG16:
+        return {GL_RG, GL_UNSIGNED_SHORT};
+    case GL_RG16_SNORM:
+        return {GL_RG, GL_SHORT};
+    case GL_R3_G3_B2:
+        return {GL_RGB, GL_UNSIGNED_BYTE_3_3_2};
+    case GL_RGB4:
+        return {GL_RGB, GL_UNSIGNED_SHORT_5_6_5};
+    case GL_RGB5:
+        return {GL_RGB, GL_UNSIGNED_SHORT_5_6_5};
+    case GL_RGB8:
+        return {GL_RGB, GL_UNSIGNED_BYTE};
+    case GL_RGB8_SNORM:
+        return {GL_RGB, GL_BYTE};
+    case GL_RGB10:
+        return {GL_RGB, GL_UNSIGNED_SHORT};
+    case GL_RGB12:
+        return {GL_RGB, GL_UNSIGNED_SHORT};
+    case GL_RGB16_SNORM:
+        return {GL_RGB, GL_SHORT};
+    case GL_RGBA2:
+        return {GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4};
+    case GL_RGBA4:
+        return {GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4};
+    case GL_RGB5_A1:
+        return {GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1};
+    case GL_RGBA8:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_RGBA8_SNORM:
+        return {GL_RGBA, GL_BYTE};
+    case GL_RGB10_A2:
+        return {GL_RGBA, GL_UNSIGNED_INT_10_10_10_2};
+    case GL_RGB10_A2UI:
+        return {GL_RGBA_INTEGER, GL_UNSIGNED_INT_10_10_10_2};
+    case GL_RGBA12:
+        return {GL_RGBA, GL_UNSIGNED_SHORT};
+    case GL_RGBA16:
+        return {GL_RGBA, GL_UNSIGNED_SHORT};
+    case GL_SRGB8:
+        return {GL_RGB, GL_UNSIGNED_BYTE};
+    case GL_SRGB8_ALPHA8:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_R16F:
+        return {GL_RED, GL_HALF_FLOAT};
+    case GL_RG16F:
+        return {GL_RG, GL_HALF_FLOAT};
+    case GL_RGB16F:
+        return {GL_RGB, GL_HALF_FLOAT};
+    case GL_RGBA16F:
+        return {GL_RGBA, GL_HALF_FLOAT};
+    case GL_R32F:
+        return {GL_RED, GL_FLOAT};
+    case GL_RG32F:
+        return {GL_RG, GL_FLOAT};
+    case GL_RGB32F:
+        return {GL_RGB, GL_FLOAT};
+    case GL_RGBA32F:
+        return {GL_RGBA, GL_FLOAT};
+    case GL_R11F_G11F_B10F:
+        return {GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV};
+    case GL_RGB9_E5:
+        return {GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV};
+    case GL_R8I:
+        return {GL_RED_INTEGER, GL_BYTE};
+    case GL_R8UI:
+        return {GL_RED_INTEGER, GL_UNSIGNED_BYTE};
+    case GL_R16I:
+        return {GL_RED_INTEGER, GL_SHORT};
+    case GL_R16UI:
+        return {GL_RED_INTEGER, GL_UNSIGNED_SHORT};
+    case GL_R32I:
+        return {GL_RED_INTEGER, GL_INT};
+    case GL_R32UI:
+        return {GL_RED_INTEGER, GL_UNSIGNED_INT};
+    case GL_RG8I:
+        return {GL_RG_INTEGER, GL_BYTE};
+    case GL_RG8UI:
+        return {GL_RG_INTEGER, GL_UNSIGNED_BYTE};
+    case GL_RG16I:
+        return {GL_RG_INTEGER, GL_SHORT};
+    case GL_RG16UI:
+        return {GL_RG_INTEGER, GL_UNSIGNED_SHORT};
+    case GL_RG32I:
+        return {GL_RG_INTEGER, GL_INT};
+    case GL_RG32UI:
+        return {GL_RG_INTEGER, GL_UNSIGNED_INT};
+    case GL_RGB8I:
+        return {GL_RGB_INTEGER, GL_BYTE};
+    case GL_RGB8UI:
+        return {GL_RGB_INTEGER, GL_UNSIGNED_BYTE};
+    case GL_RGB16I:
+        return {GL_RGB_INTEGER, GL_SHORT};
+    case GL_RGB16UI:
+        return {GL_RGB_INTEGER, GL_UNSIGNED_SHORT};
+    case GL_RGB32I:
+        return {GL_RGB_INTEGER, GL_INT};
+    case GL_RGB32UI:
+        return {GL_RGB_INTEGER, GL_UNSIGNED_INT};
+    case GL_RGBA8I:
+        return {GL_RGBA_INTEGER, GL_BYTE};
+    case GL_RGBA8UI:
+        return {GL_RGBA_INTEGER, GL_UNSIGNED_BYTE};
+    case GL_RGBA16I:
+        return {GL_RGBA_INTEGER, GL_SHORT};
+    case GL_RGBA16UI:
+        return {GL_RGBA_INTEGER, GL_UNSIGNED_SHORT};
+    case GL_RGBA32I:
+        return {GL_RGBA_INTEGER, GL_INT};
+    case GL_RGBA32UI:
+        return {GL_RGBA_INTEGER, GL_UNSIGNED_INT};
+    case GL_DEPTH_COMPONENT16:
+        return {GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT};
+    case GL_DEPTH_COMPONENT24:
+        return {GL_DEPTH_COMPONENT, GL_UNSIGNED_INT};
+    case GL_DEPTH_COMPONENT32:
+        return {GL_DEPTH_COMPONENT, GL_UNSIGNED_INT};
+    case GL_DEPTH_COMPONENT32F:
+        return {GL_DEPTH_COMPONENT, GL_FLOAT};
+    case GL_DEPTH24_STENCIL8:
+        return {GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8};
+    case GL_DEPTH32F_STENCIL8:
+        return {GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV};
+    case GL_STENCIL_INDEX8:
+        return {GL_STENCIL_INDEX, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+        return {GL_RGB, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+        return {GL_RGB, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_SRGBA_S3TC_DXT1_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_SRGBA_S3TC_DXT3_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    case GL_COMPRESSED_SRGBA_S3TC_DXT5_EXT:
+        return {GL_RGBA, GL_UNSIGNED_BYTE};
+    default:
+        storm_assert_unreachable( "Unsupported internal format value" );
+    }
 
-        {GL_R16F, {GL_RED, GL_HALF_FLOAT}},
-        {GL_RG16F, {GL_RG, GL_HALF_FLOAT}},
-        {GL_RGB16F, {GL_RGB, GL_HALF_FLOAT}},
-        {GL_RGBA16F, {GL_RGBA, GL_HALF_FLOAT}},
-        {GL_R32F, {GL_RED, GL_FLOAT}},
-        {GL_RG32F, {GL_RG, GL_FLOAT}},
-        {GL_RGB32F, {GL_RGB, GL_FLOAT}},
-        {GL_RGBA32F, {GL_RGBA, GL_FLOAT}},
-        {GL_R11F_G11F_B10F, {GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV}},
-        {GL_RGB9_E5, {GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV}},
-
-        {GL_R8I, {GL_RED_INTEGER, GL_BYTE}},
-        {GL_R8UI, {GL_RED_INTEGER, GL_UNSIGNED_BYTE}},
-        {GL_R16I, {GL_RED_INTEGER, GL_SHORT}},
-        {GL_R16UI, {GL_RED_INTEGER, GL_UNSIGNED_SHORT}},
-        {GL_R32I, {GL_RED_INTEGER, GL_INT}},
-        {GL_R32UI, {GL_RED_INTEGER, GL_UNSIGNED_INT}},
-        {GL_RG8I, {GL_RG_INTEGER, GL_BYTE}},
-        {GL_RG8UI, {GL_RG_INTEGER, GL_UNSIGNED_BYTE}},
-        {GL_RG16I, {GL_RG_INTEGER, GL_SHORT}},
-        {GL_RG16UI, {GL_RG_INTEGER, GL_UNSIGNED_SHORT}},
-        {GL_RG32I, {GL_RG_INTEGER, GL_INT}},
-        {GL_RG32UI, {GL_RG_INTEGER, GL_UNSIGNED_INT}},
-        {GL_RGB8I, {GL_RGB_INTEGER, GL_BYTE}},
-        {GL_RGB8UI, {GL_RGB_INTEGER, GL_UNSIGNED_BYTE}},
-        {GL_RGB16I, {GL_RGB_INTEGER, GL_SHORT}},
-        {GL_RGB16UI, {GL_RGB_INTEGER, GL_UNSIGNED_SHORT}},
-        {GL_RGB32I, {GL_RGB_INTEGER, GL_INT}},
-        {GL_RGB32UI, {GL_RGB_INTEGER, GL_UNSIGNED_INT}},
-        {GL_RGBA8I, {GL_RGBA_INTEGER, GL_BYTE}},
-        {GL_RGBA8UI, {GL_RGBA_INTEGER, GL_UNSIGNED_BYTE}},
-        {GL_RGBA16I, {GL_RGBA_INTEGER, GL_SHORT}},
-        {GL_RGBA16UI, {GL_RGBA_INTEGER, GL_UNSIGNED_SHORT}},
-        {GL_RGBA32I, {GL_RGBA_INTEGER, GL_INT}},
-        {GL_RGBA32UI, {GL_RGBA_INTEGER, GL_UNSIGNED_INT}},
-
-        {GL_DEPTH_COMPONENT16, {GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT}},
-        {GL_DEPTH_COMPONENT24, {GL_DEPTH_COMPONENT, GL_UNSIGNED_INT}},
-        {GL_DEPTH_COMPONENT32, {GL_DEPTH_COMPONENT, GL_UNSIGNED_INT}},
-        {GL_DEPTH_COMPONENT32F, {GL_DEPTH_COMPONENT, GL_FLOAT}},
-        {GL_DEPTH24_STENCIL8, {GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8}},
-        {GL_DEPTH32F_STENCIL8, {GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV}},
-        {GL_STENCIL_INDEX8, {GL_STENCIL_INDEX, GL_UNSIGNED_BYTE}},
-
-        {GL_COMPRESSED_RGB_S3TC_DXT1_EXT, {GL_RGB, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_SRGB_S3TC_DXT1_EXT, {GL_RGB, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_SRGBA_S3TC_DXT1_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_SRGBA_S3TC_DXT3_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}},
-        {GL_COMPRESSED_SRGBA_S3TC_DXT5_EXT, {GL_RGBA, GL_UNSIGNED_BYTE}}
-    };
-    storm_assert( mapping.count(internalFormat) );
-    return mapping.at( internalFormat );
+    return {0, 0};
 }
 
 // TODO: support compressed texture formats
@@ -134,32 +207,73 @@ PixelDescription getCompatiblePixelDescription( GLenum internalFormat ) {
 
 }
 
-void APIENTRY glTexStorage1D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width )
+void glTexStorage1D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width )
 {
+    if( gpuContext.isFunctionAvailable<GlTexStorage1D>() ) {
+        gpuContext.call<GlTexStorage1D>(
+            target,
+            levels,
+            internalFormat,
+            width );
+        return;
+    }
+
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
             getCompatiblePixelDescription( internalFormat );
 
-        ::glTexImage1D( target, level, internalFormat, width, 0,
-            pixelDescription.format, pixelDescription.type, nullptr );
-        checkResult( "::glTexImage1D" );
+        gpuContext.call<GlTexImage1D>(
+            target,
+            level,
+            internalFormat,
+            width,
+            0,
+            pixelDescription.format,
+            pixelDescription.type,
+            nullptr );
 
         width = std::max( 1, (width / 2) );
     }
 }
 
-void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width, GLsizei height )
+void glTexStorage2D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width,
+    GLsizei height )
 {
+    if( gpuContext.isFunctionAvailable<GlTexStorage2D>() ) {
+        gpuContext.call<GlTexStorage2D>(
+            target,
+            levels,
+            internalFormat,
+            width,
+            height );
+        return;
+    }
+
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
             getCompatiblePixelDescription( internalFormat );
 
         if( target != GL_TEXTURE_CUBE_MAP ) {
-            ::glTexImage2D( target, level, internalFormat, width, height, 0,
-                pixelDescription.format, pixelDescription.type, nullptr );
-            checkResult( "::glTexImage2D" );
+            gpuContext.call<GlTexImage2D>(
+                target,
+                level,
+                internalFormat,
+                width,
+                height,
+                0,
+                pixelDescription.format,
+                pixelDescription.type,
+                nullptr );
         } else {
             const GLenum faces[] = {
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -170,48 +284,103 @@ void APIENTRY glTexStorage2D( GLenum target, GLsizei levels,
                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
             };
             for( GLenum face : faces ) {
-                ::glTexImage2D( face, level, internalFormat, width, height, 0,
-                    pixelDescription.format, pixelDescription.type, nullptr );
-                checkResult( "::glTexImage2D" );
+                gpuContext.call<GlTexImage2D>(
+                    face,
+                    level,
+                    internalFormat,
+                    width,
+                    height,
+                    0,
+                    pixelDescription.format,
+                    pixelDescription.type,
+                    nullptr );
             }
         }
 
         width = std::max( 1, (width / 2) );
-        if( target != GL_TEXTURE_1D_ARRAY )
+
+        if( target != GL_TEXTURE_1D_ARRAY ) {
             height = std::max( 1, (height / 2) );
+        }
     }
 }
 
-void APIENTRY glTexStorage3D( GLenum target, GLsizei levels,
-    GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth )
+void glTexStorage3D(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
+    GLsizei levels,
+    GLenum internalFormat,
+    GLsizei width,
+    GLsizei height,
+    GLsizei depth )
 {
+    if( gpuContext.isFunctionAvailable<GlTexStorage3D>() ) {
+        gpuContext.call<GlTexStorage3D>(
+            target,
+            levels,
+            internalFormat,
+            width,
+            height,
+            depth );
+        return;
+    }
+
     for( GLsizei level = 0; level < levels; ++level ) {
         const PixelDescription pixelDescription =
             getCompatiblePixelDescription( internalFormat );
 
-        ::glTexImage3D( target, level, internalFormat, width, height, depth, 0,
-            pixelDescription.format, pixelDescription.type, nullptr );
-        checkResult( "::glTexImage3D" );
+        gpuContext.call<GlTexImage3D>(
+            target,
+            level,
+            internalFormat,
+            width,
+            height,
+            depth,
+            0,
+            pixelDescription.format,
+            pixelDescription.type,
+            nullptr );
 
         width = std::max( 1, (width / 2) );
         height = std::max( 1, (height / 2) );
-        if( target != GL_TEXTURE_2D_ARRAY )
+
+        if( target != GL_TEXTURE_2D_ARRAY ) {
             depth = std::max( 1, (depth / 2) );
+        }
     }
 }
 
-void APIENTRY glTexStorage2DMultisample( GLenum target,
+void glTexStorage2DMultisample(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,
     GLsizei height,
     GLboolean fixedSampleLocations )
 {
-    ::glTexImage2DMultisample(
-        target, samples, internalFormat, width, height, fixedSampleLocations );
+    if( gpuContext.isFunctionAvailable<GlTexStorage2DMultisample>() ) {
+        gpuContext.call<GlTexStorage2DMultisample>(
+            target,
+            samples,
+            internalFormat,
+            width,
+            height,
+            fixedSampleLocations );
+    } else {
+        gpuContext.call<GlTexImage2DMultisample>(
+            target,
+            samples,
+            internalFormat,
+            width,
+            height,
+            fixedSampleLocations );
+    }
 }
 
-void APIENTRY glTexStorage3DMultisample( GLenum target,
+void glTexStorage3DMultisample(
+    const GpuContextOgl &gpuContext,
+    GLenum target,
     GLsizei samples,
     GLenum internalFormat,
     GLsizei width,
@@ -219,8 +388,25 @@ void APIENTRY glTexStorage3DMultisample( GLenum target,
     GLsizei depth,
     GLboolean fixedSampleLocations )
 {
-    ::glTexStorage3DMultisample( target, samples, internalFormat,
-        width, height, depth, fixedSampleLocations );
+    if( gpuContext.isFunctionAvailable<GlTexStorage3DMultisample>() ) {
+        gpuContext.call<GlTexStorage3DMultisample>(
+            target,
+            samples,
+            internalFormat,
+            width,
+            height,
+            depth,
+            fixedSampleLocations );
+    } else {
+        gpuContext.call<GlTexImage3DMultisample>(
+            target,
+            samples,
+            internalFormat,
+            width,
+            height,
+            depth,
+            fixedSampleLocations );
+    }
 }
 
 }

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <storm/gpu_context.h>
 #include <storm/resource_type.h>
 
 namespace storm {
@@ -15,10 +16,15 @@ public:
         ResourceType resourceType;
     };
 
-    static Pointer create( const Description&, const void *data = nullptr );
+    static Pointer create(
+        GpuContext::Pointer gpuContext,
+        const Description &description,
+        const void *data = nullptr );
 
     template <class Container>
-    static Pointer create( const Container &container );
+    static Pointer create(
+        GpuContext::Pointer gpuContext,
+        const Container &container );
 
     virtual ~Buffer() = default;
 
@@ -37,13 +43,15 @@ public:
 };
 
 template <class Container>
-Buffer::Pointer Buffer::create( const Container &container ) {
+Buffer::Pointer Buffer::create(
+    GpuContext::Pointer gpuContext, const Container &container )
+{
     Description description;
     description.size =
         sizeof( typename Container::value_type ) * container.size();
     description.resourceType = ResourceType::Static;
 
-    return create( description, container.data() );
+    return create( gpuContext, description, container.data() );
 }
 
 }

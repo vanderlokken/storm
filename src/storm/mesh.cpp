@@ -11,7 +11,9 @@ namespace storm {
 
 namespace {
 
-Mesh::Pointer parse( BinaryInputStream &stream ) {
+Mesh::Pointer parse(
+    GpuContext::Pointer gpuContext, BinaryInputStream &stream )
+{
     const uint32_t attributeCount = stream.read<uint32_t>();
 
     using VertexAttribute = VertexFormat::Attribute;
@@ -52,34 +54,38 @@ Mesh::Pointer parse( BinaryInputStream &stream ) {
 
     Mesh::Description meshDescription;
     meshDescription.vertexFormat = vertexFormat;
-    meshDescription.vertexBuffer =
-        Buffer::create( vertexBufferDescription, vertexData.data() );
-    meshDescription.indexBuffer =
-        Buffer::create( indexBufferDescription, indexData.data() );
+    meshDescription.vertexBuffer = Buffer::create(
+        gpuContext, vertexBufferDescription, vertexData.data() );
+    meshDescription.indexBuffer = Buffer::create(
+        gpuContext, indexBufferDescription, indexData.data() );
     meshDescription.primitiveTopology = Mesh::PrimitiveTopology::TriangleList;
     meshDescription.indexSize = indexSize;
 
-    return Mesh::create( meshDescription );
+    return Mesh::create( gpuContext, meshDescription );
 }
 
 } // namespace
 
-Mesh::Pointer Mesh::load( std::istream &stream ) {
+Mesh::Pointer Mesh::load(
+    GpuContext::Pointer gpuContext, std::istream &stream )
+{
     try {
         BinaryInputStream binaryInputStream( stream );
-        return parse( binaryInputStream );
+        return parse( gpuContext, binaryInputStream );
     } catch( std::ios_base::failure& ) {
         throw ResourceLoadingError() << "Invalid mesh data";
     }
 }
 
-Mesh::Pointer Mesh::load( std::string_view filename ) {
+Mesh::Pointer Mesh::load(
+    GpuContext::Pointer gpuContext, std::string_view filename )
+{
     std::ifstream stream( filename.data(), std::ios::binary );
 
     if( !stream )
         throw ResourceLoadingError() << "Couldn't open " << filename;
 
-    return Mesh::load( stream );
+    return Mesh::load( gpuContext, stream );
 }
 
 }

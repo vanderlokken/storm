@@ -1,19 +1,16 @@
 #pragma once
 
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/ogl/handle_ogl.h>
 #include <storm/query.h>
 
 namespace storm {
 
-class QueryHandleOgl : public HandleOgl {
-public:
-    QueryHandleOgl();
-    ~QueryHandleOgl();
-};
+using QueryHandleOgl = HandleOgl<GlGenQueries, GlDeleteQueries>;
 
 class GpuTimeIntervalQueryOgl : public GpuTimeIntervalQuery {
 public:
-    GpuTimeIntervalQueryOgl();
+    explicit GpuTimeIntervalQueryOgl( GpuContextOgl::Pointer );
 
     void begin() override;
     void end() override;
@@ -25,7 +22,7 @@ public:
 private:
     QueryHandleOgl _beginTimestampQueryHandle;
     QueryHandleOgl _endTimestampQueryHandle;
-    bool _running;
+    bool _running = false;
 };
 
 }

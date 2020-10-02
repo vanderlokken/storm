@@ -3,29 +3,27 @@
 #include <algorithm>
 #include <string_view>
 
-#include <storm/ogl/api_ogl.h>
-
 #include <storm/ogl/backbuffer_ogl.h>
 #include <storm/ogl/buffer_ogl.h>
-#include <storm/ogl/check_result_ogl.h>
 #include <storm/ogl/framebuffer_ogl.h>
 #include <storm/ogl/mesh_ogl.h>
 #include <storm/ogl/pipeline_state_ogl.h>
 #include <storm/ogl/shader_ogl.h>
+#include <storm/throw_exception.h>
 
 namespace storm {
 
 namespace {
 
-bool isSeamlessCubemapSupported() {
+bool isSeamlessCubemapSupported( const GpuContextOgl &gpuContext ) {
     // There's a bug in the official drivers for the following GPU.
     const std::string_view unacceptableRenderers[] = {
         "GeForce GTS 250/PCIe/SSE2/3DNOW!",
         "GeForce GTS 250/PCIe/SSE2"
     };
 
-    const std::string_view renderer =
-        reinterpret_cast<const char*>( ::glGetString(GL_RENDERER) );
+    const std::string_view renderer = reinterpret_cast<const char*>(
+        gpuContext.callUnchecked<GlGetString>(GL_RENDERER) );
 
     const auto iterator = std::find(
         std::begin(unacceptableRenderers),
@@ -38,27 +36,19 @@ bool isSeamlessCubemapSupported() {
 
 } // namespace
 
-ProgramPipelineHandleOgl::ProgramPipelineHandleOgl() {
-    ::glGenProgramPipelines( 1, &_handle );
-    checkResult( "::glGenProgramPipelines" );
-}
-
-ProgramPipelineHandleOgl::~ProgramPipelineHandleOgl() {
-    ::glDeleteProgramPipelines( 1, &_handle );
+RenderingSystemOgl::RenderingSystemOgl() :
+    _gpuContext(
+        std::dynamic_pointer_cast<GpuContextOgl>(GpuContext::create()) )
+{
+    if( _gpuContext->getApiVersion() < GpuContextOgl::ApiVersion(4, 3) &&
+        !_gpuContext->getExtensionSupportStatus().arbSeparateShaderObjects )
+    {
+        throw SystemRequirementsNotMet() << "Video driver doesn't support "
+            "required 'ARB_separate_shader_objects' OpenGL extension.";
+    }
 }
 
 void RenderingSystemOgl::initialize() {
-    loadOpenGlApi();
-
-    const OpenGlSupportStatus &supportStatus = getOpenGlSupportStatus();
-
-    if( supportStatus.version < OpenGlVersion(4, 3) ) {
-        if( !supportStatus.ARB_separate_shader_objects ) {
-            throw SystemRequirementsNotMet() << "Video driver doesn't support "
-                "required 'ARB_separate_shader_objects' OpenGL extension.";
-        }
-    }
-
     setVsyncEnabled( true );
 
     // TODO: set output and clipping rectangles
@@ -67,38 +57,41 @@ void RenderingSystemOgl::initialize() {
     _pipelineState = createDefaultOpenGlPipelineState();
     setPipelineState( PipelineStateBuilder().build() );
 
-    _programPipeline = std::make_shared<ProgramPipelineHandleOgl>();
-    _vertexArrayWithoutData = std::make_shared<VertexArrayHandleOgl>();
+    _programPipeline =
+        std::make_shared<ProgramPipelineHandleOgl>( _gpuContext );
+    _vertexArrayWithoutData =
+        std::make_shared<VertexArrayHandleOgl>( _gpuContext );
+    _backbuffer = std::make_shared<BackbufferOgl>( _gpuContext );
 
-    ::glBindProgramPipeline( *_programPipeline );
-    checkResult( "::glBindProgramPipeline" );
-
-    _backbuffer = std::make_shared<BackbufferOgl>();
-
-    ::glBindVertexArray( _vertexArray = *_vertexArrayWithoutData );
-    checkResult( "::glBindVertexArray" );
+    _gpuContext->call<GlBindProgramPipeline>( *_programPipeline );
+    _gpuContext->call<GlBindVertexArray>(
+        _vertexArray = *_vertexArrayWithoutData );
 
     _primitiveRestartIndex = 0xffff;
-    ::glPrimitiveRestartIndex( _primitiveRestartIndex );
+    _gpuContext->callUnchecked<GlPrimitiveRestartIndex>(
+        _primitiveRestartIndex );
 
-    ::glFrontFace( GL_CW );
-    checkResult( "::glFrontFace" );
+    _gpuContext->call<GlFrontFace>( GL_CW );
 
     setBooleanOpenGlState(
-        GL_PRIMITIVE_RESTART, true );
+        *_gpuContext, GL_PRIMITIVE_RESTART, true );
     setBooleanOpenGlState(
-        GL_TEXTURE_CUBE_MAP_SEAMLESS, isSeamlessCubemapSupported() );
+        *_gpuContext, GL_TEXTURE_CUBE_MAP_SEAMLESS,
+        isSeamlessCubemapSupported(*_gpuContext) );
     setBooleanOpenGlState(
-        GL_FRAMEBUFFER_SRGB, true );
+        *_gpuContext, GL_FRAMEBUFFER_SRGB, true );
 
-    const size_t rootBufferSize = 128;
-    _rootBufferData.resize( rootBufferSize );
+    _rootBufferData.resize( RootBufferSize );
+}
+
+GpuContext::Pointer RenderingSystemOgl::getGpuContext() const {
+    return _gpuContext;
 }
 
 void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
     storm_assert( mesh );
 
-    auto nativeMesh = std::static_pointer_cast< MeshOgl >( mesh );
+    auto nativeMesh = std::dynamic_pointer_cast< MeshOgl >( mesh );
     bindVertexArray( nativeMesh->getHandle() );
 
     const size_t indexSize = mesh->getDescription().indexSize;
@@ -113,7 +106,8 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
 
     if( _primitiveRestartIndex != primitiveRestartIndex ) {
         _primitiveRestartIndex = primitiveRestartIndex;
-        ::glPrimitiveRestartIndex( _primitiveRestartIndex );
+        _gpuContext->callUnchecked<GlPrimitiveRestartIndex>(
+            _primitiveRestartIndex );
     }
 
     const GLenum primitiveTopology = nativeMesh->getPrimitiveTopology();
@@ -124,14 +118,14 @@ void RenderingSystemOgl::renderMesh( Mesh::Pointer mesh, unsigned count ) {
         GL_UNSIGNED_INT;
     const GLvoid *indexOffset = nullptr;
 
+    updateShaderBindings();
+
     if( count == 1 ) {
-        ::glDrawElements(
+        _gpuContext->call<GlDrawElements>(
             primitiveTopology, indexCount, indexFormat, indexOffset );
-        checkResult( "::glDrawElements" );
     } else {
-        ::glDrawElementsInstanced(
+        _gpuContext->call<GlDrawElementsInstanced>(
             primitiveTopology, indexCount, indexFormat, indexOffset, count );
-        checkResult( "::glDrawElementsInstanced" );
     }
 }
 
@@ -140,9 +134,10 @@ void RenderingSystemOgl::renderGenerated(
 {
     bindVertexArray( *_vertexArrayWithoutData );
 
-    ::glDrawArrays(
+    updateShaderBindings();
+
+    _gpuContext->call<GlDrawArrays>(
         MeshOgl::convertPrimitiveTopology(primitiveTopology), 0, vertexCount );
-    checkResult( "::glDrawArrays" );
 }
 
 void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
@@ -156,14 +151,14 @@ void RenderingSystemOgl::setShader( Shader::Pointer shader ) {
 
     RenderingSystemCommon::setShader( shader );
 
-    const auto nativeShader = std::static_pointer_cast< ShaderOgl >( shader );
+    const auto nativeShader = std::dynamic_pointer_cast< ShaderOgl >( shader );
 
     const GLbitfield stage = selectShaderStage( shaderType );
 
-    ::glUseProgramStages( *_programPipeline, stage, nativeShader->getHandle() );
-    checkResult( "::glUseProgramStages" );
+    _gpuContext->call<GlUseProgramStages>(
+        *_programPipeline, stage, nativeShader->getHandle() );
 
-    nativeShader->install();
+    nativeShader->markAllBindingsChanged();
     nativeShader->handleRootBufferUpdate(
         _rootBufferData, /* offset */ 0, _rootBufferData.size() );
 }
@@ -173,8 +168,8 @@ void RenderingSystemOgl::resetShader( Shader::Type shaderType ) {
         return;
     }
 
-    ::glUseProgramStages( *_programPipeline, selectShaderStage(shaderType), 0 );
-    checkResult( "::glUseProgramStages" );
+    _gpuContext->call<GlUseProgramStages>(
+        *_programPipeline, selectShaderStage(shaderType), 0 );
 
     RenderingSystemCommon::resetShader( shaderType );
 }
@@ -216,7 +211,8 @@ void RenderingSystemOgl::setPipelineState(
     storm_assert( pipelineState );
 
     if( _pipelineState != pipelineState ) {
-        switchOpenGlPipelineState( *_pipelineState, *pipelineState );
+        switchOpenGlPipelineState(
+            *_gpuContext, *_pipelineState, *pipelineState );
         _pipelineState = std::move( pipelineState );
     }
 }
@@ -230,22 +226,20 @@ const Rectangle& RenderingSystemOgl::getOutputRectangle() const {
 }
 
 void RenderingSystemOgl::setClippingRectangle( const Rectangle &rectangle ) {
-    ::glScissor(
+    _gpuContext->call<GlScissor>(
         rectangle.x,
         rectangle.y,
         rectangle.width,
         rectangle.height );
-    checkResult( "::glScissor" );
     _clippingRectangle = rectangle;
 }
 
 void RenderingSystemOgl::setOutputRectangle( const Rectangle &rectangle ) {
-    ::glViewport(
+    _gpuContext->call<GlViewport>(
         rectangle.x,
         rectangle.y,
         rectangle.width,
         rectangle.height );
-    checkResult( "::glViewport" );
     _outputRectangle = rectangle;
 }
 
@@ -261,13 +255,12 @@ void RenderingSystemOgl::setFramebuffer(
     }
 
     auto nativeFramebuffer =
-        std::static_pointer_cast< FramebufferOgl >( framebuffer );
+        std::dynamic_pointer_cast< FramebufferOgl >( framebuffer );
 
     const GLint framebufferHandle =
         nativeFramebuffer ? nativeFramebuffer->getHandle() : 0;
 
-    ::glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
-    checkResult( "::glBindFramebuffer" );
+    _gpuContext->call<GlBindFramebuffer>( GL_FRAMEBUFFER, framebufferHandle );
 
     if( !preserveOutputRectangle ) {
         unsigned int width;
@@ -300,11 +293,8 @@ void RenderingSystemOgl::setFramebuffer(
 }
 
 void RenderingSystemOgl::clearColorBuffer( const Color &color ) {
-    ::glClearColor( color.r, color.g, color.b, color.a );
-    checkResult( "::glClearColor" );
-
-    ::glClear( GL_COLOR_BUFFER_BIT );
-    checkResult( "::glClear" );
+    _gpuContext->call<GlClearColor>( color.r, color.g, color.b, color.a );
+    _gpuContext->call<GlClear>( GL_COLOR_BUFFER_BIT );
 }
 
 void RenderingSystemOgl::clearDepthBuffer( float depth ) {
@@ -313,31 +303,21 @@ void RenderingSystemOgl::clearDepthBuffer( float depth ) {
 
     if( !depthWritingEnabled ) {
         // Depth buffer writing must be temporarily enabled
-
-        ::glDepthMask( GL_TRUE );
-        checkResult( "::glDepthMask" );
+        _gpuContext->call<GlDepthMask>( static_cast<GLboolean>(GL_TRUE) );
     }
 
-    ::glClearDepth( depth );
-    checkResult( "::glClearDepth" );
-
-    ::glClear( GL_DEPTH_BUFFER_BIT );
-    checkResult( "::glClear" );
+    _gpuContext->call<GlClearDepth>( depth );
+    _gpuContext->call<GlClear>( GL_DEPTH_BUFFER_BIT );
 
     if( !depthWritingEnabled ) {
         // Restore previous value
-
-        ::glDepthMask( GL_FALSE );
-        checkResult( "::glDepthMask" );
+        _gpuContext->call<GlDepthMask>( static_cast<GLboolean>(GL_FALSE) );
     }
 }
 
 void RenderingSystemOgl::clearStencilBuffer( unsigned int stencil ) {
-    ::glClearStencil( stencil );
-    checkResult( "::glClearStencil" );
-
-    ::glClear( GL_STENCIL_BUFFER_BIT );
-    checkResult( "::glClear" );
+    _gpuContext->call<GlClearStencil>( stencil );
+    _gpuContext->call<GlClear>( GL_STENCIL_BUFFER_BIT );
 }
 
 Backbuffer::Pointer RenderingSystemOgl::getBackbuffer() const {
@@ -347,21 +327,20 @@ Backbuffer::Pointer RenderingSystemOgl::getBackbuffer() const {
 std::string RenderingSystemOgl::getDebugMessageLog() const {
     std::string log;
 
-    auto getIntegerParameter = []( GLenum parameter ) {
+    auto getIntegerParameter = [&]( GLenum parameter ) {
         GLint parameterValue = 0;
-        ::glGetIntegerv( parameter, &parameterValue );
-        checkResult( "::glGetIntegerv" );
+        _gpuContext->call<GlGetIntegerv>( parameter, &parameterValue );
         return parameterValue;
     };
 
-    if( getOpenGlSupportStatus().KHR_debug ) {
+    if( _gpuContext->getExtensionSupportStatus().khrDebug ) {
         GLint messageCount = getIntegerParameter( GL_DEBUG_LOGGED_MESSAGES );
         while( messageCount-- ) {
             std::string message(
                 getIntegerParameter(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH), 0 );
 
             GLenum severity = 0;
-            ::glGetDebugMessageLog(
+            _gpuContext->call<GlGetDebugMessageLog>(
                 /* messageCount = */ 1,
                 static_cast<GLsizei>(message.size()),
                 nullptr,
@@ -370,7 +349,6 @@ std::string RenderingSystemOgl::getDebugMessageLog() const {
                 &severity,
                 nullptr,
                 &message[0] );
-            checkResult( "::glGetDebugMessageLog" );
 
             // Replace the null character.
             message.back() = '\n';
@@ -383,17 +361,23 @@ std::string RenderingSystemOgl::getDebugMessageLog() const {
     return log;
 }
 
-void RenderingSystemOgl::installOpenGlContext() {
-    // OpenGL context is installed when the rendering system is being created
-    RenderingSystem::getInstance();
-}
-
 void RenderingSystemOgl::bindVertexArray( GLuint vertexArray ) {
     if( _vertexArray != vertexArray ) {
         _vertexArray = vertexArray;
 
-        ::glBindVertexArray( vertexArray );
-        checkResult( "::glBindVertexArray" );
+        _gpuContext->call<GlBindVertexArray>( vertexArray );
+    }
+}
+
+void RenderingSystemOgl::updateShaderBindings() {
+    for( Shader::Pointer shader : {
+            getShader(Shader::Type::Vertex),
+            getShader(Shader::Type::Pixel),
+            getShader(Shader::Type::Geometry)} ) {
+        if( shader ) {
+            std::dynamic_pointer_cast<ShaderOgl>( shader )
+                ->updateChangedBindings();
+        }
     }
 }
 
@@ -415,16 +399,6 @@ GLbitfield RenderingSystemOgl::selectShaderStage( Shader::Type shaderType ) {
     }
     storm_assert_unreachable( "Unexpected shader type value" );
     return 0;
-}
-
-void setBooleanOpenGlState( GLenum state, bool value ) {
-    if( value ) {
-        ::glEnable( state );
-        checkResult( "::glEnable" );
-    } else {
-        ::glDisable( state );
-        checkResult( "::glDisable" );
-    }
 }
 
 }

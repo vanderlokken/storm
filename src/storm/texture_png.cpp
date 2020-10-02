@@ -74,7 +74,9 @@
 namespace storm {
 
 Texture::Pointer parsePng(
-    BinaryInputStream &stream, const Texture::LoadingParameters &parameters )
+    GpuContext::Pointer gpuContext,
+    BinaryInputStream &stream,
+    const Texture::LoadingParameters &parameters )
 {
     const std::vector<char> buffer(
         std::istreambuf_iterator<char> {*stream},
@@ -108,7 +110,7 @@ Texture::Pointer parsePng(
     description.mipLevels = 1;
     description.resourceType = ResourceType::Static;
 
-    Texture::Pointer texture = Texture::create( description );
+    Texture::Pointer texture = Texture::create( gpuContext, description );
 
     Texture::Separate2dRegion region;
     region.mipLevel = 0;

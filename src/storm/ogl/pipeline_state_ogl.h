@@ -1,10 +1,12 @@
 #pragma once
 
+#include <storm/ogl/gpu_context_ogl.h>
 #include <storm/pipeline_state.h>
 
 namespace storm {
 
 void switchOpenGlPipelineState(
+    const GpuContextOgl &gpuContext,
     const PipelineState &previousState,
     const PipelineState &nextState );
 
