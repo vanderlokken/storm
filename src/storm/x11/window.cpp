@@ -475,7 +475,7 @@ private:
         // events and mouse wheel rotation events.
         const bool isMouseMotion =
             xcb_input_button_press_valuator_mask_length( event ) > 0 &&
-            (*xcb_input_button_press_valuator_mask(event) & 0b11) == 0b11;
+            (*xcb_input_button_press_valuator_mask(event) & 0b11);
 
         if( isMouseMotion ) {
             runCallback(
@@ -492,7 +492,7 @@ private:
 
         const bool isMouseMotion =
             xcb_input_raw_button_press_valuator_mask_length( event ) > 0 &&
-            (*xcb_input_raw_button_press_valuator_mask(event) & 0b11) == 0b11;
+            (*xcb_input_raw_button_press_valuator_mask(event) & 0b11);
 
         if( hasFocus() && isMouseMotion ) {
             IntVector2d delta;
