@@ -111,7 +111,7 @@ void KeyboardStateXkb::selectEvents( int32_t deviceId ) {
 }
 
 void KeyboardStateXkb::updateKeycodeMapping() {
-    auto addMapping = [=]( const char *name, KeyboardKey key ) {
+    auto addMapping = [this]( const char *name, KeyboardKey key ) {
         const xkb_keycode_t keycode = xkb_keymap_key_by_name( _keymap, name );
 
         if( keycode != XKB_KEYCODE_INVALID ) {

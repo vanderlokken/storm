@@ -518,7 +518,7 @@ private:
     }
 
     void onRawKeyboardInput( const RAWKEYBOARD &keyboard ) {
-        auto processKey = [=]( Key key ) {
+        auto processKey = [&]( Key key ) {
             const bool isPressed = (keyboard.Flags & RI_KEY_BREAK) == 0;
 
             if( isPressed ) {

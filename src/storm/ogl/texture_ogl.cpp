@@ -517,7 +517,7 @@ void TextureOgl::setTexelTransferAlignment(
 {
     const std::initializer_list<unsigned int> alignments = {4, 2, 1};
 
-    auto isSuitable = [=]( unsigned int alignment ) {
+    auto isSuitable = [&]( unsigned int alignment ) {
         return (_texelDescription.size * width) % alignment == 0;
     };
 
