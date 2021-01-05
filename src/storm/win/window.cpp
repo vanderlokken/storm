@@ -127,7 +127,7 @@ void runCallback( const std::function<T> &callback, Args&&... args ) {
 
 class WindowImplementation : public Window {
 private:
-    static constexpr wchar_t *windowClassName = L"window";
+    static constexpr const wchar_t *windowClassName = L"window";
 
 public:
     WindowImplementation() {
