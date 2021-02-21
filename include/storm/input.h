@@ -9,7 +9,8 @@ enum class MouseButton {
     Right,
     Middle,
     SideFirst,
-    SideSecond
+    SideSecond,
+    Count
 };
 
 enum class KeyboardKey {
